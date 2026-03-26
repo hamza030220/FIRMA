@@ -239,6 +239,14 @@
   color:rgba(255,255,255,.6);
 }
 
+.admin-stats-title{
+  font-size:1.15rem;
+  font-weight:700;
+  color:#20452c;
+  margin:0 0 12px;
+  letter-spacing:.3px;
+}
+
 .admin-stats{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
@@ -267,6 +275,27 @@
 .admin-stat-value{
   font-family:'Playfair Display',serif;
   font-size:1.5rem;font-weight:700;color:#1f2937;
+}
+
+.admin-stat-extra{
+  font-size:.78rem;color:#9ca3af;font-weight:400;
+  line-height:1.4;
+}
+.admin-stat-warning{
+  color:#d97706;
+}
+.admin-stat-success{
+  color:#16a34a;
+}
+
+a.admin-stat-card-link{
+  text-decoration:none;
+  cursor:pointer;
+}
+a.admin-stat-card-link:hover{
+  border-color:#4aac33;
+  box-shadow:0 4px 20px rgba(74,172,51,.1);
+  transform:translateY(-2px);
 }
 
 @media(max-width:768px){

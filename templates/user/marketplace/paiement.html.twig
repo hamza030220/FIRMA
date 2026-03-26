@@ -1,0 +1,98 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Paiement — Équipements{% endblock %}
+
+{% block user_content %}
+<div class="um-pay-page">
+
+    <a href="{{ path('user_marketplace') }}" class="um-pay-back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au marketplace
+    </a>
+
+    <h1 class="um-pay-title">Finaliser votre commande</h1>
+
+    <div class="um-pay-layout">
+
+        {# ── Left: Invoice ── #}
+        <div class="um-pay-invoice">
+            <h2>Récapitulatif</h2>
+            <div class="um-pay-items">
+                {% for id, item in cart %}
+                <div class="um-pay-item">
+                    <div class="um-pay-item-info">
+                        <strong>{{ item.nom }}</strong>
+                        <span>{{ item.qty }} × {{ item.prix|number_format(2, ',', ' ') }} TND</span>
+                    </div>
+                    <span class="um-pay-item-sub">{{ (item.prix * item.qty)|number_format(2, ',', ' ') }} TND</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="um-pay-divider"></div>
+            <div class="um-pay-total-row">
+                <span>Total à payer</span>
+                <strong>{{ total|number_format(2, ',', ' ') }} TND</strong>
+            </div>
+        </div>
+
+        {# ── Right: Card Form ── #}
+        <div class="um-pay-form-wrap">
+            <h2>Informations de paiement</h2>
+            <form method="post" action="{{ path('user_marketplace_paiement_process') }}" class="um-pay-form" id="umPayForm">
+                <input type="hidden" name="_token" value="{{ csrf_token('paiement_equipements') }}">
+
+                <div class="um-pay-section-title">Adresse de livraison</div>
+                <div class="um-pay-field">
+                    <label for="payAdresse">Adresse</label>
+                    <input type="text" id="payAdresse" name="adresse" required placeholder="123 Rue de la Ferme">
+                </div>
+                <div class="um-pay-field">
+                    <label for="payVille">Ville</label>
+                    <input type="text" id="payVille" name="ville" required placeholder="Tunis">
+                </div>
+
+                <div class="um-pay-section-title">Carte bancaire</div>
+                <div class="um-pay-card-preview">
+                    <div class="um-card-chip"></div>
+                    <div class="um-card-number" id="cardPreviewNumber">•••• •••• •••• ••••</div>
+                    <div class="um-card-bottom">
+                        <div>
+                            <small>Titulaire</small>
+                            <div id="cardPreviewName">VOTRE NOM</div>
+                        </div>
+                        <div>
+                            <small>Expire</small>
+                            <div id="cardPreviewExp">MM/AA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="um-pay-field">
+                    <label for="payCardNumber">Numéro de carte</label>
+                    <input type="text" id="payCardNumber" name="card_number" required
+                        placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+                </div>
+                <div class="um-pay-field">
+                    <label for="payCardName">Nom sur la carte</label>
+                    <input type="text" id="payCardName" name="card_name" required placeholder="Jean Dupont" autocomplete="cc-name">
+                </div>
+                <div class="um-pay-row">
+                    <div class="um-pay-field">
+                        <label for="payCardExp">Date d'expiration</label>
+                        <input type="text" id="payCardExp" name="card_exp" required placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp">
+                    </div>
+                    <div class="um-pay-field">
+                        <label for="payCardCvv">CVV</label>
+                        <input type="text" id="payCardCvv" name="card_cvv" required placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+                    </div>
+                </div>
+
+                <button type="submit" class="um-pay-submit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Payer {{ total|number_format(2, ',', ' ') }} TND
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
