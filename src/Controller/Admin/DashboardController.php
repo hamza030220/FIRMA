@@ -2,6 +2,12 @@
 
 namespace App\Controller\Admin;
 
+use App\Repository\Marketplace\CommandeRepository;
+use App\Repository\Marketplace\EquipementRepository;
+use App\Repository\Marketplace\FournisseurRepository;
+use App\Repository\Marketplace\LocationRepository;
+use App\Repository\Marketplace\TerrainRepository;
+use App\Repository\Marketplace\VehiculeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,15 +18,27 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class DashboardController extends AbstractController
 {
     #[Route('', name: 'admin_dashboard')]
-    public function dashboard(): Response
-    {
-        return $this->render('admin/dashboard.html.twig');
-    }
+    public function dashboard(
+        EquipementRepository $equipRepo,
+        VehiculeRepository $vehicRepo,
+        TerrainRepository $terrainRepo,
+        FournisseurRepository $fournRepo,
+        CommandeRepository $cmdRepo,
+        LocationRepository $locRepo,
+    ): Response {
+        $totalProducts = $equipRepo->count([]) + $vehicRepo->count([]) + $terrainRepo->count([]);
+        $pendingOrders = $cmdRepo->count(['statutPaiement' => 'en_attente']);
+        $activeLocations = $locRepo->count(['statut' => 'en_cours']);
+        $totalFournisseurs = $fournRepo->count(['actif' => true]);
 
-    #[Route('/marketplace', name: 'admin_marketplace')]
-    public function marketplace(): Response
-    {
-        return $this->render('admin/marketplace/index.html.twig');
+        return $this->render('admin/dashboard.html.twig', [
+            'totalProducts' => $totalProducts,
+            'pendingOrders' => $pendingOrders,
+            'activeLocations' => $activeLocations,
+            'totalFournisseurs' => $totalFournisseurs,
+            'totalCommandes' => $cmdRepo->count([]),
+            'totalLocations' => $locRepo->count([]),
+        ]);
     }
 
     #[Route('/evenements', name: 'admin_evenements')]

@@ -1,17 +1,87 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block page_title %}Gérer Marketplace{% endblock %}
-{% block admin_page_title %}Gérer Marketplace{% endblock %}
+{% block page_title %}Marketplace{% endblock %}
+{% block admin_page_title %}Marketplace{% endblock %}
 
 {% block admin_content %}
-<div class="placeholder-page">
-    <div class="placeholder-hero">
-        <div class="placeholder-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        </div>
+<div class="mp-dashboard">
+    <div class="mp-dashboard-header">
         <h2>Gestion du Marketplace</h2>
-        <p>Gérez les annonces, produits, catégories et transactions du marketplace.</p>
-        <span class="placeholder-badge">Bientôt disponible</span>
+        <p>Gérez vos produits, véhicules, terrains, fournisseurs et suivez les commandes et locations.</p>
+    </div>
+
+    <div class="mp-cards-grid">
+        {# ── Équipements ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_equipements.png') }}" alt="Équipements">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Équipements</h3>
+                <p>{{ counts.equipements }} équipement{{ counts.equipements > 1 ? 's' : '' }} enregistré{{ counts.equipements > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_equipements') }}" class="mp-card-btn">Consulter</a>
+        </div>
+
+        {# ── Véhicules ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_vehicule.png') }}" alt="Véhicules">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Véhicules</h3>
+                <p>{{ counts.vehicules }} véhicule{{ counts.vehicules > 1 ? 's' : '' }} enregistré{{ counts.vehicules > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_vehicules') }}" class="mp-card-btn">Consulter</a>
+        </div>
+
+        {# ── Terrains ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_terrains.png') }}" alt="Terrains">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Terrains</h3>
+                <p>{{ counts.terrains }} terrain{{ counts.terrains > 1 ? 's' : '' }} enregistré{{ counts.terrains > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_terrains') }}" class="mp-card-btn">Consulter</a>
+        </div>
+
+        {# ── Fournisseurs ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_fournisseurs.png') }}" alt="Fournisseurs">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Fournisseurs</h3>
+                <p>{{ counts.fournisseurs }} fournisseur{{ counts.fournisseurs > 1 ? 's' : '' }} enregistré{{ counts.fournisseurs > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_fournisseurs') }}" class="mp-card-btn">Consulter</a>
+        </div>
+
+        {# ── Commandes ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_commande.png') }}" alt="Commandes">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Commandes</h3>
+                <p>{{ counts.commandes }} commande{{ counts.commandes > 1 ? 's' : '' }} enregistrée{{ counts.commandes > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_commandes') }}" class="mp-card-btn">Consulter</a>
+        </div>
+
+        {# ── Locations ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon">
+                <img src="{{ asset('image/icone_location.png') }}" alt="Locations">
+            </div>
+            <div class="mp-card-body">
+                <h3>Gestion Locations</h3>
+                <p>{{ counts.locations }} location{{ counts.locations > 1 ? 's' : '' }} enregistrée{{ counts.locations > 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ path('admin_marketplace_locations') }}" class="mp-card-btn">Consulter</a>
+        </div>
     </div>
 </div>
 {% endblock %}

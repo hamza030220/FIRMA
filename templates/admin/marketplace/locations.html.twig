@@ -1,0 +1,104 @@
+{% extends 'admin/base.html.twig' %}
+{% import 'admin/marketplace/_macros.html.twig' as macros %}
+
+{% block page_title %}Locations{% endblock %}
+{% block admin_page_title %}Gestion des Locations{% endblock %}
+
+{% block admin_content %}
+<div class="mp-page">
+    <a href="{{ path('admin_marketplace') }}" class="mp-back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au Marketplace
+    </a>
+
+    {{ macros.flashes() }}
+
+    {% if locations is empty %}
+        <div class="mp-empty">Aucune location enregistrée.</div>
+    {% else %}
+    <div class="mp-toolbar">
+        <div class="mp-search-box">
+            <svg class="mp-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="mp-search" data-table="locations" placeholder="Rechercher par N°, client, bien…">
+        </div>
+        <div class="mp-filters">
+            <select class="mp-filter" data-table="locations" data-col="2">
+                <option value="">Type</option>
+                <option value="Vehicule">Véhicule</option>
+                <option value="Terrain">Terrain</option>
+            </select>
+            <select class="mp-filter" data-table="locations" data-col="7">
+                <option value="">Statut</option>
+                <option value="En attente">En attente</option>
+                <option value="Confirmee">Confirmée</option>
+                <option value="En cours">En cours</option>
+                <option value="Terminee">Terminée</option>
+                <option value="Annulee">Annulée</option>
+            </select>
+        </div>
+    </div>
+    <div class="mp-table-wrap">
+        <table class="mp-table" id="table-locations">
+            <thead>
+                <tr>
+                    <th>N° Location</th>
+                    <th>Client</th>
+                    <th>Type</th>
+                    <th>Bien</th>
+                    <th>Début</th>
+                    <th>Fin</th>
+                    <th>Prix total</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for l in locations %}
+                <tr>
+                    <td><strong>{{ l.numeroLocation }}</strong></td>
+                    <td>{{ l.utilisateur ? l.utilisateur.fullName : '—' }}</td>
+                    <td>
+                        <span class="mp-badge {{ l.typeLocation == 'vehicule' ? 'mp-badge-info' : 'mp-badge-warning' }}">
+                            {{ l.typeLocation|capitalize }}
+                        </span>
+                    </td>
+                    <td>{{ l.itemName }}</td>
+                    <td>{{ l.dateDebut ? l.dateDebut|date('d/m/Y') : '—' }}</td>
+                    <td>{{ l.dateFin ? l.dateFin|date('d/m/Y') : '—' }}</td>
+                    <td>{{ l.prixTotal|number_format(2, ',', ' ') }} TND</td>
+                    <td>
+                        {% set sClass = {
+                            'en_attente': 'mp-badge-warning',
+                            'confirmee': 'mp-badge-info',
+                            'en_cours': 'mp-badge-success',
+                            'terminee': 'mp-badge-success',
+                            'annulee': 'mp-badge-danger'
+                        } %}
+                        <span class="mp-badge {{ sClass[l.statut] ?? '' }}">
+                            {{ l.statut|replace({'_': ' '})|capitalize }}
+                        </span>
+                    </td>
+                    <td class="mp-actions">
+                        <a href="{{ path('admin_marketplace_locations_edit', {id: l.id}) }}" class="mp-btn mp-btn-sm mp-btn-edit" title="Modifier le statut">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                        <form method="post" action="{{ path('admin_marketplace_locations_delete', {id: l.id}) }}" onsubmit="return confirm('Supprimer cette location ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ l.id) }}">
+                            <button type="submit" class="mp-btn mp-btn-sm mp-btn-delete" title="Supprimer">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="mp-no-results" style="display:none">
+                    <td colspan="9">Aucun résultat trouvé.</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

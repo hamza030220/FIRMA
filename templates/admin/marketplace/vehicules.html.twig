@@ -1,0 +1,122 @@
+{% extends 'admin/base.html.twig' %}
+{% import 'admin/marketplace/_macros.html.twig' as macros %}
+
+{% block page_title %}Véhicules{% endblock %}
+{% block admin_page_title %}Gestion des Véhicules{% endblock %}
+
+{% block admin_content %}
+<div class="mp-page">
+    <a href="{{ path('admin_marketplace') }}" class="mp-back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au Marketplace
+    </a>
+
+    {{ macros.flashes() }}
+
+    <div class="mp-tabs">
+        <button class="mp-tab active" data-tab="list">Liste des Véhicules</button>
+        <button class="mp-tab" data-tab="add">Ajouter un Véhicule</button>
+    </div>
+
+    {# ── TAB 1 : Liste ── #}
+    <div class="mp-tab-pane active" id="tab-list">
+        {% if vehicules is empty %}
+            <div class="mp-empty">Aucun véhicule enregistré.</div>
+        {% else %}
+        <div class="mp-toolbar">
+            <div class="mp-search-box">
+                <svg class="mp-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="mp-search" data-table="vehicules" placeholder="Rechercher par nom, marque, modèle…">
+            </div>
+            <div class="mp-filters">
+                <select class="mp-filter" data-table="vehicules" data-col="6">
+                    <option value="">Disponibilité</option>
+                    <option value="Oui">Disponible</option>
+                    <option value="Non">Indisponible</option>
+                </select>
+            </div>
+        </div>
+        <div class="mp-table-wrap">
+            <table class="mp-table" id="table-vehicules">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Nom</th>
+                        <th>Marque</th>
+                        <th>Modèle</th>
+                        <th>Catégorie</th>
+                        <th>Prix/jour</th>
+                        <th>Disponible</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for v in vehicules %}
+                    <tr>
+                        <td>
+                            {% if v.imageUrl %}
+                                <img src="{{ asset(v.imageUrl) }}" alt="" class="mp-thumb">
+                            {% else %}
+                                <span class="mp-no-img">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ v.nom }}</td>
+                        <td>{{ v.marque ?? '—' }}</td>
+                        <td>{{ v.modele ?? '—' }}</td>
+                        <td>{{ v.categorie }}</td>
+                        <td>{{ v.prixJour|number_format(2, ',', ' ') }} TND</td>
+                        <td>
+                            <span class="mp-badge {{ v.disponible ? 'mp-badge-success' : 'mp-badge-danger' }}">
+                                {{ v.disponible ? 'Oui' : 'Non' }}
+                            </span>
+                        </td>
+                        <td class="mp-actions">
+                            <a href="{{ path('admin_marketplace_vehicules_edit', {id: v.id}) }}" class="mp-btn mp-btn-sm mp-btn-edit" title="Modifier">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form method="post" action="{{ path('admin_marketplace_vehicules_delete', {id: v.id}) }}" onsubmit="return confirm('Supprimer ce véhicule ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ v.id) }}">
+                                <button type="submit" class="mp-btn mp-btn-sm mp-btn-delete" title="Supprimer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="mp-no-results" style="display:none">
+                        <td colspan="8">Aucun résultat trouvé.</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── TAB 2 : Ajouter ── #}
+    <div class="mp-tab-pane" id="tab-add">
+        {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data'}}) }}
+            <div class="mp-form-grid">
+                {{ form_row(form.nom) }}
+                {{ form_row(form.categorie) }}
+                {{ form_row(form.marque) }}
+                {{ form_row(form.modele) }}
+                {{ form_row(form.immatriculation) }}
+                {{ form_row(form.prixJour) }}
+                {{ form_row(form.prixSemaine) }}
+                {{ form_row(form.prixMois) }}
+                {{ form_row(form.caution) }}
+                {{ form_row(form.imageFile) }}
+            </div>
+            {{ form_row(form.description) }}
+            <div class="mp-form-check-row">
+                {{ form_row(form.disponible) }}
+            </div>
+            <div class="mp-form-actions">
+                <button type="submit" class="mp-btn mp-btn-primary">Ajouter le véhicule</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
