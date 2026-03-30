@@ -38,6 +38,7 @@ class DashboardController extends AbstractController
             'totalFournisseurs' => $totalFournisseurs,
             'totalCommandes' => $cmdRepo->count([]),
             'totalLocations' => $locRepo->count([]),
+            'totalTerrains' => $terrainRepo->count([]),
         ]);
     }
 
