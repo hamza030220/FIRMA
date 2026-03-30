@@ -640,47 +640,77 @@
 }
 .um-pay-row .um-pay-field{flex:1;}
 
-/* ── Card Preview ── */
-.um-pay-card-preview{
-  width:100%;aspect-ratio:1.6/1;max-width:340px;
-  border-radius:16px;padding:24px;
-  background:linear-gradient(135deg,#1a3a24 0%,#20452c 40%,#2d6b3f 100%);
-  color:#fff;position:relative;
-  margin:0 auto 20px;
-  display:flex;flex-direction:column;justify-content:space-between;
-  box-shadow:0 8px 28px rgba(32,69,44,.3);
-  overflow:hidden;
+/* ── Payment Header (title + timer) ── */
+.um-pay-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;gap:16px;flex-wrap:wrap;
 }
-.um-pay-card-preview::before{
-  content:'';position:absolute;top:-30%;right:-20%;
-  width:200px;height:200px;border-radius:50%;
-  background:rgba(74,172,51,.15);
+.um-pay-header .um-pay-title{
+  margin-bottom:0;
 }
-.um-pay-card-preview::after{
-  content:'';position:absolute;bottom:-40%;left:-10%;
-  width:250px;height:250px;border-radius:50%;
-  background:rgba(255,255,255,.03);
+
+/* ── Countdown Timer ── */
+.um-pay-timer{
+  display:flex;align-items:center;gap:8px;
+  background:#f0faf1;border:1.5px solid #4aac33;
+  padding:8px 16px;border-radius:10px;
+  font-size:.95rem;font-weight:700;color:#20452c;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .3s ease;
 }
-.um-card-chip{
-  width:40px;height:30px;border-radius:6px;
-  background:linear-gradient(135deg,#d4af37,#c5a028);
-  box-shadow:inset 0 1px 2px rgba(255,255,255,.3);
+.um-pay-timer svg{
+  stroke:#4aac33;flex-shrink:0;
 }
-.um-card-number{
-  font-size:1.2rem;letter-spacing:2px;
-  font-family:'Courier New',monospace;
-  text-shadow:0 1px 2px rgba(0,0,0,.3);
-  z-index:1;
+.um-pay-timer-urgent{
+  background:#fef2f2;border-color:#dc2626;color:#dc2626;
+  animation:umTimerPulse 1s infinite;
 }
-.um-card-bottom{
-  display:flex;justify-content:space-between;
-  z-index:1;
+.um-pay-timer-urgent svg{
+  stroke:#dc2626;
 }
-.um-card-bottom small{
-  font-size:.6rem;opacity:.7;text-transform:uppercase;
-  letter-spacing:1px;
+@keyframes umTimerPulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.6;}
 }
-.um-card-bottom div:last-child{text-align:right;}
+
+/* ── Stripe Elements ── */
+.um-stripe-element{
+  padding:12px 14px;
+  border:1.5px solid #e0e0e0;
+  border-radius:10px;
+  background:#fff;
+  transition:border-color .2s,box-shadow .2s;
+}
+.um-stripe-element.StripeElement--focus{
+  border-color:#4aac33;
+  box-shadow:0 0 0 3px rgba(74,172,51,.1);
+}
+.um-stripe-element.StripeElement--invalid{
+  border-color:#dc2626;
+  box-shadow:0 0 0 3px rgba(220,38,38,.1);
+}
+
+/* ── Stripe Error ── */
+.um-stripe-error{
+  background:#fef2f2;border:1px solid #fecaca;
+  color:#dc2626;border-radius:8px;
+  padding:10px 14px;font-size:.85rem;
+  margin-bottom:14px;
+  font-weight:500;
+}
+
+/* ── Submit Spinner ── */
+.um-pay-spinner{
+  display:inline-block;
+  width:20px;height:20px;
+  border:2.5px solid rgba(255,255,255,.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:umSpin .6s linear infinite;
+}
+@keyframes umSpin{
+  to{transform:rotate(360deg);}
+}
 
 .um-pay-submit{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -696,6 +726,33 @@
   box-shadow:0 6px 20px rgba(74,172,51,.35);
 }
 
+/* ── Payer à la livraison ── */
+.um-pay-divider-or{
+  display:flex;align-items:center;gap:12px;margin:16px 0;
+}
+.um-pay-divider-or::before,
+.um-pay-divider-or::after{
+  content:'';flex:1;height:1px;background:#ddd;
+}
+.um-pay-divider-or span{
+  font-size:.85rem;color:#888;font-weight:600;text-transform:uppercase;
+}
+.um-pay-livraison{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;border-radius:12px;
+  border:2px solid #20452c;
+  background:transparent;
+  color:#20452c;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:all .2s ease;
+  font-family:inherit;
+}
+.um-pay-livraison:hover{
+  background:#20452c;color:#fff;
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(32,69,44,.25);
+}
+.um-pay-livraison svg{stroke:currentColor;}
+
 /* ══════════════════════════════════════════════════════
    Responsive
    ══════════════════════════════════════════════════════ */
@@ -705,7 +762,7 @@
   .um-modal-body{padding:18px;}
   .um-date-row{flex-direction:column;}
   .um-pay-layout{grid-template-columns:1fr;}
-  .um-pay-card-preview{max-width:100%;}
+  .um-pay-header{flex-direction:column;align-items:flex-start;}
   .um-fab{width:50px;height:50px;}
   .um-fab-cart{bottom:20px;right:16px;}
   .um-fab-loc{bottom:20px;left:16px;}

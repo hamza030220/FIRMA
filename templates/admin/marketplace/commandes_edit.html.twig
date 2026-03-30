@@ -79,7 +79,7 @@
                 <div>
                     <label for="statut_paiement">Statut paiement</label>
                     <select name="statut_paiement" id="statut_paiement">
-                        {% for val in ['en_attente', 'payee', 'echouee', 'remboursee'] %}
+                        {% for val in ['en_attente', 'paye', 'echoue'] %}
                             <option value="{{ val }}" {{ commande.statutPaiement == val ? 'selected' : '' }}>
                                 {{ val|replace({'_': ' '})|capitalize }}
                             </option>
@@ -89,7 +89,7 @@
                 <div>
                     <label for="statut_livraison">Statut livraison</label>
                     <select name="statut_livraison" id="statut_livraison">
-                        {% for val in ['en_preparation', 'expediee', 'livree', 'annulee'] %}
+                        {% for val in ['en_attente', 'en_preparation', 'expedie', 'livre', 'annule'] %}
                             <option value="{{ val }}" {{ commande.statutLivraison == val ? 'selected' : '' }}>
                                 {{ val|replace({'_': ' '})|capitalize }}
                             </option>

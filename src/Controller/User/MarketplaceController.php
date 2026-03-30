@@ -10,6 +10,8 @@ use App\Repository\Marketplace\LocationRepository;
 use App\Repository\Marketplace\TerrainRepository;
 use App\Repository\Marketplace\VehiculeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -209,9 +211,25 @@ class MarketplaceController extends AbstractController
             $total += (float) $item['prix'] * $item['qty'];
         }
 
+        // Convert TND → EUR (÷ 3.4) then to cents
+        $amountEur = round($total / 3.4, 2);
+        $stripeCents = (int) round($amountEur * 100);
+
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        $intent = PaymentIntent::create([
+            'amount' => $stripeCents,
+            'currency' => 'eur',
+            'metadata' => ['type' => 'equipement', 'total_tnd' => $total],
+        ]);
+
+        // Store intent ID in session for verification
+        $this->requestStack->getSession()->set('stripe_pi_equip', $intent->id);
+
         return $this->render('user/marketplace/paiement.html.twig', [
             'cart' => $cart,
             'total' => $total,
+            'stripe_public_key' => $_ENV['STRIPE_PUBLIC_KEY'],
+            'client_secret' => $intent->client_secret,
         ]);
     }
 
@@ -229,13 +247,28 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('user_marketplace_paiement');
         }
 
+        // Verify PaymentIntent with Stripe
+        $piId = $this->requestStack->getSession()->get('stripe_pi_equip');
+        if (!$piId) {
+            $this->addFlash('danger', 'Session de paiement expirée. Veuillez réessayer.');
+            return $this->redirectToRoute('user_marketplace_paiement');
+        }
+
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        $intent = PaymentIntent::retrieve($piId);
+
+        if ($intent->status !== 'succeeded') {
+            $this->addFlash('danger', 'Le paiement n\'a pas été confirmé. Veuillez réessayer.');
+            return $this->redirectToRoute('user_marketplace_paiement');
+        }
+
         $user = $this->getUser();
         $commande = new Commande();
         $commande->setUtilisateur($user);
         $commande->setNumeroCommande('CMD-' . strtoupper(uniqid()));
         $commande->setAdresseLivraison($request->request->get('adresse', ''));
         $commande->setVilleLivraison($request->request->get('ville', ''));
-        $commande->setStatutPaiement('payee');
+        $commande->setStatutPaiement('paye');
         $commande->setStatutLivraison('en_preparation');
 
         $montantTotal = 0;
@@ -263,8 +296,76 @@ class MarketplaceController extends AbstractController
         $em->flush();
 
         $this->saveCart([]);
+        $this->requestStack->getSession()->remove('stripe_pi_equip');
 
         $this->addFlash('success', 'Commande ' . $commande->getNumeroCommande() . ' confirmée ! Merci pour votre achat.');
+        return $this->redirectToRoute('user_marketplace');
+    }
+
+    /* ================================================================
+       PAIEMENT À LA LIVRAISON — Équipements
+       ================================================================ */
+
+    #[Route('/paiement-livraison', name: 'user_marketplace_paiement_livraison', methods: ['POST'])]
+    public function paiementLivraison(
+        Request $request,
+        EquipementRepository $equipRepo,
+        EntityManagerInterface $em,
+    ): Response {
+        $cart = $this->getCart();
+        if (empty($cart)) {
+            return $this->redirectToRoute('user_marketplace');
+        }
+
+        if (!$this->isCsrfTokenValid('paiement_equipements', $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('user_marketplace_paiement');
+        }
+
+        $adresse = trim($request->request->get('adresse', ''));
+        $ville   = trim($request->request->get('ville', ''));
+
+        if ($adresse === '' || $ville === '') {
+            $this->addFlash('danger', 'Veuillez remplir l\'adresse et la ville de livraison.');
+            return $this->redirectToRoute('user_marketplace_paiement');
+        }
+
+        $user = $this->getUser();
+        $commande = new Commande();
+        $commande->setUtilisateur($user);
+        $commande->setNumeroCommande('CMD-' . strtoupper(uniqid()));
+        $commande->setAdresseLivraison($adresse);
+        $commande->setVilleLivraison($ville);
+        $commande->setStatutPaiement('en_attente');
+        $commande->setStatutLivraison('en_preparation');
+
+        $montantTotal = 0;
+
+        foreach ($cart as $id => $item) {
+            $equip = $equipRepo->find($id);
+            if (!$equip) continue;
+
+            $detail = new DetailCommande();
+            $detail->setCommande($commande);
+            $detail->setEquipement($equip);
+            $detail->setQuantite($item['qty']);
+            $detail->setPrixUnitaire($equip->getPrixVente());
+            $sousTotal = (float) $equip->getPrixVente() * $item['qty'];
+            $detail->setSousTotal((string) $sousTotal);
+            $montantTotal += $sousTotal;
+
+            $equip->setQuantiteStock($equip->getQuantiteStock() - $item['qty']);
+            $em->persist($detail);
+        }
+
+        $commande->setMontantTotal((string) $montantTotal);
+        $em->persist($commande);
+        $em->flush();
+
+        $this->saveCart([]);
+        $this->requestStack->getSession()->remove('stripe_pi_equip');
+
+        $this->addFlash('success', 'Commande ' . $commande->getNumeroCommande() . ' enregistrée ! Paiement à la livraison.');
         return $this->redirectToRoute('user_marketplace');
     }
 
@@ -285,10 +386,27 @@ class MarketplaceController extends AbstractController
             $totalCaution += $loc['caution'];
         }
 
+        $grandTotal = $total + $totalCaution;
+
+        // Convert TND → EUR (÷ 3.4) then to cents
+        $amountEur = round($grandTotal / 3.4, 2);
+        $stripeCents = (int) round($amountEur * 100);
+
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        $intent = PaymentIntent::create([
+            'amount' => $stripeCents,
+            'currency' => 'eur',
+            'metadata' => ['type' => 'location', 'total_tnd' => $grandTotal],
+        ]);
+
+        $this->requestStack->getSession()->set('stripe_pi_loc', $intent->id);
+
         return $this->render('user/marketplace/paiement_locations.html.twig', [
             'locations' => $locs,
             'total' => $total,
             'totalCaution' => $totalCaution,
+            'stripe_public_key' => $_ENV['STRIPE_PUBLIC_KEY'],
+            'client_secret' => $intent->client_secret,
         ]);
     }
 
@@ -304,6 +422,21 @@ class MarketplaceController extends AbstractController
 
         if (!$this->isCsrfTokenValid('paiement_locations', $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('user_marketplace_paiement_locations');
+        }
+
+        // Verify PaymentIntent with Stripe
+        $piId = $this->requestStack->getSession()->get('stripe_pi_loc');
+        if (!$piId) {
+            $this->addFlash('danger', 'Session de paiement expirée. Veuillez réessayer.');
+            return $this->redirectToRoute('user_marketplace_paiement_locations');
+        }
+
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        $intent = PaymentIntent::retrieve($piId);
+
+        if ($intent->status !== 'succeeded') {
+            $this->addFlash('danger', 'Le paiement n\'a pas été confirmé. Veuillez réessayer.');
             return $this->redirectToRoute('user_marketplace_paiement_locations');
         }
 
@@ -334,9 +467,37 @@ class MarketplaceController extends AbstractController
 
         $em->flush();
         $this->saveLocationsSession([]);
+        $this->requestStack->getSession()->remove('stripe_pi_loc');
 
         $this->addFlash('success', 'Réservation confirmée ! Vos locations ont été enregistrées.');
         return $this->redirectToRoute('user_marketplace');
+    }
+
+    /* ================================================================
+       CANCEL PAYMENT — Timeout (3 min)
+       ================================================================ */
+
+    #[Route('/paiement/annuler', name: 'user_marketplace_paiement_cancel', methods: ['POST'])]
+    public function cancelPayment(Request $request): JsonResponse
+    {
+        $type = $request->request->get('type', 'equipement');
+        $sessionKey = $type === 'location' ? 'stripe_pi_loc' : 'stripe_pi_equip';
+        $piId = $this->requestStack->getSession()->get($sessionKey);
+
+        if ($piId) {
+            try {
+                Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+                $intent = PaymentIntent::retrieve($piId);
+                if (in_array($intent->status, ['requires_payment_method', 'requires_confirmation', 'requires_action'])) {
+                    $intent->cancel();
+                }
+            } catch (\Exception $e) {
+                // Silently ignore — intent may already be canceled
+            }
+            $this->requestStack->getSession()->remove($sessionKey);
+        }
+
+        return $this->json(['success' => true]);
     }
 
     /* ================================================================

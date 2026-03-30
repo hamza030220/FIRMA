@@ -31,7 +31,13 @@
                 {{ form_row(form.caution) }}
                 {{ form_row(form.imageFile) }}
             </div>
-            {{ form_row(form.adresse) }}
+            <div style="display:flex;align-items:flex-end;gap:8px;">
+                <div style="flex:1;">{{ form_row(form.adresse) }}</div>
+                <button type="button" class="firma-map-btn" style="margin-bottom:6px;" title="Modifier la localisation"
+                    onclick="firmaMapPicker({adresseFieldId:'{{ form.adresse.vars.id }}',villeFieldId:'{{ form.ville.vars.id }}',currentAdresse:'{{ terrain.adresse|default('')|e('js') }}',currentVille:'{{ terrain.ville|default('')|e('js') }}'})">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </button>
+            </div>
             {{ form_row(form.description) }}
             <div class="mp-form-check-row">
                 {{ form_row(form.disponible) }}
