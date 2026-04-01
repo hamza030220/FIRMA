@@ -526,8 +526,13 @@ function initCatalogue() {
                 stockInfo.textContent = d.detailStock + ' en stock';
             }
 
-            /* Reset date fields */
-            if (dateDebut) { dateDebut.value = ''; dateFin.value = ''; }
+            /* Reset date fields + enforce min = today */
+            if (dateDebut) {
+                const today = new Date().toISOString().split('T')[0];
+                dateDebut.value = ''; dateFin.value = '';
+                dateDebut.min = today;
+                dateFin.min = today;
+            }
             dateError.style.display = 'none';
             dateSummary.style.display = 'none';
 
@@ -585,7 +590,11 @@ function initCatalogue() {
         dateSummary.innerHTML = days + ' jour' + (days > 1 ? 's' : '') + ' — Coût estimé : <strong>' + umFmt(cost) + ' TND</strong>';
         dateSummary.style.display = '';
     }
-    if (dateDebut) dateDebut.addEventListener('change', checkDates);
+    if (dateDebut) dateDebut.addEventListener('change', function() {
+        if (dateDebut.value) dateFin.min = dateDebut.value;
+        if (dateFin.value && dateFin.value <= dateDebut.value) dateFin.value = '';
+        checkDates();
+    });
     if (dateFin) dateFin.addEventListener('change', checkDates);
 
     /* ── AJAX helper ── */
