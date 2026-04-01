@@ -198,11 +198,11 @@
                 <div class="um-date-row">
                     <div class="um-date-field">
                         <label for="umDateDebut">Date début</label>
-                        <input type="date" id="umDateDebut">
+                        <input type="date" id="umDateDebut" min="{{ "now"|date("Y-m-d") }}">
                     </div>
                     <div class="um-date-field">
                         <label for="umDateFin">Date fin</label>
-                        <input type="date" id="umDateFin">
+                        <input type="date" id="umDateFin" min="{{ "now"|date("Y-m-d") }}">
                     </div>
                 </div>
                 <p class="um-date-error" id="umDateError" style="display:none;"></p>

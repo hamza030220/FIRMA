@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Service\Marketplace\PdfMailerService;
 
 #[Route('/admin/marketplace')]
 #[IsGranted('ROLE_ADMIN')]
@@ -113,6 +114,32 @@ class MarketplaceController extends AbstractController
             $this->em->flush();
             $this->addFlash('success', 'Équipement supprimé.');
         }
+        return $this->redirectToRoute('admin_marketplace_equipements');
+    }
+
+    #[Route('/equipements/analyser-stock', name: 'admin_marketplace_analyser_stock', methods: ['POST'])]
+    public function analyserStock(Request $request, EquipementRepository $repo, PdfMailerService $pdfMailer): Response
+    {
+        if (!$this->isCsrfTokenValid('analyser_stock', $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_marketplace_equipements');
+        }
+
+        $all = $repo->findAll();
+        $lowStock = array_filter($all, fn(Equipement $e) => $e->getQuantiteStock() < $e->getSeuilAlerte());
+
+        if (empty($lowStock)) {
+            $this->addFlash('success', 'Tous les équipements ont un stock suffisant. Aucune alerte à signaler.');
+            return $this->redirectToRoute('admin_marketplace_equipements');
+        }
+
+        try {
+            $pdfMailer->sendAnalyseStock(array_values($lowStock));
+            $this->addFlash('success', 'Rapport envoyé ! ' . count($lowStock) . ' équipement(s) en alerte — email envoyé à hamza.slimani@esprit.tn');
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de l\'envoi du rapport : ' . $e->getMessage());
+        }
+
         return $this->redirectToRoute('admin_marketplace_equipements');
     }
 

@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\Marketplace\PdfMailerService;
 
 #[Route('/user/marketplace')]
 #[IsGranted('ROLE_USER')]
@@ -238,6 +239,7 @@ class MarketplaceController extends AbstractController
         Request $request,
         EquipementRepository $equipRepo,
         EntityManagerInterface $em,
+        PdfMailerService $pdfMailer,
     ): Response {
         $cart = $this->getCart();
         if (empty($cart)) return $this->redirectToRoute('user_marketplace');
@@ -289,11 +291,35 @@ class MarketplaceController extends AbstractController
             // Decrease stock
             $equip->setQuantiteStock($equip->getQuantiteStock() - $item['qty']);
             $em->persist($detail);
+            $commande->getDetails()->add($detail);
         }
 
-        $commande->setMontantTotal((string) $montantTotal);
+        $commande->setMontantTotal((string) ($montantTotal + 7));
         $em->persist($commande);
         $em->flush();
+
+        // Send receipt PDF by email
+        try {
+            $pdfMailer->sendRecuCommande($commande);
+        } catch (\Exception $e) {
+            // Don't block the user if email fails
+        }
+
+        // Auto-alert admin if any equipment dropped below stock threshold
+        try {
+            $lowStock = [];
+            foreach ($cart as $id => $item) {
+                $equip = $equipRepo->find($id);
+                if ($equip && $equip->getQuantiteStock() < $equip->getSeuilAlerte()) {
+                    $lowStock[] = $equip;
+                }
+            }
+            if (!empty($lowStock)) {
+                $pdfMailer->sendStockAlert($lowStock, $commande);
+            }
+        } catch (\Exception $e) {
+            // Don't block the user if stock alert email fails
+        }
 
         $this->saveCart([]);
         $this->requestStack->getSession()->remove('stripe_pi_equip');
@@ -311,6 +337,7 @@ class MarketplaceController extends AbstractController
         Request $request,
         EquipementRepository $equipRepo,
         EntityManagerInterface $em,
+        PdfMailerService $pdfMailer,
     ): Response {
         $cart = $this->getCart();
         if (empty($cart)) {
@@ -356,11 +383,35 @@ class MarketplaceController extends AbstractController
 
             $equip->setQuantiteStock($equip->getQuantiteStock() - $item['qty']);
             $em->persist($detail);
+            $commande->getDetails()->add($detail);
         }
 
-        $commande->setMontantTotal((string) $montantTotal);
+        $commande->setMontantTotal((string) ($montantTotal + 7));
         $em->persist($commande);
         $em->flush();
+
+        // Send compte-rendu PDF by email
+        try {
+            $pdfMailer->sendCompteRendu($commande);
+        } catch (\Exception $e) {
+            // Don't block the user if email fails
+        }
+
+        // Auto-alert admin if any equipment dropped below stock threshold
+        try {
+            $lowStock = [];
+            foreach ($cart as $id => $item) {
+                $equip = $equipRepo->find($id);
+                if ($equip && $equip->getQuantiteStock() < $equip->getSeuilAlerte()) {
+                    $lowStock[] = $equip;
+                }
+            }
+            if (!empty($lowStock)) {
+                $pdfMailer->sendStockAlert($lowStock, $commande);
+            }
+        } catch (\Exception $e) {
+            // Don't block the user if stock alert email fails
+        }
 
         $this->saveCart([]);
         $this->requestStack->getSession()->remove('stripe_pi_equip');
@@ -416,6 +467,7 @@ class MarketplaceController extends AbstractController
         VehiculeRepository $vehicRepo,
         TerrainRepository $terrainRepo,
         EntityManagerInterface $em,
+        PdfMailerService $pdfMailer,
     ): Response {
         $locs = $this->getLocationsSession();
         if (empty($locs)) return $this->redirectToRoute('user_marketplace');
@@ -441,6 +493,7 @@ class MarketplaceController extends AbstractController
         }
 
         $user = $this->getUser();
+        $createdLocations = [];
 
         foreach ($locs as $loc) {
             $location = new Location();
@@ -463,9 +516,18 @@ class MarketplaceController extends AbstractController
             }
 
             $em->persist($location);
+            $createdLocations[] = $location;
         }
 
         $em->flush();
+
+        // Send location receipt PDF by email
+        try {
+            $pdfMailer->sendRecuLocations($user, $createdLocations);
+        } catch (\Exception $e) {
+            // Don't block the user if email fails
+        }
+
         $this->saveLocationsSession([]);
         $this->requestStack->getSession()->remove('stripe_pi_loc');
 
