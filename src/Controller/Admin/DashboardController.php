@@ -29,11 +29,13 @@ class DashboardController extends AbstractController
         return $this->render('admin/event/index.html.twig');
     }
 
-    #[Route('/techniciens', name: 'admin_techniciens')]
-    public function techniciens(): Response
-    {
-        return $this->render('admin/tech/index.html.twig');
-    }
+
+
+#[Route('/maladies', name: 'admin_maladie_list')]
+public function maladies(): Response
+{
+    return $this->redirectToRoute('admin_maladie_index');
+}
 
     #[Route('/forum', name: 'admin_forum')]
     public function forum(): Response
