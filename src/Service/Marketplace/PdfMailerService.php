@@ -183,6 +183,20 @@ class PdfMailerService
         $this->mailer->send($email);
     }
 
+    /**
+     * Generate historique commande PDF — download (not emailed)
+     */
+    public function generateHistoriquePdf(Commande $commande): string
+    {
+        $html = $this->twig->render('pdf/historique_commande.html.twig', [
+            'commande' => $commande,
+            'logo_base64' => $this->getLogoBase64(),
+            'firma_base64' => $this->getFirmaBase64(),
+        ]);
+
+        return $this->generatePdf($html);
+    }
+
     private function generatePdf(string $html): string
     {
         $options = new Options();

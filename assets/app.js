@@ -641,12 +641,12 @@ function initCatalogue() {
     /* ━━━━━━━━━━━━━ CART DRAWER ━━━━━━━━━━━━━ */
     const cartDrawer = document.getElementById('umCartDrawer');
     const cartBody = document.getElementById('umCartDrawerBody');
-    const cartFooter = document.getElementById('umCartDrawerFooter');
+    const cartFooterInline = document.getElementById('umCartDrawerFooterInline');
     const cartTotal = document.getElementById('umCartTotal');
     const cartBadge = document.getElementById('umCartBadge');
     const locDrawer = document.getElementById('umLocDrawer');
     const locBody = document.getElementById('umLocDrawerBody');
-    const locFooter = document.getElementById('umLocDrawerFooter');
+    const locFooterInline = document.getElementById('umLocDrawerFooterInline');
     const locTotal = document.getElementById('umLocTotal');
     const locCaution = document.getElementById('umLocCaution');
     const locBadge = document.getElementById('umLocBadge');
@@ -679,7 +679,7 @@ function initCatalogue() {
     function renderCartDrawer() {
         if (!cartData.items || cartData.items.length === 0) {
             cartBody.innerHTML = '<p class="um-drawer-empty">Votre panier est vide.</p>';
-            cartFooter.style.display = 'none';
+            cartFooterInline.style.display = 'none';
             return;
         }
         let html = '';
@@ -703,7 +703,7 @@ function initCatalogue() {
         });
         cartBody.innerHTML = html;
         cartTotal.textContent = umFmt(cartData.total) + ' TND';
-        cartFooter.style.display = '';
+        cartFooterInline.style.display = '';
 
         /* Qty buttons inside drawer */
         cartBody.querySelectorAll('[data-cart-qty]').forEach(btn => {
@@ -737,7 +737,7 @@ function initCatalogue() {
     function renderLocDrawer() {
         if (!locData.items || locData.items.length === 0) {
             locBody.innerHTML = '<p class="um-drawer-empty">Aucune location ajoutée.</p>';
-            locFooter.style.display = 'none';
+            locFooterInline.style.display = 'none';
             return;
         }
         let html = '';
@@ -758,7 +758,7 @@ function initCatalogue() {
         locBody.innerHTML = html;
         locTotal.textContent = umFmt(locData.total) + ' TND';
         locCaution.textContent = umFmt(locData.totalCaution) + ' TND';
-        locFooter.style.display = '';
+        locFooterInline.style.display = '';
 
         /* Remove buttons */
         locBody.querySelectorAll('[data-loc-rm]').forEach(btn => {
@@ -783,6 +783,7 @@ function initCatalogue() {
     document.getElementById('umFabCart').addEventListener('click', () => {
         closeAllDrawers();
         renderCartDrawer();
+        loadHistoriqueCommandes();
         cartDrawer.classList.add('open');
         backdrop.classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -790,6 +791,7 @@ function initCatalogue() {
     document.getElementById('umFabLoc').addEventListener('click', () => {
         closeAllDrawers();
         renderLocDrawer();
+        loadHistoriqueLocations();
         locDrawer.classList.add('open');
         backdrop.classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -816,6 +818,257 @@ function initCatalogue() {
     /* ── Init badges & drawers from session ── */
     updateCartBadge();
     updateLocBadge();
+
+    /* ━━━━━━━━━━━━━ HISTORIQUE — Ancien paniers ━━━━━━━━━━━━━ */
+    const histCartList = document.getElementById('umHistCartList');
+    const histLocList = document.getElementById('umHistLocList');
+    const histOverlay = document.getElementById('umHistOverlay');
+    const histModalTitle = document.getElementById('umHistModalTitle');
+    const histModalBody = document.getElementById('umHistModalBody');
+    const histReorderBtn = document.getElementById('umHistReorder');
+    const histPdfLink = document.getElementById('umHistPdf');
+
+    let currentHistCommande = null;
+
+    async function loadHistoriqueCommandes() {
+        histCartList.innerHTML = '<p class="um-drawer-empty um-hist-loading">Chargement…</p>';
+        try {
+            const resp = await fetch(ROUTES.histCommandes, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await resp.json();
+            const commandes = data.commandes || [];
+            if (commandes.length === 0) {
+                histCartList.innerHTML = '<p class="um-drawer-empty">Aucun ancien panier.</p>';
+                return;
+            }
+            let html = '';
+            commandes.forEach(cmd => {
+                html += '<div class="um-hist-card" data-hist-cmd-id="' + cmd.id + '">';
+                html += '<div class="um-hist-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>';
+                html += '<div class="um-hist-card-info">';
+                html += '<strong>' + escHtml(cmd.numero) + '</strong>';
+                html += '<span>' + cmd.date + '</span>';
+                html += '</div>';
+                html += '<div class="um-hist-card-amount">' + umFmt(cmd.montant) + ' TND</div>';
+                html += '<button class="um-hist-card-rm" data-hist-hide="' + cmd.id + '" title="Masquer">✕</button>';
+                html += '</div>';
+            });
+            histCartList.innerHTML = html;
+
+            /* Click card → open overlay */
+            histCartList.querySelectorAll('.um-hist-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.um-hist-card-rm')) return;
+                    const id = parseInt(card.dataset.histCmdId);
+                    const cmd = commandes.find(c => c.id === id);
+                    if (cmd) openHistOverlay(cmd);
+                });
+            });
+
+            /* Hide buttons */
+            histCartList.querySelectorAll('[data-hist-hide]').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.histHide;
+                    await umPost(ROUTES.histHide, { id: id });
+                    btn.closest('.um-hist-card').remove();
+                    if (!histCartList.querySelector('.um-hist-card')) {
+                        histCartList.innerHTML = '<p class="um-drawer-empty">Aucun ancien panier.</p>';
+                    }
+                });
+            });
+        } catch (err) {
+            histCartList.innerHTML = '<p class="um-drawer-empty">Erreur de chargement.</p>';
+        }
+    }
+
+    /* ── Open historique overlay ── */
+    function openHistOverlay(cmd) {
+        currentHistCommande = cmd;
+        histModalTitle.textContent = 'Commande ' + cmd.numero;
+
+        let html = '<label class="um-hist-select-all"><input type="checkbox" id="umHistSelectAll" checked> Tout sélectionner</label>';
+
+        cmd.details.forEach((d, idx) => {
+            const unavail = !d.disponible || d.stockActuel < 1;
+            html += '<div class="um-hist-prod' + (unavail ? ' um-hist-prod-unavail' : '') + '">';
+            html += '<input type="checkbox" class="um-hist-prod-check" data-idx="' + idx + '"' + (unavail ? ' disabled' : ' checked') + '>';
+            html += '<div class="um-hist-prod-img">';
+            if (d.image) html += '<img src="' + d.image + '" alt="">';
+            html += '</div>';
+            html += '<div class="um-hist-prod-info">';
+            html += '<strong>' + escHtml(d.nom) + '</strong>';
+            html += '<span>' + umFmt(d.prix) + ' TND/u</span>';
+            if (unavail) html += '<span class="um-hist-prod-stock-warn">Indisponible</span>';
+            else html += '<span>Stock : ' + d.stockActuel + '</span>';
+            html += '</div>';
+            html += '<div class="um-hist-prod-qty">';
+            html += '<button class="um-hist-qty-btn" data-hist-qty-dir="-1" data-hist-qty-idx="' + idx + '"' + (unavail ? ' disabled' : '') + '>−</button>';
+            html += '<span class="um-hist-qty-val" data-hist-qty-val="' + idx + '">' + d.qty + '</span>';
+            html += '<button class="um-hist-qty-btn" data-hist-qty-dir="1" data-hist-qty-idx="' + idx + '"' + (unavail ? ' disabled' : '') + '>+</button>';
+            html += '</div>';
+            html += '</div>';
+        });
+        histModalBody.innerHTML = html;
+
+        /* PDF link — set href */
+        const pdfUrl = ROUTES.histPdfBase.replace('{id}', cmd.id);
+        histPdfLink.href = pdfUrl;
+        histPdfLink.classList.remove('disabled');
+
+        /* Track qty changes for PDF disable */
+        function checkQtyChanged() {
+            let changed = false;
+            cmd.details.forEach((d, idx) => {
+                const valEl = histModalBody.querySelector('[data-hist-qty-val="' + idx + '"]');
+                if (valEl && parseInt(valEl.textContent) !== d.qty) changed = true;
+            });
+            if (changed) histPdfLink.classList.add('disabled');
+            else histPdfLink.classList.remove('disabled');
+        }
+
+        /* Qty buttons */
+        histModalBody.querySelectorAll('.um-hist-qty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.histQtyIdx);
+                const dir = parseInt(btn.dataset.histQtyDir);
+                const valEl = histModalBody.querySelector('[data-hist-qty-val="' + idx + '"]');
+                let val = parseInt(valEl.textContent);
+                val += dir;
+                const max = cmd.details[idx].stockActuel;
+                if (val < 1) val = 1;
+                if (val > max) val = max;
+                valEl.textContent = val;
+                checkQtyChanged();
+            });
+        });
+
+        /* Select all checkbox */
+        const selectAll = document.getElementById('umHistSelectAll');
+        if (selectAll) {
+            selectAll.addEventListener('change', () => {
+                histModalBody.querySelectorAll('.um-hist-prod-check:not(:disabled)').forEach(cb => {
+                    cb.checked = selectAll.checked;
+                });
+            });
+        }
+
+        /* Show overlay */
+        histOverlay.classList.add('open');
+    }
+
+    /* ── Close historique overlay ── */
+    function closeHistOverlay() {
+        histOverlay.classList.remove('open');
+        currentHistCommande = null;
+    }
+    document.getElementById('umHistOverlayClose').addEventListener('click', closeHistOverlay);
+    histOverlay.addEventListener('click', (e) => { if (e.target === histOverlay) closeHistOverlay(); });
+
+    /* ── Reorder from historique ── */
+    histReorderBtn.addEventListener('click', async () => {
+        if (!currentHistCommande) return;
+        const items = [];
+        histModalBody.querySelectorAll('.um-hist-prod-check:checked').forEach(cb => {
+            const idx = parseInt(cb.dataset.idx);
+            const d = currentHistCommande.details[idx];
+            if (!d || !d.disponible) return;
+            const valEl = histModalBody.querySelector('[data-hist-qty-val="' + idx + '"]');
+            const qty = valEl ? parseInt(valEl.textContent) : d.qty;
+            items.push({ id: d.id, qty: qty });
+        });
+        if (items.length === 0) {
+            showFlash('Aucun article sélectionné.', 'warning');
+            return;
+        }
+        try {
+            const resp = await fetch(ROUTES.histReorder, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                body: new URLSearchParams({ items: JSON.stringify(items) }).toString(),
+            });
+            const data = await resp.json();
+            if (data.error) { showFlash(data.error, 'danger'); return; }
+            cartData = data.cart;
+            updateCartBadge();
+            renderCartDrawer();
+            closeHistOverlay();
+            showFlash('Articles ajoutés au panier !', 'success');
+        } catch (err) {
+            showFlash('Erreur lors de l\'ajout.', 'danger');
+        }
+    });
+
+    /* ── PDF link click guard ── */
+    histPdfLink.addEventListener('click', (e) => {
+        if (histPdfLink.classList.contains('disabled')) {
+            e.preventDefault();
+            showFlash('Exportation PDF indisponible : les quantités ont été modifiées.', 'warning');
+        }
+    });
+
+    /* ━━━━━━━━━━━━━ HISTORIQUE — Locations ━━━━━━━━━━━━━ */
+    async function loadHistoriqueLocations() {
+        histLocList.innerHTML = '<p class="um-drawer-empty um-hist-loading">Chargement…</p>';
+        try {
+            const resp = await fetch(ROUTES.histLocations, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await resp.json();
+            const { enCours = [], aVenir = [], expirees = [] } = data;
+
+            if (enCours.length === 0 && aVenir.length === 0 && expirees.length === 0) {
+                histLocList.innerHTML = '<p class="um-drawer-empty">Aucune location passée.</p>';
+                return;
+            }
+
+            let html = '';
+            if (enCours.length > 0) {
+                html += '<div class="um-hist-section-title en-cours">En cours</div>';
+                enCours.forEach(loc => { html += buildLocCard(loc, false); });
+            }
+            if (aVenir.length > 0) {
+                html += '<div class="um-hist-section-title a-venir">À venir</div>';
+                aVenir.forEach(loc => { html += buildLocCard(loc, false); });
+            }
+            if (expirees.length > 0) {
+                html += '<div class="um-hist-section-title expirees">Expirées</div>';
+                expirees.forEach(loc => { html += buildLocCard(loc, true); });
+            }
+            histLocList.innerHTML = html;
+
+            /* Hide buttons on expired */
+            histLocList.querySelectorAll('[data-hist-loc-hide]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.histLocHide;
+                    await umPost(ROUTES.histLocHide, { id: id });
+                    btn.closest('.um-hist-loc-card').remove();
+                    /* Check if section is now empty */
+                    if (!histLocList.querySelector('.um-hist-loc-card')) {
+                        histLocList.innerHTML = '<p class="um-drawer-empty">Aucune location passée.</p>';
+                    }
+                });
+            });
+        } catch (err) {
+            histLocList.innerHTML = '<p class="um-drawer-empty">Erreur de chargement.</p>';
+        }
+    }
+
+    function buildLocCard(loc, showHide) {
+        const iconColor = loc.type === 'vehicule' ? '#2563eb' : '#e6a817';
+        const iconSvg = loc.type === 'vehicule'
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + iconColor + '" stroke-width="2"><path d="M5 17h2m10 0h2M3 9l2-5h14l2 5"/><rect x="3" y="9" width="18" height="8" rx="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + iconColor + '" stroke-width="2"><path d="M3 21V3h18v18H3z"/><path d="M9 21V9h6v12"/></svg>';
+        let html = '<div class="um-hist-loc-card">';
+        html += '<div class="um-hist-card-icon">' + iconSvg + '</div>';
+        html += '<div class="um-hist-card-info">';
+        html += '<strong>' + escHtml(loc.nom) + '</strong>';
+        html += '<span>' + loc.dateDebut + ' → ' + loc.dateFin + '</span>';
+        html += '<span>' + loc.jours + 'j · ' + umFmt(loc.prix) + ' TND</span>';
+        html += '</div>';
+        if (showHide) {
+            html += '<button class="um-hist-card-rm" data-hist-loc-hide="' + loc.id + '" title="Masquer">✕</button>';
+        }
+        html += '</div>';
+        return html;
+    }
 }
 
 /* ══════════════════════════════════════════════════════

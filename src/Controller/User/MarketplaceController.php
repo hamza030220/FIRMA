@@ -5,6 +5,7 @@ namespace App\Controller\User;
 use App\Entity\Marketplace\Commande;
 use App\Entity\Marketplace\DetailCommande;
 use App\Entity\Marketplace\Location;
+use App\Repository\Marketplace\CommandeRepository;
 use App\Repository\Marketplace\EquipementRepository;
 use App\Repository\Marketplace\LocationRepository;
 use App\Repository\Marketplace\TerrainRepository;
@@ -558,6 +559,180 @@ class MarketplaceController extends AbstractController
             }
             $this->requestStack->getSession()->remove($sessionKey);
         }
+
+        return $this->json(['success' => true]);
+    }
+
+    /* ================================================================
+       HISTORIQUE — Commandes (anciens paniers)
+       ================================================================ */
+
+    #[Route('/historique-commandes', name: 'user_marketplace_historique_commandes', methods: ['GET'])]
+    public function historiqueCommandes(CommandeRepository $cmdRepo): JsonResponse
+    {
+        $user = $this->getUser();
+        $commandes = $cmdRepo->findBy(['utilisateur' => $user], ['dateCommande' => 'DESC']);
+
+        $hidden = $this->requestStack->getSession()->get('hidden_commandes', []);
+
+        $result = [];
+        foreach ($commandes as $cmd) {
+            if (in_array($cmd->getId(), $hidden)) continue;
+
+            $details = [];
+            foreach ($cmd->getDetails() as $d) {
+                $equip = $d->getEquipement();
+                $details[] = [
+                    'id' => $equip ? $equip->getId() : null,
+                    'nom' => $equip ? $equip->getNom() : '(supprimé)',
+                    'image' => $equip ? $equip->getImageUrl() : '',
+                    'prix' => $d->getPrixUnitaire(),
+                    'qty' => $d->getQuantite(),
+                    'sousTotal' => $d->getSousTotal(),
+                    'stockActuel' => $equip ? $equip->getQuantiteStock() : 0,
+                    'disponible' => $equip ? $equip->isDisponible() : false,
+                ];
+            }
+
+            $result[] = [
+                'id' => $cmd->getId(),
+                'numero' => $cmd->getNumeroCommande(),
+                'date' => $cmd->getDateCommande()->format('d/m/Y H:i'),
+                'montant' => $cmd->getMontantTotal(),
+                'statutPaiement' => $cmd->getStatutPaiement(),
+                'statutLivraison' => $cmd->getStatutLivraison(),
+                'details' => $details,
+            ];
+        }
+
+        return $this->json(['commandes' => $result]);
+    }
+
+    #[Route('/historique-commandes/hide', name: 'user_marketplace_historique_hide', methods: ['POST'])]
+    public function historiqueHide(Request $request): JsonResponse
+    {
+        $id = (int) $request->request->get('id');
+        if (!$id) return $this->json(['error' => 'ID invalide.'], 400);
+
+        $hidden = $this->requestStack->getSession()->get('hidden_commandes', []);
+        if (!in_array($id, $hidden)) {
+            $hidden[] = $id;
+        }
+        $this->requestStack->getSession()->set('hidden_commandes', $hidden);
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/historique-commandes/reorder', name: 'user_marketplace_historique_reorder', methods: ['POST'])]
+    public function historiqueReorder(Request $request, EquipementRepository $equipRepo): JsonResponse
+    {
+        $items = json_decode($request->request->get('items', '[]'), true);
+        if (empty($items)) return $this->json(['error' => 'Aucun article sélectionné.'], 400);
+
+        $cart = $this->getCart();
+
+        foreach ($items as $item) {
+            $id = (int) ($item['id'] ?? 0);
+            $qty = max(1, (int) ($item['qty'] ?? 1));
+            $equip = $equipRepo->find($id);
+            if (!$equip || !$equip->isDisponible()) continue;
+
+            $qty = min($qty, $equip->getQuantiteStock());
+            if ($qty < 1) continue;
+
+            if (isset($cart[$id])) {
+                $cart[$id]['qty'] = min($cart[$id]['qty'] + $qty, $equip->getQuantiteStock());
+            } else {
+                $cart[$id] = [
+                    'nom' => $equip->getNom(),
+                    'prix' => $equip->getPrixVente(),
+                    'image' => $equip->getImageUrl() ?? '',
+                    'qty' => $qty,
+                    'stock' => $equip->getQuantiteStock(),
+                ];
+            }
+        }
+
+        $this->saveCart($cart);
+        return $this->json(['cart' => $this->cartSummary($cart), 'success' => true]);
+    }
+
+    #[Route('/historique-commandes/{id}/pdf', name: 'user_marketplace_historique_pdf', methods: ['GET'])]
+    public function historiqueExportPdf(Commande $commande, PdfMailerService $pdfMailer): Response
+    {
+        $user = $this->getUser();
+        if ($commande->getUtilisateur() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $pdf = $pdfMailer->generateHistoriquePdf($commande);
+
+        return new Response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="Historique_' . $commande->getNumeroCommande() . '.pdf"',
+        ]);
+    }
+
+    /* ================================================================
+       HISTORIQUE — Locations
+       ================================================================ */
+
+    #[Route('/historique-locations', name: 'user_marketplace_historique_locations', methods: ['GET'])]
+    public function historiqueLocations(LocationRepository $locRepo): JsonResponse
+    {
+        $user = $this->getUser();
+        $locations = $locRepo->findBy(['utilisateur' => $user], ['dateDebut' => 'DESC']);
+
+        $hidden = $this->requestStack->getSession()->get('hidden_locations', []);
+        $today = new \DateTime('today');
+
+        $enCours = [];
+        $aVenir = [];
+        $expirees = [];
+
+        foreach ($locations as $loc) {
+            if (in_array($loc->getId(), $hidden)) continue;
+
+            $item = [
+                'id' => $loc->getId(),
+                'numero' => $loc->getNumeroLocation(),
+                'type' => $loc->getTypeLocation(),
+                'nom' => $loc->getItemName(),
+                'dateDebut' => $loc->getDateDebut()->format('d/m/Y'),
+                'dateFin' => $loc->getDateFin()->format('d/m/Y'),
+                'jours' => $loc->getDureeJours(),
+                'prix' => $loc->getPrixTotal(),
+                'caution' => $loc->getCaution(),
+                'statut' => $loc->getStatut(),
+            ];
+
+            if ($loc->getDateFin() < $today) {
+                $expirees[] = $item;
+            } elseif ($loc->getDateDebut() > $today) {
+                $aVenir[] = $item;
+            } else {
+                $enCours[] = $item;
+            }
+        }
+
+        return $this->json([
+            'enCours' => $enCours,
+            'aVenir' => $aVenir,
+            'expirees' => $expirees,
+        ]);
+    }
+
+    #[Route('/historique-locations/hide', name: 'user_marketplace_historique_loc_hide', methods: ['POST'])]
+    public function historiqueLocHide(Request $request): JsonResponse
+    {
+        $id = (int) $request->request->get('id');
+        if (!$id) return $this->json(['error' => 'ID invalide.'], 400);
+
+        $hidden = $this->requestStack->getSession()->get('hidden_locations', []);
+        if (!in_array($id, $hidden)) {
+            $hidden[] = $id;
+        }
+        $this->requestStack->getSession()->set('hidden_locations', $hidden);
 
         return $this->json(['success' => true]);
     }
