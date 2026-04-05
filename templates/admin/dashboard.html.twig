@@ -27,6 +27,13 @@
             <span class="admin-stat-value">—</span>
         </div>
         <div class="admin-stat-card">
+            <a href="{{ path('admin_maladie_index') }}" style="text-decoration: none; color: inherit;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="admin-stat-label">Maladies</span>
+                <span class="admin-stat-value">—</span>
+            </a>
+        </div>
+        <div class="admin-stat-card">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             <span class="admin-stat-label">Techniciens</span>
             <span class="admin-stat-value">—</span>
@@ -35,6 +42,23 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span class="admin-stat-label">Utilisateurs</span>
             <span class="admin-stat-value">—</span>
+        </div>
+    </div>
+</div>
+
+{# Section d'activité récente #}
+<div class="admin-recent">
+    <h3>Activité récente</h3>
+    <div class="admin-recent-list">
+        <div class="admin-recent-item">
+            <div class="admin-recent-icon">🌱</div>
+            <div class="admin-recent-content">
+                <strong>Module Maladies</strong>
+                <p>Gérez les maladies des plantes et leurs traitements</p>
+            </div>
+            <div class="admin-recent-action">
+                <a href="{{ path('admin_maladie_index') }}" class="btn btn-sm btn-primary">Accéder</a>
+            </div>
         </div>
     </div>
 </div>

@@ -1,0 +1,270 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Nouvelle maladie{% endblock %}
+{% block admin_page_title %}Nouvelle maladie{% endblock %}
+
+{% block admin_content %}
+
+<style>
+.form-wrap{max-width:800px}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--color-text-secondary);text-decoration:none;margin-bottom:1.5rem;transition:color 0.15s}
+.back-link:hover{color:var(--color-text-primary)}
+.back-link svg{width:16px;height:16px}
+.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.form-card-header{padding:1.2rem 1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
+.form-card-header h2{font-size:16px;font-weight:500;color:var(--color-text-primary);margin:0}
+.header-icon{width:36px;height:36px;border-radius:var(--border-radius-md);background:#eaf3de;display:flex;align-items:center;justify-content:center}
+.header-icon svg{width:18px;height:18px;color:#3b6d11}
+.form-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.form-label .req{color:#a32d2d;margin-left:2px}
+.form-label .hint{font-weight:400;color:var(--color-text-secondary);font-size:12px;margin-left:6px}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);font-size:14px;color:var(--color-text-primary);outline:none;transition:border-color 0.15s;font-family:var(--font-sans)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--color-border-primary)}
+.form-input.is-error,.form-select.is-error,.form-textarea.is-error{border-color:#a32d2d;background:#fff8f8}
+.form-input.is-valid,.form-select.is-valid,.form-textarea.is-valid{border-color:#3b6d11}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
+.error-msg{font-size:12px;color:#a32d2d;display:flex;align-items:center;gap:4px}
+.error-msg svg{width:12px;height:12px;flex-shrink:0}
+.char-count{font-size:11px;color:var(--color-text-secondary);text-align:right;margin-top:2px}
+.char-count.warn{color:#854f0b}
+.char-count.over{color:#a32d2d}
+.gravite-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gravite-option{position:relative}
+.gravite-option input{position:absolute;opacity:0;width:0;height:0}
+.gravite-label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;transition:all 0.15s;text-align:center}
+.gravite-label:hover{background:var(--color-background-secondary)}
+.gravite-option input:checked + .gravite-label{border-width:1.5px}
+.gl-faible input:checked + .gravite-label{border-color:#3b6d11;background:#eaf3de}
+.gl-moyen input:checked + .gravite-label{border-color:#185fa5;background:#e6f1fb}
+.gl-eleve input:checked + .gravite-label{border-color:#854f0b;background:#faeeda}
+.gl-critique input:checked + .gravite-label{border-color:#a32d2d;background:#fcebeb}
+.gravite-dot{width:10px;height:10px;border-radius:50%}
+.gd-f{background:#3b6d11}.gd-m{background:#185fa5}.gd-e{background:#854f0b}.gd-c{background:#a32d2d}
+.gravite-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.upload-zone{border:0.5px dashed var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--color-background-secondary)}
+.upload-zone:hover{border-color:var(--color-border-secondary);background:var(--color-background-primary)}
+.upload-zone.dragover{border-color:#3b6d11;background:#eaf3de}
+.upload-zone input{display:none}
+.upload-icon{width:40px;height:40px;border-radius:50%;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.upload-icon svg{width:18px;height:18px;color:var(--color-text-secondary)}
+.upload-text{font-size:14px;color:var(--color-text-secondary)}
+.upload-text strong{color:var(--color-text-primary)}
+.upload-hint{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.preview-wrap{margin-top:10px;display:none}
+.preview-wrap img{max-height:120px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
+.form-footer{padding:1.2rem 1.5rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.btn-submit{display:inline-flex;align-items:center;gap:7px;background:#2d7a3a;color:#fff;border:none;padding:10px 24px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s}
+.btn-submit:hover{background:#245f2d}
+.btn-cancel{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:14px;color:var(--color-text-secondary);text-decoration:none;background:var(--color-background-primary);transition:all 0.15s}
+.btn-cancel:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.alert-error{display:flex;align-items:center;gap:10px;background:#fcebeb;border:0.5px solid #f7c1c1;border-radius:var(--border-radius-md);padding:11px 14px;margin-bottom:1rem;font-size:14px;color:#791f1f}
+</style>
+
+<div class="form-wrap">
+    <a href="{{ path('admin_maladie_index') }}" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour à la liste
+    </a>
+
+    {% if errors is defined and errors|length > 0 %}
+    <div class="alert-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Veuillez corriger les {{ errors|length }} erreur(s) avant de soumettre.
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="header-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <h2>Ajouter une nouvelle maladie</h2>
+            </div>
+
+            <div class="form-body">
+
+                {# NOM #}
+                <div class="form-group">
+                    <label class="form-label">Nom <span class="req">*</span><span class="hint">min. 3 caractères</span></label>
+                    <input type="text" name="nom" id="nom"
+                        class="form-input {% if errors.nom is defined %}is-error{% elseif old.nom is defined and old.nom %}is-valid{% endif %}"
+                        value="{{ old.nom|default('') }}"
+                        maxlength="150"
+                        placeholder="Ex: Mildiou"
+                        oninput="countChars(this,'nom-count',150)">
+                    <span class="char-count" id="nom-count">0 / 150</span>
+                    {% if errors.nom is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.nom }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# NOM SCIENTIFIQUE #}
+                <div class="form-group">
+                    <label class="form-label">Nom scientifique <span class="hint">optionnel</span></label>
+                    <input type="text" name="nomScientifique" id="nomSci"
+                        class="form-input {% if errors.nomScientifique is defined %}is-error{% elseif old.nomScientifique is defined and old.nomScientifique %}is-valid{% endif %}"
+                        value="{{ old.nomScientifique|default('') }}"
+                        maxlength="200"
+                        placeholder="Ex: Phytophthora infestans"
+                        oninput="countChars(this,'sci-count',200)">
+                    <span class="char-count" id="sci-count">0 / 200</span>
+                    {% if errors.nomScientifique is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.nomScientifique }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# DESCRIPTION #}
+                <div class="form-group full">
+                    <label class="form-label">Description <span class="req">*</span><span class="hint">min. 10 caractères</span></label>
+                    <textarea name="description" id="desc"
+                        class="form-textarea {% if errors.description is defined %}is-error{% elseif old.description is defined and old.description %}is-valid{% endif %}"
+                        maxlength="2000"
+                        placeholder="Décrivez la maladie, son origine et ses caractéristiques..."
+                        oninput="countChars(this,'desc-count',2000)">{{ old.description|default('') }}</textarea>
+                    <span class="char-count" id="desc-count">0 / 2000</span>
+                    {% if errors.description is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.description }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# SYMPTOMES #}
+                <div class="form-group full">
+                    <label class="form-label">Symptômes <span class="req">*</span><span class="hint">min. 10 caractères</span></label>
+                    <textarea name="symptomes" id="symp"
+                        class="form-textarea {% if errors.symptomes is defined %}is-error{% elseif old.symptomes is defined and old.symptomes %}is-valid{% endif %}"
+                        maxlength="2000"
+                        placeholder="Décrivez les symptômes visibles sur la plante..."
+                        oninput="countChars(this,'symp-count',2000)">{{ old.symptomes|default('') }}</textarea>
+                    <span class="char-count" id="symp-count">0 / 2000</span>
+                    {% if errors.symptomes is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.symptomes }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# GRAVITE #}
+                <div class="form-group full">
+                    <label class="form-label">Niveau de gravité <span class="req">*</span></label>
+                    <div class="gravite-grid">
+                        {% for val, label in {faible: 'Faible', moyen: 'Moyen', eleve: 'Élevé', critique: 'Critique'} %}
+                        <div class="gravite-option gl-{{ val }}">
+                            <input type="radio" name="niveauGravite" id="g-{{ val }}" value="{{ val }}"
+                                {{ (old.niveauGravite|default('moyen')) == val ? 'checked' : '' }}>
+                            <label class="gravite-label" for="g-{{ val }}">
+                                <span class="gravite-dot gd-{{ val|slice(0,1) }}"></span>
+                                <span class="gravite-name">{{ label }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if errors.niveauGravite is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.niveauGravite }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# SAISON #}
+                <div class="form-group">
+                    <label class="form-label">Saison fréquente</label>
+                    <select name="saisonFrequente" class="form-select {% if errors.saisonFrequente is defined %}is-error{% endif %}">
+                        <option value="">Toute l'année</option>
+                        {% for s in ['Printemps', 'Été', 'Automne', 'Hiver', 'Printemps-Été', 'Printemps-Automne'] %}
+                        <option value="{{ s }}" {{ old.saisonFrequente|default('') == s ? 'selected' : '' }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.saisonFrequente is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.saisonFrequente }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {# IMAGE #}
+                <div class="form-group full">
+                    <label class="form-label">Photo <span class="hint">JPG, PNG, WEBP · max 2MB</span></label>
+                    <div class="upload-zone {% if errors.imageFile is defined %}is-error{% endif %}" id="dropZone" onclick="document.getElementById('imageFile').click()">
+                        <input type="file" name="imageFile" id="imageFile" accept="image/*" onchange="previewImage(this)">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div class="upload-text"><strong>Cliquez</strong> ou glissez une image ici</div>
+                        <div class="upload-hint">JPG, PNG, WEBP ou GIF · Maximum 2 MB</div>
+                        <div class="preview-wrap" id="previewWrap">
+                            <img id="previewImg" src="" alt="Aperçu">
+                        </div>
+                    </div>
+                    {% if errors.imageFile is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.imageFile }}
+                    </span>
+                    {% endif %}
+                </div>
+
+            </div>{# end form-body #}
+
+            <div class="form-footer">
+                <a href="{{ path('admin_maladie_index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Enregistrer la maladie
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function countChars(el, countId, max) {
+    const len = el.value.length;
+    const counter = document.getElementById(countId);
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('previewWrap').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Drag & drop
+const zone = document.getElementById('dropZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const input = document.getElementById('imageFile');
+    input.files = e.dataTransfer.files;
+    previewImage(input);
+});
+
+// Init compteurs
+document.querySelectorAll('[oninput]').forEach(el => el.dispatchEvent(new Event('input')));
+</script>
+
+{% endblock %}
