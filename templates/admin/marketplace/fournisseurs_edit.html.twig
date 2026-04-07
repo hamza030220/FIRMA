@@ -14,7 +14,7 @@
     {{ macros.flashes() }}
 
     <div class="mp-edit-card">
-        {{ form_start(form, {'attr': {'class': 'mp-form'}}) }}
+        {{ form_start(form, {'attr': {'class': 'mp-form', 'novalidate': 'novalidate'}}) }}
             <div class="mp-form-grid">
                 {{ form_row(form.nomEntreprise) }}
                 {{ form_row(form.contactNom) }}

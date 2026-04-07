@@ -111,7 +111,7 @@
 
     {# ── TAB 2 : Ajouter ── #}
     <div class="mp-tab-pane" id="tab-add">
-        {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data'}}) }}
+        {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
             <div class="mp-form-grid">
                 {{ form_row(form.nom) }}
                 {{ form_row(form.categorie) }}

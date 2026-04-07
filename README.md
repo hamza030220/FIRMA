@@ -41,9 +41,12 @@
 
 ### 🛒 Marketplace
 - Catalogue de produits agricoles (engrais, semences, matériel)
-- Commandes en ligne avec paiement sécurisé
+- Commandes en ligne avec paiement sécurisé (Stripe)
 - Location d'équipements courte & longue durée
 - Gestion fournisseurs & achats
+- Gestion véhicules & terrains avec cartographie
+- Validation des formulaires champ par champ avec notifications toast
+- Recherche, filtres et pagination côté admin & utilisateur
 
 ### 📅 Événements
 - Inscription aux foires, ateliers, formations et salons agricoles
@@ -263,6 +266,8 @@ Le schéma `firma` comporte **21 tables** :
 |-------------|-------|
 | Symfony AssetMapper | Gestion des assets (pas de Webpack) |
 | Stimulus (Hotwired) | Contrôleurs JS interactifs |
+| Stripe.js | Paiement sécurisé en ligne |
+| Leaflet / OpenStreetMap | Cartographie des terrains |
 | Google Fonts | Playfair Display + Plus Jakarta Sans |
 | CSS custom | Design système sur mesure |
 
@@ -286,11 +291,13 @@ Le schéma `firma` comporte **21 tables** :
 ```
 FIRMA/
 ├── assets/
-│   ├── app.js                    # Point d'entrée JS
+│   ├── app.js                    # JS global (toast, confirm, alert, nav)
+│   ├── marketplace.js            # JS Marketplace (tables, catalogue, panier, Stripe, maps)
+│   ├── validation.js             # Validation champ par champ (toast popup)
 │   ├── controllers.json          # Config Stimulus
 │   ├── image/                    # Logos & images
 │   ├── styles/
-│   │   ├── app.css               # Styles globaux
+│   │   ├── app.css               # Styles globaux + toast + validation
 │   │   ├── landing.css           # Page d'accueil
 │   │   ├── login.css             # Page de connexion
 │   │   ├── admin/dashboard.css   # Interface admin
