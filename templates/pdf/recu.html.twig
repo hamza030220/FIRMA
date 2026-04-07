@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { margin: 30px 40px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 11px; color: #333; }
+
+    /* ── Header ── */
+    .header { border-bottom: 3px solid #4aac33; padding-bottom: 14px; margin-bottom: 18px; }
+    .header table { width: 100%; }
+    .header td { vertical-align: top; }
+    .logo { width: 80px; height: auto; }
+    .company-name { font-size: 26px; font-weight: bold; color: #20452c; letter-spacing: 1px; }
+    .company-sub { font-size: 10px; color: #666; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 { font-size: 22px; color: #4aac33; text-transform: uppercase; letter-spacing: 2px; }
+    .doc-title .doc-num { font-size: 11px; color: #666; margin-top: 4px; }
+
+    /* ── Green accent bar ── */
+    .accent-bar { background: #4aac33; color: #fff; padding: 8px 14px; font-size: 11px; font-weight: bold; border-radius: 4px; margin-bottom: 14px; }
+
+    /* ── Info blocks ── */
+    .info-row { width: 100%; margin-bottom: 16px; }
+    .info-row td { vertical-align: top; width: 50%; }
+    .info-block { background: #f5faf3; border: 1px solid #d4eacd; border-radius: 6px; padding: 10px 12px; }
+    .info-block h4 { font-size: 10px; color: #4aac33; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-block p { font-size: 10.5px; line-height: 1.5; color: #444; }
+
+    /* ── Products table ── */
+    .products-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .products-table th { background: #20452c; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .products-table th:last-child, .products-table td:last-child { text-align: right; }
+    .products-table th:nth-child(3), .products-table td:nth-child(3) { text-align: center; }
+    .products-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .products-table tr:nth-child(even) td { background: #fafff8; }
+
+    /* ── Totals ── */
+    .totals { width: 260px; margin-left: auto; margin-bottom: 20px; }
+    .totals td { padding: 4px 10px; font-size: 11px; }
+    .totals .label { text-align: right; color: #666; }
+    .totals .value { text-align: right; font-weight: bold; }
+    .totals .grand-total td { border-top: 2px solid #4aac33; padding-top: 8px; font-size: 13px; }
+    .totals .grand-total .value { color: #4aac33; }
+
+    /* ── Payment badge ── */
+    .payment-badge { display: inline-block; background: #4aac33; color: #fff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* ── Thank you ── */
+    .thankyou { background: linear-gradient(135deg, #f5faf3, #e8f5e2); border: 1px solid #c8e6be; border-radius: 8px; padding: 16px 20px; text-align: center; margin-top: 20px; page-break-inside: avoid; }
+    .thankyou h3 { color: #20452c; font-size: 14px; margin-bottom: 6px; }
+    .thankyou p { color: #555; font-size: 10.5px; line-height: 1.6; }
+
+    /* ── Footer ── */
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:70%">
+                <table><tr>
+                    <td style="width:90px"><img src="{{ logo_base64 }}" class="logo"></td>
+                    <td>
+                        <div class="company-name">FIRMA</div>
+                        <div class="company-sub">Marketplace Agricole</div>
+                    </td>
+                </tr></table>
+            </td>
+            <td class="doc-title">
+                <h1>Reçu</h1>
+                <div class="doc-num">N° {{ commande.numeroCommande }}</div>
+                <div class="doc-num">{{ commande.dateCommande|date('d/m/Y à H:i') }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Info blocks -->
+<table class="info-row">
+    <tr>
+        <td style="padding-right:8px">
+            <div class="info-block">
+                <h4>Client</h4>
+                <p>
+                    <strong>{{ commande.utilisateur.prenom }} {{ commande.utilisateur.nom }}</strong><br>
+                    {{ commande.utilisateur.email }}
+                </p>
+            </div>
+        </td>
+        <td style="padding-left:8px">
+            <div class="info-block">
+                <h4>Adresse de livraison</h4>
+                <p>
+                    {{ commande.adresseLivraison }}<br>
+                    {{ commande.villeLivraison }}
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- Products -->
+<div class="accent-bar">Détails de la commande</div>
+<table class="products-table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Qté</th>
+            <th>Sous-total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for detail in commande.details %}
+        <tr>
+            <td>{{ detail.equipement.nom }}</td>
+            <td>{{ detail.prixUnitaire|number_format(2, ',', ' ') }} DT</td>
+            <td>{{ detail.quantite }}</td>
+            <td>{{ detail.sousTotal|number_format(2, ',', ' ') }} DT</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Totals -->
+<table class="totals">
+    <tr>
+        <td class="label">Sous-total</td>
+        <td class="value">{{ (commande.montantTotal - 7)|number_format(2, ',', ' ') }} DT</td>
+    </tr>
+    <tr>
+        <td class="label">Frais de livraison</td>
+        <td class="value">7,00 DT</td>
+    </tr>
+    <tr class="grand-total">
+        <td class="label">Total payé</td>
+        <td class="value">{{ commande.montantTotal|number_format(2, ',', ' ') }} DT</td>
+    </tr>
+</table>
+
+<div style="margin-bottom:10px">
+    <span style="color:#666;font-size:10px">Méthode de paiement :</span>
+    <span class="payment-badge">✓ Carte bancaire (Stripe)</span>
+</div>
+
+<!-- Thank you — won't split across pages -->
+<div class="thankyou">
+    <h3>Merci pour votre confiance !</h3>
+    <p>
+        Nous vous remercions d'avoir choisi <strong>FIRMA Marketplace</strong> pour vos achats agricoles.<br>
+        Votre commande est en cours de préparation et vous sera livrée dans les plus brefs délais.<br>
+        Pour toute question, n'hésitez pas à nous contacter à <strong>zusslimani001122@gmail.com</strong>.
+    </p>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    FIRMA Marketplace &bull; Document généré le {{ "now"|date('d/m/Y') }} &bull; Ce reçu fait office de preuve de paiement
+</div>
+
+</body>
+</html>

@@ -336,6 +336,7 @@ body{
   border:1.5px solid rgba(32,69,44,0.15);
   border-radius:12px;
   background:rgba(255,255,255,0.6);
+  -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
   font-family:'Plus Jakarta Sans',sans-serif;
   font-size:14.5px;color:var(--text-dark);
@@ -428,7 +429,7 @@ body{
   
   .login-brand-panel{
     padding:32px 24px;
-    min-height:auto;
+    min-height:0;
   }
   .brand-content{max-width:100%;text-align:center}
   .brand-title{font-size:28px}

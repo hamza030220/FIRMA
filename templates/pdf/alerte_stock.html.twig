@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { margin: 30px 40px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 11px; color: #333; }
+
+    .header { border-bottom: 3px solid #dc3545; padding-bottom: 14px; margin-bottom: 18px; }
+    .header table { width: 100%; }
+    .header td { vertical-align: top; }
+    .logo { width: 80px; height: auto; }
+    .company-name { font-size: 26px; font-weight: bold; color: #20452c; letter-spacing: 1px; }
+    .company-sub { font-size: 10px; color: #666; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 { font-size: 20px; color: #dc3545; text-transform: uppercase; letter-spacing: 2px; }
+    .doc-title .doc-num { font-size: 11px; color: #666; margin-top: 4px; }
+
+    .alert-banner { background: #dc3545; color: #fff; padding: 10px 16px; font-size: 12px; font-weight: bold; border-radius: 6px; margin-bottom: 18px; text-align: center; }
+
+    .info-block { background: #fff3f3; border: 1px solid #f5c6cb; border-radius: 6px; padding: 12px 14px; margin-bottom: 16px; }
+    .info-block h4 { font-size: 10px; color: #dc3545; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-block p { font-size: 10.5px; line-height: 1.6; color: #444; }
+
+    .products-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+    .products-table th { background: #dc3545; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .products-table th:nth-child(3), .products-table td:nth-child(3),
+    .products-table th:nth-child(4), .products-table td:nth-child(4) { text-align: center; }
+    .products-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .products-table tr:nth-child(even) td { background: #fff8f8; }
+    .stock-critical { color: #dc3545; font-weight: bold; }
+
+    .footer-img { margin-top: 30px; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:70%">
+                <table><tr>
+                    <td style="width:90px"><img src="{{ logo_base64 }}" class="logo"></td>
+                    <td>
+                        <div class="company-name">FIRMA</div>
+                        <div class="company-sub">Marketplace Agricole</div>
+                    </td>
+                </tr></table>
+            </td>
+            <td class="doc-title">
+                <h1>⚠ Alerte Stock</h1>
+                <div class="doc-num">{{ "now"|date('d/m/Y à H:i') }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="alert-banner">
+    ⚠ ALERTE : {{ equipements|length }} équipement{{ equipements|length > 1 ? 's ont' : ' a' }} atteint un niveau de stock critique
+</div>
+
+<div class="info-block">
+    <h4>Détails de la commande déclencheuse</h4>
+    <p>
+        Commande <strong>N° {{ commande.numeroCommande }}</strong> passée par
+        <strong>{{ commande.utilisateur.prenom }} {{ commande.utilisateur.nom }}</strong>
+        le {{ commande.dateCommande|date('d/m/Y à H:i') }}.
+    </p>
+</div>
+
+<!-- Equipements en alerte -->
+<table class="products-table">
+    <thead>
+        <tr>
+            <th>Équipement</th>
+            <th>Fournisseur</th>
+            <th>Stock actuel</th>
+            <th>Seuil d'alerte</th>
+            <th>Contact fournisseur</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for equip in equipements %}
+        <tr>
+            <td><strong>{{ equip.nom }}</strong></td>
+            <td>{{ equip.fournisseur ? equip.fournisseur.nomEntreprise : '—' }}</td>
+            <td class="stock-critical">{{ equip.quantiteStock }}</td>
+            <td>{{ equip.seuilAlerte }}</td>
+            <td>
+                {% if equip.fournisseur %}
+                    {{ equip.fournisseur.contactNom ?? '' }}<br>
+                    {{ equip.fournisseur.email ?? '' }}<br>
+                    {{ equip.fournisseur.telephone ?? '' }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="info-block">
+    <h4>Action recommandée</h4>
+    <p>
+        Veuillez contacter les fournisseurs ci-dessus pour réapprovisionner les équipements en faible stock.
+        Une rupture de stock pourrait impacter les ventes sur la plateforme FIRMA.
+    </p>
+</div>
+
+<!-- firma.png illustration -->
+<div class="footer-img">
+    <img src="{{ firma_base64 }}" style="width:60px;height:auto;opacity:0.7">
+</div>
+
+<div class="footer">
+    FIRMA Marketplace &bull; Alerte automatique de stock &bull; {{ "now"|date('d/m/Y') }}
+</div>
+
+</body>
+</html>
