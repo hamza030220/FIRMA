@@ -1,0 +1,1861 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Gérer Événements{% endblock %}
+{% block admin_page_title %}Gérer Événements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/admin/evenements.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="aevt-page">
+    {# ── Tabs ── #}
+    <nav class="aevt-tabs">
+        <a href="#" class="aevt-tab {% if tab == 'liste' %}aevt-tab--active{% endif %}" data-tab="liste">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Liste
+        </a>
+        <a href="#" class="aevt-tab {% if tab == 'creer' %}aevt-tab--active{% endif %}" data-tab="creer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer
+        </a>
+        <a href="#" class="aevt-tab {% if tab == 'modifier' %}aevt-tab--active{% endif %}" data-tab="modifier">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+        </a>
+        <a href="#" class="aevt-tab {% if tab == 'sponsors' %}aevt-tab--active{% endif %}" data-tab="sponsors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Sponsors
+        </a>
+        <a href="#" class="aevt-tab {% if tab == 'dashboard' %}aevt-tab--active{% endif %}" data-tab="dashboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+        </a>
+    </nav>
+
+    {# ── Flash messages ── #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="aevt-flash aevt-flash--{{ type }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {# ════════════════════════════════════════════════
+       TAB 1 — LISTE
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'liste' %}aevt-panel--active{% endif %}" id="panel-liste">
+        {# Toolbar #}
+        <div class="aevt-toolbar">
+            <form class="aevt-search" method="get" action="{{ path('admin_evenements') }}">
+                <input type="text" name="q" value="{{ search }}" placeholder="Recherche">
+                <button type="submit" class="aevt-search__btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button type="button" class="aevt-search__more">⋯</button>
+            </form>
+            <div class="aevt-sort">
+                <label>Trier par :</label>
+                <select onchange="window.location.href='{{ path('admin_evenements') }}?q={{ search }}&sort='+this.value">
+                    <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date (plus récent)</option>
+                    <option value="date_asc"  {% if sort == 'date_asc' %}selected{% endif %}>Date (plus ancien)</option>
+                    <option value="titre_asc" {% if sort == 'titre_asc' %}selected{% endif %}>Titre A → Z</option>
+                    <option value="titre_desc" {% if sort == 'titre_desc' %}selected{% endif %}>Titre Z → A</option>
+                    <option value="places"    {% if sort == 'places' %}selected{% endif %}>Places disponibles</option>
+                    <option value="statut"    {% if sort == 'statut' %}selected{% endif %}>Statut</option>
+                </select>
+            </div>
+        </div>
+
+        {# Cards #}
+        {% if evenements is empty %}
+            <div class="aevt-empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <p>Aucun événement trouvé.</p>
+            </div>
+        {% else %}
+            <div class="aevt-cards">
+                {% for evt in evenements %}
+                    {% set typeEnum   = evt.typeEnum %}
+                    {% set statutEnum = evt.statutEnum %}
+                    {% set confirmed  = participationCounts[evt.idEvenement] ?? 0 %}
+
+                    <article class="aevt-card">
+                        <div class="aevt-card__thumb">
+                            {% if evt.imageUrl %}
+                                <img src="{{ evt.imageUrl }}" alt="{{ evt.titre }}">
+                            {% else %}
+                                <div class="aevt-card__thumb-ph">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="aevt-card__body">
+                            <div class="aevt-card__title">Titre : <strong>{{ evt.titre }}</strong></div>
+                            <div class="aevt-card__org">Organisateur : {{ evt.organisateur ?? '—' }}</div>
+                            <div class="aevt-card__dates">
+                                Du {{ evt.dateDebut|date('d/m/Y') }} au {{ evt.dateFin|date('d/m/Y') }}
+                                <span class="aevt-card__sep">|</span>
+                                {{ evt.horaireDebut|date('H:i') }} → {{ evt.horaireFin|date('H:i') }}
+                            </div>
+                            {% if statutEnum %}
+                                <span class="aevt-badge {{ statutEnum.badgeClass }}">{{ statutEnum.label }}</span>
+                            {% endif %}
+                            {% if typeEnum %}
+                                <span class="aevt-badge aevt-badge--type">{{ typeEnum.label }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="aevt-card__stats">
+                            <div class="aevt-card__places">
+                                <strong>Places : {{ evt.placesDisponibles }}/{{ evt.capaciteMax }}</strong>
+                            </div>
+                            <div class="aevt-card__participants">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                Participations : {{ confirmed }}
+                            </div>
+                        </div>
+
+                        <div class="aevt-card__actions">
+                            <button type="button" class="aevt-btn aevt-btn--primary js-detail-btn" data-id="{{ evt.idEvenement }}">Détails</button>
+                            <button type="button" class="aevt-btn aevt-btn--outline js-participants-btn" data-id="{{ evt.idEvenement }}">Participants</button>
+                            <a href="{{ path('admin_evenements', {tab: 'modifier', edit: evt.idEvenement}) }}" class="aevt-btn aevt-btn--neutral">Modif…</a>
+                            {% if evt.isModifiable %}
+                                <form method="post" action="{{ path('admin_evenement_cancel', {id: evt.idEvenement}) }}" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ evt.idEvenement) }}">
+                                    <button type="submit" class="aevt-btn aevt-btn--warn">Annuler</button>
+                                </form>
+                            {% endif %}
+                            <form method="post" action="{{ path('admin_evenement_delete', {id: evt.idEvenement}) }}" data-firma-confirm="Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evt.idEvenement) }}">
+                                <button type="submit" class="aevt-btn aevt-btn--danger-outline">Supprimer</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 2 — CRÉER
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'creer' %}aevt-panel--active{% endif %}" id="panel-creer">
+        <h2 class="aevt-form__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer un nouvel événement
+        </h2>
+
+        <form method="post" action="{{ path('admin_evenement_create') }}" class="aevt-form" novalidate>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Titre *</label>
+                <input type="text" name="titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" placeholder="Titre de l'événement">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Description</label>
+                <textarea name="description" class="aevt-form__textarea" rows="4" placeholder="Description de l'événement"></textarea>
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Organisateur</label>
+                <input type="text" name="organisateur" data-validate="maxlen:255" class="aevt-form__input" placeholder="Nom de l'organisateur">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Type *</label>
+                <select name="type_evenement" data-validate="required" class="aevt-form__select">
+                    <option value="">— Choisir —</option>
+                    {% for t in typeOptions %}
+                        <option value="{{ t.value }}">{{ t.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="aevt-form__grid2">
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Date début *</label>
+                    <input type="date" name="date_debut" data-validate="required" class="aevt-form__input">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Date fin *</label>
+                    <input type="date" name="date_fin" data-validate="required" class="aevt-form__input">
+                </div>
+            </div>
+            <div class="aevt-form__grid2">
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Horaire début</label>
+                    <input type="time" name="horaire_debut" class="aevt-form__input">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Horaire fin</label>
+                    <input type="time" name="horaire_fin" class="aevt-form__input">
+                </div>
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Capacité max *</label>
+                <input type="text" name="capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="50" placeholder="50">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Lieu</label>
+                <input type="text" name="lieu" data-validate="maxlen:255" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Adresse</label>
+                <input type="text" name="adresse" data-validate="maxlen:255" class="aevt-form__input" placeholder="Adresse complète">
+            </div>
+
+            {# Image #}
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Image</label>
+                <div class="aevt-form__img-group">
+                    <input type="text" name="image_url" class="aevt-form__input aevt-form__img-input" placeholder="https://... ou parcourir" id="create_image_url">
+                    <input type="file" accept="image/*" class="aevt-form__file-hidden" id="create_image_file" data-target="create_image_url">
+                    <button type="button" class="aevt-btn aevt-btn--outline aevt-btn--sm js-browse-btn" data-file="create_image_file">Parcourir</button>
+                    <button type="button" class="aevt-btn aevt-btn--primary aevt-btn--sm js-gen-ai" data-target="create_image_url">Générer IA</button>
+                </div>
+                <div class="aevt-form__img-preview" id="create_image_preview" style="display:none">
+                    <img id="create_image_preview_img" alt="Aperçu">
+                </div>
+            </div>
+
+            {# Sponsors #}
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Sponsors</label>
+                <div class="aevt-form__sponsors">
+                    {% if catalogSponsors is empty %}
+                        <p class="aevt-text-muted">Aucun sponsor dans le catalogue.</p>
+                    {% else %}
+                        {% for s in catalogSponsors %}
+                            <label class="aevt-form__sponsor-item">
+                                <input type="checkbox" name="sponsors[]" value="{{ s.idSponsor }}">
+                                <span class="aevt-form__sponsor-name">{{ s.nom }}</span>
+                                <span class="aevt-pill">{{ s.secteurActivite }}</span>
+                            </label>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="aevt-form__actions">
+                <button type="submit" class="aevt-btn aevt-btn--primary aevt-btn--lg">Créer l'événement</button>
+                <button type="reset" class="aevt-btn aevt-btn--outline aevt-btn--lg">Réinitialiser</button>
+            </div>
+        </form>
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 3 — MODIFIER
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'modifier' %}aevt-panel--active{% endif %}" id="panel-modifier">
+        {% if editEvent %}
+            <h2 class="aevt-form__title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Modifier : {{ editEvent.titre }}
+            </h2>
+
+            <form method="post" action="{{ path('admin_evenement_update', {id: editEvent.idEvenement}) }}" class="aevt-form" novalidate>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Titre *</label>
+                    <input type="text" name="titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" value="{{ editEvent.titre }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Description</label>
+                    <textarea name="description" class="aevt-form__textarea" rows="4">{{ editEvent.description }}</textarea>
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Organisateur</label>
+                    <input type="text" name="organisateur" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.organisateur }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Type *</label>
+                    <select name="type_evenement" data-validate="required" class="aevt-form__select">
+                        <option value="">— Choisir —</option>
+                        {% for t in typeOptions %}
+                            <option value="{{ t.value }}" {% if editEvent.typeEvenement == t.value %}selected{% endif %}>{{ t.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="aevt-form__grid2">
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Date début *</label>
+                        <input type="date" name="date_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateDebut|date('Y-m-d') }}">
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Date fin *</label>
+                        <input type="date" name="date_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateFin|date('Y-m-d') }}">
+                    </div>
+                </div>
+                <div class="aevt-form__grid2">
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Horaire début</label>
+                        <input type="time" name="horaire_debut" class="aevt-form__input" value="{{ editEvent.horaireDebut ? editEvent.horaireDebut|date('H:i') : '' }}">
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Horaire fin</label>
+                        <input type="time" name="horaire_fin" class="aevt-form__input" value="{{ editEvent.horaireFin ? editEvent.horaireFin|date('H:i') : '' }}">
+                    </div>
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Capacité max *</label>
+                    <input type="text" name="capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="{{ editEvent.capaciteMax }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Lieu</label>
+                    <input type="text" name="lieu" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.lieu }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Adresse</label>
+                    <input type="text" name="adresse" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.adresse }}">
+                </div>
+
+                {# Image #}
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Image</label>
+                    <div class="aevt-form__img-group">
+                        <input type="text" name="image_url" class="aevt-form__input aevt-form__img-input" value="{{ editEvent.imageUrl }}" placeholder="https://... ou parcourir" id="edit_image_url">
+                        <input type="file" accept="image/*" class="aevt-form__file-hidden" id="edit_image_file" data-target="edit_image_url">
+                        <button type="button" class="aevt-btn aevt-btn--outline aevt-btn--sm js-browse-btn" data-file="edit_image_file">Parcourir</button>
+                        <button type="button" class="aevt-btn aevt-btn--primary aevt-btn--sm js-gen-ai" data-target="edit_image_url">Générer IA</button>
+                    </div>
+                    <div class="aevt-form__img-preview" id="edit_image_preview" style="display:none">
+                        <img id="edit_image_preview_img" alt="Aperçu">
+                    </div>
+                </div>
+
+                {# Sponsors #}
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Sponsors</label>
+                    <div class="aevt-form__sponsors">
+                        {% if catalogSponsors is empty %}
+                            <p class="aevt-text-muted">Aucun sponsor dans le catalogue.</p>
+                        {% else %}
+                            {% for s in catalogSponsors %}
+                                <label class="aevt-form__sponsor-item">
+                                    <input type="checkbox" name="sponsors[]" value="{{ s.idSponsor }}"
+                                           {% if s.idSponsor in editSponsorIds %}checked{% endif %}>
+                                    <span class="aevt-form__sponsor-name">{{ s.nom }}</span>
+                                    <span class="aevt-pill">{{ s.secteurActivite }}</span>
+                                </label>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="aevt-form__actions">
+                    <button type="submit" class="aevt-btn aevt-btn--primary aevt-btn--lg">Enregistrer les modifications</button>
+                    <a href="{{ path('admin_evenements') }}" class="aevt-btn aevt-btn--outline aevt-btn--lg">Annuler</a>
+                </div>
+            </form>
+        {% else %}
+            {# Event picker #}
+            <h2 class="aevt-form__title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Modifier un événement
+            </h2>
+            <div class="aevt-form__picker">
+                <p>Sélectionnez un événement à modifier :</p>
+                <div class="aevt-form__picker-search">
+                    <svg class="aevt-form__picker-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="pickerSearch" class="aevt-form__picker-search-input" placeholder="Rechercher par titre, organisateur, date…">
+                </div>
+                <div class="aevt-form__picker-list" id="pickerList">
+                    {% for evt in evenements %}
+                        <a href="{{ path('admin_evenements', {tab: 'modifier', edit: evt.idEvenement}) }}" class="aevt-form__picker-item" data-search="{{ evt.titre|lower }} {{ (evt.organisateur ?? '')|lower }} {{ evt.dateDebut|date('d/m/Y') }}">
+                            <strong>{{ evt.titre }}</strong>
+                            <span class="aevt-text-muted">{{ evt.dateDebut|date('d/m/Y') }} — {{ evt.organisateur ?? 'N/A' }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+                <p class="aevt-form__picker-empty" id="pickerEmpty" style="display:none">Aucun événement trouvé.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 5 — SPONSORS
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'sponsors' %}aevt-panel--active{% endif %}" id="panel-sponsors">
+        {# Toolbar #}
+        <div class="aevt-toolbar">
+            <div class="aevt-search" style="border:1.5px solid #d4d4d4">
+                <input type="text" id="spSearch" placeholder="Rechercher un sponsor…">
+                <button type="button" class="aevt-search__btn" style="pointer-events:none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+            </div>
+            <div class="aevt-sort">
+                <label>Trier par :</label>
+                <select id="spSort">
+                    <option value="nom_asc">Nom A → Z</option>
+                    <option value="nom_desc">Nom Z → A</option>
+                    <option value="montant_desc">Montant ↓</option>
+                    <option value="montant_asc">Montant ↑</option>
+                    <option value="secteur">Secteur</option>
+                </select>
+            </div>
+            <button type="button" class="aevt-btn aevt-btn--primary aevt-btn--lg" id="spCreateBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Créer un sponsor
+            </button>
+        </div>
+
+        {# Sponsor table #}
+        {% if catalogSponsors is empty %}
+            <div class="aevt-empty">
+                <p>Aucun sponsor dans le catalogue.</p>
+            </div>
+        {% else %}
+            <div class="aevt-table-wrap">
+                <table class="aevt-table" id="spTable">
+                    <thead>
+                        <tr>
+                            <th>Logo</th>
+                            <th>Nom</th>
+                            <th>Secteur</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th>Contribution</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="spTbody">
+                        {% for s in catalogSponsors %}
+                            {% set secteurEnum = s.secteurEnum %}
+                            <tr class="sp-row"
+                                data-id="{{ s.idSponsor }}"
+                                data-nom="{{ s.nom|lower }}"
+                                data-secteur="{{ s.secteurActivite }}"
+                                data-email="{{ s.emailContact|lower }}"
+                                data-montant="{{ s.montantContribution }}">
+                                <td>
+                                    <div class="sp-table-logo">
+                                        {% if s.logoUrl %}
+                                            <img src="{{ s.logoUrl }}" alt="">
+                                        {% else %}
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td><strong style="color:#20452c">{{ s.nom }}</strong></td>
+                                <td>
+                                    {% if secteurEnum %}
+                                        <span class="aevt-badge aevt-badge--type">{{ secteurEnum.label }}</span>
+                                    {% else %}
+                                        {{ s.secteurActivite }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ s.emailContact ?? '—' }}</td>
+                                <td>{{ s.telephone ?? '—' }}</td>
+                                <td>
+                                    {% if s.montantContribution > 0 %}
+                                        <span class="aevt-badge badge-success">{{ s.montantContribution }} TND</span>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+                                        <button type="button" class="aevt-btn aevt-btn--primary aevt-btn--sm js-sp-detail" data-id="{{ s.idSponsor }}">Détails</button>
+                                        <button type="button" class="aevt-btn aevt-btn--neutral aevt-btn--sm js-sp-edit" data-id="{{ s.idSponsor }}">Modifier</button>
+                                        <form method="post" action="{{ path('admin_sponsor_delete', {id: s.idSponsor}) }}" data-firma-confirm="Supprimer ce sponsor ? Cette action est irréversible." style="margin:0">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.idSponsor) }}">
+                                            <button type="submit" class="aevt-btn aevt-btn--danger-outline aevt-btn--sm">Supprimer</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p id="spNoResult" class="aevt-text-muted" style="padding:1rem;display:none;text-align:center">Aucun sponsor trouvé.</p>
+        {% endif %}
+    </div>
+
+    {# ── MODAL: Sponsor Create/Edit ── #}
+    <div class="aevt-modal-overlay" id="spFormModal" style="display:none">
+        <div class="aevt-modal" style="max-width:620px">
+            <div class="aevt-modal__header">
+                <div class="aevt-modal__header-info">
+                    <h2 id="spFormTitle">Créer un sponsor</h2>
+                </div>
+                <button type="button" class="aevt-modal__close" id="spFormClose">&times;</button>
+            </div>
+            <form id="spForm" method="post" action="{{ path('admin_sponsor_create') }}" novalidate>
+                <div class="aevt-modal__body">
+                    <div class="aevt-form__grid2">
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Nom *</label>
+                            <input type="text" name="nom" id="spF_nom" class="aevt-form__input" data-validate="required|minlen:2|maxlen:200" placeholder="Nom du sponsor">
+                        </div>
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Secteur d'activité</label>
+                            <select name="secteur_activite" id="spF_secteur" class="aevt-form__select">
+                                {% for sec in secteurOptions %}
+                                    <option value="{{ sec.value }}">{{ sec.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="aevt-form__grid2">
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Email de contact</label>
+                            <input type="text" name="email_contact" id="spF_email" class="aevt-form__input" data-validate="email|maxlen:150" placeholder="contact@example.com">
+                        </div>
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Téléphone</label>
+                            <input type="text" name="telephone" id="spF_tel" class="aevt-form__input" data-validate="phone" placeholder="+216 XX XXX XXX">
+                        </div>
+                    </div>
+                    <div class="aevt-form__grid2">
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Site web</label>
+                            <input type="text" name="site_web" id="spF_web" class="aevt-form__input" data-validate="url|maxlen:255" placeholder="https://...">
+                        </div>
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Montant (TND)</label>
+                            <input type="text" name="montant_contribution" id="spF_montant" class="aevt-form__input" data-validate="numeric|min:0" value="0">
+                        </div>
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Description</label>
+                        <textarea name="description" id="spF_desc" class="aevt-form__textarea" rows="3" placeholder="Description du sponsor…"></textarea>
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Logo</label>
+                        <div class="aevt-form__img-group">
+                            <input type="text" name="logo_url" id="spF_logo" class="aevt-form__input aevt-form__img-input" placeholder="https://... ou parcourir">
+                            <input type="file" accept="image/*" class="aevt-form__file-hidden" id="spF_logo_file" data-target="spF_logo">
+                            <button type="button" class="aevt-btn aevt-btn--outline aevt-btn--sm js-sp-browse" data-file="spF_logo_file">Parcourir</button>
+                        </div>
+                        <div class="aevt-form__img-preview" id="spF_logo_preview" style="display:none">
+                            <img id="spF_logo_preview_img" alt="Aperçu">
+                        </div>
+                    </div>
+                </div>
+                <div class="aevt-modal__footer">
+                    <button type="button" class="aevt-btn aevt-btn--outline" id="spFormCancel">Annuler</button>
+                    <button type="submit" class="aevt-btn aevt-btn--primary" id="spFormSubmit">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── MODAL: Sponsor Detail ── #}
+    <div class="aevt-modal-overlay" id="spDetailModal" style="display:none">
+        <div class="aevt-modal" style="max-width:520px">
+            <div class="aevt-modal__header">
+                <div class="aevt-modal__header-img" id="spD_logo"></div>
+                <div class="aevt-modal__header-info">
+                    <h2 id="spD_nom"></h2>
+                    <div class="aevt-modal__header-badges">
+                        <span id="spD_secteur" class="aevt-badge aevt-badge--type"></span>
+                        <span id="spD_montant" class="aevt-badge badge-success" style="display:none"></span>
+                    </div>
+                </div>
+                <button type="button" class="aevt-modal__close" id="spDetailClose">&times;</button>
+            </div>
+            <div class="aevt-modal__body">
+                <div class="aevt-modal__section" id="spD_descSection" style="display:none">
+                    <h4>Description</h4>
+                    <div class="aevt-modal__desc" id="spD_desc"></div>
+                </div>
+                <div class="aevt-modal__fields">
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Email</span><span id="spD_email"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Téléphone</span><span id="spD_tel"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Site web</span><span id="spD_web"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Contribution</span><span id="spD_contrib"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Date d'ajout</span><span id="spD_date"></span></div>
+                </div>
+            </div>
+            <div class="aevt-modal__footer">
+                <a href="#" id="spD_webLink" class="aevt-btn aevt-btn--outline" target="_blank" rel="noopener" style="display:none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Visiter le site
+                </a>
+                <button type="button" class="aevt-btn aevt-btn--primary" id="spDetailClose2">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 4 — DASHBOARD
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'dashboard' %}aevt-panel--active{% endif %}" id="panel-dashboard">
+
+        {# ── ROW 1 : KPI cards ── #}
+        <div class="dash-kpi-row">
+            <div class="dash-kpi-card dash-kpi-card--green">
+                <div class="dash-kpi-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="dash-kpi-body">
+                    <span class="dash-kpi-value">{{ dashStats.totalEvents }}</span>
+                    <span class="dash-kpi-label">Total événements</span>
+                </div>
+                <div class="dash-kpi-sub">
+                    <span class="dash-kpi-chip dash-kpi-chip--accent">{{ dashStats.eventsActifs }} actifs</span>
+                </div>
+            </div>
+
+            <div class="dash-kpi-card dash-kpi-card--blue">
+                <div class="dash-kpi-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="dash-kpi-body">
+                    <span class="dash-kpi-value">{{ dashStats.totalParticipants }}</span>
+                    <span class="dash-kpi-label">Participants totaux</span>
+                </div>
+                <div class="dash-kpi-sub">
+                    <span class="dash-kpi-chip dash-kpi-chip--success">{{ dashStats.participConfirm }} confirmés</span>
+                    <span class="dash-kpi-chip dash-kpi-chip--warn">{{ dashStats.participAttente }} en attente</span>
+                </div>
+            </div>
+
+            <div class="dash-kpi-card dash-kpi-card--amber">
+                <div class="dash-kpi-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                </div>
+                <div class="dash-kpi-body">
+                    <span class="dash-kpi-value">{{ dashStats.tauxRemplissage|number_format(1) }}%</span>
+                    <span class="dash-kpi-label">Taux de remplissage</span>
+                </div>
+                <div class="dash-kpi-sub">
+                    <div class="dash-kpi-bar"><div class="dash-kpi-bar-fill" style="width:{{ dashStats.tauxRemplissage|number_format(0) }}%"></div></div>
+                </div>
+            </div>
+
+            <div class="dash-kpi-card dash-kpi-card--purple">
+                <div class="dash-kpi-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="dash-kpi-body">
+                    <span class="dash-kpi-value">{{ dashStats.totalSponsors }}</span>
+                    <span class="dash-kpi-label">Sponsors</span>
+                </div>
+                <div class="dash-kpi-sub">
+                    <span class="dash-kpi-chip dash-kpi-chip--accent">{{ dashStats.sponsorsAssignes }} assignés</span>
+                    <span class="dash-kpi-chip dash-kpi-chip--info">{{ dashStats.totalContributions|number_format(0, ',', ' ') }} TND</span>
+                </div>
+            </div>
+
+            <div class="dash-kpi-card dash-kpi-card--teal">
+                <div class="dash-kpi-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="dash-kpi-body">
+                    <span class="dash-kpi-value">{{ dashStats.eventsCetteSemaine }}</span>
+                    <span class="dash-kpi-label">Cette semaine</span>
+                </div>
+                <div class="dash-kpi-sub">
+                    <span class="dash-kpi-chip dash-kpi-chip--accent">{{ dashStats.eventsCeMois }} ce mois</span>
+                </div>
+            </div>
+        </div>
+
+        {# ── ROW 2 : Charts ── #}
+        <div class="dash-charts-row">
+            <div class="dash-card dash-card--wide">
+                <div class="dash-card-header">
+                    <h3>Événements par mois</h3>
+                    <span class="dash-card-badge">12 derniers mois</span>
+                </div>
+                <div class="dash-chart-wrap"><canvas id="chartEvtMois"></canvas></div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header"><h3>Par type</h3></div>
+                <div class="dash-chart-wrap dash-chart-wrap--square"><canvas id="chartType"></canvas></div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header"><h3>Par statut</h3></div>
+                <div class="dash-chart-wrap dash-chart-wrap--square"><canvas id="chartStatut"></canvas></div>
+            </div>
+        </div>
+
+        {# ── ROW 3 : Participations + Sponsors charts ── #}
+        <div class="dash-charts-row">
+            <div class="dash-card dash-card--wide">
+                <div class="dash-card-header">
+                    <h3>Participations par mois</h3>
+                    <span class="dash-card-badge">12 derniers mois</span>
+                </div>
+                <div class="dash-chart-wrap"><canvas id="chartParticipMois"></canvas></div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header"><h3>Statut participations</h3></div>
+                <div class="dash-chart-wrap dash-chart-wrap--square"><canvas id="chartParticipStatut"></canvas></div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header"><h3>Sponsors par secteur</h3></div>
+                <div class="dash-chart-wrap dash-chart-wrap--square"><canvas id="chartSecteur"></canvas></div>
+            </div>
+        </div>
+
+        {# ── ROW 4 : Tables ── #}
+        <div class="dash-tables-row">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3>Top événements</h3>
+                    <span class="dash-card-badge">par participation</span>
+                </div>
+                <table class="dash-table" id="dashTopEvents">
+                    <thead><tr><th>#</th><th>Événement</th><th>Participants</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3>Places disponibles</h3>
+                    <span class="dash-card-badge">top 5</span>
+                </div>
+                <table class="dash-table" id="dashPlaces">
+                    <thead><tr><th>#</th><th>Événement</th><th>Places</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3>Top sponsors</h3>
+                    <span class="dash-card-badge">par événements</span>
+                </div>
+                <table class="dash-table" id="dashTopSponsors">
+                    <thead><tr><th>#</th><th>Sponsor</th><th>Événements</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    {# ════════════════════════════════════════════════
+       MODAL — DETAIL POPUP
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-modal-overlay" id="detailModal" style="display:none">
+        <div class="aevt-modal">
+            {# Header #}
+            <div class="aevt-modal__header">
+                <div class="aevt-modal__header-img" id="modal-thumb"></div>
+                <div class="aevt-modal__header-info">
+                    <h2 id="modal-titre"></h2>
+                    <div class="aevt-modal__header-badges">
+                        <span id="modal-statut" class="aevt-badge"></span>
+                        <span id="modal-type" class="aevt-badge aevt-badge--type"></span>
+                    </div>
+                </div>
+                <button type="button" class="aevt-modal__close" id="modal-close">&times;</button>
+            </div>
+
+            {# Body #}
+            <div class="aevt-modal__body">
+                {# Description #}
+                <div class="aevt-modal__section">
+                    <h4>Description</h4>
+                    <div class="aevt-modal__desc" id="modal-desc"></div>
+                </div>
+
+                {# Info fields #}
+                <div class="aevt-modal__fields">
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Organisateur</span><span id="modal-org"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Date début</span><span id="modal-dateDebut"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Date fin</span><span id="modal-dateFin"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Horaire</span><span id="modal-horaire"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Lieu</span><span id="modal-lieu"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Adresse</span><span id="modal-adresse"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Capacité</span><span id="modal-capacite"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Places dispo.</span><span id="modal-places"></span></div>
+                    <div class="aevt-modal__field"><span class="aevt-modal__field-label">Participations</span><span id="modal-participations"></span></div>
+                </div>
+
+                {# Sponsors #}
+                <div class="aevt-modal__section" id="modal-sponsors-section" style="display:none">
+                    <h4>Sponsors</h4>
+                    <div class="aevt-modal__sponsors" id="modal-sponsors"></div>
+                </div>
+
+                {# Weather #}
+                <div class="aevt-modal__section" id="modal-weather-section">
+                    <h4>Météo prévue</h4>
+                    <div class="aevt-modal__weather" id="modal-weather">
+                        <div class="aevt-weather-loading">
+                            <span class="aevt-spinner"></span> Chargement de la météo…
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Footer #}
+            <div class="aevt-modal__footer">
+                <a href="#" id="modal-maps-link" class="aevt-btn aevt-btn--outline" target="_blank" rel="noopener">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Voir sur Google Maps
+                </a>
+                <button type="button" class="aevt-btn aevt-btn--primary" id="modal-close2">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    {# ════════════════════════════════════════════════
+       MODAL — PARTICIPANTS POPUP
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-modal-overlay" id="participantsModal" style="display:none">
+        <div class="aevt-modal aevt-modal--wide">
+            {# Header #}
+            <div class="aevt-modal__header aevt-modal__header--compact">
+                <div class="aevt-modal__header-info">
+                    <h2 id="part-modal-titre"></h2>
+                    <p class="aevt-modal__subtitle" id="part-modal-total"></p>
+                </div>
+                <button type="button" class="aevt-modal__close" id="part-modal-close">&times;</button>
+            </div>
+
+            {# Body — Participants table #}
+            <div class="aevt-modal__body">
+                <div id="part-modal-empty" class="aevt-empty" style="display:none">
+                    <p>Aucun participant pour cet événement.</p>
+                </div>
+                <div class="aevt-table-wrap" id="part-modal-table-wrap" style="display:none">
+                    <table class="aevt-table aevt-table--participants">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Statut</th>
+                                <th>Accompagnants</th>
+                                <th>Commentaire</th>
+                            </tr>
+                        </thead>
+                        <tbody id="part-modal-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# Footer #}
+            <div class="aevt-modal__footer">
+                <button type="button" class="aevt-btn aevt-btn--primary" id="part-modal-close2">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ═══════════════════════════════
+    // Picker search (Modifier tab)
+    // ═══════════════════════════════
+    var pickerInput = document.getElementById('pickerSearch');
+    if (pickerInput) {
+        pickerInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase().trim();
+            var items = document.querySelectorAll('#pickerList .aevt-form__picker-item');
+            var visible = 0;
+            items.forEach(function(item) {
+                var text = item.getAttribute('data-search') || '';
+                var show = !q || text.includes(q);
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            var empty = document.getElementById('pickerEmpty');
+            if (empty) empty.style.display = visible === 0 ? '' : 'none';
+        });
+    }
+
+    // ═══════════════════════════════
+    // Browse & Upload image file
+    // ═══════════════════════════════
+    document.querySelectorAll('.js-browse-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var fileInput = document.getElementById(this.dataset.file);
+            if (fileInput) fileInput.click();
+        });
+    });
+
+    document.querySelectorAll('.aevt-form__file-hidden').forEach(function(fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (!this.files || !this.files[0]) return;
+
+            var file = this.files[0];
+            var targetId = this.dataset.target;
+            var targetInput = document.getElementById(targetId);
+            var previewWrap = document.getElementById(targetId.replace('_url', '_preview'));
+            var previewImg  = document.getElementById(targetId.replace('_url', '_preview_img'));
+
+            // Validate client-side
+            if (!file.type.startsWith('image/')) {
+                firmaToast('Veuillez sélectionner un fichier image.', 'error');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                firmaToast('Fichier trop volumineux (max 5 Mo).', 'error');
+                return;
+            }
+
+            // Show local preview immediately
+            if (previewWrap && previewImg) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewWrap.style.display = '';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Upload
+            var formData = new FormData();
+            formData.append('image', file);
+
+            var browseBtn = fileInput.previousElementSibling ? null : null;
+            var btns = fileInput.parentElement.querySelectorAll('.js-browse-btn');
+            btns.forEach(function(b) { b.textContent = 'Envoi…'; b.disabled = true; });
+
+            fetch('{{ path('admin_evenement_upload_image') }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    firmaToast('Erreur : ' + data.error, 'error');
+                } else {
+                    targetInput.value = data.url;
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                firmaToast('Erreur réseau lors de l\'envoi.', 'error');
+            })
+            .finally(function() {
+                btns.forEach(function(b) { b.textContent = 'Parcourir'; b.disabled = false; });
+            });
+        });
+    });
+
+    // ═══════════════════════════════
+    // Tab switching (client-side)
+    // ═══════════════════════════════
+    const tabs = document.querySelectorAll('.aevt-tab[data-tab]');
+    const panels = document.querySelectorAll('.aevt-panel');
+
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.tab;
+
+            tabs.forEach(function(t) { t.classList.remove('aevt-tab--active'); });
+            panels.forEach(function(p) { p.classList.remove('aevt-panel--active'); });
+
+            this.classList.add('aevt-tab--active');
+            var panel = document.getElementById('panel-' + target);
+            if (panel) panel.classList.add('aevt-panel--active');
+        });
+    });
+
+    // ═══════════════════════════════
+    // Detail Modal
+    // ═══════════════════════════════
+    const modal = document.getElementById('detailModal');
+    const closeBtn = document.getElementById('modal-close');
+    const closeBtn2 = document.getElementById('modal-close2');
+
+    function openModal(id) {
+        fetch('{{ path('admin_evenements') }}/' + id + '/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                // Header
+                var thumbEl = document.getElementById('modal-thumb');
+                if (data.imageUrl) {
+                    thumbEl.innerHTML = '<img src="' + data.imageUrl + '" alt="">';
+                } else {
+                    thumbEl.innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+                }
+                document.getElementById('modal-titre').textContent = data.titre;
+
+                var statutBadge = document.getElementById('modal-statut');
+                statutBadge.textContent = data.statut;
+                statutBadge.className = 'aevt-badge ' + data.statutClass;
+
+                document.getElementById('modal-type').textContent = data.type;
+
+                // Body
+                document.getElementById('modal-desc').textContent = data.description || '—';
+                document.getElementById('modal-org').textContent = data.organisateur || '—';
+                document.getElementById('modal-dateDebut').textContent = data.dateDebut || '—';
+                document.getElementById('modal-dateFin').textContent = data.dateFin || '—';
+                document.getElementById('modal-horaire').textContent = (data.horaireDebut || '?') + ' → ' + (data.horaireFin || '?');
+                document.getElementById('modal-lieu').textContent = data.lieu || '—';
+                document.getElementById('modal-adresse').textContent = data.adresse || '—';
+                document.getElementById('modal-capacite').textContent = data.capaciteMax || '—';
+                document.getElementById('modal-places').textContent = data.placesDisponibles + ' / ' + data.capaciteMax;
+                document.getElementById('modal-participations').textContent = data.participations;
+
+                // Google Maps link
+                var mapsLink = document.getElementById('modal-maps-link');
+                if (data.googleMapsUrl) {
+                    mapsLink.href = data.googleMapsUrl;
+                    mapsLink.style.display = '';
+                } else {
+                    mapsLink.style.display = 'none';
+                }
+
+                // Sponsors
+                var sponsorsSection = document.getElementById('modal-sponsors-section');
+                var sponsorsContainer = document.getElementById('modal-sponsors');
+                if (data.sponsors && data.sponsors.length > 0) {
+                    sponsorsSection.style.display = '';
+                    var html = '';
+                    data.sponsors.forEach(function(s, i) {
+                        html += '<div class="aevt-modal__sponsor-row ' + (i % 2 === 0 ? 'even' : 'odd') + '">'
+                            + '<strong>' + s.nom + '</strong>'
+                            + '<span class="aevt-pill">' + s.secteur + '</span>'
+                            + '<span class="aevt-text-muted">' + (s.email || '') + '</span>'
+                            + '</div>';
+                    });
+                    sponsorsContainer.innerHTML = html;
+                } else {
+                    sponsorsSection.style.display = 'none';
+                }
+
+                // ── Weather (Open-Meteo, client-side) ──
+                loadWeather(data.lieu, data.adresse, data.dateDebutRaw);
+
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(function(err) {
+                console.error('Error loading event detail:', err);
+                firmaToast('Impossible de charger les détails.', 'error');
+            });
+    }
+
+    // ═══════════════════════════════
+    // Weather — Open-Meteo (free)
+    // ═══════════════════════════════
+    var WMO_DESC = {
+        0:'Ciel dégagé',1:'Principalement dégagé',2:'Partiellement nuageux',3:'Couvert',
+        45:'Brouillard',48:'Brouillard givrant',
+        51:'Bruine légère',53:'Bruine modérée',55:'Bruine dense',
+        56:'Bruine verglaçante légère',57:'Bruine verglaçante',
+        61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',
+        66:'Pluie verglaçante légère',67:'Pluie verglaçante',
+        71:'Neige légère',73:'Neige modérée',75:'Neige forte',
+        77:'Grains de neige',
+        80:'Averses légères',81:'Averses modérées',82:'Averses violentes',
+        85:'Averses de neige légères',86:'Averses de neige fortes',
+        95:'Orage',96:'Orage avec grêle légère',99:'Orage avec grêle forte'
+    };
+    var WMO_EMOJI = {
+        0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
+        45:'🌫️',48:'🌫️',
+        51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',
+        61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',
+        71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',
+        80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'🌨️',
+        95:'⛈️',96:'⛈️',99:'⛈️'
+    };
+
+    function extractCity(lieu, adresse) {
+        // Priority: extract city from adresse (format: "123 Rue X, 75017 Paris")
+        if (adresse && adresse.trim()) {
+            var parts = adresse.trim().split(',');
+            // Take the last segment, e.g. " 75017 Paris"
+            var last = parts[parts.length - 1].trim();
+            // Strip postal code (digits) to get city name
+            var city = last.replace(/^\d{4,5}\s*/, '').trim();
+            if (city) return city;
+            // If only postal code remained, try second-to-last segment
+            if (parts.length >= 2) {
+                last = parts[parts.length - 2].trim();
+                city = last.replace(/^\d{4,5}\s*/, '').trim();
+                if (city) return city;
+            }
+        }
+        // Fallback: lieu (rarely a city, but try)
+        if (lieu && lieu.trim()) {
+            return lieu.trim();
+        }
+        return null;
+    }
+
+    function getReliabilityText(daysAhead) {
+        if (daysAhead <= 0)  return 'Météo actuelle';
+        if (daysAhead <= 3)  return 'Prévision fiable (J+' + daysAhead + ')';
+        if (daysAhead <= 7)  return 'Prévision modérée (J+' + daysAhead + ')';
+        if (daysAhead <= 14) return 'Prévision indicative (J+' + daysAhead + ')';
+        return 'Prévision à long terme — peu fiable';
+    }
+
+    function loadWeather(lieu, adresse, dateDebutRaw) {
+        var weatherEl = document.getElementById('modal-weather');
+        weatherEl.innerHTML = '<div class="aevt-weather-loading"><span class="aevt-spinner"></span> Chargement de la météo…</div>';
+
+        var city = extractCity(lieu, adresse);
+        if (!city) {
+            weatherEl.innerHTML = '<span class="aevt-weather-error">Lieu non défini — impossible de charger la météo.</span>';
+            return;
+        }
+
+        // Step 1: Geocode city
+        fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(city) + '&count=5&language=fr')
+            .then(function(r) { return r.json(); })
+            .then(function(geo) {
+                if (!geo.results || geo.results.length === 0) {
+                    weatherEl.innerHTML = '<span class="aevt-weather-error">Ville « ' + city + ' » introuvable pour la météo.</span>';
+                    return;
+                }
+
+                var lat = geo.results[0].latitude;
+                var lon = geo.results[0].longitude;
+                var cityName = geo.results[0].name;
+
+                // Step 2: Get forecast
+                var forecastUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat
+                    + '&longitude=' + lon
+                    + '&daily=temperature_2m_max,temperature_2m_min,weather_code'
+                    + '&current_weather=true&timezone=auto&forecast_days=16';
+
+                return fetch(forecastUrl)
+                    .then(function(r) { return r.json(); })
+                    .then(function(wx) {
+                        var html = '';
+                        var today = new Date().toISOString().slice(0, 10);
+
+                        if (dateDebutRaw && wx.daily && wx.daily.time) {
+                            var idx = wx.daily.time.indexOf(dateDebutRaw);
+                            if (idx !== -1) {
+                                // Forecast for event date
+                                var code   = wx.daily.weather_code[idx];
+                                var tMax   = wx.daily.temperature_2m_max[idx];
+                                var tMin   = wx.daily.temperature_2m_min[idx];
+                                var tAvg   = Math.round((tMax + tMin) / 2);
+                                var desc   = WMO_DESC[code] || 'Inconnu';
+                                var emoji  = WMO_EMOJI[code] || '🌡️';
+
+                                var eventDate = new Date(dateDebutRaw);
+                                var nowDate   = new Date(today);
+                                var daysAhead = Math.round((eventDate - nowDate) / (1000 * 60 * 60 * 24));
+                                var reliability = getReliabilityText(daysAhead);
+
+                                html = '<div class="aevt-weather-card">'
+                                    + '<div class="aevt-weather-emoji">' + emoji + '</div>'
+                                    + '<div class="aevt-weather-info">'
+                                    + '<p class="aevt-weather-temp">' + tAvg + '°C</p>'
+                                    + '<p class="aevt-weather-desc">' + desc + '</p>'
+                                    + '<p class="aevt-weather-range">↓ ' + Math.round(tMin) + '°C  ↑ ' + Math.round(tMax) + '°C</p>'
+                                    + '<p class="aevt-weather-reliability">' + reliability + ' — ' + cityName + '</p>'
+                                    + '</div></div>';
+                            }
+                        }
+
+                        // Fallback to current weather
+                        if (!html && wx.current_weather) {
+                            var cw     = wx.current_weather;
+                            var code2  = cw.weathercode;
+                            var desc2  = WMO_DESC[code2] || 'Inconnu';
+                            var emoji2 = WMO_EMOJI[code2] || '🌡️';
+
+                            html = '<div class="aevt-weather-card">'
+                                + '<div class="aevt-weather-emoji">' + emoji2 + '</div>'
+                                + '<div class="aevt-weather-info">'
+                                + '<p class="aevt-weather-temp">' + Math.round(cw.temperature) + '°C</p>'
+                                + '<p class="aevt-weather-desc">' + desc2 + ' (météo actuelle)</p>'
+                                + '<p class="aevt-weather-reliability">L\'événement est trop éloigné pour une prévision fiable — ' + cityName + '</p>'
+                                + '</div></div>';
+                        }
+
+                        if (!html) {
+                            html = '<span class="aevt-weather-error">Prévision non disponible pour cette date.</span>';
+                        }
+
+                        weatherEl.innerHTML = html;
+                    });
+            })
+            .catch(function(err) {
+                console.error('Weather error:', err);
+                weatherEl.innerHTML = '<span class="aevt-weather-error">Impossible de charger la météo.</span>';
+            });
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.js-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openModal(this.dataset.id);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    closeBtn2.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+    });
+
+    // ═══════════════════════════════
+    // Participants Modal
+    // ═══════════════════════════════
+    var partModal      = document.getElementById('participantsModal');
+    var partCloseBtn   = document.getElementById('part-modal-close');
+    var partCloseBtn2  = document.getElementById('part-modal-close2');
+
+    function badgeClass(statut) {
+        if (statut === 'confirme')   return 'aevt-badge aevt-badge--success';
+        if (statut === 'en_attente') return 'aevt-badge aevt-badge--warning';
+        if (statut === 'annule')     return 'aevt-badge aevt-badge--danger';
+        return 'aevt-badge';
+    }
+    function badgeLabel(statut) {
+        if (statut === 'confirme')   return 'Confirmé';
+        if (statut === 'en_attente') return 'En attente';
+        if (statut === 'annule')     return 'Annulé';
+        return statut;
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function openParticipantsModal(eventId) {
+        fetch('{{ path('admin_evenements') }}/' + eventId + '/participants/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                document.getElementById('part-modal-titre').textContent = 'Participants — ' + data.titre;
+                document.getElementById('part-modal-total').textContent =
+                    data.totalPersonnes + ' personne' + (data.totalPersonnes > 1 ? 's' : '') + ' au total (participants + accompagnants)';
+
+                var tbody = document.getElementById('part-modal-tbody');
+                var tableWrap = document.getElementById('part-modal-table-wrap');
+                var emptyMsg  = document.getElementById('part-modal-empty');
+
+                tbody.innerHTML = '';
+
+                if (!data.participants || data.participants.length === 0) {
+                    tableWrap.style.display = 'none';
+                    emptyMsg.style.display = '';
+                } else {
+                    tableWrap.style.display = '';
+                    emptyMsg.style.display = 'none';
+
+                    data.participants.forEach(function(p, idx) {
+                        var rowId = 'part-sub-' + eventId + '-' + idx;
+                        var hasAccomp = p.nombreAccompagnants > 0 && p.accompagnants.length > 0;
+
+                        // Main row
+                        var tr = document.createElement('tr');
+                        var accompHtml;
+                        if (hasAccomp) {
+                            accompHtml = '<span class="aevt-accomp-toggle" data-target="' + rowId + '">'
+                                + '<span class="aevt-arrow">►</span> '
+                                + p.nombreAccompagnants
+                                + '</span>';
+                        } else {
+                            accompHtml = '<span>' + p.nombreAccompagnants + '</span>';
+                        }
+
+                        tr.innerHTML =
+                            '<td>' + (idx + 1) + '</td>'
+                            + '<td>' + escapeHtml(p.fullName) + '</td>'
+                            + '<td>' + escapeHtml(p.email) + '</td>'
+                            + '<td><span class="' + badgeClass(p.statut) + '">' + badgeLabel(p.statut) + '</span></td>'
+                            + '<td>' + accompHtml + '</td>'
+                            + '<td>' + escapeHtml(p.commentaire || '—') + '</td>';
+                        tbody.appendChild(tr);
+
+                        // Sub-row (expandable)
+                        if (hasAccomp) {
+                            var subTr = document.createElement('tr');
+                            subTr.className = 'aevt-sub-row aevt-sub-row--hidden';
+                            subTr.id = rowId;
+                            var listHtml = '<ul>';
+                            p.accompagnants.forEach(function(name) {
+                                listHtml += '<li>' + escapeHtml(name) + '</li>';
+                            });
+                            listHtml += '</ul>';
+                            subTr.innerHTML = '<td colspan="6"><div class="aevt-sub-panel">'
+                                + '<strong>Accompagnants :</strong>'
+                                + listHtml
+                                + '</div></td>';
+                            tbody.appendChild(subTr);
+                        }
+                    });
+
+                    // Toggle handlers
+                    tbody.querySelectorAll('.aevt-accomp-toggle').forEach(function(toggle) {
+                        toggle.addEventListener('click', function() {
+                            var target = document.getElementById(this.dataset.target);
+                            if (!target) return;
+                            var isOpen = !target.classList.contains('aevt-sub-row--hidden');
+                            if (isOpen) {
+                                target.classList.add('aevt-sub-row--hidden');
+                                this.classList.remove('open');
+                            } else {
+                                target.classList.remove('aevt-sub-row--hidden');
+                                this.classList.add('open');
+                            }
+                        });
+                    });
+                }
+
+                partModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(function(err) {
+                console.error('Error loading participants:', err);
+                firmaToast('Impossible de charger les participants.', 'error');
+            });
+    }
+
+    function closeParticipantsModal() {
+        partModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.js-participants-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openParticipantsModal(this.dataset.id);
+        });
+    });
+
+    partCloseBtn.addEventListener('click', closeParticipantsModal);
+    partCloseBtn2.addEventListener('click', closeParticipantsModal);
+    partModal.addEventListener('click', function(e) {
+        if (e.target === partModal) closeParticipantsModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && partModal.style.display !== 'none') closeParticipantsModal();
+    });
+
+    // ═══════════════════════════════
+    // Sponsors tab — Search & Sort
+    // ═══════════════════════════════
+    var spSearchInput = document.getElementById('spSearch');
+    var spSortSelect  = document.getElementById('spSort');
+    var spTbody       = document.getElementById('spTbody');
+    var spNoResult    = document.getElementById('spNoResult');
+
+    function spFilterAndSort() {
+        if (!spTbody) return;
+        var q = (spSearchInput ? spSearchInput.value.toLowerCase().trim() : '');
+        var sortBy = spSortSelect ? spSortSelect.value : 'nom_asc';
+        var rows = Array.from(spTbody.querySelectorAll('.sp-row'));
+        var visible = 0;
+
+        // Filter
+        rows.forEach(function(r) {
+            var match = !q
+                || r.dataset.nom.includes(q)
+                || r.dataset.secteur.includes(q)
+                || r.dataset.email.includes(q);
+            r.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        // Sort visible rows
+        rows.sort(function(a, b) {
+            switch (sortBy) {
+                case 'nom_asc':     return a.dataset.nom.localeCompare(b.dataset.nom);
+                case 'nom_desc':    return b.dataset.nom.localeCompare(a.dataset.nom);
+                case 'montant_desc':return parseFloat(b.dataset.montant) - parseFloat(a.dataset.montant);
+                case 'montant_asc': return parseFloat(a.dataset.montant) - parseFloat(b.dataset.montant);
+                case 'secteur':     return a.dataset.secteur.localeCompare(b.dataset.secteur);
+                default: return 0;
+            }
+        });
+        rows.forEach(function(r) { spTbody.appendChild(r); });
+
+        if (spNoResult) spNoResult.style.display = (visible === 0 && q) ? '' : 'none';
+    }
+
+    if (spSearchInput) spSearchInput.addEventListener('input', spFilterAndSort);
+    if (spSortSelect)  spSortSelect.addEventListener('change', spFilterAndSort);
+
+    // ═══════════════════════════════
+    // Sponsor Form Modal (create/edit)
+    // ═══════════════════════════════
+    var spFormModal  = document.getElementById('spFormModal');
+    var spForm       = document.getElementById('spForm');
+    var spFormTitle  = document.getElementById('spFormTitle');
+    var spFormSubmit = document.getElementById('spFormSubmit');
+    var createAction = '{{ path('admin_sponsor_create') }}';
+
+    function spOpenFormCreate() {
+        spFormTitle.textContent = 'Créer un sponsor';
+        spFormSubmit.textContent = 'Créer';
+        spForm.action = createAction;
+        // Clear all fields
+        ['spF_nom','spF_email','spF_tel','spF_web','spF_desc','spF_logo'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('spF_montant').value = '0';
+        document.getElementById('spF_secteur').selectedIndex = 0;
+        document.getElementById('spF_logo_preview').style.display = 'none';
+        spFormModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function spOpenFormEdit(id) {
+        fetch('{{ path('admin_sponsors') }}/' + id + '/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                spFormTitle.textContent = 'Modifier — ' + data.nom;
+                spFormSubmit.textContent = 'Enregistrer';
+                spForm.action = '{{ path('admin_sponsors') }}/' + id + '/update';
+                document.getElementById('spF_nom').value = data.nom || '';
+                document.getElementById('spF_email').value = data.emailContact || '';
+                document.getElementById('spF_tel').value = data.telephone || '';
+                document.getElementById('spF_web').value = data.siteWeb || '';
+                document.getElementById('spF_montant').value = data.montant || '0';
+                document.getElementById('spF_desc').value = data.description || '';
+                document.getElementById('spF_logo').value = data.logoUrl || '';
+                // Set secteur
+                var secteurSelect = document.getElementById('spF_secteur');
+                for (var i = 0; i < secteurSelect.options.length; i++) {
+                    if (data.secteur && secteurSelect.options[i].text === data.secteur) {
+                        secteurSelect.selectedIndex = i; break;
+                    }
+                }
+                // Logo preview
+                var previewWrap = document.getElementById('spF_logo_preview');
+                var previewImg  = document.getElementById('spF_logo_preview_img');
+                if (data.logoUrl) {
+                    previewImg.src = data.logoUrl;
+                    previewWrap.style.display = '';
+                } else {
+                    previewWrap.style.display = 'none';
+                }
+                spFormModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(function(err) {
+                console.error(err);
+                firmaToast('Impossible de charger les données du sponsor.', 'error');
+            });
+    }
+
+    function spCloseFormModal() {
+        spFormModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('spCreateBtn').addEventListener('click', spOpenFormCreate);
+    document.getElementById('spFormClose').addEventListener('click', spCloseFormModal);
+    document.getElementById('spFormCancel').addEventListener('click', spCloseFormModal);
+    spFormModal.addEventListener('click', function(e) { if (e.target === spFormModal) spCloseFormModal(); });
+
+    document.querySelectorAll('.js-sp-edit').forEach(function(btn) {
+        btn.addEventListener('click', function() { spOpenFormEdit(this.dataset.id); });
+    });
+
+    // ═══════════════════════════════
+    // Sponsor Detail Modal
+    // ═══════════════════════════════
+    var spDetailModal = document.getElementById('spDetailModal');
+
+    function spOpenDetail(id) {
+        fetch('{{ path('admin_sponsors') }}/' + id + '/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var logoEl = document.getElementById('spD_logo');
+                if (data.logoUrl) {
+                    logoEl.innerHTML = '<img src="' + data.logoUrl + '" alt="" style="width:100%;height:100%;object-fit:contain">';
+                } else {
+                    logoEl.innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>';
+                }
+                document.getElementById('spD_nom').textContent = data.nom;
+                document.getElementById('spD_secteur').textContent = data.secteur;
+
+                var montantBadge = document.getElementById('spD_montant');
+                if (data.montant && parseFloat(data.montant) > 0) {
+                    montantBadge.textContent = data.montant + ' TND';
+                    montantBadge.style.display = '';
+                } else {
+                    montantBadge.style.display = 'none';
+                }
+
+                var descSec = document.getElementById('spD_descSection');
+                if (data.description) {
+                    descSec.style.display = '';
+                    document.getElementById('spD_desc').textContent = data.description;
+                } else {
+                    descSec.style.display = 'none';
+                }
+
+                document.getElementById('spD_email').textContent = data.emailContact || '—';
+                document.getElementById('spD_tel').textContent = data.telephone || '—';
+                document.getElementById('spD_web').textContent = data.siteWeb || '—';
+                document.getElementById('spD_contrib').textContent = (data.montant && parseFloat(data.montant) > 0) ? data.montant + ' TND' : '—';
+                document.getElementById('spD_date').textContent = data.dateCreation || '—';
+
+                var webLink = document.getElementById('spD_webLink');
+                if (data.siteWeb) { webLink.href = data.siteWeb; webLink.style.display = ''; }
+                else { webLink.style.display = 'none'; }
+
+                spDetailModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(function(err) {
+                console.error(err);
+                firmaToast('Impossible de charger les détails.', 'error');
+            });
+    }
+
+    function spCloseDetail() {
+        spDetailModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.js-sp-detail').forEach(function(btn) {
+        btn.addEventListener('click', function() { spOpenDetail(this.dataset.id); });
+    });
+    document.getElementById('spDetailClose').addEventListener('click', spCloseDetail);
+    document.getElementById('spDetailClose2').addEventListener('click', spCloseDetail);
+    spDetailModal.addEventListener('click', function(e) { if (e.target === spDetailModal) spCloseDetail(); });
+
+    // Sponsor logo browse & upload
+    document.querySelectorAll('.js-sp-browse').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById(this.dataset.file).click();
+        });
+    });
+    var spLogoFile = document.getElementById('spF_logo_file');
+    if (spLogoFile) {
+        spLogoFile.addEventListener('change', function() {
+            if (!this.files || !this.files[0]) return;
+            var file = this.files[0];
+            if (!file.type.startsWith('image/')) { firmaToast('Veuillez sélectionner une image.', 'error'); return; }
+            if (file.size > 5 * 1024 * 1024) { firmaToast('Max 5 Mo.', 'error'); return; }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('spF_logo_preview_img').src = e.target.result;
+                document.getElementById('spF_logo_preview').style.display = '';
+            };
+            reader.readAsDataURL(file);
+
+            var fd = new FormData();
+            fd.append('image', file);
+            var browseBtn = spLogoFile.parentElement.querySelector('.js-sp-browse');
+            if (browseBtn) { browseBtn.textContent = 'Envoi…'; browseBtn.disabled = true; }
+
+            fetch('{{ path('admin_sponsor_upload_logo') }}', { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) firmaToast('Erreur : ' + data.error, 'error');
+                    else document.getElementById('spF_logo').value = data.url;
+                })
+                .catch(function() { firmaToast('Erreur réseau.', 'error'); })
+                .finally(function() {
+                    if (browseBtn) { browseBtn.textContent = 'Parcourir'; browseBtn.disabled = false; }
+                });
+        });
+    }
+
+    // ═══════════════════════════════
+    // "Générer IA" — Hugging Face
+    // ═══════════════════════════════
+    document.querySelectorAll('.js-gen-ai').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var targetId = this.dataset.target;
+            var titleInput = this.closest('form').querySelector('input[name="titre"]');
+            var descInput  = this.closest('form').querySelector('textarea[name="description"]');
+            var titre = (titleInput ? titleInput.value : '').trim();
+            var desc  = (descInput  ? descInput.value  : '').trim();
+
+            if (!titre) {
+                firmaToast('Veuillez remplir le titre avant de générer une image.', 'warning');
+                return;
+            }
+
+            var prompt = 'Professional photo for an agricultural event: ' + titre;
+            if (desc) prompt += '. ' + desc.substring(0, 120);
+            prompt += '. High quality, vibrant colors, natural lighting, farm landscape.';
+
+            var target = document.getElementById(targetId);
+            var originalText = btn.textContent;
+            btn.textContent = 'Génération en cours…';
+            btn.disabled = true;
+
+            var formData = new FormData();
+            formData.append('prompt', prompt);
+
+            fetch('{{ path('admin_evenement_generate_image') }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    firmaToast('Erreur IA : ' + data.error, 'error');
+                } else {
+                    target.value = data.url;
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                firmaToast('Erreur réseau lors de la génération.', 'error');
+            })
+            .finally(function() {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        });
+    });
+
+    // ═══════════════════════════════
+    // JS form validation on submit
+    // ═══════════════════════════════
+    document.querySelectorAll('form.aevt-form[novalidate]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!firmaValidateForm(this)) {
+                e.preventDefault();
+            }
+        });
+    });
+    // Sponsor form validation
+    var spFormEl = document.getElementById('spForm');
+    if (spFormEl) {
+        spFormEl.addEventListener('submit', function(e) {
+            if (!firmaValidateForm(this)) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<script>
+(function(){
+    /* ═══════════════════════════════════════════
+       DASHBOARD — Charts & Tables
+       ═══════════════════════════════════════════ */
+    const DASH_URL = '{{ path("admin_evenement_dashboard_data") }}';
+
+    /* Color palettes */
+    const PALETTE = ['#4aac33','#3b82f6','#f59e0b','#8b5cf6','#14b8a6','#ef4444','#ec4899','#06b6d4'];
+    const PALETTE_LIGHT = ['rgba(74,172,51,.15)','rgba(59,130,246,.15)','rgba(245,158,11,.15)','rgba(139,92,246,.15)','rgba(20,184,166,.15)','rgba(239,68,68,.15)','rgba(236,72,153,.15)','rgba(6,182,212,.15)'];
+
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { font: { family: "'Plus Jakarta Sans',sans-serif", size: 12 }, padding: 14, usePointStyle: true, pointStyleWidth: 10 } }
+        }
+    };
+
+    function rankClass(i) {
+        if (i === 0) return 'dash-rank dash-rank--gold';
+        if (i === 1) return 'dash-rank dash-rank--silver';
+        if (i === 2) return 'dash-rank dash-rank--bronze';
+        return 'dash-rank';
+    }
+
+    function fillTable(id, rows, labelKey, valueKey) {
+        var tb = document.querySelector('#' + id + ' tbody');
+        if (!tb) return;
+        tb.innerHTML = '';
+        rows.forEach(function(r, i) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><span class="' + rankClass(i) + '">' + (i + 1) + '</span></td>'
+                         + '<td>' + r[labelKey] + '</td>'
+                         + '<td><strong>' + r[valueKey] + '</strong></td>';
+            tb.appendChild(tr);
+        });
+        if (!rows.length) {
+            tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:24px">Aucune donnée</td></tr>';
+        }
+    }
+
+    /* Only init when dashboard tab is shown or on load if active */
+    var dashLoaded = false;
+    function initDashboard() {
+        if (dashLoaded) return;
+        dashLoaded = true;
+
+        fetch(DASH_URL)
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                /* ── Events par mois (Bar) ── */
+                var ctxMois = document.getElementById('chartEvtMois');
+                if (ctxMois) {
+                    new Chart(ctxMois, {
+                        type: 'bar',
+                        data: {
+                            labels: d.evenementsParMois.map(function(m){ return m.mois; }),
+                            datasets: [{
+                                label: 'Événements',
+                                data: d.evenementsParMois.map(function(m){ return m.count; }),
+                                backgroundColor: 'rgba(74,172,51,.25)',
+                                borderColor: '#4aac33',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                barPercentage: 0.6
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            plugins: Object.assign({}, chartDefaults.plugins, { legend: { display: false } }),
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Plus Jakarta Sans'" } }, grid: { color: '#f0f0f0' } },
+                                x: { ticks: { font: { family: "'Plus Jakarta Sans'", size: 11 } }, grid: { display: false } }
+                            }
+                        })
+                    });
+                }
+
+                /* ── Participations par mois (Line) ── */
+                var ctxPM = document.getElementById('chartParticipMois');
+                if (ctxPM) {
+                    new Chart(ctxPM, {
+                        type: 'line',
+                        data: {
+                            labels: d.participationsParMois.map(function(m){ return m.mois; }),
+                            datasets: [{
+                                label: 'Participations',
+                                data: d.participationsParMois.map(function(m){ return m.count; }),
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,.1)',
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                fill: true,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#3b82f6'
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            plugins: Object.assign({}, chartDefaults.plugins, { legend: { display: false } }),
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Plus Jakarta Sans'" } }, grid: { color: '#f0f0f0' } },
+                                x: { ticks: { font: { family: "'Plus Jakarta Sans'", size: 11 } }, grid: { display: false } }
+                            }
+                        })
+                    });
+                }
+
+                /* ── Répartition par type (Doughnut) ── */
+                var ctxType = document.getElementById('chartType');
+                if (ctxType) {
+                    new Chart(ctxType, {
+                        type: 'doughnut',
+                        data: {
+                            labels: d.repartitionType.map(function(r){ return r.type; }),
+                            datasets: [{
+                                data: d.repartitionType.map(function(r){ return r.count; }),
+                                backgroundColor: PALETTE.slice(0, d.repartitionType.length),
+                                borderWidth: 0,
+                                hoverOffset: 6
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            cutout: '62%',
+                            plugins: Object.assign({}, chartDefaults.plugins, {
+                                legend: { position: 'bottom', labels: Object.assign({}, chartDefaults.plugins.legend.labels, { padding: 10 }) }
+                            })
+                        })
+                    });
+                }
+
+                /* ── Répartition par statut (Doughnut) ── */
+                var ctxStatut = document.getElementById('chartStatut');
+                if (ctxStatut) {
+                    var statutColors = { 'actif': '#4aac33', 'termine': '#3b82f6', 'annule': '#ef4444', 'complet': '#f59e0b' };
+                    new Chart(ctxStatut, {
+                        type: 'doughnut',
+                        data: {
+                            labels: d.repartitionStatut.map(function(r){ return r.statut; }),
+                            datasets: [{
+                                data: d.repartitionStatut.map(function(r){ return r.count; }),
+                                backgroundColor: d.repartitionStatut.map(function(r){ return statutColors[r.statut] || '#9ca3af'; }),
+                                borderWidth: 0,
+                                hoverOffset: 6
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            cutout: '62%',
+                            plugins: Object.assign({}, chartDefaults.plugins, {
+                                legend: { position: 'bottom', labels: Object.assign({}, chartDefaults.plugins.legend.labels, { padding: 10 }) }
+                            })
+                        })
+                    });
+                }
+
+                /* ── Statut participations (Doughnut) ── */
+                var ctxPS = document.getElementById('chartParticipStatut');
+                if (ctxPS) {
+                    var psColors = { 'confirmee': '#4aac33', 'en_attente': '#f59e0b', 'annulee': '#ef4444' };
+                    new Chart(ctxPS, {
+                        type: 'doughnut',
+                        data: {
+                            labels: d.repartitionParticip.map(function(r){ return r.statut; }),
+                            datasets: [{
+                                data: d.repartitionParticip.map(function(r){ return r.count; }),
+                                backgroundColor: d.repartitionParticip.map(function(r){ return psColors[r.statut] || '#9ca3af'; }),
+                                borderWidth: 0,
+                                hoverOffset: 6
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            cutout: '62%',
+                            plugins: Object.assign({}, chartDefaults.plugins, {
+                                legend: { position: 'bottom', labels: Object.assign({}, chartDefaults.plugins.legend.labels, { padding: 10 }) }
+                            })
+                        })
+                    });
+                }
+
+                /* ── Sponsors par secteur (Polar Area) ── */
+                var ctxSec = document.getElementById('chartSecteur');
+                if (ctxSec) {
+                    new Chart(ctxSec, {
+                        type: 'polarArea',
+                        data: {
+                            labels: d.repartitionSecteur.map(function(r){ return r.secteur; }),
+                            datasets: [{
+                                data: d.repartitionSecteur.map(function(r){ return r.count; }),
+                                backgroundColor: PALETTE_LIGHT.slice(0, d.repartitionSecteur.length),
+                                borderColor: PALETTE.slice(0, d.repartitionSecteur.length),
+                                borderWidth: 2
+                            }]
+                        },
+                        options: Object.assign({}, chartDefaults, {
+                            plugins: Object.assign({}, chartDefaults.plugins, {
+                                legend: { position: 'bottom', labels: Object.assign({}, chartDefaults.plugins.legend.labels, { padding: 10 }) }
+                            }),
+                            scales: { r: { ticks: { display: false }, grid: { color: '#f0f0f0' } } }
+                        })
+                    });
+                }
+
+                /* ── Tables ── */
+                fillTable('dashTopEvents',  d.topEvenements,      'titre', 'count');
+                fillTable('dashPlaces',     d.placesDisponibles,  'titre', 'places');
+                fillTable('dashTopSponsors', d.topSponsors,       'nom',   'count');
+            })
+            .catch(function(err){ console.error('Dashboard data error:', err); });
+    }
+
+    /* Trigger when dashboard tab is selected */
+    var dashPanel = document.getElementById('panel-dashboard');
+    if (dashPanel && dashPanel.classList.contains('aevt-panel--active')) {
+        initDashboard();
+    }
+
+    /* Listen for tab clicks */
+    document.querySelectorAll('[data-tab]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            if (this.getAttribute('data-tab') === 'dashboard') {
+                setTimeout(initDashboard, 50);
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}
