@@ -1,0 +1,114 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ evenement.titre }}{% endblock %}
+{% block admin_page_title %}Détail Événement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/admin/evenements.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+{% set typeEnum   = evenement.typeEnum %}
+{% set statutEnum = evenement.statutEnum %}
+{% set pct        = evenement.capaciteMax > 0 ? ((evenement.capaciteMax - evenement.placesDisponibles) / evenement.capaciteMax * 100)|round : 0 %}
+
+<div class="aevt-detail">
+    {# ── Breadcrumb ── #}
+    <nav class="aevt-breadcrumb">
+        <a href="{{ path('admin_evenements') }}">Événements</a>
+        <span>/</span>
+        <span>{{ evenement.titre }}</span>
+    </nav>
+
+    {# ── Header ── #}
+    <div class="aevt-detail__header">
+        <div>
+            <h2>{{ evenement.titre }}</h2>
+            <div class="aevt-detail__badges">
+                {% if statutEnum %}
+                    <span class="evt-badge {{ statutEnum.badgeClass }}">{{ statutEnum.label }}</span>
+                {% endif %}
+                {% if typeEnum %}
+                    <span class="aevt-pill">{{ typeEnum.label }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="aevt-detail__actions">
+            <a href="{{ path('admin_evenements') }}" class="aevt-btn aevt-btn--outline">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Participants ({{ confirmedCount }})
+            </a>
+            {% if evenement.isModifiable %}
+                <form method="post" action="{{ path('admin_evenement_cancel', {id: evenement.idEvenement}) }}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ evenement.idEvenement) }}">
+                    <button class="aevt-btn aevt-btn--warn">Annuler l'événement</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{{ path('admin_evenement_delete', {id: evenement.idEvenement}) }}" style="display:inline" data-firma-confirm="Supprimer définitivement cet événement ? Cette action est irréversible.">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.idEvenement) }}">
+                <button class="aevt-btn aevt-btn--danger">Supprimer</button>
+            </form>
+        </div>
+    </div>
+
+    {# ── Info Grid ── #}
+    <div class="aevt-detail__grid">
+        <div class="aevt-info-card">
+            <h4>Dates</h4>
+            <p>{{ evenement.dateDebut|date('d/m/Y') }}{% if evenement.dateFin != evenement.dateDebut %} – {{ evenement.dateFin|date('d/m/Y') }}{% endif %}</p>
+            <p class="aevt-text-muted">{{ evenement.horaireDebut|date('H:i') }} – {{ evenement.horaireFin|date('H:i') }}</p>
+        </div>
+
+        <div class="aevt-info-card">
+            <h4>Lieu</h4>
+            <p>{{ evenement.lieu ?? '—' }}</p>
+            {% if evenement.adresse %}<p class="aevt-text-muted">{{ evenement.adresse }}</p>{% endif %}
+            {% if evenement.googleMapsUrl %}
+                <a href="{{ evenement.googleMapsUrl }}" target="_blank" class="aevt-link">Maps →</a>
+            {% endif %}
+        </div>
+
+        <div class="aevt-info-card">
+            <h4>Capacité</h4>
+            <div class="aevt-gauge-mini" style="margin-bottom:.5rem">
+                <div class="aevt-gauge-mini__fill {% if pct >= 90 %}gauge-danger{% elseif pct >= 70 %}gauge-warning{% endif %}" style="width:{{ pct }}%"></div>
+            </div>
+            <p>{{ evenement.placesDisponibles }} / {{ evenement.capaciteMax }} places</p>
+            <p class="aevt-text-muted">{{ confirmedCount }} confirmés · {{ totalPersonnes }} personnes au total</p>
+        </div>
+
+        <div class="aevt-info-card">
+            <h4>Organisateur</h4>
+            <p>{{ evenement.organisateur ?? '—' }}</p>
+            {% if evenement.contactEmail %}<p class="aevt-text-muted">{{ evenement.contactEmail }}</p>{% endif %}
+            {% if evenement.contactTel %}<p class="aevt-text-muted">{{ evenement.contactTel }}</p>{% endif %}
+        </div>
+    </div>
+
+    {# ── Description ── #}
+    {% if evenement.description %}
+        <section class="aevt-section">
+            <h3>Description</h3>
+            <p>{{ evenement.description|nl2br }}</p>
+        </section>
+    {% endif %}
+
+    {# ── Sponsors ── #}
+    {% if sponsors is not empty %}
+        <section class="aevt-section">
+            <h3>Sponsors ({{ sponsors|length }})</h3>
+            <div class="aevt-sponsors">
+                {% for sponsor in sponsors %}
+                    <div class="aevt-sponsor-chip">
+                        <strong>{{ sponsor.nom }}</strong>
+                        {% if sponsor.montantContribution and sponsor.montantContribution != '0.00' %}
+                            <span>{{ sponsor.montantContribution }} DT</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

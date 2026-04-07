@@ -1,0 +1,155 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}{{ evenement.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/user/evenements.css') }}">
+{% endblock %}
+
+{% block user_content %}
+{% set typeEnum   = evenement.typeEnum %}
+{% set statutEnum = evenement.statutEnum %}
+{% set pct        = evenement.capaciteMax > 0 ? ((evenement.capaciteMax - evenement.placesDisponibles) / evenement.capaciteMax * 100)|round : 0 %}
+
+<div class="evt-detail">
+    {# ── Breadcrumb ── #}
+    <nav class="evt-breadcrumb">
+        <a href="{{ path('user_evenements') }}">Événements</a>
+        <span>/</span>
+        <span>{{ evenement.titre }}</span>
+    </nav>
+
+    {# ── Flash messages ── #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="evt-flash evt-flash--{{ type }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {# ── Hero Section ── #}
+    <div class="evt-detail__hero">
+        {% if evenement.imageUrl %}
+            <img src="{{ evenement.imageUrl }}" alt="{{ evenement.titre }}" class="evt-detail__image">
+        {% else %}
+            <div class="evt-detail__image-placeholder">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+        {% endif %}
+
+        <div class="evt-detail__hero-info">
+            <div class="evt-detail__badges">
+                {% if statutEnum %}
+                    <span class="evt-badge {{ statutEnum.badgeClass }}">{{ statutEnum.label }}</span>
+                {% endif %}
+                {% if typeEnum %}
+                    <span class="evt-type">{{ typeEnum.label }}</span>
+                {% endif %}
+            </div>
+            <h1>{{ evenement.titre }}</h1>
+            <p class="evt-detail__organizer">Par {{ evenement.organisateur }}</p>
+        </div>
+    </div>
+
+    {# ── Info Grid ── #}
+    <div class="evt-detail__grid">
+        {# ── Left: Description + Sponsors ── #}
+        <div class="evt-detail__main">
+            {% if evenement.description %}
+                <section class="evt-section">
+                    <h3>Description</h3>
+                    <p>{{ evenement.description|nl2br }}</p>
+                </section>
+            {% endif %}
+
+            {# ── Sponsors ── #}
+            {% if sponsors is not empty %}
+                <section class="evt-section">
+                    <h3>Sponsors</h3>
+                    <div class="evt-sponsors">
+                        {% for sponsor in sponsors %}
+                            <div class="evt-sponsor">
+                                {% if sponsor.logoUrl %}
+                                    <img src="{{ sponsor.logoUrl }}" alt="{{ sponsor.nom }}">
+                                {% else %}
+                                    <div class="evt-sponsor__icon">{{ sponsor.nom|first }}</div>
+                                {% endif %}
+                                <div>
+                                    <strong>{{ sponsor.nom }}</strong>
+                                    {% if sponsor.secteurEnum %}
+                                        <small>{{ sponsor.secteurEnum.value }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        {# ── Right Sidebar ── #}
+        <aside class="evt-detail__sidebar">
+            {# Date & Time #}
+            <div class="evt-info-card">
+                <h4>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Date & Horaire
+                </h4>
+                <p>{{ evenement.dateDebut|date('d/m/Y') }}{% if evenement.dateFin != evenement.dateDebut %} – {{ evenement.dateFin|date('d/m/Y') }}{% endif %}</p>
+                <p>{{ evenement.horaireDebut|date('H:i') }} – {{ evenement.horaireFin|date('H:i') }}</p>
+            </div>
+
+            {# Lieu #}
+            {% if evenement.lieu or evenement.adresse %}
+                <div class="evt-info-card">
+                    <h4>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Lieu
+                    </h4>
+                    {% if evenement.lieu %}<p>{{ evenement.lieu }}</p>{% endif %}
+                    {% if evenement.adresse %}<p class="evt-text-muted">{{ evenement.adresse }}</p>{% endif %}
+                    {% if evenement.googleMapsUrl %}
+                        <a href="{{ evenement.googleMapsUrl }}" target="_blank" class="evt-link">
+                            Voir sur Google Maps →
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {# Places #}
+            <div class="evt-info-card">
+                <h4>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    Places
+                </h4>
+                <div class="evt-gauge-bar" style="margin-bottom:.5rem">
+                    <div class="evt-gauge-fill {% if pct >= 90 %}gauge-danger{% elseif pct >= 70 %}gauge-warning{% endif %}" style="width:{{ pct }}%"></div>
+                </div>
+                <p>{{ evenement.placesDisponibles }} places disponibles sur {{ evenement.capaciteMax }}</p>
+                <p class="evt-text-muted">{{ confirmedCount }} participant{{ confirmedCount > 1 ? 's' : '' }} confirmé{{ confirmedCount > 1 ? 's' : '' }}</p>
+            </div>
+
+            {# Contact #}
+            {% if evenement.contactEmail or evenement.contactTel %}
+                <div class="evt-info-card">
+                    <h4>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Contact
+                    </h4>
+                    {% if evenement.contactEmail %}<p><a href="mailto:{{ evenement.contactEmail }}">{{ evenement.contactEmail }}</a></p>{% endif %}
+                    {% if evenement.contactTel %}<p>{{ evenement.contactTel }}</p>{% endif %}
+                </div>
+            {% endif %}
+
+            {# Participation status #}
+            {% if participation %}
+                <div class="evt-info-card evt-info-card--enrolled">
+                    <p><strong>Vous êtes inscrit(e)</strong></p>
+                    <p class="evt-text-muted">Code : {{ participation.codeParticipation }}</p>
+                    <p class="evt-text-muted">Statut : {{ participation.statut }}</p>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

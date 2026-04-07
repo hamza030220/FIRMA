@@ -1,0 +1,79 @@
+{# ── User Event Card Partial ── #}
+{% set typeEnum   = evt.typeEnum %}
+{% set statutEnum = evt.statutEnum %}
+{% set pct        = evt.capaciteMax > 0 ? ((evt.capaciteMax - evt.placesDisponibles) / evt.capaciteMax * 100)|round : 0 %}
+
+<article class="evt-card">
+    {# ── Image ── #}
+    <div class="evt-card__img">
+        {% if evt.imageUrl %}
+            <img src="{{ evt.imageUrl }}" alt="{{ evt.titre }}">
+        {% else %}
+            <div class="evt-card__img-placeholder">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+        {% endif %}
+
+        {# Statut badge #}
+        {% if statutEnum %}
+            <span class="evt-badge {{ statutEnum.badgeClass }}">{{ statutEnum.label }}</span>
+        {% endif %}
+
+        {# Type pill #}
+        {% if typeEnum %}
+            <span class="evt-type">{{ typeEnum.label }}</span>
+        {% endif %}
+    </div>
+
+    {# ── Body ── #}
+    <div class="evt-card__body">
+        <h3 class="evt-card__title">{{ evt.titre }}</h3>
+
+        <ul class="evt-card__meta">
+            <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ evt.dateDebut|date('d/m/Y') }}{% if evt.dateFin != evt.dateDebut %} – {{ evt.dateFin|date('d/m/Y') }}{% endif %}
+            </li>
+            {% if evt.lieu %}
+            <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ evt.lieu }}
+            </li>
+            {% endif %}
+            {% if evt.organisateur %}
+            <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ evt.organisateur }}
+            </li>
+            {% endif %}
+        </ul>
+
+        {# ── Places Gauge ── #}
+        <div class="evt-card__gauge">
+            <div class="evt-gauge-bar">
+                <div class="evt-gauge-fill {% if pct >= 90 %}gauge-danger{% elseif pct >= 70 %}gauge-warning{% endif %}" style="width:{{ pct }}%"></div>
+            </div>
+            <span class="evt-gauge-label">{{ evt.placesDisponibles }} / {{ evt.capaciteMax }} places</span>
+        </div>
+    </div>
+
+    {# ── Footer ── #}
+    <div class="evt-card__foot">
+        {% if isParticipating %}
+            <span class="evt-btn evt-btn--enrolled">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Inscrit
+            </span>
+        {% else %}
+            {% if evt.placesDisponibles > 0 and evt.statut == 'actif' %}
+                <button type="button" class="evt-btn evt-btn--success evt-participer-btn" data-id="{{ evt.idEvenement }}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    Participer
+                </button>
+            {% endif %}
+        {% endif %}
+        <button type="button" class="evt-btn evt-btn--primary evt-detail-btn" data-id="{{ evt.idEvenement }}">
+            Voir détails
+        </button>
+    </div>
+</article>
