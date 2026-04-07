@@ -1,0 +1,232 @@
+{# ═══════════════════════════════════════════════════════
+   FIRMA — Toast notifications + Confirm modal
+   Include once in base.html.twig
+   ═══════════════════════════════════════════════════════ #}
+
+{# ── Toast container ── #}
+<div id="firmaToastContainer" class="firma-toast-container"></div>
+
+{# ── Confirm modal ── #}
+<div class="firma-confirm-overlay" id="firmaConfirmOverlay" style="display:none">
+    <div class="firma-confirm-box">
+        <div class="firma-confirm-icon" id="firmaConfirmIcon"></div>
+        <h3 class="firma-confirm-title" id="firmaConfirmTitle">Confirmer</h3>
+        <p class="firma-confirm-msg" id="firmaConfirmMsg">Êtes-vous sûr ?</p>
+        <div class="firma-confirm-actions">
+            <button type="button" class="firma-confirm-btn firma-confirm-btn--cancel" id="firmaConfirmCancel">Annuler</button>
+            <button type="button" class="firma-confirm-btn firma-confirm-btn--ok" id="firmaConfirmOk">Confirmer</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Toast ── */
+.firma-toast-container{position:fixed;top:24px;right:24px;z-index:100000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.firma-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:12px;min-width:300px;max-width:440px;padding:14px 18px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;line-height:1.5;animation:firmaToastIn .35s ease;backdrop-filter:blur(8px)}
+.firma-toast--success{background:#eaf7ed;border:1px solid #b4dbbf;color:#1a3a24}
+.firma-toast--error{background:#fdecea;border:1px solid #f5c6cb;color:#721c24}
+.firma-toast--warning{background:#fff8e1;border:1px solid #ffd54f;color:#6d4c00}
+.firma-toast--info{background:#e8f4fd;border:1px solid #90caf9;color:#0d3c61}
+.firma-toast__icon{flex-shrink:0;width:22px;height:22px;margin-top:1px}
+.firma-toast__body{flex:1}
+.firma-toast__close{flex-shrink:0;background:none;border:none;cursor:pointer;opacity:.5;font-size:18px;line-height:1;padding:0 0 0 8px;color:inherit}
+.firma-toast__close:hover{opacity:1}
+.firma-toast--hide{animation:firmaToastOut .3s ease forwards}
+@keyframes firmaToastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes firmaToastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
+
+/* ── Confirm modal ── */
+.firma-confirm-overlay{position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:firmaFadeIn .2s ease}
+.firma-confirm-box{background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:firmaScaleIn .25s ease;font-family:'Plus Jakarta Sans',sans-serif}
+.firma-confirm-icon{margin:0 auto 12px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.firma-confirm-icon--danger{background:#fdecea}
+.firma-confirm-icon--warning{background:#fff8e1}
+.firma-confirm-icon--info{background:#e8f4fd}
+.firma-confirm-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1a3a24;margin:0 0 8px}
+.firma-confirm-msg{font-size:14px;color:#5a6e5f;margin:0 0 24px;line-height:1.6}
+.firma-confirm-actions{display:flex;gap:12px;justify-content:center}
+.firma-confirm-btn{padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.firma-confirm-btn--cancel{background:#f0f4f1;color:#5a6e5f}
+.firma-confirm-btn--cancel:hover{background:#e2e8e3}
+.firma-confirm-btn--ok{background:#c0392b;color:#fff}
+.firma-confirm-btn--ok:hover{background:#a93226}
+.firma-confirm-btn--ok.firma-confirm-btn--green{background:#1a3a24}
+.firma-confirm-btn--ok.firma-confirm-btn--green:hover{background:#20452c}
+@keyframes firmaFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes firmaScaleIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+</style>
+
+<script>
+(function(){
+    /* ── Toast API ── */
+    var icons = {
+        success: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        error:   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        warning: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        info:    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+
+    window.firmaToast = function(message, type, duration) {
+        type = type || 'info';
+        duration = duration || 4000;
+        var container = document.getElementById('firmaToastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'firma-toast firma-toast--' + type;
+        toast.innerHTML =
+            '<span class="firma-toast__icon">' + (icons[type] || icons.info) + '</span>' +
+            '<span class="firma-toast__body">' + message + '</span>' +
+            '<button class="firma-toast__close" type="button">&times;</button>';
+        container.appendChild(toast);
+
+        var close = toast.querySelector('.firma-toast__close');
+        var timer;
+        function dismiss() {
+            clearTimeout(timer);
+            toast.classList.add('firma-toast--hide');
+            setTimeout(function(){ toast.remove(); }, 300);
+        }
+        close.addEventListener('click', dismiss);
+        timer = setTimeout(dismiss, duration);
+    };
+
+    /* ── Confirm API ── */
+    var overlay  = document.getElementById('firmaConfirmOverlay');
+    var titleEl  = document.getElementById('firmaConfirmTitle');
+    var msgEl    = document.getElementById('firmaConfirmMsg');
+    var iconEl   = document.getElementById('firmaConfirmIcon');
+    var okBtn    = document.getElementById('firmaConfirmOk');
+    var cancelBtn= document.getElementById('firmaConfirmCancel');
+    var currentResolve = null;
+
+    var confirmIcons = {
+        danger:  '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        warning: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        info:    '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+
+    window.firmaConfirm = function(options) {
+        var title     = options.title || 'Confirmer';
+        var message   = options.message || 'Êtes-vous sûr ?';
+        var type      = options.type || 'danger';
+        var okText    = options.okText || 'Confirmer';
+        var cancelText= options.cancelText || 'Annuler';
+
+        titleEl.textContent = title;
+        msgEl.textContent   = message;
+        iconEl.innerHTML    = confirmIcons[type] || confirmIcons.danger;
+        iconEl.className    = 'firma-confirm-icon firma-confirm-icon--' + type;
+        okBtn.textContent   = okText;
+        okBtn.className     = 'firma-confirm-btn firma-confirm-btn--ok' + (type === 'info' ? ' firma-confirm-btn--green' : '');
+        cancelBtn.textContent = cancelText;
+        overlay.style.display = 'flex';
+
+        return new Promise(function(resolve) {
+            currentResolve = resolve;
+        });
+    };
+
+    function closeConfirm(result) {
+        overlay.style.display = 'none';
+        if (currentResolve) {
+            currentResolve(result);
+            currentResolve = null;
+        }
+    }
+    okBtn.addEventListener('click', function(){ closeConfirm(true); });
+    cancelBtn.addEventListener('click', function(){ closeConfirm(false); });
+    overlay.addEventListener('click', function(e){
+        if (e.target === overlay) closeConfirm(false);
+    });
+
+    /* ── Form validation helper ── */
+    window.firmaValidateForm = function(form) {
+        var ok = true;
+        // Clear previous
+        form.querySelectorAll('.firma-field-error').forEach(function(el){ el.remove(); });
+        form.querySelectorAll('.firma-input-invalid').forEach(function(el){ el.classList.remove('firma-input-invalid'); });
+
+        form.querySelectorAll('[data-validate]').forEach(function(input) {
+            var rules = input.getAttribute('data-validate').split('|');
+            var value = input.value.trim();
+            var errorMsg = null;
+
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i];
+                if (rule === 'required' && value === '') {
+                    errorMsg = input.getAttribute('data-msg-required') || 'Ce champ est requis.';
+                    break;
+                }
+                if (rule.startsWith('min:') && value !== '') {
+                    var min = parseFloat(rule.split(':')[1]);
+                    if (parseFloat(value) < min) { errorMsg = 'Valeur minimum : ' + min; break; }
+                }
+                if (rule.startsWith('max:') && value !== '') {
+                    var max = parseFloat(rule.split(':')[1]);
+                    if (parseFloat(value) > max) { errorMsg = 'Valeur maximum : ' + max; break; }
+                }
+                if (rule.startsWith('minlen:') && value !== '') {
+                    var ml = parseInt(rule.split(':')[1]);
+                    if (value.length < ml) { errorMsg = 'Minimum ' + ml + ' caractères.'; break; }
+                }
+                if (rule.startsWith('maxlen:') && value !== '') {
+                    var xl = parseInt(rule.split(':')[1]);
+                    if (value.length > xl) { errorMsg = 'Maximum ' + xl + ' caractères.'; break; }
+                }
+                if (rule === 'email' && value !== '') {
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) { errorMsg = 'Email invalide.'; break; }
+                }
+                if (rule === 'url' && value !== '') {
+                    if (!/^https?:\/\/.+/.test(value)) { errorMsg = 'URL invalide (commencez par http:// ou https://).'; break; }
+                }
+                if (rule === 'phone' && value !== '') {
+                    var digits = value.replace(/[\s\-\.\(\)\+]/g, '');
+                    if (!/^\d{8,15}$/.test(digits)) { errorMsg = 'Numéro de téléphone invalide (8 à 15 chiffres).'; break; }
+                }
+                if (rule === 'numeric' && value !== '') {
+                    if (!/^-?\d+(\.\d+)?$/.test(value)) { errorMsg = 'Veuillez entrer un nombre valide.'; break; }
+                }
+                if (rule === 'integer' && value !== '') {
+                    if (!/^\d+$/.test(value)) { errorMsg = 'Veuillez entrer un nombre entier.'; break; }
+                }
+                if (rule === 'date' && value !== '') {
+                    if (isNaN(Date.parse(value))) { errorMsg = 'Date invalide.'; break; }
+                }
+            }
+
+            if (errorMsg) {
+                ok = false;
+                input.classList.add('firma-input-invalid');
+                var span = document.createElement('span');
+                span.className = 'firma-field-error';
+                span.textContent = errorMsg;
+                input.parentNode.insertBefore(span, input.nextSibling);
+            }
+        });
+
+        if (!ok) {
+            var first = form.querySelector('.firma-input-invalid');
+            if (first) first.focus();
+        }
+        return ok;
+    };
+
+    /* ── Global data-firma-confirm handler ── */
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form.hasAttribute('data-firma-confirm')) return;
+        if (form.dataset.firmaConfirmBypassed) { delete form.dataset.firmaConfirmBypassed; return; }
+        e.preventDefault();
+        var msg = form.getAttribute('data-firma-confirm');
+        firmaConfirm({ title: 'Confirmation', message: msg, type: 'danger', okText: 'Confirmer', cancelText: 'Annuler' })
+            .then(function(ok) {
+                if (ok) { form.dataset.firmaConfirmBypassed = '1'; form.submit(); }
+            });
+    });
+})();
+</script>
+
+<style>
+/* ── Field validation styles ── */
+.firma-input-invalid{border-color:#c0392b!important;box-shadow:0 0 0 3px rgba(192,57,43,.12)!important}
+.firma-field-error{display:block;color:#c0392b;font-size:12px;margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif}
+</style>
