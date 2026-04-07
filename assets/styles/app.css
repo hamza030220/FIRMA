@@ -142,13 +142,12 @@
 
 /* ── Toast Notifications ── */
 .firma-toast-container{
-  position:fixed;top:24px;left:50%;
-  transform:translateX(-50%);
+  position:fixed;top:24px;right:24px;
   z-index:99997;
-  display:flex;flex-direction:column;align-items:center;
+  display:flex;flex-direction:column;align-items:flex-end;
   gap:10px;
   pointer-events:none;
-  width:92%;max-width:480px;
+  width:400px;max-width:92vw;
 }
 .firma-toast{
   width:100%;
@@ -156,7 +155,7 @@
   border-radius:14px;
   background:#fff;
   box-shadow:0 8px 32px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.04);
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:flex-start;gap:12px;
   font-family:'Plus Jakarta Sans',sans-serif;
   font-size:.88rem;color:#1f2937;
   pointer-events:all;
@@ -180,6 +179,11 @@
   stroke-width:2;fill:none;
   stroke-linecap:round;stroke-linejoin:round;
 }
+
+/* Toast text */
+.firma-toast-text{flex:1;min-width:0;padding-top:8px;}
+.firma-toast-text ul{margin:4px 0 0 0;padding-left:16px;}
+.firma-toast-text li{margin-bottom:2px;}
 
 /* Toast close */
 .firma-toast-close{
@@ -240,7 +244,7 @@
   .firma-modal-title{font-size:1.05rem;}
   .firma-modal-btns{flex-direction:column;}
   .firma-modal-btn{justify-content:center;}
-  .firma-toast-container{top:12px;max-width:96%;}
+  .firma-toast-container{top:12px;right:12px;max-width:96vw;}
 }
 
 /* ══════════════════════════════════════════════════════
@@ -332,3 +336,6 @@
   .firma-map-area{height:300px;}
   .firma-map-footer{flex-direction:column;align-items:stretch;}
 }
+
+/* ══════ FIRMA — Validation Styles ══════ */
+.firma-field-error{border-color:#dc2626 !important;box-shadow:0 0 0 2px rgba(220,38,38,.15) !important;}

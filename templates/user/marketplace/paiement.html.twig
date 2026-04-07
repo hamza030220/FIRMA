@@ -44,7 +44,7 @@
         {# ── Right: Card Form ── #}
         <div class="um-pay-form-wrap">
             <h2>Informations de paiement</h2>
-            <form method="post" action="{{ path('user_marketplace_paiement_process') }}" class="um-pay-form" id="umPayForm">
+            <form method="post" action="{{ path('user_marketplace_paiement_process') }}" class="um-pay-form" id="umPayForm" novalidate>
                 <input type="hidden" name="_token" value="{{ csrf_token('paiement_equipements') }}">
 
                 <div class="um-pay-section-title">Adresse de livraison</div>

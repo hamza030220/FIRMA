@@ -58,7 +58,7 @@
 
         {# ── Mise à jour du statut ── #}
         <h3 class="mp-section-title">Mettre à jour le statut</h3>
-        <form method="post" action="{{ path('admin_marketplace_locations_edit', {id: location.id}) }}" class="mp-form">
+        <form method="post" action="{{ path('admin_marketplace_locations_edit', {id: location.id}) }}" class="mp-form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token('location_status' ~ location.id) }}">
             <div class="mp-form-grid">
                 <div>

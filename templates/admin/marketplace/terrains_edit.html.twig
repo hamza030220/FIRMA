@@ -14,7 +14,7 @@
     {{ macros.flashes() }}
 
     <div class="mp-edit-card">
-        {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data'}}) }}
+        {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
             {% if terrain.imageUrl %}
                 <div class="mp-current-img">
                     <span class="mp-current-img-label">Image actuelle :</span>
