@@ -1,8 +1,6 @@
-/* ══════════════════════════════════════════════════════
-   FIRMA — Admin Dashboard Styles (v2)
-   ══════════════════════════════════════════════════════ */
+/* FIRMA - Admin Dashboard Styles (v2) */
 
-/* ── Admin Layout ── */
+/* Admin Layout */
 .admin-layout{
   display:flex;
   min-height:100vh;
@@ -10,9 +8,7 @@
   background:#f4f6f8;
 }
 
-/* ══════════════════════════════════════════════════════
-   Sidebar
-   ══════════════════════════════════════════════════════ */
+/* Sidebar */
 .admin-sidebar{
   position:fixed;top:0;left:0;bottom:0;
   width:264px;
@@ -23,7 +19,7 @@
   overflow:hidden;
 }
 
-/* ── Brand Header ── */
+/* Brand Header */
 .admin-sidebar-header{
   padding:24px 20px;
   border-bottom:1px solid rgba(255,255,255,.08);
@@ -54,7 +50,7 @@
   padding:3px 8px;border-radius:4px;
 }
 
-/* ── Menu ── */
+/* Menu */
 .admin-sidebar-menu{
   flex:1;
   padding:20px 14px;
@@ -113,7 +109,7 @@
   stroke:#4aac33;
 }
 
-/* ── Sidebar Footer ── */
+/* Sidebar Footer */
 .admin-sidebar-footer{
   padding:14px;
   border-top:1px solid rgba(255,255,255,.08);
@@ -127,7 +123,7 @@
   background:rgba(255,107,107,.08) !important;
 }
 
-/* ── Sidebar Toggle (mobile) ── */
+/* Sidebar Toggle (mobile) */
 .admin-sidebar-toggle{
   display:none;
   position:fixed;top:18px;left:18px;z-index:300;
@@ -141,9 +137,7 @@
   border-radius:2px;transition:all .3s ease;
 }
 
-/* ══════════════════════════════════════════════════════
-   Main Area
-   ══════════════════════════════════════════════════════ */
+/* Main Area */
 .admin-main{
   flex:1;
   margin-left:264px;
@@ -182,7 +176,7 @@
   padding:36px;
 }
 
-/* ── Responsive ── */
+/* Responsive */
 @media(max-width:1024px){
   .admin-sidebar{
     transform:translateX(-100%);
@@ -205,9 +199,7 @@
   }
 }
 
-/* ══════════════════════════════════════════════════════
-   Admin Dashboard Welcome
-   ══════════════════════════════════════════════════════ */
+/* Admin Dashboard Welcome */
 .admin-welcome{
   animation:fadePlaceholder .4s ease;
 }
@@ -239,6 +231,14 @@
   color:rgba(255,255,255,.6);
 }
 
+.admin-stats-title{
+  font-size:1.15rem;
+  font-weight:700;
+  color:#20452c;
+  margin:0 0 12px;
+  letter-spacing:.3px;
+}
+
 .admin-stats{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
@@ -267,6 +267,27 @@
 .admin-stat-value{
   font-family:'Playfair Display',serif;
   font-size:1.5rem;font-weight:700;color:#1f2937;
+}
+
+.admin-stat-extra{
+  font-size:.78rem;color:#9ca3af;font-weight:400;
+  line-height:1.4;
+}
+.admin-stat-warning{
+  color:#d97706;
+}
+.admin-stat-success{
+  color:#16a34a;
+}
+
+a.admin-stat-card-link{
+  text-decoration:none;
+  cursor:pointer;
+}
+a.admin-stat-card-link:hover{
+  border-color:#4aac33;
+  box-shadow:0 4px 20px rgba(74,172,51,.1);
+  transform:translateY(-2px);
 }
 
 @media(max-width:768px){

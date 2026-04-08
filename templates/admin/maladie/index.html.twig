@@ -46,9 +46,9 @@
 .si-up,.si-dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent}
 .si-up{border-bottom:4px solid currentColor}
 .si-dn{border-top:4px solid currentColor}
-.tbl tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background 0.12s}
+.tbl tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background 0.12s, box-shadow 0.18s, transform 0.18s}
 .tbl tbody tr:last-child{border-bottom:none}
-.tbl tbody tr:hover{background:var(--color-background-secondary)}
+.tbl tbody tr:hover{background:var(--color-background-secondary);box-shadow:inset 0 0 0 1px rgba(15,92,47,0.10), 0 8px 22px rgba(15,92,47,0.08);transform:translateY(-1px)}
 .tbl td{padding:13px 16px;vertical-align:middle;color:var(--color-text-primary)}
 .cell-id{font-size:12px;color:var(--color-text-secondary);font-weight:500}
 .img-cell{width:42px;height:42px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
@@ -147,7 +147,7 @@
     <table class="tbl">
         <thead>
             <tr>
-                <th style="width:44px">#</th>
+                <th style="width:44px"><span class="th-sort" onclick="sortBy('id')"># <span class="sort-icon" id="sort-id"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
                 <th style="width:54px">Photo</th>
                 <th><span class="th-sort" onclick="sortBy('nom')">Nom <span class="sort-icon" id="sort-nom"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
                 <th><span class="th-sort" onclick="sortBy('gravite')">Gravité <span class="sort-icon" id="sort-gravite"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
@@ -170,6 +170,14 @@ const graviteOrder = {critique:4,eleve:3,moyen:2,faible:1};
 const graviteLabel = {critique:'Critique',eleve:'Élevé',moyen:'Moyen',faible:'Faible'};
 const badgeClass = {critique:'bc',eleve:'be',moyen:'bm',faible:'bf'};
 let filterG='tous', sortCol='id', sortDir=1, searchVal='';
+
+function normalizeValue(value){
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
 
 function setFilter(btn,g){
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -209,7 +217,7 @@ function render(){
         else if(sortCol==='saison'){va=a.saison;vb=b.saison;}
         else if(sortCol==='traitements'){va=a.traitements;vb=b.traitements;}
         else{va=a.id;vb=b.id;}
-        if(typeof va==='string') return va.localeCompare(vb)*sortDir;
+        if(typeof va==='string' || typeof vb==='string') return normalizeValue(va).localeCompare(normalizeValue(vb), 'fr')*sortDir;
         return(va-vb)*sortDir;
     });
 
@@ -233,7 +241,7 @@ function render(){
                 <div class="actions">
                     <a href="${d.urlShow}" class="ab" title="Voir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
                     <a href="${d.urlEdit}" class="ab" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
-                    <form method="post" action="${d.urlDelete}" style="display:inline" onsubmit="return confirm('Supprimer cette maladie ?')">
+                    <form method="post" action="${d.urlDelete}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir supprimer cette maladie ? Cette action est irréversible.">
                         <input type="hidden" name="_token" value="${d.token}">
                         <button class="ab del" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
                     </form>
@@ -244,7 +252,9 @@ function render(){
     document.getElementById('count-info').textContent=`${rows.length} maladie${rows.length>1?'s':''} affichée${rows.length>1?'s':''}`;
 }
 
+document.getElementById('sort-id')?.classList.add('asc');
 render();
 </script>
 
 {% endblock %}
+

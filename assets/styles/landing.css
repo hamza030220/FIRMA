@@ -50,8 +50,8 @@ body::before {
   position:fixed;top:16px;left:50%;transform:translateX(-50%);
   width:calc(100% - 48px);max-width:1160px;
   background:rgba(255,250,222,0.7);
-  backdrop-filter:blur(28px) saturate(200%);
   -webkit-backdrop-filter:blur(28px) saturate(200%);
+  backdrop-filter:blur(28px) saturate(200%);
   border:1px solid rgba(32,69,44,0.12);
   border-radius:18px;
   padding:0 28px;height:66px;
@@ -148,8 +148,8 @@ body::before {
     transparent 40%, rgba(255,250,222,0.6) 60%,
     transparent 80%, rgba(74,172,51,0.3) 100%
   );
-  mask: radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px));
   -webkit-mask: radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px));
+  mask: radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px));
   animation: ringRotate 8s linear infinite;
   opacity:0.5;transition:opacity .4s;
 }
@@ -274,7 +274,7 @@ body::before {
   color:var(--forest);
   font-family:'Plus Jakarta Sans',sans-serif;
   font-size:16px;font-weight:500;cursor:pointer;
-  backdrop-filter:blur(10px);transition:all .3s;text-decoration:none;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:all .3s;text-decoration:none;
 }
 .cta-secondary:hover{background:var(--white);border-color:rgba(32,69,44,0.35)}
 

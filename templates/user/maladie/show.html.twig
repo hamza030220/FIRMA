@@ -9,6 +9,9 @@
     {% for message in app.flashes('success') %}
         <div class="show-flash show-flash-success">{{ message }}</div>
     {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div class="show-flash show-flash-warning">{{ message }}</div>
+    {% endfor %}
 
     {# ===== HERO HEADER ===== #}
     <div class="show-hero">
@@ -215,17 +218,24 @@
                     {% endif %}
 
                     {# Feedback #}
+                    {% set userVote = userVotes[solution.id] ?? null %}
                     <div class="sol-feedback">
-                        <p class="sol-feedback-q">Ce traitement vous a-t-il aidé ?</p>
+                        <p class="sol-feedback-q">Ce traitement vous a-t-il aidÃ© ?</p>
                         <div class="sol-feedback-btns">
+                            {% if userVote %}
+                                <div class="sol-feedback-done">
+                                    Vous avez déjà voté :
+                                    <strong>{{ userVote == 'positif' ? 'avis positif' : 'avis négatif' }}</strong>
+                                </div>
+                            {% endif %}
                             <form method="post" action="{{ path('user_feedback', {'id': solution.id, 'type': 'positif'}) }}">
-                                <button type="submit" class="sol-btn-like">
+                                <button type="submit" class="sol-btn-like" {% if userVote %}disabled{% endif %}>
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
                                     Oui, efficace
                                 </button>
                             </form>
                             <form method="post" action="{{ path('user_feedback', {'id': solution.id, 'type': 'negatif'}) }}">
-                                <button type="submit" class="sol-btn-dislike">
+                                <button type="submit" class="sol-btn-dislike" {% if userVote %}disabled{% endif %}>
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
                                     Non, inefficace
                                 </button>
@@ -262,6 +272,7 @@
 /* Flash */
 .show-flash { padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500; }
 .show-flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+.show-flash-warning { background: #fff8e1; color: #8d6e00; border-left: 4px solid #d4a017; }
 
 /* Hero */
 .show-hero { margin-bottom: 1.5rem; }
@@ -392,9 +403,13 @@
     border-radius: 12px;
     margin-bottom: 1.2rem;
     overflow: hidden;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
 }
-.sol-card:hover { box-shadow: 0 4px 16px rgba(15,92,47,0.08); }
+.sol-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px rgba(15,92,47,0.14), 0 6px 18px rgba(15,92,47,0.08);
+    border-color: #b8d4b8;
+}
 .sol-head {
     display: flex;
     align-items: center;
@@ -469,6 +484,7 @@
 }
 .sol-feedback-q { font-size: 0.83rem; color: #5a7a5a; margin: 0 0 0.6rem; }
 .sol-feedback-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.sol-feedback-done { width: 100%; font-size: 0.82rem; color: #5f6f52; margin-bottom: 0.2rem; }
 .sol-btn-like, .sol-btn-dislike {
     display: inline-flex;
     align-items: center;
@@ -483,6 +499,7 @@
     font-family: inherit;
 }
 .sol-btn-like:hover, .sol-btn-dislike:hover { transform: scale(1.04); }
+.sol-btn-like:disabled, .sol-btn-dislike:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 .sol-btn-like { background: #e8f5e9; color: #2e7d32; }
 .sol-btn-like:hover { background: #c8e6c9; }
 .sol-btn-dislike { background: #fdeaea; color: #c62828; }
