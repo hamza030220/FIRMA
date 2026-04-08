@@ -1,0 +1,542 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}{{ maladie.nom }}{% endblock %}
+
+{% block user_content %}
+<div class="show-page">
+
+    {# Flash messages #}
+    {% for message in app.flashes('success') %}
+        <div class="show-flash show-flash-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div class="show-flash show-flash-warning">{{ message }}</div>
+    {% endfor %}
+
+    {# ===== HERO HEADER ===== #}
+    <div class="show-hero">
+        <div class="show-hero-top">
+            <a href="{{ path('user_maladie') }}" class="show-back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+                Retour aux maladies
+            </a>
+            <a href="{{ path('user_maladie_pdf', {'id': maladie.id}) }}" class="show-btn-pdf" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
+                Télécharger la fiche PDF
+            </a>
+        </div>
+
+        <div class="show-hero-content">
+            {% if maladie.imageUrl %}
+            <div class="show-hero-img">
+                <img src="{{ asset('uploads/maladies/' ~ maladie.imageUrl) }}" alt="{{ maladie.nom }}">
+            </div>
+            {% endif %}
+            <div class="show-hero-info">
+                <h1 class="show-title">{{ maladie.nom }}</h1>
+                {% if maladie.nomScientifique %}
+                    <p class="show-sci"><em>{{ maladie.nomScientifique }}</em></p>
+                {% endif %}
+                <div class="show-badges">
+                    <span class="show-badge show-badge-{{ maladie.niveauGravite }}">
+                        {% if maladie.niveauGravite == 'critique' %}⚠️
+                        {% elseif maladie.niveauGravite == 'eleve' %}↑
+                        {% elseif maladie.niveauGravite == 'moyen' %}~
+                        {% else %}✓{% endif %}
+                        {{ maladie.niveauGravite|capitalize }}
+                    </span>
+                    {% if maladie.saisonFrequente %}
+                        <span class="show-badge show-badge-season">🌸 {{ maladie.saisonFrequente }}</span>
+                    {% endif %}
+                </div>
+
+                {# Stats globales #}
+                <div class="show-stats">
+                    {% set totalUsages = 0 %}
+                    {% set totalLikes = 0 %}
+                    {% set totalDislikes = 0 %}
+                    {% for s in maladie.solutionTraitements %}
+                        {% set totalUsages = totalUsages + s.usageCount %}
+                        {% set totalLikes = totalLikes + s.feedbackPositive %}
+                        {% set totalDislikes = totalDislikes + s.feedbackNegative %}
+                    {% endfor %}
+                    <div class="show-stat">
+                        <span class="show-stat-num">{{ maladie.solutionTraitements|length }}</span>
+                        <span class="show-stat-lbl">traitement{% if maladie.solutionTraitements|length > 1 %}s{% endif %}</span>
+                    </div>
+                    <div class="show-stat-sep"></div>
+                    <div class="show-stat">
+                        <span class="show-stat-num">{{ totalUsages }}</span>
+                        <span class="show-stat-lbl">utilisation{% if totalUsages > 1 %}s{% endif %}</span>
+                    </div>
+                    <div class="show-stat-sep"></div>
+                    <div class="show-stat">
+                        <span class="show-stat-num green">{{ totalLikes }}</span>
+                        <span class="show-stat-lbl">avis positifs</span>
+                    </div>
+                    {% if totalUsages > 0 %}
+                    <div class="show-stat-sep"></div>
+                    <div class="show-stat">
+                        <span class="show-stat-num blue">{{ (totalLikes * 100 / totalUsages)|round }}%</span>
+                        <span class="show-stat-lbl">de succès</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ===== DESCRIPTION ===== #}
+    {% if maladie.description %}
+    <div class="show-section">
+        <div class="show-section-head">
+            <span class="show-section-icon">📋</span>
+            <h2>Description</h2>
+        </div>
+        <div class="show-section-body">
+            <p>{{ maladie.description|nl2br }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ===== SYMPTOMES ===== #}
+    {% if maladie.symptomes %}
+    <div class="show-section">
+        <div class="show-section-head">
+            <span class="show-section-icon">🔍</span>
+            <h2>Symptômes</h2>
+        </div>
+        <div class="show-section-body">
+            <p>{{ maladie.symptomes|nl2br }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ===== TRAITEMENTS ===== #}
+    <div class="show-section">
+        <div class="show-section-head">
+            <span class="show-section-icon">💊</span>
+            <h2>Traitements & Solutions</h2>
+            {% if maladie.solutionTraitements is not empty %}
+                <span class="show-count">{{ maladie.solutionTraitements|length }}</span>
+            {% endif %}
+        </div>
+        <div class="show-section-body">
+
+            {% if maladie.solutionTraitements is empty %}
+                <div class="show-empty">
+                    <p>Aucun traitement disponible pour cette maladie pour le moment.</p>
+                </div>
+            {% else %}
+                {% for solution in maladie.solutionTraitements %}
+                <div class="sol-card">
+
+                    {# En-tête solution #}
+                    <div class="sol-head">
+                        <h3 class="sol-title">{{ solution.titre }}</h3>
+                        {% if solution.dureeTraitement %}
+                            <span class="sol-duree">⏱️ {{ solution.dureeTraitement }}</span>
+                        {% endif %}
+                    </div>
+
+                    {# Contenu #}
+                    <div class="sol-body">
+                        {% if solution.solution %}
+                        <div class="sol-field">
+                            <div class="sol-field-lbl">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Solution
+                            </div>
+                            <div class="sol-field-val">{{ solution.solution|nl2br }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if solution.etapes %}
+                        <div class="sol-field">
+                            <div class="sol-field-lbl">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+                                Étapes à suivre
+                            </div>
+                            <div class="sol-field-val">{{ solution.etapes|nl2br }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if solution.produitsRecommandes %}
+                        <div class="sol-field">
+                            <div class="sol-field-lbl">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Produits recommandés
+                            </div>
+                            <div class="sol-field-val">{{ solution.produitsRecommandes|nl2br }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if solution.conseilsPrevention %}
+                        <div class="sol-field">
+                            <div class="sol-field-lbl">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Conseils de prévention
+                            </div>
+                            <div class="sol-field-val">{{ solution.conseilsPrevention|nl2br }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# Stats #}
+                    <div class="sol-stats">
+                        <div class="sol-stat">
+                            <span class="sol-stat-num">{{ solution.usageCount }}</span>
+                            <span class="sol-stat-lbl">utilisation{% if solution.usageCount > 1 %}s{% endif %}</span>
+                        </div>
+                        <div class="sol-stat green">
+                            <span class="sol-stat-num">👍 {{ solution.feedbackPositive }}</span>
+                            <span class="sol-stat-lbl">positifs</span>
+                        </div>
+                        <div class="sol-stat red">
+                            <span class="sol-stat-num">👎 {{ solution.feedbackNegative }}</span>
+                            <span class="sol-stat-lbl">négatifs</span>
+                        </div>
+                        {% if solution.successRate is not null %}
+                        <div class="sol-stat blue">
+                            <span class="sol-stat-num">{{ solution.successRate }}%</span>
+                            <span class="sol-stat-lbl">de succès</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# Barre de progression #}
+                    {% if solution.usageCount > 0 %}
+                    <div class="sol-progress">
+                        <div class="sol-progress-label">
+                            <span>Taux de satisfaction</span>
+                            <span>{{ solution.successRate ?? 0 }}%</span>
+                        </div>
+                        <div class="sol-progress-bar">
+                            <div class="sol-progress-fill" style="width: {{ solution.successRate ?? 0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# Feedback #}
+                    {% set userVote = userVotes[solution.id] ?? null %}
+                    <div class="sol-feedback">
+                        <p class="sol-feedback-q">Ce traitement vous a-t-il aidÃ© ?</p>
+                        <div class="sol-feedback-btns">
+                            {% if userVote %}
+                                <div class="sol-feedback-done">
+                                    Vous avez déjà voté :
+                                    <strong>{{ userVote == 'positif' ? 'avis positif' : 'avis négatif' }}</strong>
+                                </div>
+                            {% endif %}
+                            <form method="post" action="{{ path('user_feedback', {'id': solution.id, 'type': 'positif'}) }}">
+                                <button type="submit" class="sol-btn-like" {% if userVote %}disabled{% endif %}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                    Oui, efficace
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('user_feedback', {'id': solution.id, 'type': 'negatif'}) }}">
+                                <button type="submit" class="sol-btn-dislike" {% if userVote %}disabled{% endif %}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+                                    Non, inefficace
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# Bouton PDF bas de page #}
+    <div class="show-pdf-bottom">
+        <a href="{{ path('user_maladie_pdf', {'id': maladie.id}) }}" class="show-btn-pdf-lg" target="_blank">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
+            Télécharger la fiche PDF complète
+        </a>
+        <p class="show-pdf-hint">Fiche incluant toutes les informations, traitements et statistiques</p>
+    </div>
+
+</div>
+
+<style>
+* { box-sizing: border-box; }
+.show-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+}
+
+/* Flash */
+.show-flash { padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500; }
+.show-flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+.show-flash-warning { background: #fff8e1; color: #8d6e00; border-left: 4px solid #d4a017; }
+
+/* Hero */
+.show-hero { margin-bottom: 1.5rem; }
+.show-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.show-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #0f5c2f;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.show-back:hover { text-decoration: underline; }
+.show-btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.1rem;
+    background: #1e6f9f;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.83rem;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+}
+.show-btn-pdf:hover { background: #155a82; transform: translateY(-1px); }
+
+.show-hero-content {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    background: white;
+    border: 1.5px solid #e0ebe0;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.show-hero-img { flex-shrink: 0; width: 200px; }
+.show-hero-img img { width: 200px; height: 180px; object-fit: cover; display: block; }
+.show-hero-info { flex: 1; padding: 1.5rem 1.5rem 1.5rem 0; }
+.show-hero-img + .show-hero-info { padding-left: 0; }
+.show-hero-content:not(:has(.show-hero-img)) .show-hero-info { padding: 1.5rem; }
+
+.show-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1a2e1a;
+    margin: 0 0 0.3rem;
+    line-height: 1.2;
+}
+.show-sci { font-style: italic; color: #7a9a7a; font-size: 0.9rem; margin: 0 0 0.75rem; }
+.show-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.show-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+.show-badge-faible   { background: #e8f5e9; color: #2e7d32; border: 1px solid #b8d8b8; }
+.show-badge-moyen    { background: #e3f2fd; color: #1565c0; border: 1px solid #b3d4f0; }
+.show-badge-eleve    { background: #fff3e0; color: #e65100; border: 1px solid #f0c060; }
+.show-badge-critique { background: #fdeaea; color: #c62828; border: 1px solid #f5b8b2; }
+.show-badge-season   { background: #f3e5f5; color: #7b1fa2; border: 1px solid #d8b0e8; }
+
+.show-stats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #f8fbf8;
+    border: 1px solid #e0ebe0;
+    border-radius: 10px;
+    overflow: hidden;
+    width: fit-content;
+}
+.show-stat { padding: 0.6rem 1rem; text-align: center; }
+.show-stat-sep { width: 1px; height: 30px; background: #e0ebe0; }
+.show-stat-num { display: block; font-size: 1.1rem; font-weight: 700; color: #0f5c2f; line-height: 1; }
+.show-stat-num.green { color: #27ae60; }
+.show-stat-num.blue { color: #1e6f9f; }
+.show-stat-lbl { display: block; font-size: 0.68rem; color: #7a9a7a; margin-top: 0.15rem; white-space: nowrap; }
+
+/* Sections */
+.show-section {
+    background: white;
+    border: 1.5px solid #e0ebe0;
+    border-radius: 14px;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+}
+.show-section-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1.3rem;
+    background: #f8fbf8;
+    border-bottom: 1px solid #e8f0e8;
+}
+.show-section-icon { font-size: 1rem; }
+.show-section-head h2 { font-size: 1rem; font-weight: 600; color: #1a2e1a; margin: 0; flex: 1; }
+.show-count {
+    background: #e8f5e9;
+    color: #0f5c2f;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.show-section-body { padding: 1.3rem; color: #424242; font-size: 0.9rem; line-height: 1.6; }
+.show-empty { text-align: center; padding: 2rem; color: #a0b8a0; font-style: italic; }
+
+/* Solution cards */
+.sol-card {
+    background: #f9fbf9;
+    border: 1.5px solid #e0ebe0;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+.sol-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px rgba(15,92,47,0.14), 0 6px 18px rgba(15,92,47,0.08);
+    border-color: #b8d4b8;
+}
+.sol-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.2rem;
+    background: white;
+    border-bottom: 1px solid #e8f0e8;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.sol-title { font-size: 1rem; font-weight: 700; color: #0f5c2f; margin: 0; font-family: 'Playfair Display', Georgia, serif; }
+.sol-duree { font-size: 0.75rem; color: #7a9a7a; background: #f0f7f0; padding: 0.2rem 0.6rem; border-radius: 10px; }
+
+.sol-body { padding: 1rem 1.2rem; }
+.sol-field { margin-bottom: 0.9rem; }
+.sol-field:last-child { margin-bottom: 0; }
+.sol-field-lbl {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #7a9a7a;
+    margin-bottom: 0.35rem;
+}
+.sol-field-val {
+    font-size: 0.875rem;
+    color: #424242;
+    line-height: 1.55;
+    background: white;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid #e8f0e8;
+}
+
+/* Stats solution */
+.sol-stats {
+    display: flex;
+    gap: 0;
+    margin: 0.8rem 1.2rem;
+    background: white;
+    border: 1px solid #e8f0e8;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.sol-stat {
+    flex: 1;
+    text-align: center;
+    padding: 0.6rem 0.5rem;
+    border-right: 1px solid #e8f0e8;
+}
+.sol-stat:last-child { border-right: none; }
+.sol-stat-num { display: block; font-size: 1rem; font-weight: 700; color: #1a2e1a; line-height: 1; }
+.sol-stat.green .sol-stat-num { color: #27ae60; }
+.sol-stat.red .sol-stat-num { color: #e74c3c; }
+.sol-stat.blue .sol-stat-num { color: #1e6f9f; }
+.sol-stat-lbl { display: block; font-size: 0.65rem; color: #7a9a7a; margin-top: 0.15rem; }
+
+/* Progress */
+.sol-progress { padding: 0 1.2rem 0.8rem; }
+.sol-progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: #7a9a7a; margin-bottom: 0.4rem; }
+.sol-progress-bar { height: 5px; background: #e8f0e8; border-radius: 3px; overflow: hidden; }
+.sol-progress-fill { height: 100%; background: linear-gradient(90deg, #0f5c2f, #27ae60); border-radius: 3px; transition: width 0.6s ease; }
+
+/* Feedback */
+.sol-feedback {
+    padding: 0.9rem 1.2rem;
+    border-top: 1px solid #e8f0e8;
+    background: white;
+}
+.sol-feedback-q { font-size: 0.83rem; color: #5a7a5a; margin: 0 0 0.6rem; }
+.sol-feedback-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.sol-feedback-done { width: 100%; font-size: 0.82rem; color: #5f6f52; margin-bottom: 0.2rem; }
+.sol-btn-like, .sol-btn-dislike {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.83rem;
+    font-weight: 600;
+    transition: transform 0.1s, background 0.15s;
+    font-family: inherit;
+}
+.sol-btn-like:hover, .sol-btn-dislike:hover { transform: scale(1.04); }
+.sol-btn-like:disabled, .sol-btn-dislike:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.sol-btn-like { background: #e8f5e9; color: #2e7d32; }
+.sol-btn-like:hover { background: #c8e6c9; }
+.sol-btn-dislike { background: #fdeaea; color: #c62828; }
+.sol-btn-dislike:hover { background: #ffcdd2; }
+
+/* PDF bottom */
+.show-pdf-bottom {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-top: 1rem;
+}
+.show-btn-pdf-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 2rem;
+    background: #1e6f9f;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(30,111,159,0.25);
+}
+.show-btn-pdf-lg:hover { background: #155a82; transform: translateY(-2px); }
+.show-pdf-hint { font-size: 0.78rem; color: #a0b8a0; margin-top: 0.6rem; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .show-hero-content { flex-direction: column; }
+    .show-hero-img { width: 100%; }
+    .show-hero-img img { width: 100%; height: 180px; }
+    .show-hero-info { padding: 1rem !important; }
+    .show-stats { flex-wrap: wrap; }
+    .sol-stats { flex-wrap: wrap; }
+    .sol-stat { min-width: 45%; border-bottom: 1px solid #e8f0e8; }
+}
+</style>
+{% endblock %}
