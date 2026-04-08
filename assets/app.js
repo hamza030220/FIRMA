@@ -47,9 +47,10 @@ function getToastContainer() {
  * Show a toast notification at top of page.
  * @param {string} message
  * @param {'success'|'danger'|'warning'|'info'} type
- * @param {number} duration  ms (default 4000)
+ * @param {number} duration  ms (default 10000)
  */
-function firmaToast(message, type = 'success', duration = 4000) {
+function firmaToast(message, type = 'success', duration = 10000) {
+    if (type === 'error') type = 'danger';
     const container = getToastContainer();
     const toast = document.createElement('div');
     toast.className = 'firma-toast firma-toast-' + type;

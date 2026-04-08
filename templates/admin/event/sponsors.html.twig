@@ -114,11 +114,11 @@
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Nom *</label>
-                    <input type="text" name="nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" placeholder="Nom du sponsor">
+                    <input type="text" name="nom" id="spF_nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" placeholder="Nom du sponsor">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Secteur d'activité</label>
-                    <select name="secteur_activite" class="sp-form__input">
+                    <select name="secteur_activite" id="spF_secteur" class="sp-form__input">
                         {% for sec in secteurOptions %}
                             <option value="{{ sec.value }}">{{ sec.label }}</option>
                         {% endfor %}
@@ -128,23 +128,23 @@
 
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
-                    <label class="sp-form__label">Email de contact</label>
-                    <input type="text" name="email_contact" class="sp-form__input" data-validate="email|maxlen:150" placeholder="contact@example.com">
+                    <label class="sp-form__label">Email de contact *</label>
+                    <input type="text" name="email_contact" id="spF_email" class="sp-form__input" data-validate="required|email|maxlen:150" placeholder="contact@example.com">
                 </div>
                 <div class="sp-form__row">
-                    <label class="sp-form__label">Téléphone</label>
-                    <input type="text" name="telephone" class="sp-form__input" data-validate="phone" placeholder="+216 XX XXX XXX">
+                    <label class="sp-form__label">Téléphone *</label>
+                    <input type="text" name="telephone" id="spF_tel" class="sp-form__input" data-validate="phone" placeholder="+216 XX XXX XXX">
                 </div>
             </div>
 
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Site web</label>
-                    <input type="text" name="site_web" class="sp-form__input" data-validate="url|maxlen:255" placeholder="https://...">
+                    <input type="text" name="site_web" id="spF_web" class="sp-form__input" data-validate="url|maxlen:255" placeholder="https://...">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Montant contribution (TND)</label>
-                    <input type="text" name="montant_contribution" class="sp-form__input" data-validate="numeric|min:0" value="0">
+                    <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" data-validate="numeric|min:0" value="0">
                 </div>
             </div>
 
@@ -184,11 +184,11 @@
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Nom *</label>
-                        <input type="text" name="nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" value="{{ editSponsor.nom }}">
+                        <input type="text" name="nom" id="spF_nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" value="{{ editSponsor.nom }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Secteur d'activité</label>
-                        <select name="secteur_activite" class="sp-form__input">
+                        <select name="secteur_activite" id="spF_secteur" class="sp-form__input">
                             {% for sec in secteurOptions %}
                                 <option value="{{ sec.value }}" {% if editSponsor.secteurActivite == sec.value %}selected{% endif %}>{{ sec.label }}</option>
                             {% endfor %}
@@ -198,23 +198,23 @@
 
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
-                        <label class="sp-form__label">Email de contact</label>
-                        <input type="text" name="email_contact" class="sp-form__input" data-validate="email|maxlen:150" value="{{ editSponsor.emailContact }}">
+                        <label class="sp-form__label">Email de contact *</label>
+                        <input type="text" name="email_contact" id="spF_email" class="sp-form__input" data-validate="required|email|maxlen:150" value="{{ editSponsor.emailContact }}">
                     </div>
                     <div class="sp-form__row">
-                        <label class="sp-form__label">Téléphone</label>
-                        <input type="text" name="telephone" class="sp-form__input" data-validate="phone" value="{{ editSponsor.telephone }}">
+                        <label class="sp-form__label">Téléphone *</label>
+                        <input type="text" name="telephone" id="spF_tel" class="sp-form__input" data-validate="phone" value="{{ editSponsor.telephone }}">
                     </div>
                 </div>
 
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Site web</label>
-                        <input type="text" name="site_web" class="sp-form__input" data-validate="url|maxlen:255" value="{{ editSponsor.siteWeb }}">
+                        <input type="text" name="site_web" id="spF_web" class="sp-form__input" data-validate="url|maxlen:255" value="{{ editSponsor.siteWeb }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Montant contribution (TND)</label>
-                        <input type="text" name="montant_contribution" class="sp-form__input" data-validate="numeric|min:0" value="{{ editSponsor.montantContribution }}">
+                        <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" data-validate="numeric|min:0" value="{{ editSponsor.montantContribution }}">
                     </div>
                 </div>
 

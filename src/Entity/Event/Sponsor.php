@@ -30,11 +30,13 @@ class Sponsor
     private ?string $siteWeb = null;
 
     #[ORM\Column(name: 'email_contact', length: 150, nullable: true)]
+    #[Assert\NotBlank(message: 'L\'email de contact est requis')]
     #[Assert\Email(message: 'L\'adresse email n\'est pas valide')]
     #[Assert\Length(max: 150, maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères')]
     private ?string $emailContact = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\NotBlank(message: 'Le téléphone est requis')]
     #[Assert\Regex(pattern: '/^\+?[\d\s\-()]{8,20}$/', message: 'Le numéro de téléphone n\'est pas valide (8 à 20 caractères)')]
     private ?string $telephone = null;
 
