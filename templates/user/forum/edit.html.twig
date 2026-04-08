@@ -15,7 +15,7 @@
     <section class="forum-panel">
         <div class="forum-toolbar">
             <h1>Modifier le post</h1>
-            <span>{{ post.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+            <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
         </div>
 
         <form method="post" action="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-form" novalidate>
@@ -28,7 +28,7 @@
             {% endif %}
 
             <label for="categorie">Categorie</label>
-            <select id="categorie" name="categorie">
+            <select id="categorie" name="categorie" required>
                 <option value="">Choisir une categorie</option>
                 {% for categorie in categories %}
                     <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ categorie }}</option>

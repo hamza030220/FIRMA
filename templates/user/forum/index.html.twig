@@ -35,7 +35,7 @@
     <div class="forum-grid">
         <aside class="forum-panel">
             <h2>Nouveau post</h2>
-            <form method="post" action="{{ path('user_forum_create') }}" class="forum-form" novalidate>
+            <form id="create-post-form" method="post" action="{{ path('user_forum_create') }}" class="forum-form" novalidate>
                 <input type="hidden" name="_token" value="{{ csrf_token('forum_create') }}">
 
                 <label for="titre">Titre</label>
@@ -45,7 +45,7 @@
                 {% endif %}
 
                 <label for="categorie">Categorie</label>
-                <select id="categorie" name="categorie">
+                <select id="categorie" name="categorie" required>
                     <option value="">Choisir une categorie</option>
                     {% for categorie in categories %}
                         <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ categorie }}</option>
@@ -61,26 +61,49 @@
                     <div class="forum-flash forum-flash-error">{{ form_errors.contenu }}</div>
                 {% endif %}
 
-                <button type="submit" class="forum-button">Publier</button>
+                <button
+                    type="button"
+                    class="forum-button"
+                    onclick="window.firmaOpenConfirmModal('create-post-form', 'Publier ce post', 'Voulez-vous vraiment publier ce post ?', 'Publier', 'primary');"
+                >
+                    Publier
+                </button>
             </form>
         </aside>
 
         <div class="forum-panel">
             <div class="forum-toolbar">
                 <h2>Discussions</h2>
-                <form method="get" action="{{ path('user_forum') }}" class="forum-search">
-                    <input type="search" name="q" value="{{ search }}" placeholder="Rechercher un sujet">
+                <form method="get" action="{{ path('user_forum') }}" class="forum-search forum-search-inline" id="user-forum-search-form">
+                    <input type="search" name="q" value="{{ search }}" placeholder="Rechercher un post par titre" minlength="3" id="user-forum-search-input">
+                    <label for="user-forum-sort" class="forum-sort-pill">
+                        <span>Trier</span>
+                        <select id="user-forum-sort" name="sort" class="forum-sort-select" aria-label="Trier les discussions" onchange="this.form.submit()">
+                            <option value="recent" {% if sort|default('recent') == 'recent' %}selected{% endif %}>Plus recents</option>
+                            <option value="oldest" {% if sort|default('recent') == 'oldest' %}selected{% endif %}>Plus anciens</option>
+                            <option value="title_asc" {% if sort|default('recent') == 'title_asc' %}selected{% endif %}>Titre A-Z</option>
+                            <option value="title_desc" {% if sort|default('recent') == 'title_desc' %}selected{% endif %}>Titre Z-A</option>
+                        </select>
+                    </label>
                     <button type="submit">Chercher</button>
+                    {% if search is not empty %}
+                        <a href="{{ path('user_forum', {sort: sort|default('recent')}) }}" class="forum-search-reset">Reinitialiser</a>
+                    {% endif %}
                 </form>
             </div>
+            {% if search is not empty %}
+                <p class="forum-search-info">
+                    {{ posts|length }} resultat{{ posts|length > 1 ? 's' : '' }} pour "<strong>{{ search }}</strong>"
+                </p>
+            {% endif %}
 
-            <div class="forum-list">
+            <div class="forum-list" style="margin-top: 1rem;">
                 {% for post in posts %}
                     <article class="forum-card">
                         <a href="{{ path('user_forum_show', {id: post.id}) }}" class="forum-card-link" aria-label="Ouvrir le post {{ post.titre }}">
                             <div class="forum-card-meta">
                                 <span>{{ post.categorie ?: 'Sans categorie' }}</span>
-                                <span>{{ post.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+                                <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
                             </div>
                             <h3>{{ post.titre }}</h3>
                             <p>{{ post.contenu|length > 190 ? post.contenu|slice(0, 190) ~ '...' : post.contenu }}</p>
@@ -120,11 +143,56 @@
                 {% else %}
                     <div class="forum-empty">
                         <h3>Aucune discussion trouvee</h3>
-                        <p>Commencez par publier le premier sujet du forum dans la version Symfony.</p>
+                        {% if search is not empty %}
+                            <p>Aucun resultat ne correspond a votre recherche. Essayez avec un autre mot-cle.</p>
+                        {% else %}
+                            <p>Commencez par publier le premier sujet du forum dans la version Symfony.</p>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('user-forum-search-form');
+            const input = document.getElementById('user-forum-search-input');
+
+            if (!(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const minLength = Number.parseInt(input.getAttribute('minlength') || '3', 10);
+            let lastSubmitted = (input.value || '').trim();
+            let debounceTimer = null;
+
+            const submitIfNeeded = () => {
+                const value = (input.value || '').trim();
+                const hasEnoughChars = value.length >= minLength;
+                const isReset = value.length === 0;
+
+                if ((!hasEnoughChars && !isReset) || value === lastSubmitted) {
+                    return;
+                }
+
+                lastSubmitted = value;
+                form.submit();
+            };
+
+            input.addEventListener('input', () => {
+                if (debounceTimer) {
+                    window.clearTimeout(debounceTimer);
+                }
+
+                debounceTimer = window.setTimeout(submitIfNeeded, 250);
+            });
+
+            input.addEventListener('search', submitIfNeeded);
+        });
+    </script>
 {% endblock %}

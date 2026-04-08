@@ -30,13 +30,23 @@ class ForumController extends AbstractController
     {
         $editCategoryId = $request->query->getInt('editCategory');
         $editingCategory = $editCategoryId > 0 ? $categorieForumRepository->find($editCategoryId) : null;
+        $search = trim((string) $request->query->get('q', ''));
+        $activeSearch = mb_strlen($search) >= 3 ? $search : '';
+        $categories = $categorieForumRepository->findAllOrdered();
+        $mostUsedCategory = $postRepository->findMostUsedCategory();
 
         return $this->render('admin/forum/index.html.twig', [
-            'posts' => $postRepository->findForumFeed(),
+            'posts' => $postRepository->findForumFeed($activeSearch),
             'total_posts' => $postRepository->countAllPosts(),
             'total_commentaires' => $commentaireRepository->countAllCommentaires(),
             'recent_commentaires' => $commentaireRepository->findRecentCommentaires(),
-            'categories' => $categorieForumRepository->findAllOrdered(),
+            'categories' => $categories,
+            'total_categories' => count($categories),
+            'categorized_posts' => $postRepository->countCategorizedPosts(),
+            'uncategorized_posts' => $postRepository->countUncategorizedPosts(),
+            'most_used_category' => $mostUsedCategory,
+            'search' => $search,
+            'active_search' => $activeSearch,
             'category_form_data' => [
                 'nom' => $editingCategory?->getNom() ?? '',
             ],
@@ -209,12 +219,21 @@ class ForumController extends AbstractController
         array $categoryErrors = [],
         ?int $editingCategoryId = null
     ): Response {
+        $categories = $categorieForumRepository->findAllOrdered();
+        $mostUsedCategory = $postRepository->findMostUsedCategory();
+
         return $this->render('admin/forum/index.html.twig', [
             'posts' => $postRepository->findForumFeed(),
             'total_posts' => $postRepository->countAllPosts(),
             'total_commentaires' => $commentaireRepository->countAllCommentaires(),
             'recent_commentaires' => $commentaireRepository->findRecentCommentaires(),
-            'categories' => $categorieForumRepository->findAllOrdered(),
+            'categories' => $categories,
+            'total_categories' => count($categories),
+            'categorized_posts' => $postRepository->countCategorizedPosts(),
+            'uncategorized_posts' => $postRepository->countUncategorizedPosts(),
+            'most_used_category' => $mostUsedCategory,
+            'search' => '',
+            'active_search' => '',
             'category_form_data' => $categoryFormData,
             'category_errors' => $categoryErrors,
             'editing_category_id' => $editingCategoryId,

@@ -34,10 +34,11 @@
             (() => {
                 let pendingFormId = null;
 
-                window.firmaOpenConfirmModal = (formId, title, message) => {
+                window.firmaOpenConfirmModal = (formId, title, message, submitLabel = 'Supprimer', submitVariant = 'danger') => {
                     const modal = document.getElementById('appConfirmModal');
                     const modalTitle = document.getElementById('appConfirmTitle');
                     const modalMessage = document.getElementById('appConfirmMessage');
+                    const modalSubmit = document.getElementById('appConfirmSubmit');
 
                     if (!modal || !modalTitle || !modalMessage) {
                         return;
@@ -46,6 +47,10 @@
                     pendingFormId = formId;
                     modalTitle.textContent = title || 'Confirmation';
                     modalMessage.textContent = message || 'Voulez-vous confirmer cette action ?';
+                    if (modalSubmit) {
+                        modalSubmit.textContent = submitLabel || 'Confirmer';
+                        modalSubmit.classList.toggle('forum-button-danger', submitVariant === 'danger');
+                    }
                     modal.hidden = false;
                 };
 

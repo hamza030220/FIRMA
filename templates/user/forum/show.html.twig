@@ -16,7 +16,7 @@
         <div class="forum-detail-header">
             <div class="forum-card-meta">
                 <span>{{ post.categorie ?: 'Sans categorie' }}</span>
-                <span>{{ post.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+                <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
             </div>
             <div class="forum-detail-stats">
                 <span>{{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}</span>
@@ -89,7 +89,7 @@
                 <article class="forum-comment">
                     <div class="forum-card-footer">
                         <strong>{{ commentaire.utilisateur.fullName }}</strong>
-                        <span>{{ commentaire.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+                        <span>{{ commentaire.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
                     </div>
                     {% if edit_comment_id is defined and edit_comment_id == commentaire.id %}
                         <form method="post" action="{{ path('user_forum_comment_edit', {id: commentaire.id}) }}" class="forum-form forum-comment-form" enctype="multipart/form-data" novalidate>
