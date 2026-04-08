@@ -36,7 +36,7 @@
     </div>
 
     {# ===== BARRE RECHERCHE + FILTRES ===== #}
-    <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form" data-auto-search data-auto-search-min="2">
+    <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form" data-auto-search="true">
         <div class="mal-search-wrap">
             <div class="mal-search-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -48,6 +48,8 @@
                 placeholder="Rechercher une maladie, symptôme, description…"
                 class="mal-search-input"
                 autocomplete="off"
+                minlength="3"
+                data-auto-search-input="true"
             >
             {% if keyword or gravite %}
             <a href="{{ path('user_maladie') }}" class="mal-clear-btn" title="Réinitialiser">
@@ -521,6 +523,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.mal-search-form');
     if (!form) return;
+    const searchInput = form.querySelector('input[name="q"]');
+    let autoSearchTimer = null;
 
     form.querySelectorAll('select[name="gravite"], select[name="tri"]').forEach((select) => {
         select.addEventListener('change', () => {
@@ -531,6 +535,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    if (searchInput instanceof HTMLInputElement && form.dataset.autoSearchBound !== 'true') {
+        searchInput.addEventListener('input', () => {
+            const value = (searchInput.value || '').trim();
+
+            if (autoSearchTimer) {
+                window.clearTimeout(autoSearchTimer);
+            }
+
+            autoSearchTimer = window.setTimeout(() => {
+                if (value.length >= 3 || value.length === 0) {
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                }
+            }, 280);
+        });
+    }
 });
 </script>
 

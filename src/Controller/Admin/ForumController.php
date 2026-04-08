@@ -160,7 +160,7 @@ class ForumController extends AbstractController
         $entityManager->remove($post);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Le post a été supprimé.');
+        $this->addFlash('success', 'Le post a ete supprime.');
 
         return $this->redirectToRoute('admin_forum');
     }
@@ -175,7 +175,7 @@ class ForumController extends AbstractController
         $entityManager->remove($commentaire);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Le commentaire a été supprimé.');
+        $this->addFlash('success', 'Le commentaire a ete supprime.');
 
         return $this->redirectToRoute('admin_forum');
     }
@@ -240,3 +240,5 @@ class ForumController extends AbstractController
         ]);
     }
 }
+
+

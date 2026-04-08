@@ -1,16 +1,16 @@
 ﻿{% extends 'admin/base.html.twig' %}
 
-{% block page_title %}GÃ©rer Forum{% endblock %}
-{% block admin_page_title %}GÃ©rer Forum{% endblock %}
+{% block page_title %}Gérer Forum{% endblock %}
+{% block admin_page_title %}Gérer Forum{% endblock %}
 
 {% block admin_content %}
 <section class="forum-admin-shell">
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            {% set is_category_add_toast = label == 'success' and message == 'La categorie a ete ajoutee.' %}
+            {% set is_action_toast = label == 'success' %}
             <div
-                class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}{% if is_category_add_toast %} forum-toast{% endif %}"
-                {% if is_category_add_toast %}data-forum-toast="category-add" role="status" aria-live="polite"{% endif %}
+                class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}{% if is_action_toast %} forum-toast{% endif %}"
+                {% if is_action_toast %}data-forum-toast-message="{{ message|e('html_attr') }}" data-forum-toast-type="success" role="status" aria-live="polite"{% endif %}
             >{{ message }}</div>
         {% endfor %}
     {% endfor %}
@@ -104,7 +104,19 @@
                     <span>{{ categories|length }} disponibles</span>
                 </div>
 
-                <form method="post" action="{{ path('admin_forum_category_create') }}" class="forum-form">
+                <form
+                    id="admin-forum-category-create-form"
+                    method="post"
+                    action="{{ path('admin_forum_category_create') }}"
+                    class="forum-form"
+                    data-forum-confirm="true"
+                    data-forum-confirm-title="Ajouter la categorie"
+                    data-forum-confirm-message="Voulez-vous vraiment ajouter cette categorie ?"
+                    data-forum-confirm-submit="Ajouter"
+                    data-forum-confirm-variant="primary"
+                    data-forum-required-input="nom"
+                    data-forum-required-message="Le nom de la categorie est obligatoire."
+                >
                     <input type="hidden" name="_token" value="{{ csrf_token('admin_forum_category_create') }}">
                     <label for="forum-category-name">Nouvelle categorie</label>
                     <input id="forum-category-name" type="text" name="nom" maxlength="100" value="{{ editing_category_id ? '' : category_form_data.nom|default('') }}" placeholder="Ex. Irrigation intelligente">
@@ -119,7 +131,17 @@
                         <article class="forum-admin-row">
                             <div>
                                 {% if editing_category_id == categorie.id %}
-                                    <form method="post" action="{{ path('admin_forum_category_edit', {id: categorie.id}) }}" class="forum-form">
+                                    <form
+                                        id="admin-forum-category-edit-{{ categorie.id }}"
+                                        method="post"
+                                        action="{{ path('admin_forum_category_edit', {id: categorie.id}) }}"
+                                        class="forum-form"
+                                        data-forum-confirm="true"
+                                        data-forum-confirm-title="Modifier la categorie"
+                                        data-forum-confirm-message="Voulez-vous vraiment enregistrer la modification de cette categorie ?"
+                                        data-forum-confirm-submit="Enregistrer"
+                                        data-forum-confirm-variant="primary"
+                                    >
                                         <input type="hidden" name="_token" value="{{ csrf_token('admin_forum_category_edit_' ~ categorie.id) }}">
                                         <label for="category-edit-{{ categorie.id }}">Modifier la categorie</label>
                                         <input id="category-edit-{{ categorie.id }}" type="text" name="nom" maxlength="100" value="{{ category_form_data.nom|default(categorie.nom) }}">
@@ -171,8 +193,17 @@
                             </div>
                             <p>{{ commentaire.contenu|length > 150 ? commentaire.contenu|slice(0, 150) ~ '...' : commentaire.contenu }}</p>
                             <div class="forum-card-footer">
-                                <span>Post : {{ commentaire.post.titre }}</span>
-                                <form method="post" action="{{ path('admin_forum_comment_delete', {id: commentaire.id}) }}">
+                                <span>Post : {{ commentaire.post ? commentaire.post.titre : 'Post supprime' }}</span>
+                                <form
+                                    id="admin-forum-comment-delete-{{ commentaire.id }}"
+                                    method="post"
+                                    action="{{ path('admin_forum_comment_delete', {id: commentaire.id}) }}"
+                                    data-forum-confirm="true"
+                                    data-forum-confirm-title="Supprimer ce commentaire"
+                                    data-forum-confirm-message="Voulez-vous vraiment supprimer ce commentaire ? Cette action est irreversible."
+                                    data-forum-confirm-submit="Supprimer"
+                                    data-forum-confirm-variant="danger"
+                                >
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ commentaire.id) }}">
                                     <button type="submit" class="forum-button forum-button-danger">Supprimer</button>
                                 </form>
@@ -214,7 +245,16 @@
                             <p>{{ post.contenu|length > 120 ? post.contenu|slice(0, 120) ~ '...' : post.contenu }}</p>
                             <small>{{ post.utilisateur.fullName }} - {{ post.categorie ?: 'Sans categorie' }} - {{ post.dateCreation|date('d/m/Y H:i', 'Africa/Lagos') }}</small>
                         </div>
-                        <form method="post" action="{{ path('admin_forum_post_delete', {id: post.id}) }}">
+                        <form
+                            id="admin-forum-post-delete-{{ post.id }}"
+                            method="post"
+                            action="{{ path('admin_forum_post_delete', {id: post.id}) }}"
+                            data-forum-confirm="true"
+                            data-forum-confirm-title="Supprimer ce post"
+                            data-forum-confirm-message="Voulez-vous vraiment supprimer ce post ? Cette action est irreversible."
+                            data-forum-confirm-submit="Supprimer"
+                            data-forum-confirm-variant="danger"
+                        >
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ post.id) }}">
                             <button type="submit" class="forum-button forum-button-danger">Supprimer</button>
                         </form>
@@ -237,24 +277,124 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('admin-forum-search-form');
             const input = document.getElementById('admin-forum-search-input');
-            const categoryAddToast = document.querySelector('[data-forum-toast="category-add"]');
+            const toastNodes = document.querySelectorAll('[data-forum-toast-message]');
 
-            if (categoryAddToast instanceof HTMLDivElement) {
-                const toastDuration = 10000;
+            const showFallbackToast = (message, type = 'success', duration = 10000) => {
+                if (!message) {
+                    return;
+                }
 
-                requestAnimationFrame(() => {
-                    categoryAddToast.classList.add('is-visible');
+                if (!document.getElementById('admin-forum-toast-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'admin-forum-toast-style';
+                    style.textContent = '@keyframes adminForumToastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}';
+                    document.head.appendChild(style);
+                }
+
+                const isDanger = type === 'danger' || type === 'error';
+                const toast = document.createElement('div');
+                toast.style.cssText =
+                    'position:fixed;top:18px;right:18px;z-index:99999;min-width:260px;max-width:420px;padding:12px 14px;border-radius:12px;' +
+                    (isDanger
+                        ? 'background:#fdeaea;color:#a32d2d;border:1px solid #f5c5c0;'
+                        : 'background:#eaf3de;color:#27500a;border:1px solid #c0dd97;') +
+                    'box-shadow:0 14px 30px rgba(0,0,0,.14);overflow:hidden;';
+
+                toast.innerHTML =
+                    '<div style="position:absolute;top:0;left:0;height:3px;width:100%;background:' +
+                    (isDanger ? '#dc2626' : '#2f7d55') +
+                    ';transform-origin:left;animation:adminForumToastProgress ' + duration + 'ms linear forwards"></div>' +
+                    '<div>' + String(message) + '</div>';
+
+                document.body.appendChild(toast);
+                window.setTimeout(() => toast.remove(), duration + 350);
+            };
+
+            toastNodes.forEach((node) => {
+                const message = node.getAttribute('data-forum-toast-message') || '';
+                const type = node.getAttribute('data-forum-toast-type') || 'success';
+                if (!message) {
+                    return;
+                }
+
+                if (typeof window.firmaToast === 'function') {
+                    window.firmaToast(message, type, 10000);
+                } else {
+                    showFallbackToast(message, type, 10000);
+                }
+                node.remove();
+            });
+
+            document.querySelectorAll('form[data-forum-confirm="true"]').forEach((confirmForm) => {
+                if (!(confirmForm instanceof HTMLFormElement) || confirmForm.dataset.forumConfirmBound === 'true') {
+                    return;
+                }
+
+                confirmForm.dataset.forumConfirmBound = 'true';
+                if (!confirmForm.id) {
+                    confirmForm.id = `admin-forum-confirm-${Math.random().toString(36).slice(2, 10)}`;
+                }
+
+                confirmForm.addEventListener('submit', (event) => {
+                    if (confirmForm.dataset.confirmed === 'true') {
+                        confirmForm.dataset.confirmed = '';
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const requiredInputName = confirmForm.getAttribute('data-forum-required-input') || '';
+                    if (requiredInputName) {
+                        const requiredField = confirmForm.querySelector(`[name="${requiredInputName}"]`);
+                        const requiredMessage = confirmForm.getAttribute('data-forum-required-message') || 'Ce champ est obligatoire.';
+
+                        if (requiredField && typeof requiredField.value === 'string' && requiredField.value.trim() === '') {
+                            let errorNode = confirmForm.querySelector('[data-forum-inline-error="required"]');
+                            if (!(errorNode instanceof HTMLDivElement)) {
+                                errorNode = document.createElement('div');
+                                errorNode.className = 'forum-flash forum-flash-error';
+                                errorNode.setAttribute('data-forum-inline-error', 'required');
+                                const actionRow = confirmForm.querySelector('.forum-actions');
+                                if (actionRow) {
+                                    actionRow.parentNode.insertBefore(errorNode, actionRow);
+                                } else {
+                                    confirmForm.appendChild(errorNode);
+                                }
+                            }
+                            errorNode.textContent = requiredMessage;
+
+                            if (typeof window.firmaToast === 'function') {
+                                window.firmaToast(requiredMessage, 'danger', 10000);
+                            } else {
+                                showFallbackToast(requiredMessage, 'danger', 10000);
+                            }
+
+                            if (typeof requiredField.focus === 'function') {
+                                requiredField.focus();
+                            }
+                            return;
+                        }
+
+                        const existingError = confirmForm.querySelector('[data-forum-inline-error="required"]');
+                        if (existingError) {
+                            existingError.remove();
+                        }
+                    }
+
+                    const title = confirmForm.getAttribute('data-forum-confirm-title') || 'Confirmation';
+                    const message = confirmForm.getAttribute('data-forum-confirm-message') || 'Voulez-vous confirmer cette action ?';
+                    const submitLabel = confirmForm.getAttribute('data-forum-confirm-submit') || 'Confirmer';
+                    const submitVariant = confirmForm.getAttribute('data-forum-confirm-variant') || 'danger';
+
+                    if (typeof window.firmaOpenConfirmModal === 'function') {
+                        window.firmaOpenConfirmModal(confirmForm.id, title, message, submitLabel, submitVariant);
+                    } else {
+                        confirmForm.dataset.confirmed = 'true';
+                        confirmForm.submit();
+                    }
                 });
-
-                window.setTimeout(() => {
-                    categoryAddToast.classList.remove('is-visible');
-                    categoryAddToast.classList.add('is-hiding');
-                }, toastDuration);
-
-                window.setTimeout(() => {
-                    categoryAddToast.remove();
-                }, toastDuration + 600);
-            }
+            });
 
             if (!(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) {
                 return;
@@ -303,6 +443,7 @@
         });
     </script>
 {% endblock %}
+
 
 
 

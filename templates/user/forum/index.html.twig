@@ -160,6 +160,34 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const editToast = sessionStorage.getItem('forumPostEditedToast');
+            if (editToast) {
+                try {
+                    const data = JSON.parse(editToast);
+                    if (typeof window.firmaToast === 'function') {
+                        window.firmaToast(
+                            data.message || 'Votre post a ete modifie avec succes.',
+                            data.type || 'success',
+                            Number.isFinite(data.duration) ? data.duration : 10000
+                        );
+                    } else {
+                        const flash = document.createElement('div');
+                        flash.className = 'forum-flash forum-flash-success';
+                        flash.textContent = data.message || 'Votre post a ete modifie avec succes.';
+                        const shell = document.querySelector('.forum-shell');
+                        if (shell) {
+                            shell.insertBefore(flash, shell.firstChild);
+                            window.setTimeout(() => flash.remove(), 10000);
+                        }
+                    }
+                } catch (e) {
+                    if (typeof window.firmaToast === 'function') {
+                        window.firmaToast('Votre post a ete modifie avec succes.', 'success', 10000);
+                    }
+                }
+                sessionStorage.removeItem('forumPostEditedToast');
+            }
+
             const form = document.getElementById('user-forum-search-form');
             const input = document.getElementById('user-forum-search-input');
 
