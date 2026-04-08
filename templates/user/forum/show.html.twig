@@ -1,0 +1,168 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}{{ post.titre }}{% endblock %}
+
+{% block user_content %}
+<section class="forum-shell">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="{{ path('user_forum') }}" class="forum-back-link">Retour aux discussions</a>
+
+    <article id="post-detail" class="forum-panel forum-detail">
+        <div class="forum-detail-header">
+            <div class="forum-card-meta">
+                <span>{{ post.categorie ?: 'Sans categorie' }}</span>
+                <span>{{ post.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+            </div>
+            <div class="forum-detail-stats">
+                <span>{{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}</span>
+                <span>Auteur : {{ post.utilisateur.fullName }}</span>
+            </div>
+        </div>
+        <h1>{{ post.titre }}</h1>
+        <p class="forum-detail-author">Discussion ouverte par {{ post.utilisateur.fullName }}</p>
+        <div class="forum-detail-content">{{ post.contenu|nl2br }}</div>
+        {% if app.user and post.utilisateur and app.user.id == post.utilisateur.id %}
+            <div class="forum-actions">
+                <a href="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-icon-action" title="Modifier le post" aria-label="Modifier le post">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
+                    </svg>
+                    <span>Modifier</span>
+                </a>
+                <form id="delete-post-{{ post.id }}" method="post" action="{{ path('user_forum_delete', {id: post.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('forum_delete_' ~ post.id) }}">
+                    <button type="button" class="forum-icon-action forum-icon-action-danger" title="Supprimer le post" aria-label="Supprimer le post" onclick="window.firmaOpenConfirmModal('delete-post-{{ post.id }}', 'Supprimer ce post', 'Voulez-vous vraiment supprimer ce post ? Cette action est irreversible.');">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 6h18"/>
+                            <path d="M8 6V4h8v2"/>
+                            <path d="M19 6l-1 14H6L5 6"/>
+                            <path d="M10 11v6"/>
+                            <path d="M14 11v6"/>
+                        </svg>
+                        <span>Supprimer</span>
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </article>
+
+    <section id="post-comments" class="forum-panel">
+        <div class="forum-toolbar">
+            <h2>Commentaires</h2>
+            <span>{{ post.commentaires|length }} au total</span>
+        </div>
+
+        <form method="post" action="{{ path('user_forum_comment', {id: post.id}) }}" class="forum-form forum-comment-form" enctype="multipart/form-data">
+            <input type="hidden" name="_token" value="{{ csrf_token('forum_comment_' ~ post.id) }}">
+            <label for="commentaire">Ajouter un commentaire</label>
+            <textarea id="commentaire" name="contenu" rows="4" maxlength="1000" placeholder="Repondez a cette discussion..." data-comment-input data-comment-min-length="2" data-comment-max-length="1000" data-comment-error-id="comment-text-error" data-comment-counter-id="comment-text-counter">{{ edit_comment_id is defined and edit_comment_id ? '' : comment_form_data.contenu|default('') }}</textarea>
+            <div id="comment-text-counter" class="forum-input-help">0 / 1000 caracteres</div>
+            <div id="comment-text-error" class="forum-flash forum-flash-error forum-inline-error" hidden></div>
+            {% if edit_comment_id is not defined or not edit_comment_id %}
+                {% if comment_form_errors.contenu is defined %}
+                    <div class="forum-flash forum-flash-error">{{ comment_form_errors.contenu }}</div>
+                {% endif %}
+                <label for="comment-image">Image du commentaire</label>
+                <input id="comment-image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/png,image/jpeg,image/webp,image/gif" data-image-preview-input="comment-image-preview" data-image-allowed-extensions="jpg,jpeg,png,webp,gif" data-image-min-width="200" data-image-min-height="200" data-image-max-width="6000" data-image-max-height="6000" data-image-max-bytes="5242880">
+                <div class="forum-flash forum-flash-error forum-inline-error" data-image-format-error hidden>Format invalide. Utilisez JPG, PNG, WEBP ou GIF.</div>
+                <div class="forum-flash forum-flash-error forum-inline-error" data-image-size-error hidden></div>
+                <div class="forum-flash forum-flash-error forum-inline-error" data-image-dimension-error hidden></div>
+                <div id="comment-image-preview" class="forum-image-preview" hidden>
+                    <p>Apercu avant publication</p>
+                    <img src="" alt="Apercu de l'image du commentaire" class="forum-comment-image">
+                </div>
+                {% if comment_form_errors.image is defined %}
+                    <div class="forum-flash forum-flash-error">{{ comment_form_errors.image }}</div>
+                {% endif %}
+            {% endif %}
+            <button type="submit" class="forum-button">Publier le commentaire</button>
+        </form>
+
+        <div class="forum-comments">
+            {% for commentaire in post.commentaires %}
+                <article class="forum-comment">
+                    <div class="forum-card-footer">
+                        <strong>{{ commentaire.utilisateur.fullName }}</strong>
+                        <span>{{ commentaire.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+                    </div>
+                    {% if edit_comment_id is defined and edit_comment_id == commentaire.id %}
+                        <form method="post" action="{{ path('user_forum_comment_edit', {id: commentaire.id}) }}" class="forum-form forum-comment-form" enctype="multipart/form-data" novalidate>
+                            <input type="hidden" name="_token" value="{{ csrf_token('forum_comment_edit_' ~ commentaire.id) }}">
+                            <label for="comment-edit-{{ commentaire.id }}">Modifier votre commentaire</label>
+                            <textarea id="comment-edit-{{ commentaire.id }}" name="contenu" rows="4" maxlength="1000" data-comment-input data-comment-min-length="2" data-comment-max-length="1000" data-comment-error-id="comment-edit-error-{{ commentaire.id }}" data-comment-counter-id="comment-edit-counter-{{ commentaire.id }}">{{ comment_form_data.contenu|default(commentaire.contenu) }}</textarea>
+                            <div id="comment-edit-counter-{{ commentaire.id }}" class="forum-input-help">0 / 1000 caracteres</div>
+                            <div id="comment-edit-error-{{ commentaire.id }}" class="forum-flash forum-flash-error forum-inline-error" hidden></div>
+                            {% if comment_form_errors.contenu is defined %}
+                                <div class="forum-flash forum-flash-error">{{ comment_form_errors.contenu }}</div>
+                            {% endif %}
+                            <label for="comment-image-edit-{{ commentaire.id }}">Remplacer l'image</label>
+                            <input id="comment-image-edit-{{ commentaire.id }}" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/png,image/jpeg,image/webp,image/gif" data-image-preview-input="comment-image-edit-preview-{{ commentaire.id }}" data-image-allowed-extensions="jpg,jpeg,png,webp,gif" data-image-min-width="200" data-image-min-height="200" data-image-max-width="6000" data-image-max-height="6000" data-image-max-bytes="5242880">
+                            <div class="forum-flash forum-flash-error forum-inline-error" data-image-format-error hidden>Format invalide. Utilisez JPG, PNG, WEBP ou GIF.</div>
+                            <div class="forum-flash forum-flash-error forum-inline-error" data-image-size-error hidden></div>
+                            <div class="forum-flash forum-flash-error forum-inline-error" data-image-dimension-error hidden></div>
+                            <div id="comment-image-edit-preview-{{ commentaire.id }}" class="forum-image-preview" hidden>
+                                <p>Apercu de la nouvelle image</p>
+                                <img src="" alt="Apercu de remplacement pour le commentaire" class="forum-comment-image">
+                            </div>
+                            {% if commentaire.imagePath %}
+                                <label class="forum-checkbox">
+                                    <input type="checkbox" name="remove_image" value="1">
+                                    <span>Supprimer l'image actuelle</span>
+                                </label>
+                            {% endif %}
+                            <input type="hidden" name="replace_image" value="1">
+                            {% if comment_form_errors.image is defined %}
+                                <div class="forum-flash forum-flash-error">{{ comment_form_errors.image }}</div>
+                            {% endif %}
+                            <div class="forum-actions">
+                                <button type="submit" class="forum-button">Enregistrer</button>
+                                <a href="{{ path('user_forum_show', {id: post.id}) }}#post-comments" class="forum-button forum-button-secondary">Annuler</a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <p>{{ commentaire.contenu|nl2br }}</p>
+                        {% if commentaire.imagePath %}
+                            <img src="{{ asset(commentaire.imagePath) }}" alt="Image jointe au commentaire" class="forum-comment-image">
+                        {% endif %}
+                    {% endif %}
+                    {% if app.user and commentaire.utilisateur and app.user.id == commentaire.utilisateur.id %}
+                        <div class="forum-actions">
+                            <a href="{{ path('user_forum_show', {id: post.id, editComment: commentaire.id}) }}#post-comments" class="forum-icon-action" title="Modifier le commentaire" aria-label="Modifier le commentaire">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 20h9"/>
+                                    <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
+                                </svg>
+                                <span>Modifier</span>
+                            </a>
+                            <form id="delete-comment-{{ commentaire.id }}" method="post" action="{{ path('user_forum_comment_delete', {id: commentaire.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('forum_comment_delete_' ~ commentaire.id) }}">
+                                <button type="button" class="forum-icon-action forum-icon-action-danger" title="Supprimer le commentaire" aria-label="Supprimer le commentaire" onclick="window.firmaOpenConfirmModal('delete-comment-{{ commentaire.id }}', 'Supprimer ce commentaire', 'Voulez-vous vraiment supprimer ce commentaire ? Cette action est irreversible.');">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 6h18"/>
+                                        <path d="M8 6V4h8v2"/>
+                                        <path d="M19 6l-1 14H6L5 6"/>
+                                        <path d="M10 11v6"/>
+                                        <path d="M14 11v6"/>
+                                    </svg>
+                                    <span>Supprimer</span>
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </article>
+            {% else %}
+                <div class="forum-empty">
+                    <h3>Pas encore de commentaires</h3>
+                    <p>Soyez le premier a repondre a ce sujet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}

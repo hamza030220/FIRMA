@@ -3,14 +3,128 @@
 {% block page_title %}Forum{% endblock %}
 
 {% block user_content %}
-<div class="placeholder-page">
-    <div class="placeholder-hero">
-        <div class="placeholder-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+<section class="forum-shell">
+    <div class="forum-hero">
+        <div>
+            <p class="forum-kicker">Communaute FIRMA</p>
+            <h1>Echangez avec la communaute FIRMA</h1>
+            <p class="forum-lead">Partagez vos questions, vos conseils et vos experiences avec les utilisateurs de la plateforme dans un espace d'echange clair et professionnel.</p>
         </div>
-        <h2>Forum</h2>
-        <p>Échangez avec d'autres agriculteurs, posez vos questions et partagez vos expériences.</p>
-        <span class="placeholder-badge">Bientôt disponible</span>
+        <div class="forum-stats">
+            <div>
+                <strong>{{ posts|length }}</strong>
+                <span>posts visibles</span>
+            </div>
+            <div>
+                <strong>{{ app.user.fullName }}</strong>
+                <span>connecte</span>
+            </div>
+        </div>
     </div>
-</div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if form_errors is not empty %}
+        <div class="forum-flash forum-flash-error">Le formulaire contient des erreurs. Verifiez les champs ci-dessous.</div>
+    {% endif %}
+
+    <div class="forum-grid">
+        <aside class="forum-panel">
+            <h2>Nouveau post</h2>
+            <form method="post" action="{{ path('user_forum_create') }}" class="forum-form" novalidate>
+                <input type="hidden" name="_token" value="{{ csrf_token('forum_create') }}">
+
+                <label for="titre">Titre</label>
+                <input id="titre" name="titre" type="text" value="{{ form_data.titre }}" placeholder="Exemple : conseil pour l'irrigation">
+                {% if form_errors.titre is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.titre }}</div>
+                {% endif %}
+
+                <label for="categorie">Categorie</label>
+                <select id="categorie" name="categorie">
+                    <option value="">Choisir une categorie</option>
+                    {% for categorie in categories %}
+                        <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ categorie }}</option>
+                    {% endfor %}
+                </select>
+                {% if form_errors.categorie is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.categorie }}</div>
+                {% endif %}
+
+                <label for="contenu">Contenu</label>
+                <textarea id="contenu" name="contenu" rows="6" placeholder="Decrivez votre besoin ou partagez votre experience...">{{ form_data.contenu }}</textarea>
+                {% if form_errors.contenu is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.contenu }}</div>
+                {% endif %}
+
+                <button type="submit" class="forum-button">Publier</button>
+            </form>
+        </aside>
+
+        <div class="forum-panel">
+            <div class="forum-toolbar">
+                <h2>Discussions</h2>
+                <form method="get" action="{{ path('user_forum') }}" class="forum-search">
+                    <input type="search" name="q" value="{{ search }}" placeholder="Rechercher un sujet">
+                    <button type="submit">Chercher</button>
+                </form>
+            </div>
+
+            <div class="forum-list">
+                {% for post in posts %}
+                    <article class="forum-card">
+                        <a href="{{ path('user_forum_show', {id: post.id}) }}" class="forum-card-link" aria-label="Ouvrir le post {{ post.titre }}">
+                            <div class="forum-card-meta">
+                                <span>{{ post.categorie ?: 'Sans categorie' }}</span>
+                                <span>{{ post.dateCreation|date('H:i', 'Africa/Tunis') }}</span>
+                            </div>
+                            <h3>{{ post.titre }}</h3>
+                            <p>{{ post.contenu|length > 190 ? post.contenu|slice(0, 190) ~ '...' : post.contenu }}</p>
+                            <span class="forum-card-cta">Voir tout le post</span>
+                        </a>
+                        <div class="forum-card-footer">
+                            <span>Par {{ post.utilisateur.fullName }}</span>
+                            <div class="forum-inline-actions">
+                                <span>{{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}</span>
+                                {% if app.user and post.utilisateur and app.user.id == post.utilisateur.id %}
+                                    <div class="forum-post-actions">
+                                        <a href="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-icon-action" title="Modifier le post" aria-label="Modifier le post">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M12 20h9"/>
+                                                <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
+                                            </svg>
+                                            <span>Modifier</span>
+                                        </a>
+                                        <form id="delete-post-{{ post.id }}" method="post" action="{{ path('user_forum_delete', {id: post.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('forum_delete_' ~ post.id) }}">
+                                            <button type="button" class="forum-icon-action forum-icon-action-danger" title="Supprimer le post" aria-label="Supprimer le post" onclick="window.firmaOpenConfirmModal('delete-post-{{ post.id }}', 'Supprimer ce post', 'Voulez-vous vraiment supprimer ce post ? Cette action est irreversible.');">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M8 6V4h8v2"/>
+                                                    <path d="M19 6l-1 14H6L5 6"/>
+                                                    <path d="M10 11v6"/>
+                                                    <path d="M14 11v6"/>
+                                                </svg>
+                                                <span>Supprimer</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                {% else %}
+                    <div class="forum-empty">
+                        <h3>Aucune discussion trouvee</h3>
+                        <p>Commencez par publier le premier sujet du forum dans la version Symfony.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
