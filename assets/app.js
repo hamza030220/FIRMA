@@ -194,3 +194,35 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
     }
 });
+
+/* -- Auto-submit search forms after N letters -- */
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[data-auto-search]').forEach((form) => {
+        const input = form.querySelector('input[name="q"], input[type="search"], input[data-auto-search-input]');
+        if (!input) return;
+
+        const minLength = Number(form.dataset.autoSearchMin || 2);
+        const delay = Number(form.dataset.autoSearchDelay || 300);
+        let timer = null;
+        let lastSubmittedValue = input.value.trim();
+
+        const submitForm = () => {
+            const value = input.value.trim();
+
+            if (value === lastSubmittedValue) return;
+            if (value !== '' && value.length < minLength) return;
+
+            lastSubmittedValue = value;
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        };
+
+        input.addEventListener('input', () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(submitForm, delay);
+        });
+    });
+});
