@@ -19,22 +19,48 @@ class PostRepository extends ServiceEntityRepository
     /**
      * @return list<Post>
      */
-    public function findForumFeed(?string $search = null): array
+    public function findForumFeed(?string $search = null, string $sort = 'recent'): array
     {
         $qb = $this->createQueryBuilder('p')
             ->leftJoin('p.utilisateur', 'u')
             ->addSelect('u')
             ->leftJoin('p.commentaires', 'c')
             ->addSelect('c')
-            ->orderBy('p.dateCreation', 'DESC');
+            ->leftJoin('c.utilisateur', 'cu')
+            ->addSelect('cu');
 
         if ($search !== null && $search !== '') {
             $qb
-                ->andWhere('LOWER(p.titre) LIKE :term OR LOWER(p.contenu) LIKE :term OR LOWER(COALESCE(p.categorie, \'\')) LIKE :term')
+                ->andWhere(
+                    'LOWER(p.titre) LIKE :term'
+                )
                 ->setParameter('term', '%' . mb_strtolower(trim($search)) . '%');
         }
 
-        return $qb->getQuery()->getResult();
+        switch ($sort) {
+            case 'oldest':
+                $qb->orderBy('p.dateCreation', 'ASC');
+                break;
+            case 'title_asc':
+                $qb
+                    ->orderBy('p.titre', 'ASC')
+                    ->addOrderBy('p.dateCreation', 'DESC');
+                break;
+            case 'title_desc':
+                $qb
+                    ->orderBy('p.titre', 'DESC')
+                    ->addOrderBy('p.dateCreation', 'DESC');
+                break;
+            case 'recent':
+            default:
+                $qb->orderBy('p.dateCreation', 'DESC');
+                break;
+        }
+
+        return $qb
+            ->distinct()
+            ->getQuery()
+            ->getResult();
     }
 
     public function findOneForForum(int $id): ?Post
@@ -58,6 +84,55 @@ class PostRepository extends ServiceEntityRepository
             ->select('COUNT(p.id)')
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function countCategorizedPosts(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.categorie IS NOT NULL')
+            ->andWhere('p.categorie <> :emptyValue')
+            ->setParameter('emptyValue', '')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countUncategorizedPosts(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.categorie IS NULL OR p.categorie = :emptyValue')
+            ->setParameter('emptyValue', '')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return array{name: string, count: int}|null
+     */
+    public function findMostUsedCategory(): ?array
+    {
+        $result = $this->createQueryBuilder('p')
+            ->select('p.categorie AS name')
+            ->addSelect('COUNT(p.id) AS usageCount')
+            ->andWhere('p.categorie IS NOT NULL')
+            ->andWhere('p.categorie <> :emptyValue')
+            ->setParameter('emptyValue', '')
+            ->groupBy('p.categorie')
+            ->orderBy('usageCount', 'DESC')
+            ->addOrderBy('p.categorie', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!is_array($result) || !isset($result['name'], $result['usageCount'])) {
+            return null;
+        }
+
+        return [
+            'name' => (string) $result['name'],
+            'count' => (int) $result['usageCount'],
+        ];
     }
 
     public function renameCategory(string $oldName, string $newName): void

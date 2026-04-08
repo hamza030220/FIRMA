@@ -21,7 +21,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class ForumController extends AbstractController
 {
-    private const TUNISIA_TIMEZONE = 'Africa/Tunis';
+    private const APP_TIMEZONE = 'Africa/Lagos';
+    private const FORUM_SORT_OPTIONS = ['recent', 'oldest', 'title_asc', 'title_desc'];
     private const COMMENT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
     private const COMMENT_IMAGE_FORMAT_MESSAGE = 'Formats acceptes : JPG, PNG, WEBP ou GIF.';
     private const COMMENT_IMAGE_DIRECTORY = 'uploads/commentaires';
@@ -49,10 +50,12 @@ class ForumController extends AbstractController
     public function index(Request $request, PostRepository $postRepository, CategorieForumRepository $categorieForumRepository): Response
     {
         $search = trim((string) $request->query->get('q', ''));
+        $sort = $this->resolveSort((string) $request->query->get('sort', 'recent'));
 
         return $this->render('user/forum/index.html.twig', [
-            'posts' => $postRepository->findForumFeed($search),
+            'posts' => $postRepository->findForumFeed($search, $sort),
             'search' => $search,
+            'sort' => $sort,
             'categories' => $categorieForumRepository->findCategoryNames(),
             'form_data' => [
                 'titre' => '',
@@ -93,7 +96,7 @@ class ForumController extends AbstractController
             ->setContenu($contenu)
             ->setCategorie($categorie !== '' ? $categorie : null)
             ->setStatut('actif')
-            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::TUNISIA_TIMEZONE)));
+            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         $entityManager->persist($post);
         $entityManager->flush();
@@ -244,7 +247,7 @@ class ForumController extends AbstractController
             ->setPost($post)
             ->setUtilisateur($user)
             ->setContenu($contenu)
-            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::TUNISIA_TIMEZONE)));
+            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         if ($image instanceof UploadedFile) {
             try {
@@ -419,7 +422,9 @@ class ForumController extends AbstractController
             $errors['contenu'] = 'Le contenu doit contenir au moins 10 caracteres.';
         }
 
-        if ($categorie !== null && !in_array($categorie, $availableCategories, true)) {
+        if ($categorie === null || $categorie === '') {
+            $errors['categorie'] = 'La categorie est obligatoire.';
+        } elseif (!in_array($categorie, $availableCategories, true)) {
             $errors['categorie'] = 'La categorie selectionnee est invalide.';
         }
 
@@ -441,10 +446,12 @@ class ForumController extends AbstractController
         }
 
         $search = trim((string) $request->query->get('q', ''));
+        $sort = $this->resolveSort((string) $request->query->get('sort', 'recent'));
 
         return $this->render('user/forum/index.html.twig', [
-            'posts' => $postRepository->findForumFeed($search),
+            'posts' => $postRepository->findForumFeed($search, $sort),
             'search' => $search,
+            'sort' => $sort,
             'categories' => $categories,
             'form_data' => [
                 'titre' => $titre,
@@ -613,5 +620,10 @@ class ForumController extends AbstractController
         if (is_file($absolutePath)) {
             @unlink($absolutePath);
         }
+    }
+
+    private function resolveSort(string $sort): string
+    {
+        return in_array($sort, self::FORUM_SORT_OPTIONS, true) ? $sort : 'recent';
     }
 }

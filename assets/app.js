@@ -246,6 +246,43 @@ const initAppUi = () => {
 
         validateComment();
     });
+
+    document.querySelectorAll('form[data-auto-search="true"]').forEach((form) => {
+        if (form.dataset.autoSearchBound) {
+            return;
+        }
+
+        const input = form.querySelector('input[data-auto-search-input="true"]');
+        if (!(input instanceof HTMLInputElement)) {
+            return;
+        }
+
+        form.dataset.autoSearchBound = 'true';
+        const minLength = Number.parseInt(input.getAttribute('minlength') || '3', 10);
+        const initialValue = (input.value || '').trim();
+        let lastSubmitted = initialValue;
+        let debounceTimer = null;
+
+        input.addEventListener('input', () => {
+            const value = (input.value || '').trim();
+
+            if (debounceTimer) {
+                window.clearTimeout(debounceTimer);
+            }
+
+            debounceTimer = window.setTimeout(() => {
+                const hasEnoughChars = value.length >= minLength;
+                const isReset = value.length === 0;
+
+                if ((!hasEnoughChars && !isReset) || value === lastSubmitted) {
+                    return;
+                }
+
+                lastSubmitted = value;
+                form.submit();
+            }, 280);
+        });
+    });
 };
 
 if (document.readyState === 'loading') {
