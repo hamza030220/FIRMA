@@ -2,7 +2,7 @@
 
 namespace App\Controller\User;
 
-use App\Repository\MaladieRepository;
+use App\Repository\Maladie\MaladieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

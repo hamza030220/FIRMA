@@ -6,61 +6,81 @@
 {% block admin_content %}
 
 <style>
-.form-wrap{max-width:800px}
-.back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--color-text-secondary);text-decoration:none;margin-bottom:1.5rem;transition:color 0.15s}
-.back-link:hover{color:var(--color-text-primary)}
+.form-wrap{max-width:1040px;margin:0 auto;padding-bottom:2rem}
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#4a5a51;text-decoration:none;margin-bottom:1.2rem;transition:color .18s}
+.back-link:hover{color:#173d2a}
 .back-link svg{width:16px;height:16px}
-.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
-.form-card-header{padding:1.2rem 1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
-.form-card-header h2{font-size:16px;font-weight:500;color:var(--color-text-primary);margin:0}
-.header-icon{width:36px;height:36px;border-radius:var(--border-radius-md);background:#eaf3de;display:flex;align-items:center;justify-content:center}
-.header-icon svg{width:18px;height:18px;color:#3b6d11}
-.form-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
-.form-group{display:flex;flex-direction:column;gap:6px}
+.new-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#163d2b 0%,#24593f 45%,#d9ead7 140%);border-radius:28px;padding:1.7rem 1.8rem;margin-bottom:1.4rem;color:#fff;box-shadow:0 20px 45px rgba(16,53,35,.16)}
+.new-hero::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.09);top:-70px;right:-40px}
+.new-hero-grid{position:relative;display:grid;grid-template-columns:1.25fr .85fr;gap:1rem;align-items:end}
+.new-kicker{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.new-title{font-size:clamp(28px,4vw,40px);line-height:1.03;margin:.85rem 0 .7rem;font-weight:700;max-width:11ch}
+.new-subtitle{margin:0;max-width:58ch;color:rgba(255,255,255,.86);font-size:14px;line-height:1.7}
+.new-hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem}
+.new-stat{background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:1rem}
+.new-stat strong{display:block;font-size:22px;margin-bottom:4px}
+.new-stat span{font-size:12px;color:rgba(255,255,255,.82)}
+.form-card{background:#fcfdf9;border:1px solid rgba(23,61,42,.08);border-radius:28px;overflow:hidden;box-shadow:0 18px 40px rgba(14,38,27,.08)}
+.form-card-header{padding:1.35rem 1.5rem;border-bottom:1px solid rgba(23,61,42,.08);display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,#f7fbf5 0%,#fcfdf9 100%)}
+.form-card-header h2{font-size:17px;font-weight:700;color:#173d2a;margin:0}
+.header-icon{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#dcefd8,#eef7ec);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(36,89,63,.08)}
+.header-icon svg{width:18px;height:18px;color:#24593f}
+.form-body{padding:1.55rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.form-group{display:flex;flex-direction:column;gap:7px}
 .form-group.full{grid-column:1/-1}
-.form-label{font-size:13px;font-weight:500;color:var(--color-text-primary)}
-.form-label .req{color:#a32d2d;margin-left:2px}
-.form-label .hint{font-weight:400;color:var(--color-text-secondary);font-size:12px;margin-left:6px}
-.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);font-size:14px;color:var(--color-text-primary);outline:none;transition:border-color 0.15s;font-family:var(--font-sans)}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--color-border-primary)}
-.form-input.is-error,.form-select.is-error,.form-textarea.is-error{border-color:#a32d2d;background:#fff8f8}
-.form-input.is-valid,.form-select.is-valid,.form-textarea.is-valid{border-color:#3b6d11}
-.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
-.error-msg{font-size:12px;color:#a32d2d;display:flex;align-items:center;gap:4px}
+.form-label{font-size:13px;font-weight:700;color:#173d2a}
+.form-label .req{color:#b42318;margin-left:2px}
+.form-label .hint{font-weight:500;color:#6a7d72;font-size:12px;margin-left:6px}
+.form-input,.form-select,.form-textarea{width:100%;padding:11px 13px;border:1px solid #d7e2da;border-radius:16px;background:#fff;font-size:14px;color:#162c21;outline:none;transition:border-color .18s,box-shadow .18s,transform .18s;font-family:var(--font-sans);box-shadow:0 1px 0 rgba(12,37,25,.02)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#2f7d55;box-shadow:0 0 0 4px rgba(47,125,85,.10)}
+.form-input.is-error,.form-select.is-error,.form-textarea.is-error{border-color:#d44b4b;background:#fff8f8}
+.form-input.is-valid,.form-select.is-valid,.form-textarea.is-valid{border-color:#3b6d11;background:#fbfff8}
+.form-textarea{resize:vertical;min-height:120px;line-height:1.65}
+.error-msg{font-size:12px;color:#a32d2d;display:flex;align-items:center;gap:5px}
 .error-msg svg{width:12px;height:12px;flex-shrink:0}
-.char-count{font-size:11px;color:var(--color-text-secondary);text-align:right;margin-top:2px}
-.char-count.warn{color:#854f0b}
+.char-count{font-size:11px;color:#708176;text-align:right;margin-top:2px}
+.char-count.warn{color:#9a6b12}
 .char-count.over{color:#a32d2d}
-.gravite-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gravite-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .gravite-option{position:relative}
 .gravite-option input{position:absolute;opacity:0;width:0;height:0}
-.gravite-label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;transition:all 0.15s;text-align:center}
-.gravite-label:hover{background:var(--color-background-secondary)}
+.gravite-label{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;border:1px solid #d7e2da;border-radius:18px;cursor:pointer;transition:all .18s;text-align:center;background:#fff}
+.gravite-label:hover{transform:translateY(-1px);box-shadow:0 10px 20px rgba(18,46,32,.05)}
 .gravite-option input:checked + .gravite-label{border-width:1.5px}
-.gl-faible input:checked + .gravite-label{border-color:#3b6d11;background:#eaf3de}
-.gl-moyen input:checked + .gravite-label{border-color:#185fa5;background:#e6f1fb}
-.gl-eleve input:checked + .gravite-label{border-color:#854f0b;background:#faeeda}
-.gl-critique input:checked + .gravite-label{border-color:#a32d2d;background:#fcebeb}
-.gravite-dot{width:10px;height:10px;border-radius:50%}
+.gl-faible input:checked + .gravite-label{border-color:#3b6d11;background:#edf8e9}
+.gl-moyen input:checked + .gravite-label{border-color:#185fa5;background:#ebf4fd}
+.gl-eleve input:checked + .gravite-label{border-color:#854f0b;background:#fff3df}
+.gl-critique input:checked + .gravite-label{border-color:#a32d2d;background:#fff0f0}
+.gravite-dot{width:12px;height:12px;border-radius:50%}
 .gd-f{background:#3b6d11}.gd-m{background:#185fa5}.gd-e{background:#854f0b}.gd-c{background:#a32d2d}
-.gravite-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
-.upload-zone{border:0.5px dashed var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--color-background-secondary)}
-.upload-zone:hover{border-color:var(--color-border-secondary);background:var(--color-background-primary)}
-.upload-zone.dragover{border-color:#3b6d11;background:#eaf3de}
+.gravite-name{font-size:12px;font-weight:700;color:#173d2a}
+.upload-zone{border:1px dashed #c8d8ce;border-radius:22px;padding:1.65rem;text-align:center;cursor:pointer;transition:all .18s;background:linear-gradient(180deg,#f7fbf8 0%,#ffffff 100%)}
+.upload-zone:hover{border-color:#2f7d55;background:#fbfffc}
+.upload-zone.dragover{border-color:#2f7d55;background:#eef8f0}
 .upload-zone input{display:none}
-.upload-icon{width:40px;height:40px;border-radius:50%;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
-.upload-icon svg{width:18px;height:18px;color:var(--color-text-secondary)}
-.upload-text{font-size:14px;color:var(--color-text-secondary)}
-.upload-text strong{color:var(--color-text-primary)}
-.upload-hint{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
-.preview-wrap{margin-top:10px;display:none}
-.preview-wrap img{max-height:120px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
-.form-footer{padding:1.2rem 1.5rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px;justify-content:flex-end}
-.btn-submit{display:inline-flex;align-items:center;gap:7px;background:#2d7a3a;color:#fff;border:none;padding:10px 24px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s}
-.btn-submit:hover{background:#245f2d}
-.btn-cancel{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:14px;color:var(--color-text-secondary);text-decoration:none;background:var(--color-background-primary);transition:all 0.15s}
-.btn-cancel:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
-.alert-error{display:flex;align-items:center;gap:10px;background:#fcebeb;border:0.5px solid #f7c1c1;border-radius:var(--border-radius-md);padding:11px 14px;margin-bottom:1rem;font-size:14px;color:#791f1f}
+.upload-icon{width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid #d7e2da;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.upload-icon svg{width:18px;height:18px;color:#4f6558}
+.upload-text{font-size:14px;color:#607168}
+.upload-text strong{color:#173d2a}
+.upload-hint{font-size:12px;color:#718279;margin-top:4px}
+.preview-wrap{margin-top:12px;display:none}
+.preview-wrap img{max-height:120px;border-radius:16px;border:1px solid #d7e2da}
+.form-footer{padding:1.2rem 1.5rem;border-top:1px solid rgba(23,61,42,.08);display:flex;align-items:center;gap:10px;justify-content:flex-end;background:#f7fbf8}
+.btn-submit{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#24593f,#2f7d55);color:#fff;border:none;padding:11px 24px;border-radius:16px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .18s,box-shadow .18s}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 14px 25px rgba(36,89,63,.22)}
+.btn-cancel{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border:1px solid #d7e2da;border-radius:16px;font-size:14px;color:#52655b;text-decoration:none;background:#fff;transition:all .18s}
+.btn-cancel:hover{background:#f2f7f3;color:#173d2a}
+.alert-error{display:flex;align-items:center;gap:10px;background:#fff2f1;border:1px solid #f5c5c0;border-radius:18px;padding:12px 14px;margin-bottom:1rem;font-size:14px;color:#791f1f}
+@media (max-width: 900px){
+  .new-hero-grid{grid-template-columns:1fr}
+}
+@media (max-width: 720px){
+  .form-wrap{max-width:100%}
+  .form-body{grid-template-columns:1fr}
+  .gravite-grid{grid-template-columns:repeat(2,1fr)}
+  .form-footer{flex-direction:column-reverse;align-items:stretch}
+  .btn-submit,.btn-cancel{justify-content:center}
+}
 </style>
 
 <div class="form-wrap">
@@ -69,6 +89,29 @@
         Retour à la liste
     </a>
 
+    <section class="new-hero">
+        <div class="new-hero-grid">
+            <div>
+                <span class="new-kicker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+                    Gestion Maladie
+                </span>
+                <h2 class="new-title">Ajouter une fiche maladie claire et complete</h2>
+                <p class="new-subtitle">Renseignez les symptomes, la gravite et le contexte de la maladie dans une page plus propre, sans modifier les autres ecrans du projet.</p>
+            </div>
+            <div class="new-hero-stats">
+                <div class="new-stat">
+                    <strong>3</strong>
+                    <span>zones importantes a verifier</span>
+                </div>
+                <div class="new-stat">
+                    <strong>1</strong>
+                    <span>image optionnelle pour enrichir la fiche</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {% if errors is defined and errors|length > 0 %}
     <div class="alert-error">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -76,7 +119,7 @@
     </div>
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" novalidate>
+    <form method="post" enctype="multipart/form-data" novalidate id="newMaladieForm">
         <div class="form-card">
             <div class="form-card-header">
                 <div class="header-icon">
@@ -233,6 +276,20 @@
 </div>
 
 <script>
+const serverFlashMessages = [
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            { message: {{ message|json_encode|raw }}, type: {{ type|json_encode|raw }} },
+        {% endfor %}
+    {% endfor %}
+];
+
+const serverValidationErrors = [
+    {% for field, message in errors %}
+        {{ message|json_encode|raw }},
+    {% endfor %}
+];
+
 function countChars(el, countId, max) {
     const len = el.value.length;
     const counter = document.getElementById(countId);
@@ -265,6 +322,48 @@ zone.addEventListener('drop', e => {
 
 // Init compteurs
 document.querySelectorAll('[oninput]').forEach(el => el.dispatchEvent(new Event('input')));
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.firmaToast) {
+        serverFlashMessages.forEach(({ message, type }) => {
+            window.firmaToast(message, type === 'error' ? 'danger' : type);
+        });
+
+        serverValidationErrors.forEach((message) => {
+            window.firmaToast(message, 'danger');
+        });
+    }
+});
+
+document.getElementById('newMaladieForm')?.addEventListener('submit', function(e) {
+    const nom = document.getElementById('nom');
+    const description = document.getElementById('desc');
+    const symptomes = document.getElementById('symp');
+    let isValid = true;
+
+    if (!nom.value.trim() || nom.value.trim().length < 3) {
+        nom.classList.add('is-error');
+        isValid = false;
+    }
+
+    if (!description.value.trim() || description.value.trim().length < 10) {
+        description.classList.add('is-error');
+        isValid = false;
+    }
+
+    if (!symptomes.value.trim() || symptomes.value.trim().length < 10) {
+        symptomes.classList.add('is-error');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+        if (window.firmaToast) {
+            window.firmaToast('Veuillez corriger les champs obligatoires avant de continuer.', 'danger');
+        }
+        (nom.value.trim().length < 3 ? nom : (!description.value.trim() || description.value.trim().length < 10 ? description : symptomes)).focus();
+    }
+});
 </script>
 
 {% endblock %}

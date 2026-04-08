@@ -36,7 +36,7 @@
     </div>
 
     {# ===== BARRE RECHERCHE + FILTRES ===== #}
-    <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form">
+    <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form" data-auto-search data-auto-search-min="2">
         <div class="mal-search-wrap">
             <div class="mal-search-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -368,7 +368,7 @@
 }
 .mal-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(15,92,47,0.1);
+    box-shadow: 0 18px 38px rgba(15,92,47,0.16), 0 6px 16px rgba(15,92,47,0.10);
     border-color: #b8d4b8;
 }
 
@@ -516,5 +516,22 @@
     .mal-btn-search { width: 100%; }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.mal-search-form');
+    if (!form) return;
+
+    form.querySelectorAll('select[name="gravite"], select[name="tri"]').forEach((select) => {
+        select.addEventListener('change', () => {
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
 
 {% endblock %}

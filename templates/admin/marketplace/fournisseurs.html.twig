@@ -1,0 +1,109 @@
+{% extends 'admin/base.html.twig' %}
+{% import 'admin/marketplace/_macros.html.twig' as macros %}
+
+{% block page_title %}Fournisseurs{% endblock %}
+{% block admin_page_title %}Gestion des Fournisseurs{% endblock %}
+
+{% block admin_content %}
+<div class="mp-page">
+    <a href="{{ path('admin_marketplace') }}" class="mp-back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au Marketplace
+    </a>
+
+    {{ macros.flashes() }}
+
+    <div class="mp-tabs">
+        <button class="mp-tab active" data-tab="list">Liste des Fournisseurs</button>
+        <button class="mp-tab" data-tab="add">Ajouter un Fournisseur</button>
+    </div>
+
+    {# ── TAB 1 : Liste ── #}
+    <div class="mp-tab-pane active" id="tab-list">
+        {% if fournisseurs is empty %}
+            <div class="mp-empty">Aucun fournisseur enregistré.</div>
+        {% else %}
+        <div class="mp-toolbar">
+            <div class="mp-search-box">
+                <svg class="mp-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="mp-search" data-table="fournisseurs" placeholder="Rechercher par entreprise, contact, email…">
+            </div>
+            <div class="mp-filters">
+                <select class="mp-filter" data-table="fournisseurs" data-col="5">
+                    <option value="">Statut</option>
+                    <option value="Oui">Actif</option>
+                    <option value="Non">Inactif</option>
+                </select>
+            </div>
+        </div>
+        <div class="mp-table-wrap">
+            <table class="mp-table" id="table-fournisseurs">
+                <thead>
+                    <tr>
+                        <th>Entreprise</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Ville</th>
+                        <th>Actif</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for f in fournisseurs %}
+                    <tr>
+                        <td>{{ f.nomEntreprise }}</td>
+                        <td>{{ f.contactNom }}</td>
+                        <td>{{ f.email }}</td>
+                        <td>{{ f.telephone }}</td>
+                        <td>{{ f.ville }}</td>
+                        <td>
+                            <span class="mp-badge {{ f.actif ? 'mp-badge-success' : 'mp-badge-danger' }}">
+                                {{ f.actif ? 'Oui' : 'Non' }}
+                            </span>
+                        </td>
+                        <td class="mp-actions">
+                            <a href="{{ path('admin_marketplace_fournisseurs_edit', {id: f.id}) }}" class="mp-btn mp-btn-sm mp-btn-edit" title="Modifier">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form method="post" action="{{ path('admin_marketplace_fournisseurs_delete', {id: f.id}) }}" data-firma-confirm="Êtes-vous sûr de vouloir supprimer ce fournisseur ? Cette action est irréversible.">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ f.id) }}">
+                                <button type="submit" class="mp-btn mp-btn-sm mp-btn-delete" title="Supprimer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="mp-no-results" style="display:none">
+                        <td colspan="7">Aucun résultat trouvé.</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── TAB 2 : Ajouter ── #}
+    <div class="mp-tab-pane" id="tab-add">
+        {{ form_start(form, {'attr': {'class': 'mp-form', 'novalidate': 'novalidate'}}) }}
+            <div class="mp-form-grid">
+                {{ form_row(form.nomEntreprise) }}
+                {{ form_row(form.contactNom) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.telephone) }}
+                {{ form_row(form.ville) }}
+            </div>
+            {{ form_row(form.adresse) }}
+            <div class="mp-form-check-row">
+                {{ form_row(form.actif) }}
+            </div>
+            <div class="mp-form-actions">
+                <button type="submit" class="mp-btn mp-btn-primary">Ajouter le fournisseur</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

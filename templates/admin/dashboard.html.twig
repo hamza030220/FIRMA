@@ -8,58 +8,122 @@
     <div class="admin-welcome-card">
         <div class="admin-welcome-text">
             <h2>Bienvenue, {{ app.user.prenom }}</h2>
-            <p>GÃ©rez l'ensemble de la plateforme FIRMA depuis le menu latÃ©ral. SÃ©lectionnez une section pour commencer.</p>
+            <p>Gérez l'ensemble de la plateforme FIRMA depuis le menu latéral. Sélectionnez une section pour commencer.</p>
         </div>
         <div class="admin-welcome-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         </div>
     </div>
 
+    <h3 class="admin-stats-title">Marketplace</h3>
     <div class="admin-stats">
-        <div class="admin-stat-card">
+        <a href="{{ path('admin_marketplace') }}" class="admin-stat-card admin-stat-card-link">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span class="admin-stat-label">Marketplace</span>
-            <span class="admin-stat-value">â€”</span>
-        </div>
+            <span class="admin-stat-label">Produits en catalogue</span>
+            <span class="admin-stat-value">{{ totalProducts }}</span>
+            <span class="admin-stat-extra">
+                {{ totalFournisseurs }} fournisseur{{ totalFournisseurs > 1 ? 's' : '' }} actif{{ totalFournisseurs > 1 ? 's' : '' }}
+            </span>
+        </a>
+
+        <a href="{{ path('admin_marketplace_commandes') }}" class="admin-stat-card admin-stat-card-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span class="admin-stat-label">Commandes</span>
+            <span class="admin-stat-value">{{ totalCommandes }}</span>
+            {% if pendingOrders > 0 %}
+            <span class="admin-stat-extra admin-stat-warning">
+                {{ pendingOrders }} en attente de paiement
+            </span>
+            {% else %}
+            <span class="admin-stat-extra">Aucune commande en attente</span>
+            {% endif %}
+        </a>
+
+        <a href="{{ path('admin_marketplace_locations') }}" class="admin-stat-card admin-stat-card-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span class="admin-stat-label">Locations</span>
+            <span class="admin-stat-value">{{ totalLocations }}</span>
+            {% if activeLocations > 0 %}
+            <span class="admin-stat-extra admin-stat-success">
+                {{ activeLocations }} en cours
+            </span>
+            {% else %}
+            <span class="admin-stat-extra">Aucune location active</span>
+            {% endif %}
+        </a>
+
         <div class="admin-stat-card">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="admin-stat-label">Nos terrains</span>
+            <span class="admin-stat-value">{{ totalTerrains }}</span>
+        </div>
+    </div>
+
+    <h3 class="admin-stats-title">Événements</h3>
+    <div class="admin-stats">
+        <a href="{{ path('admin_evenements') }}" class="admin-stat-card admin-stat-card-link">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span class="admin-stat-label">Ã‰vÃ©nements</span>
-            <span class="admin-stat-value">â€”</span>
-        </div>
-        <div class="admin-stat-card">
-            <a href="{{ path('admin_maladie_index') }}" style="text-decoration: none; color: inherit;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
-                <span class="admin-stat-label">Maladies</span>
-                <span class="admin-stat-value">â€”</span>
-            </a>
-        </div>
-        <div class="admin-stat-card">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            <span class="admin-stat-label">Techniciens</span>
-            <span class="admin-stat-value">â€”</span>
-        </div>
-        <div class="admin-stat-card">
+            <span class="admin-stat-label">Événements</span>
+            <span class="admin-stat-value">{{ totalEvenements }}</span>
+            <span class="admin-stat-extra admin-stat-success">
+                {{ evenementsActifs }} actif{{ evenementsActifs > 1 ? 's' : '' }}
+            </span>
+        </a>
+
+        <a href="{{ path('admin_maladie_index') }}" class="admin-stat-card admin-stat-card-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="admin-stat-label">Maladies</span>
+            <span class="admin-stat-value">Module</span>
+            <span class="admin-stat-extra">Gestion des maladies et traitements</span>
+        </a>
+
+        <a href="{{ path('admin_evenements') }}" class="admin-stat-card admin-stat-card-link">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span class="admin-stat-label">Utilisateurs</span>
-            <span class="admin-stat-value">â€”</span>
+            <span class="admin-stat-label">Participants</span>
+            <span class="admin-stat-value">{{ totalParticipants }}</span>
+            {% if enAttente > 0 %}
+            <span class="admin-stat-extra admin-stat-warning">
+                {{ enAttente }} en attente
+            </span>
+            {% else %}
+            <span class="admin-stat-extra">{{ confirmees }} confirmée{{ confirmees > 1 ? 's' : '' }}</span>
+            {% endif %}
+        </a>
+
+        <div class="admin-stat-card">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span class="admin-stat-label">Taux de remplissage</span>
+            <span class="admin-stat-value">{{ tauxRemplissage|number_format(0) }}%</span>
+            <span class="admin-stat-extra">
+                {{ evtCetteSemaine }} cette semaine · {{ evtCeMois }} ce mois
+            </span>
+        </div>
+
+        <div class="admin-stat-card">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l3.09 6.26L22 8.27l-5 4.87 1.18 6.88L12 16.77l-6.18 3.25L7 13.14 2 8.27l6.91-1.01L12 1z"/></svg>
+            <span class="admin-stat-label">Sponsors</span>
+            <span class="admin-stat-value">{{ totalSponsors }}</span>
+            <span class="admin-stat-extra">
+                {{ totalContributions|number_format(0, ',', ' ') }} TND de contributions
+            </span>
         </div>
     </div>
 </div>
 
-{# Section d'activitÃ© rÃ©cente #}
 <div class="admin-recent">
-    <h3>ActivitÃ© rÃ©cente</h3>
+    <h3>Activité récente</h3>
     <div class="admin-recent-list">
         <div class="admin-recent-item">
-            <div class="admin-recent-icon">ðŸŒ±</div>
+            <div class="admin-recent-icon">Mal</div>
             <div class="admin-recent-content">
                 <strong>Module Maladies</strong>
-                <p>GÃ©rez les maladies des plantes et leurs traitements</p>
+                <p>Gérez les maladies des plantes et leurs traitements.</p>
             </div>
             <div class="admin-recent-action">
-                <a href="{{ path('admin_maladie_index') }}" class="btn btn-sm btn-primary">AccÃ©der</a>
+                <a href="{{ path('admin_maladie_index') }}" class="btn btn-sm btn-primary">Accéder</a>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
