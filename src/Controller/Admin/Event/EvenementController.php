@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Asset\Packages;
 
 #[Route('/admin/evenements')]
 #[IsGranted('ROLE_ADMIN')]
@@ -28,6 +29,7 @@ class EvenementController extends AbstractController
         private readonly EvenementRepository $evenementRepo,
         private readonly ParticipationRepository $participationRepo,
         private readonly SponsorRepository $sponsorRepo,
+        private readonly Packages $packages,
     ) {}
 
     // ──────────────────────────────────────────
@@ -118,8 +120,8 @@ class EvenementController extends AbstractController
         $prompt = $request->request->get('prompt', 'agricultural event');
         $token  = $this->getParameter('app.huggingface_token');
 
-        // Call Hugging Face Inference API (Stable Diffusion)
-        $model = 'stabilityai/stable-diffusion-xl-base-1.0';
+        // Call Hugging Face Inference API (FLUX.1-schnell)
+        $model = 'black-forest-labs/FLUX.1-schnell';
         $url   = 'https://router.huggingface.co/hf-inference/models/' . $model;
 
         $ch = curl_init($url);
@@ -133,10 +135,6 @@ class EvenementController extends AbstractController
             ],
             CURLOPT_POSTFIELDS => json_encode([
                 'inputs' => $prompt,
-                'parameters' => [
-                    'width' => 768,
-                    'height' => 512,
-                ],
             ]),
         ]);
 
@@ -159,7 +157,7 @@ class EvenementController extends AbstractController
         }
 
         // Save the image
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/assets/image/event';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -168,7 +166,7 @@ class EvenementController extends AbstractController
         file_put_contents($uploadDir . '/' . $filename, $response);
 
         return $this->json([
-            'url' => '/uploads/events/' . $filename,
+            'url' => 'image/event/' . $filename,
         ]);
     }
 
@@ -193,7 +191,7 @@ class EvenementController extends AbstractController
             return $this->json(['error' => 'Fichier trop volumineux (max 5 Mo).'], 400);
         }
 
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/assets/image/event';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -203,7 +201,7 @@ class EvenementController extends AbstractController
         $file->move($uploadDir, $filename);
 
         return $this->json([
-            'url' => '/uploads/events/' . $filename,
+            'url' => 'image/event/' . $filename,
         ]);
     }
 
@@ -234,7 +232,7 @@ class EvenementController extends AbstractController
             'id'            => $evt->getIdEvenement(),
             'titre'         => $evt->getTitre(),
             'description'   => $evt->getDescription(),
-            'imageUrl'      => $evt->getImageUrl(),
+            'imageUrl'      => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
             'type'          => $evt->getTypeEnum()?->label() ?? $evt->getTypeEvenement(),
             'statut'        => $evt->getStatutEnum()?->label() ?? $evt->getStatut(),
             'statutClass'   => $evt->getStatutEnum()?->badgeClass() ?? 'badge-secondary',
@@ -288,7 +286,12 @@ class EvenementController extends AbstractController
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $this->addFlash('danger', 'Données invalides.');
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $field . ': ' . $error->getMessage();
+            }
+            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
             return $this->redirectToRoute('admin_evenements');
         }
 
@@ -321,7 +324,12 @@ class EvenementController extends AbstractController
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $this->addFlash('danger', 'Données invalides.');
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $field . ': ' . $error->getMessage();
+            }
+            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
             return $this->redirectToRoute('admin_evenements');
         }
 

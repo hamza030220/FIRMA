@@ -94,7 +94,12 @@ class SponsorController extends AbstractController
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $this->addFlash('danger', 'Données invalides.');
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $field . ': ' . $error->getMessage();
+            }
+            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
             return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
         }
 
@@ -119,7 +124,12 @@ class SponsorController extends AbstractController
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $this->addFlash('danger', 'Données invalides.');
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $field . ': ' . $error->getMessage();
+            }
+            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
             return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
         }
 

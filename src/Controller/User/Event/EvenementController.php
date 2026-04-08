@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Asset\Packages;
 
 #[Route('/user/evenements')]
 #[IsGranted('ROLE_USER')]
@@ -24,6 +25,7 @@ class EvenementController extends AbstractController
         private readonly ParticipationService $participationService,
         private readonly ParticipationRepository $participationRepo,
         private readonly SponsorRepository $sponsorRepo,
+        private readonly Packages $packages,
     ) {}
 
     /** Liste des événements avec recherche et tri. */
@@ -97,7 +99,7 @@ class EvenementController extends AbstractController
             'id'               => $evt->getIdEvenement(),
             'titre'            => $evt->getTitre(),
             'description'      => $evt->getDescription(),
-            'imageUrl'         => $evt->getImageUrl(),
+            'imageUrl'         => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
             'type'             => $evt->getTypeEnum()?->label(),
             'statut'           => $evt->getStatutEnum()?->label(),
             'statutBadge'      => $evt->getStatutEnum()?->badgeClass(),
@@ -280,40 +282,12 @@ class EvenementController extends AbstractController
                     'titre'     => $evt->getTitre(),
                     'dateDebut' => $evt->getDateDebut()?->format('d/m/Y'),
                     'lieu'      => $evt->getLieu(),
-                    'imageUrl'  => $evt->getImageUrl(),
+                    'imageUrl'  => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
                 ],
             ];
         }
 
         return $this->json(['participations' => $rows]);
-    }
-
-    // ──────────────────────────────────────────
-    //  GET — Confirmer participation via email
-    // ──────────────────────────────────────────
-    #[Route('/participation/{id}/confirmer/{token}', name: 'user_participation_confirm', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function confirmParticipation(int $id, string $token): Response
-    {
-        $participation = $this->participationService->getById($id);
-        if (!$participation) {
-            $this->addFlash('danger', 'Participation introuvable.');
-            return $this->redirectToRoute('user_evenements');
-        }
-
-        // Vérifier que le token HMAC est valide
-        if (!$this->participationService->verifyToken($participation, $token)) {
-            $this->addFlash('danger', 'Lien de confirmation invalide.');
-            return $this->redirectToRoute('user_evenements');
-        }
-
-        if ($participation->getStatut() !== 'en_attente') {
-            $this->addFlash('info', 'Cette participation a déjà été confirmée.');
-            return $this->redirectToRoute('user_evenements');
-        }
-
-        $this->participationService->confirmer($participation);
-        $this->addFlash('success', 'Votre participation a été confirmée ! Votre code de participation vous a été envoyé par email.');
-        return $this->redirectToRoute('user_evenements');
     }
 
     /** Détail d'un événement. */

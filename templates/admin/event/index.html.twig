@@ -83,7 +83,7 @@
                     <article class="aevt-card">
                         <div class="aevt-card__thumb">
                             {% if evt.imageUrl %}
-                                <img src="{{ evt.imageUrl }}" alt="{{ evt.titre }}">
+                                <img src="{{ asset(evt.imageUrl) }}" alt="{{ evt.titre }}">
                             {% else %}
                                 <div class="aevt-card__thumb-ph">
                                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -150,19 +150,19 @@
         <form method="post" action="{{ path('admin_evenement_create') }}" class="aevt-form" novalidate>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Titre *</label>
-                <input type="text" name="titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" placeholder="Titre de l'événement">
+                <input type="text" name="titre" id="evt_titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" placeholder="Titre de l'événement">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Description</label>
-                <textarea name="description" class="aevt-form__textarea" rows="4" placeholder="Description de l'événement"></textarea>
+                <textarea name="description" id="evt_description" class="aevt-form__textarea" rows="4" placeholder="Description de l'événement"></textarea>
             </div>
             <div class="aevt-form__row">
-                <label class="aevt-form__label">Organisateur</label>
-                <input type="text" name="organisateur" data-validate="maxlen:255" class="aevt-form__input" placeholder="Nom de l'organisateur">
+                <label class="aevt-form__label">Organisateur *</label>
+                <input type="text" name="organisateur" id="evt_organisateur" data-validate="required|maxlen:255" class="aevt-form__input" placeholder="Nom de l'organisateur">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Type *</label>
-                <select name="type_evenement" data-validate="required" class="aevt-form__select">
+                <select name="type_evenement" id="evt_type" data-validate="required" class="aevt-form__select">
                     <option value="">— Choisir —</option>
                     {% for t in typeOptions %}
                         <option value="{{ t.value }}">{{ t.label }}</option>
@@ -172,34 +172,34 @@
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date début *</label>
-                    <input type="date" name="date_debut" data-validate="required" class="aevt-form__input">
+                    <input type="date" name="date_debut" id="evt_date_debut" data-validate="required" class="aevt-form__input">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date fin *</label>
-                    <input type="date" name="date_fin" data-validate="required" class="aevt-form__input">
+                    <input type="date" name="date_fin" id="evt_date_fin" data-validate="required" class="aevt-form__input">
                 </div>
             </div>
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
-                    <label class="aevt-form__label">Horaire début</label>
-                    <input type="time" name="horaire_debut" class="aevt-form__input">
+                    <label class="aevt-form__label">Horaire début *</label>
+                    <input type="time" name="horaire_debut" id="evt_horaire_debut" data-validate="required" class="aevt-form__input">
                 </div>
                 <div class="aevt-form__row">
-                    <label class="aevt-form__label">Horaire fin</label>
-                    <input type="time" name="horaire_fin" class="aevt-form__input">
+                    <label class="aevt-form__label">Horaire fin *</label>
+                    <input type="time" name="horaire_fin" id="evt_horaire_fin" data-validate="required" class="aevt-form__input">
                 </div>
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Capacité max *</label>
-                <input type="text" name="capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="50" placeholder="50">
+                <input type="text" name="capacite_max" id="evt_capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="50" placeholder="50">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Lieu</label>
-                <input type="text" name="lieu" data-validate="maxlen:255" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel">
+                <input type="text" name="lieu" id="evt_lieu" data-validate="maxlen:255" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Adresse</label>
-                <input type="text" name="adresse" data-validate="maxlen:255" class="aevt-form__input" placeholder="Adresse complète">
+                <input type="text" name="adresse" id="evt_adresse" data-validate="maxlen:255" class="aevt-form__input" placeholder="Adresse complète">
             </div>
 
             {# Image #}
@@ -254,19 +254,19 @@
             <form method="post" action="{{ path('admin_evenement_update', {id: editEvent.idEvenement}) }}" class="aevt-form" novalidate>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Titre *</label>
-                    <input type="text" name="titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" value="{{ editEvent.titre }}">
+                    <input type="text" name="titre" id="evt_titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" value="{{ editEvent.titre }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Description</label>
-                    <textarea name="description" class="aevt-form__textarea" rows="4">{{ editEvent.description }}</textarea>
+                    <textarea name="description" id="evt_description" class="aevt-form__textarea" rows="4">{{ editEvent.description }}</textarea>
                 </div>
                 <div class="aevt-form__row">
-                    <label class="aevt-form__label">Organisateur</label>
-                    <input type="text" name="organisateur" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.organisateur }}">
+                    <label class="aevt-form__label">Organisateur *</label>
+                    <input type="text" name="organisateur" id="evt_organisateur" data-validate="required|maxlen:255" class="aevt-form__input" value="{{ editEvent.organisateur }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Type *</label>
-                    <select name="type_evenement" data-validate="required" class="aevt-form__select">
+                    <select name="type_evenement" id="evt_type" data-validate="required" class="aevt-form__select">
                         <option value="">— Choisir —</option>
                         {% for t in typeOptions %}
                             <option value="{{ t.value }}" {% if editEvent.typeEvenement == t.value %}selected{% endif %}>{{ t.label }}</option>
@@ -276,34 +276,34 @@
                 <div class="aevt-form__grid2">
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Date début *</label>
-                        <input type="date" name="date_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateDebut|date('Y-m-d') }}">
+                        <input type="date" name="date_debut" id="evt_date_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateDebut|date('Y-m-d') }}">
                     </div>
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Date fin *</label>
-                        <input type="date" name="date_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateFin|date('Y-m-d') }}">
+                        <input type="date" name="date_fin" id="evt_date_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateFin|date('Y-m-d') }}">
                     </div>
                 </div>
                 <div class="aevt-form__grid2">
                     <div class="aevt-form__row">
-                        <label class="aevt-form__label">Horaire début</label>
-                        <input type="time" name="horaire_debut" class="aevt-form__input" value="{{ editEvent.horaireDebut ? editEvent.horaireDebut|date('H:i') : '' }}">
+                        <label class="aevt-form__label">Horaire début *</label>
+                        <input type="time" name="horaire_debut" id="evt_horaire_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.horaireDebut ? editEvent.horaireDebut|date('H:i') : '' }}">
                     </div>
                     <div class="aevt-form__row">
-                        <label class="aevt-form__label">Horaire fin</label>
-                        <input type="time" name="horaire_fin" class="aevt-form__input" value="{{ editEvent.horaireFin ? editEvent.horaireFin|date('H:i') : '' }}">
+                        <label class="aevt-form__label">Horaire fin *</label>
+                        <input type="time" name="horaire_fin" id="evt_horaire_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.horaireFin ? editEvent.horaireFin|date('H:i') : '' }}">
                     </div>
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Capacité max *</label>
-                    <input type="text" name="capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="{{ editEvent.capaciteMax }}">
+                    <input type="text" name="capacite_max" id="evt_capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="{{ editEvent.capaciteMax }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Lieu</label>
-                    <input type="text" name="lieu" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.lieu }}">
+                    <input type="text" name="lieu" id="evt_lieu" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.lieu }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Adresse</label>
-                    <input type="text" name="adresse" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.adresse }}">
+                    <input type="text" name="adresse" id="evt_adresse" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.adresse }}">
                 </div>
 
                 {# Image #}
@@ -497,12 +497,12 @@
                     </div>
                     <div class="aevt-form__grid2">
                         <div class="aevt-form__row">
-                            <label class="aevt-form__label">Email de contact</label>
-                            <input type="text" name="email_contact" id="spF_email" class="aevt-form__input" data-validate="email|maxlen:150" placeholder="contact@example.com">
+                            <label class="aevt-form__label">Email de contact *</label>
+                            <input type="text" name="email_contact" id="spF_email" class="aevt-form__input" data-validate="required|email|maxlen:150" placeholder="contact@example.com">
                         </div>
                         <div class="aevt-form__row">
-                            <label class="aevt-form__label">Téléphone</label>
-                            <input type="text" name="telephone" id="spF_tel" class="aevt-form__input" data-validate="phone" placeholder="+216 XX XXX XXX">
+                            <label class="aevt-form__label">Téléphone *</label>
+                            <input type="text" name="telephone" id="spF_tel" class="aevt-form__input" data-validate="required|phone" placeholder="+216 XX XXX XXX">
                         </div>
                     </div>
                     <div class="aevt-form__grid2">
@@ -1597,6 +1597,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     firmaToast('Erreur IA : ' + data.error, 'error');
                 } else {
                     target.value = data.url;
+                    // Show preview
+                    var previewId = targetId.replace('_url', '_preview');
+                    var previewDiv = document.getElementById(previewId);
+                    if (previewDiv) {
+                        var previewImg = previewDiv.querySelector('img');
+                        if (previewImg) previewImg.src = '{{ asset("") }}' + data.url;
+                        previewDiv.style.display = 'block';
+                    }
+                    firmaToast('Image générée avec succès !', 'success');
                 }
             })
             .catch(function(err) {

@@ -113,7 +113,7 @@ class ParticipationService
         $evt  = $participation->getEvenement();
 
         $token = $this->generateToken($participation);
-        $confirmUrl = $this->urlGenerator->generate('user_participation_confirm', [
+        $confirmUrl = $this->urlGenerator->generate('public_participation_confirm', [
             'id'    => $participation->getIdParticipation(),
             'token' => $token,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
