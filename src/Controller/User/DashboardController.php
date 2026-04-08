@@ -23,12 +23,6 @@ class DashboardController extends AbstractController
         return $this->render('user/marketplace/index.html.twig');
     }
 
-    #[Route('/forum', name: 'user_forum')]
-    public function forum(): Response
-    {
-        return $this->render('user/forum/index.html.twig');
-    }
-
     #[Route('/techniciens', name: 'user_techniciens')]
     public function techniciens(): Response
     {

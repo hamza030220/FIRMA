@@ -4,14 +4,145 @@
 {% block admin_page_title %}Gérer Forum{% endblock %}
 
 {% block admin_content %}
-<div class="placeholder-page">
-    <div class="placeholder-hero">
-        <div class="placeholder-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h2>Gestion du Forum</h2>
-        <p>Modérez les discussions, gérez les catégories et les signalements.</p>
-        <span class="placeholder-badge">Bientôt disponible</span>
+<section class="forum-admin-shell">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="forum-admin-stats">
+        <article class="forum-admin-stat">
+            <span>Posts</span>
+            <strong>{{ total_posts }}</strong>
+        </article>
+        <article class="forum-admin-stat">
+            <span>Commentaires</span>
+            <strong>{{ total_commentaires }}</strong>
+        </article>
+        <article class="forum-admin-stat">
+            <span>Statut</span>
+            <strong>Modération active</strong>
+        </article>
     </div>
-</div>
+
+    <div class="forum-admin-grid">
+        <section class="forum-panel">
+            <div class="forum-toolbar">
+                <h2>Categories du forum</h2>
+                <span>{{ categories|length }} disponibles</span>
+            </div>
+
+            <form method="post" action="{{ path('admin_forum_category_create') }}" class="forum-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_forum_category_create') }}">
+                <label for="forum-category-name">Nouvelle categorie</label>
+                <input id="forum-category-name" type="text" name="nom" maxlength="100" value="{{ editing_category_id ? '' : category_form_data.nom|default('') }}" placeholder="Ex. Irrigation intelligente">
+                {% if category_errors.nom is defined and not editing_category_id %}
+                    <div class="forum-flash forum-flash-error">{{ category_errors.nom }}</div>
+                {% endif %}
+                <button type="submit" class="forum-button">Ajouter la categorie</button>
+            </form>
+
+            <div class="forum-admin-table">
+                {% for categorie in categories %}
+                    <article class="forum-admin-row">
+                        <div>
+                            {% if editing_category_id == categorie.id %}
+                                <form method="post" action="{{ path('admin_forum_category_edit', {id: categorie.id}) }}" class="forum-form">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_forum_category_edit_' ~ categorie.id) }}">
+                                    <label for="category-edit-{{ categorie.id }}">Modifier la categorie</label>
+                                    <input id="category-edit-{{ categorie.id }}" type="text" name="nom" maxlength="100" value="{{ category_form_data.nom|default(categorie.nom) }}">
+                                    {% if category_errors.nom is defined %}
+                                        <div class="forum-flash forum-flash-error">{{ category_errors.nom }}</div>
+                                    {% endif %}
+                                    <div class="forum-actions">
+                                        <button type="submit" class="forum-button">Enregistrer</button>
+                                        <a href="{{ path('admin_forum') }}" class="forum-button forum-button-secondary">Annuler</a>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <h3>{{ categorie.nom }}</h3>
+                                <small>Utilisable dans les publications du forum</small>
+                            {% endif %}
+                        </div>
+
+                        {% if editing_category_id != categorie.id %}
+                            <div class="forum-actions">
+                                <a href="{{ path('admin_forum', {editCategory: categorie.id}) }}" class="forum-button forum-button-secondary">Modifier</a>
+                                <form method="post" action="{{ path('admin_forum_category_delete', {id: categorie.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_forum_category_delete_' ~ categorie.id) }}">
+                                    <button type="submit" class="forum-button forum-button-danger">Supprimer</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </article>
+                {% else %}
+                    <div class="forum-empty">
+                        <h3>Aucune categorie</h3>
+                        <p>Ajoutez une premiere categorie pour organiser les futurs posts.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="forum-panel">
+            <div class="forum-toolbar">
+                <h2>Posts publiés</h2>
+                <span>{{ posts|length }} affichés</span>
+            </div>
+
+            <div class="forum-admin-table">
+                {% for post in posts %}
+                    <article class="forum-admin-row">
+                        <div>
+                            <h3>{{ post.titre }}</h3>
+                            <p>{{ post.contenu|length > 120 ? post.contenu|slice(0, 120) ~ '...' : post.contenu }}</p>
+                            <small>{{ post.utilisateur.fullName }} • {{ post.categorie ?: 'Sans catégorie' }} • {{ post.dateCreation|date('d/m/Y H:i') }}</small>
+                        </div>
+                        <form method="post" action="{{ path('admin_forum_post_delete', {id: post.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ post.id) }}">
+                            <button type="submit" class="forum-button forum-button-danger">Supprimer</button>
+                        </form>
+                    </article>
+                {% else %}
+                    <div class="forum-empty">
+                        <h3>Aucun post</h3>
+                        <p>Le forum utilisateur est prêt, mais il n'y a pas encore de contenu à modérer.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="forum-panel">
+            <div class="forum-toolbar">
+                <h2>Commentaires récents</h2>
+                <span>Derniers échanges</span>
+            </div>
+
+            <div class="forum-comments">
+                {% for commentaire in recent_commentaires %}
+                    <article class="forum-comment">
+                        <div class="forum-card-footer">
+                            <strong>{{ commentaire.utilisateur.fullName }}</strong>
+                            <span>{{ commentaire.dateCreation|date('d/m/Y H:i') }}</span>
+                        </div>
+                        <p>{{ commentaire.contenu|length > 150 ? commentaire.contenu|slice(0, 150) ~ '...' : commentaire.contenu }}</p>
+                        <div class="forum-card-footer">
+                            <span>Post : {{ commentaire.post.titre }}</span>
+                            <form method="post" action="{{ path('admin_forum_comment_delete', {id: commentaire.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ commentaire.id) }}">
+                                <button type="submit" class="forum-button forum-button-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </article>
+                {% else %}
+                    <div class="forum-empty">
+                        <h3>Aucun commentaire</h3>
+                        <p>Les commentaires apparaîtront ici dès que les utilisateurs commenceront à échanger.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</section>
 {% endblock %}

@@ -17,12 +17,12 @@ return [
         'entrypoint' => true,
     ],
     '@hotwired/stimulus' => [
-        'version' => '3.2.2',
+        'path' => './assets/vendor/hotwired/stimulus.js',
     ],
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
     '@hotwired/turbo' => [
-        'version' => '7.3.0',
+        'path' => './assets/vendor/hotwired/turbo.js',
     ],
 ];
