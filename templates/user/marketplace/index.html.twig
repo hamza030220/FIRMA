@@ -3,14 +3,352 @@
 {% block page_title %}Marketplace{% endblock %}
 
 {% block user_content %}
-<div class="placeholder-page">
-    <div class="placeholder-hero">
-        <div class="placeholder-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+<div class="um-page">
+
+    {# ══════════════ Header ══════════════ #}
+    <div class="um-header">
+        <h1>Marketplace</h1>
+        <p>Parcourez notre catalogue d'équipements agricoles, véhicules et terrains.</p>
+    </div>
+
+    {# ══════════════ Tabs ══════════════ #}
+    <div class="um-tabs">
+        <button class="um-tab active" data-tab="equipements">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Équipements
+        </button>
+        <button class="um-tab" data-tab="vehicules">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Véhicules
+        </button>
+        <button class="um-tab" data-tab="terrains">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+            Terrains
+        </button>
+    </div>
+
+    {# ══════════════ Search ══════════════ #}
+    <div class="um-search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="umSearch" placeholder="Rechercher un article…" autocomplete="off">
+    </div>
+
+    {# ══════════════ Équipements ══════════════ #}
+    <div class="um-tab-pane active" id="pane-equipements">
+        {% if equipements is empty %}
+            <p class="um-empty">Aucun équipement disponible pour le moment.</p>
+        {% else %}
+        <div class="um-grid">
+            {% for e in equipements %}
+            <div class="um-card" data-search="{{ e.nom|lower }} {{ e.categorie|lower|default('') }} {{ e.description|lower|default('') }}">
+                <div class="um-card-img">
+                    {% if e.imageUrl %}
+                        <img src="{{ asset(e.imageUrl) }}" alt="{{ e.nom }}">
+                    {% else %}
+                        <div class="um-card-no-img">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                    {% endif %}
+                    {% if e.quantiteStock <= e.seuilAlerte and e.quantiteStock > 0 %}
+                        <span class="um-badge um-badge-warn">Stock faible</span>
+                    {% elseif e.quantiteStock == 0 %}
+                        <span class="um-badge um-badge-danger">Rupture</span>
+                    {% endif %}
+                </div>
+                <div class="um-card-body">
+                    <h3 class="um-card-title">{{ e.nom }}</h3>
+                    <span class="um-card-price">{{ e.prixVente|number_format(2, ',', ' ') }} TND</span>
+                </div>
+                <button class="um-card-btn"
+                    data-detail-type="equipement"
+                    data-detail-id="{{ e.id }}"
+                    data-detail-nom="{{ e.nom }}"
+                    data-detail-desc="{{ e.description|default('Aucune description.')|e }}"
+                    data-detail-prix="{{ e.prixVente }}"
+                    data-detail-prix-fmt="{{ e.prixVente|number_format(2, ',', ' ') }} TND"
+                    data-detail-image="{{ e.imageUrl ? asset(e.imageUrl) : '' }}"
+                    data-detail-stock="{{ e.quantiteStock }}"
+                    data-detail-categorie="{{ e.categorie|default('—') }}"
+                    data-detail-fournisseur="{{ e.fournisseur|default('—') }}">
+                    Voir les détails
+                </button>
+            </div>
+            {% endfor %}
         </div>
-        <h2>Marketplace</h2>
-        <p>Achetez et vendez des produits agricoles, matériel et services au sein de la communauté FIRMA.</p>
-        <span class="placeholder-badge">Bientôt disponible</span>
+        {% endif %}
+    </div>
+
+    {# ══════════════ Véhicules ══════════════ #}
+    <div class="um-tab-pane" id="pane-vehicules">
+        {% if vehicules is empty %}
+            <p class="um-empty">Aucun véhicule disponible pour le moment.</p>
+        {% else %}
+        <div class="um-grid">
+            {% for v in vehicules %}
+            <div class="um-card" data-search="{{ v.nom|lower }} {{ v.marque|lower|default('') }} {{ v.modele|lower|default('') }} {{ v.description|lower|default('') }}">
+                <div class="um-card-img">
+                    {% if v.imageUrl %}
+                        <img src="{{ asset(v.imageUrl) }}" alt="{{ v.nom }}">
+                    {% else %}
+                        <div class="um-card-no-img">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="um-card-body">
+                    <h3 class="um-card-title">{{ v.nom }}</h3>
+                    <span class="um-card-cat">{{ v.marque }} {{ v.modele }}</span>
+                    <span class="um-card-price">{{ v.prixJour|number_format(2, ',', ' ') }} TND<small>/jour</small></span>
+                </div>
+                <button class="um-card-btn"
+                    data-detail-type="vehicule"
+                    data-detail-id="{{ v.id }}"
+                    data-detail-nom="{{ v.nom }}"
+                    data-detail-desc="{{ v.description|default('Aucune description.')|e }}"
+                    data-detail-image="{{ v.imageUrl ? asset(v.imageUrl) : '' }}"
+                    data-detail-prix-jour="{{ v.prixJour }}"
+                    data-detail-prix-semaine="{{ v.prixSemaine }}"
+                    data-detail-prix-mois="{{ v.prixMois }}"
+                    data-detail-caution="{{ v.caution }}"
+                    data-detail-marque="{{ v.marque|default('—') }}"
+                    data-detail-modele="{{ v.modele|default('—') }}"
+                    data-detail-immatriculation="{{ v.immatriculation|default('—') }}">
+                    Voir les détails
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    {# ══════════════ Terrains ══════════════ #}
+    <div class="um-tab-pane" id="pane-terrains">
+        {% if terrains is empty %}
+            <p class="um-empty">Aucun terrain disponible pour le moment.</p>
+        {% else %}
+        <div class="um-grid">
+            {% for t in terrains %}
+            <div class="um-card" data-search="{{ t.titre|lower }} {{ t.ville|lower|default('') }} {{ t.description|lower|default('') }}">
+                <div class="um-card-img">
+                    {% if t.imageUrl %}
+                        <img src="{{ asset(t.imageUrl) }}" alt="{{ t.titre }}">
+                    {% else %}
+                        <div class="um-card-no-img">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="um-card-body">
+                    <h3 class="um-card-title">{{ t.titre }}</h3>
+                    <span class="um-card-cat">{{ t.ville }} — {{ t.superficieHectares }} ha</span>
+                    <span class="um-card-price">{{ t.prixMois|number_format(2, ',', ' ') }} TND<small>/mois</small></span>
+                </div>
+                <button class="um-card-btn"
+                    data-detail-type="terrain"
+                    data-detail-id="{{ t.id }}"
+                    data-detail-nom="{{ t.titre }}"
+                    data-detail-desc="{{ t.description|default('Aucune description.')|e }}"
+                    data-detail-image="{{ t.imageUrl ? asset(t.imageUrl) : '' }}"
+                    data-detail-prix-mois="{{ t.prixMois }}"
+                    data-detail-prix-annee="{{ t.prixAnnee }}"
+                    data-detail-caution="{{ t.caution }}"
+                    data-detail-ville="{{ t.ville|default('—') }}"
+                    data-detail-adresse="{{ t.adresse|default('—') }}"
+                    data-detail-superficie="{{ t.superficieHectares }}">
+                    Voir les détails
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{# ══════════════ Detail Modal Overlay ══════════════ #}
+<div class="um-modal-overlay" id="umModal">
+    <div class="um-modal">
+        <button class="um-modal-close" id="umModalClose">&times;</button>
+        <div class="um-modal-img" id="umModalImg"></div>
+        <div class="um-modal-body">
+            <h2 id="umModalTitle"></h2>
+            <p class="um-modal-desc" id="umModalDesc"></p>
+            <div class="um-modal-meta" id="umModalMeta"></div>
+            <div class="um-modal-price-row" id="umModalPriceRow"></div>
+
+            {# Mini-map for terrain location #}
+            <div class="firma-minimap" id="umModalMiniMap" style="display:none;"></div>
+
+            {# Équipement: qty + add to cart #}
+            <div class="um-modal-actions" id="umModalActionsEquip" style="display:none;">
+                <div class="um-qty-row">
+                    <button class="um-qty-btn" id="umQtyMinus">−</button>
+                    <input type="number" id="umQtyInput" value="1" min="1">
+                    <button class="um-qty-btn" id="umQtyPlus">+</button>
+                    <span class="um-stock-info" id="umStockInfo"></span>
+                </div>
+                <button class="um-btn-cart" id="umAddCart">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Ajouter au panier
+                </button>
+            </div>
+
+            {# Location: dates + add to locations #}
+            <div class="um-modal-actions" id="umModalActionsLoc" style="display:none;">
+                <div class="um-date-row">
+                    <div class="um-date-field">
+                        <label for="umDateDebut">Date début</label>
+                        <input type="date" id="umDateDebut" min="{{ "now"|date("Y-m-d") }}">
+                    </div>
+                    <div class="um-date-field">
+                        <label for="umDateFin">Date fin</label>
+                        <input type="date" id="umDateFin" min="{{ "now"|date("Y-m-d") }}">
+                    </div>
+                </div>
+                <p class="um-date-error" id="umDateError" style="display:none;"></p>
+                <p class="um-date-summary" id="umDateSummary" style="display:none;"></p>
+                <button class="um-btn-loc" id="umAddLoc">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Ajouter à mes locations
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+{# ══════════════ Floating Cart Button (bottom-right) ══════════════ #}
+<button class="um-fab um-fab-cart" id="umFabCart" title="Mon panier">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    <span class="um-fab-badge" id="umCartBadge" style="display:none;">0</span>
+</button>
+
+{# ══════════════ Floating Locations Button (bottom-left) ══════════════ #}
+<button class="um-fab um-fab-loc" id="umFabLoc" title="Mes locations">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="um-fab-badge" id="umLocBadge" style="display:none;">0</span>
+</button>
+
+{# ══════════════ Cart Drawer (slide-in right) ══════════════ #}
+<div class="um-drawer um-drawer-right" id="umCartDrawer">
+    <div class="um-drawer-header">
+        <h3>Mon panier</h3>
+        <button class="um-drawer-close" id="umCartDrawerClose">&times;</button>
+    </div>
+    <div class="um-drawer-body">
+        {# Current session cart #}
+        <div id="umCartDrawerBody">
+            <p class="um-drawer-empty">Votre panier est vide.</p>
+        </div>
+        <div id="umCartDrawerFooterInline" style="display:none;">
+            <div class="um-drawer-total">
+                <span>Total :</span>
+                <strong id="umCartTotal">0,00 TND</strong>
+            </div>
+            <a href="{{ path('user_marketplace_paiement') }}" class="um-btn-pay" id="umBtnPayCart">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Payer avec carte
+            </a>
+        </div>
+
+        {# Historique separator #}
+        <div class="um-hist-divider">
+            <span>Ancien paniers</span>
+        </div>
+        <div id="umHistCartList">
+            <p class="um-drawer-empty um-hist-loading">Chargement…</p>
+        </div>
+    </div>
+</div>
+
+{# ══════════════ Locations Drawer (slide-in left) ══════════════ #}
+<div class="um-drawer um-drawer-left" id="umLocDrawer">
+    <div class="um-drawer-header">
+        <h3>Mes locations</h3>
+        <button class="um-drawer-close" id="umLocDrawerClose">&times;</button>
+    </div>
+    <div class="um-drawer-body">
+        {# Current session locations to pay #}
+        <div id="umLocDrawerBody">
+            <p class="um-drawer-empty">Aucune location ajoutée.</p>
+        </div>
+        <div id="umLocDrawerFooterInline" style="display:none;">
+            <div class="um-drawer-total">
+                <span>Total :</span>
+                <strong id="umLocTotal">0,00 TND</strong>
+            </div>
+            <div class="um-drawer-total um-drawer-caution">
+                <span>Caution :</span>
+                <strong id="umLocCaution">0,00 TND</strong>
+            </div>
+            <a href="{{ path('user_marketplace_paiement_locations') }}" class="um-btn-pay" id="umBtnPayLoc">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Procéder au paiement
+            </a>
+        </div>
+
+        {# Historique separator #}
+        <div class="um-hist-divider">
+            <span>Historique de mes locations</span>
+        </div>
+        <div id="umHistLocList">
+            <p class="um-drawer-empty um-hist-loading">Chargement…</p>
+        </div>
+    </div>
+</div>
+
+{# Drawer backdrop #}
+<div class="um-drawer-backdrop" id="umDrawerBackdrop"></div>
+
+{# ══════════════ Historique Commande Overlay ══════════════ #}
+<div class="um-hist-overlay" id="umHistOverlay">
+    <div class="um-hist-modal">
+        <div class="um-hist-modal-header">
+            <h3 id="umHistModalTitle">Commande</h3>
+            <button class="um-drawer-close" id="umHistOverlayClose">&times;</button>
+        </div>
+        <div class="um-hist-modal-body" id="umHistModalBody"></div>
+        <div class="um-hist-modal-footer" id="umHistModalFooter">
+            <button class="um-btn-pay um-btn-hist-reorder" id="umHistReorder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                Ajouter au panier
+            </button>
+            <a class="um-btn-hist-pdf" id="umHistPdf" href="#" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Exporter PDF
+            </a>
+        </div>
+    </div>
+</div>
+
+{# ══════════════ Flash messages ══════════════ #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="um-flash um-flash-{{ label }}">
+            {{ message }}
+            <button class="um-flash-close">&times;</button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{# Routes for JS #}
+<script>
+    window.UM_ROUTES = {
+        cartAdd: '{{ path("user_marketplace_cart_add") }}',
+        cartUpdate: '{{ path("user_marketplace_cart_update") }}',
+        cartRemove: '{{ path("user_marketplace_cart_remove") }}',
+        cartGet: '{{ path("user_marketplace_cart_get") }}',
+        locAdd: '{{ path("user_marketplace_loc_add") }}',
+        locRemove: '{{ path("user_marketplace_loc_remove") }}',
+        paiement: '{{ path("user_marketplace_paiement") }}',
+        paiementLoc: '{{ path("user_marketplace_paiement_locations") }}',
+        histCommandes: '{{ path("user_marketplace_historique_commandes") }}',
+        histHide: '{{ path("user_marketplace_historique_hide") }}',
+        histReorder: '{{ path("user_marketplace_historique_reorder") }}',
+        histPdfBase: '{{ path("user_marketplace_historique_pdf", {id: 0}) }}'.replace('/0/', '/{id}/'),
+        histLocations: '{{ path("user_marketplace_historique_locations") }}',
+        histLocHide: '{{ path("user_marketplace_historique_loc_hide") }}',
+    };
+    window.UM_CART_INIT = {{ cart|json_encode|raw }};
+    window.UM_LOC_INIT = {{ locations|json_encode|raw }};
+</script>
 {% endblock %}

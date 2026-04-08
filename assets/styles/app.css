@@ -824,3 +824,347 @@ body {
         justify-content: center;
     }
 }
+
+/* ===== Merge: styles from main branch ===== */
+/* Base application styles */
+
+/* ══════════════════════════════════════════════════════
+   FIRMA — Global Custom Modal & Toast System
+   ══════════════════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.firma-overlay{
+  position:fixed;inset:0;z-index:99998;
+  background:rgba(15,25,18,.55);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  opacity:0;
+  transition:opacity .3s ease;
+  pointer-events:none;
+}
+.firma-overlay.firma-show{
+  opacity:1;pointer-events:all;
+}
+
+/* ── Modal ── */
+.firma-modal{
+  position:fixed;z-index:99999;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(.88);
+  width:92%;max-width:420px;
+  background:#fff;
+  border-radius:20px;
+  padding:36px 32px 28px;
+  box-shadow:0 24px 64px rgba(32,69,44,.18),0 2px 8px rgba(0,0,0,.06);
+  opacity:0;
+  transition:opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+  text-align:center;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.firma-modal.firma-show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+  pointer-events:all;
+}
+
+/* Icon circle */
+.firma-modal-icon{
+  width:64px;height:64px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 18px;
+  position:relative;
+}
+.firma-modal-icon svg{
+  width:30px;height:30px;
+  stroke-width:2;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.firma-modal-icon.firma-icon-danger{
+  background:linear-gradient(135deg,#fef2f2,#fee2e2);
+}
+.firma-modal-icon.firma-icon-danger svg{stroke:#dc2626;}
+.firma-modal-icon.firma-icon-warning{
+  background:linear-gradient(135deg,#fffbeb,#fef3c7);
+}
+.firma-modal-icon.firma-icon-warning svg{stroke:#d97706;}
+.firma-modal-icon.firma-icon-success{
+  background:linear-gradient(135deg,#f0faf1,#dcfce7);
+}
+.firma-modal-icon.firma-icon-success svg{stroke:#20452c;}
+.firma-modal-icon.firma-icon-info{
+  background:linear-gradient(135deg,#f0faf1,#d1fae5);
+}
+.firma-modal-icon.firma-icon-info svg{stroke:#4aac33;}
+
+/* Subtle ring animation on icon */
+.firma-modal-icon::after{
+  content:'';position:absolute;inset:-4px;
+  border-radius:50%;
+  border:2px solid transparent;
+  animation:firmaRing .6s ease forwards;
+}
+.firma-icon-danger::after{border-color:rgba(220,38,38,.15);}
+.firma-icon-warning::after{border-color:rgba(217,119,6,.15);}
+.firma-icon-success::after{border-color:rgba(32,69,44,.12);}
+.firma-icon-info::after{border-color:rgba(74,172,51,.12);}
+
+@keyframes firmaRing{
+  0%{transform:scale(.6);opacity:0;}
+  100%{transform:scale(1);opacity:1;}
+}
+
+/* Title */
+.firma-modal-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.2rem;font-weight:700;color:#1f2937;
+  margin-bottom:8px;
+}
+
+/* Message */
+.firma-modal-msg{
+  font-size:.9rem;color:#6b7280;
+  line-height:1.55;margin-bottom:24px;
+}
+
+/* Buttons row */
+.firma-modal-btns{
+  display:flex;gap:10px;justify-content:center;
+}
+.firma-modal-btn{
+  padding:10px 24px;border-radius:10px;
+  font-size:.88rem;font-weight:600;
+  cursor:pointer;border:none;
+  font-family:inherit;
+  transition:all .2s ease;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.firma-modal-btn:active{transform:scale(.96);}
+
+/* Cancel / secondary */
+.firma-btn-cancel{
+  background:#f3f4f6;color:#6b7280;
+}
+.firma-btn-cancel:hover{
+  background:#e5e7eb;color:#374151;
+}
+
+/* Danger */
+.firma-btn-danger{
+  background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;
+}
+.firma-btn-danger:hover{
+  box-shadow:0 4px 14px rgba(220,38,38,.35);
+  transform:translateY(-1px);
+}
+
+/* Primary / OK */
+.firma-btn-primary{
+  background:linear-gradient(135deg,#20452c,#4aac33);color:#fff;
+}
+.firma-btn-primary:hover{
+  box-shadow:0 4px 14px rgba(74,172,51,.35);
+  transform:translateY(-1px);
+}
+
+/* ── Toast Notifications ── */
+.firma-toast-container{
+  position:fixed;top:24px;right:24px;
+  z-index:99997;
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:10px;
+  pointer-events:none;
+  width:400px;max-width:92vw;
+}
+.firma-toast{
+  width:100%;
+  padding:14px 20px 14px 16px;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.04);
+  display:flex;align-items:flex-start;gap:12px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.88rem;color:#1f2937;
+  pointer-events:all;
+  transform:translateY(-30px);
+  opacity:0;
+  animation:firmaToastIn .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  border-left:4px solid transparent;
+}
+.firma-toast.firma-toast-out{
+  animation:firmaToastOut .3s ease forwards;
+}
+
+/* Toast icon */
+.firma-toast-icon{
+  width:36px;height:36px;min-width:36px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.firma-toast-icon svg{
+  width:18px;height:18px;
+  stroke-width:2;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* Toast text */
+.firma-toast-text{flex:1;min-width:0;padding-top:8px;}
+.firma-toast-text ul{margin:4px 0 0 0;padding-left:16px;}
+.firma-toast-text li{margin-bottom:2px;}
+
+/* Toast close */
+.firma-toast-close{
+  margin-left:auto;background:none;border:none;
+  cursor:pointer;color:#9ca3af;
+  padding:4px;border-radius:6px;
+  transition:all .2s;flex-shrink:0;
+}
+.firma-toast-close:hover{color:#374151;background:#f3f4f6;}
+.firma-toast-close svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;}
+
+/* Toast progress bar */
+.firma-toast-progress{
+  position:absolute;bottom:0;left:0;height:3px;
+  border-radius:0 0 0 14px;
+  animation:firmaToastProgress 4s linear forwards;
+}
+
+/* Toast variants */
+.firma-toast-success{border-left-color:#4aac33;}
+.firma-toast-success .firma-toast-icon{background:#f0faf1;}
+.firma-toast-success .firma-toast-icon svg{stroke:#4aac33;}
+.firma-toast-success .firma-toast-progress{background:#4aac33;}
+
+.firma-toast-danger{border-left-color:#dc2626;}
+.firma-toast-danger .firma-toast-icon{background:#fef2f2;}
+.firma-toast-danger .firma-toast-icon svg{stroke:#dc2626;}
+.firma-toast-danger .firma-toast-progress{background:#dc2626;}
+
+.firma-toast-warning{border-left-color:#d97706;}
+.firma-toast-warning .firma-toast-icon{background:#fffbeb;}
+.firma-toast-warning .firma-toast-icon svg{stroke:#d97706;}
+.firma-toast-warning .firma-toast-progress{background:#d97706;}
+
+.firma-toast-info{border-left-color:#20452c;}
+.firma-toast-info .firma-toast-icon{background:#f0faf1;}
+.firma-toast-info .firma-toast-icon svg{stroke:#20452c;}
+.firma-toast-info .firma-toast-progress{background:#20452c;}
+
+@keyframes firmaToastIn{
+  0%{transform:translateY(-30px);opacity:0;}
+  100%{transform:translateY(0);opacity:1;}
+}
+@keyframes firmaToastOut{
+  0%{transform:translateY(0);opacity:1;}
+  100%{transform:translateY(-20px);opacity:0;}
+}
+@keyframes firmaToastProgress{
+  0%{width:100%;}
+  100%{width:0%;}
+}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .firma-modal{padding:28px 20px 22px;border-radius:16px;}
+  .firma-modal-icon{width:52px;height:52px;}
+  .firma-modal-icon svg{width:24px;height:24px;}
+  .firma-modal-title{font-size:1.05rem;}
+  .firma-modal-btns{flex-direction:column;}
+  .firma-modal-btn{justify-content:center;}
+  .firma-toast-container{top:12px;right:12px;max-width:96vw;}
+}
+
+/* ══════════════════════════════════════════════════════
+   FIRMA — Map Picker Overlay (Leaflet / OSM)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Trigger button (small green icon) ── */
+.firma-map-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:10px;
+  border:2px solid #4aac33;background:#f0faf1;
+  cursor:pointer;transition:all .2s ease;flex-shrink:0;
+}
+.firma-map-btn:hover{background:#4aac33;}
+.firma-map-btn:hover svg{stroke:#fff;}
+.firma-map-btn svg{width:18px;height:18px;stroke:#4aac33;fill:none;stroke-width:2;transition:stroke .2s;}
+
+/* ── Overlay ── */
+.firma-map-overlay{
+  position:fixed;inset:0;z-index:99999;
+  background:rgba(15,25,18,.6);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+.firma-map-overlay.open{opacity:1;pointer-events:auto;}
+
+/* ── Container ── */
+.firma-map-container{
+  width:640px;max-width:92vw;
+  background:#fff;border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  overflow:hidden;
+  transform:scale(.92);transition:transform .3s ease;
+}
+.firma-map-overlay.open .firma-map-container{transform:scale(1);}
+
+/* ── Header ── */
+.firma-map-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;background:#20452c;color:#fff;
+}
+.firma-map-header h3{margin:0;font-size:1rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;}
+.firma-map-close{
+  background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;
+  line-height:1;padding:0 4px;opacity:.7;transition:opacity .2s;
+}
+.firma-map-close:hover{opacity:1;}
+
+/* ── Map area ── */
+.firma-map-area{height:380px;position:relative;}
+
+/* ── Footer (address display + confirm) ── */
+.firma-map-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 20px;background:#f8faf8;border-top:1px solid #e5e7eb;
+}
+.firma-map-address{
+  flex:1;font-size:.88rem;color:#4b5563;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.firma-map-address em{color:#9ca3af;font-style:normal;}
+.firma-map-confirm{
+  padding:8px 20px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#20452c,#4aac33);
+  color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;
+  transition:all .2s;font-family:inherit;white-space:nowrap;
+}
+.firma-map-confirm:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(74,172,51,.3);}
+.firma-map-confirm:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── Mini-map (user terrain detail) ── */
+.firma-minimap{
+  width:100%;height:200px;border-radius:12px;overflow:hidden;
+  margin-top:12px;border:1px solid #e5e7eb;
+}
+
+/* ── Field row with map button ── */
+.firma-field-with-map{
+  display:flex;align-items:flex-end;gap:8px;
+}
+.firma-field-with-map .um-pay-field,
+.firma-field-with-map>div:first-child{flex:1;}
+
+@media(max-width:600px){
+  .firma-map-container{max-width:98vw;border-radius:14px;}
+  .firma-map-area{height:300px;}
+  .firma-map-footer{flex-direction:column;align-items:stretch;}
+}
+
+/* ══════ FIRMA — Validation Styles ══════ */
+.firma-field-error{border-color:#dc2626 !important;box-shadow:0 0 0 2px rgba(220,38,38,.15) !important;}
+
