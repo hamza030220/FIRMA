@@ -37,17 +37,16 @@ class DashboardController extends AbstractController
         $activeLocations = $locRepo->count(['statut' => 'en_cours']);
         $totalFournisseurs = $fournRepo->count(['actif' => true]);
 
-        // Event stats
-        $totalEvenements   = $evtRepo->countAll();
-        $evenementsActifs   = $evtRepo->countActifs();
-        $tauxRemplissage    = $evtRepo->tauxRemplissageMoyen();
-        $totalParticipants  = $partRepo->countTotalParticipants();
-        $confirmees         = $partRepo->countConfirmees();
-        $enAttente          = $partRepo->countEnAttente();
-        $totalSponsors      = $sponsorRepo->count([]);
+        $totalEvenements = $evtRepo->countAll();
+        $evenementsActifs = $evtRepo->countActifs();
+        $tauxRemplissage = $evtRepo->tauxRemplissageMoyen();
+        $totalParticipants = $partRepo->countTotalParticipants();
+        $confirmees = $partRepo->countConfirmees();
+        $enAttente = $partRepo->countEnAttente();
+        $totalSponsors = $sponsorRepo->count([]);
         $totalContributions = $sponsorRepo->totalContributions();
-        $evtCetteSemaine    = $evtRepo->countCetteSemaine();
-        $evtCeMois          = $evtRepo->countCeMois();
+        $evtCetteSemaine = $evtRepo->countCetteSemaine();
+        $evtCeMois = $evtRepo->countCeMois();
 
         return $this->render('admin/dashboard.html.twig', [
             'totalProducts' => $totalProducts,
@@ -57,17 +56,16 @@ class DashboardController extends AbstractController
             'totalCommandes' => $cmdRepo->count([]),
             'totalLocations' => $locRepo->count([]),
             'totalTerrains' => $terrainRepo->count([]),
-            // Events
-            'totalEvenements'   => $totalEvenements,
-            'evenementsActifs'  => $evenementsActifs,
-            'tauxRemplissage'   => $tauxRemplissage,
+            'totalEvenements' => $totalEvenements,
+            'evenementsActifs' => $evenementsActifs,
+            'tauxRemplissage' => $tauxRemplissage,
             'totalParticipants' => $totalParticipants,
-            'confirmees'        => $confirmees,
-            'enAttente'         => $enAttente,
-            'totalSponsors'     => $totalSponsors,
-            'totalContributions'=> $totalContributions,
-            'evtCetteSemaine'   => $evtCetteSemaine,
-            'evtCeMois'         => $evtCeMois,
+            'confirmees' => $confirmees,
+            'enAttente' => $enAttente,
+            'totalSponsors' => $totalSponsors,
+            'totalContributions' => $totalContributions,
+            'evtCetteSemaine' => $evtCetteSemaine,
+            'evtCeMois' => $evtCeMois,
         ]);
     }
 
@@ -77,10 +75,10 @@ class DashboardController extends AbstractController
         return $this->render('admin/marketplace/index.html.twig');
     }
 
-    #[Route('/techniciens', name: 'admin_techniciens')]
-    public function techniciens(): Response
+    #[Route('/maladies', name: 'admin_maladie_list')]
+    public function maladies(): Response
     {
-        return $this->render('admin/tech/index.html.twig');
+        return $this->redirectToRoute('admin_maladie_index');
     }
 
     #[Route('/forum', name: 'admin_forum')]
