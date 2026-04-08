@@ -18,7 +18,7 @@
             <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
         </div>
 
-        <form method="post" action="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-form" novalidate>
+        <form id="edit-post-form" method="post" action="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token('forum_edit_' ~ post.id) }}">
 
             <label for="titre">Titre</label>
@@ -51,4 +51,67 @@
         </form>
     </section>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('edit-post-form');
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            let isConfirmed = false;
+            let pendingSubmit = false;
+
+            const setEditSuccessToast = () => {
+                sessionStorage.setItem('forumPostEditedToast', JSON.stringify({
+                    message: 'Votre post a ete modifie avec succes.',
+                    type: 'success',
+                    duration: 10000
+                }));
+            };
+
+            const modal = document.getElementById('appConfirmModal');
+            const modalTitle = document.getElementById('appConfirmTitle');
+            const modalMessage = document.getElementById('appConfirmMessage');
+            const modalSubmit = document.getElementById('appConfirmSubmit');
+
+            if (modal && modalTitle && modalMessage && modalSubmit && !modalSubmit.dataset.editPostBound) {
+                modalSubmit.dataset.editPostBound = 'true';
+                modalSubmit.addEventListener('click', () => {
+                    if (!pendingSubmit) {
+                        return;
+                    }
+
+                    pendingSubmit = false;
+                    isConfirmed = true;
+                    setEditSuccessToast();
+                    form.submit();
+                });
+            }
+
+            form.addEventListener('submit', (event) => {
+                if (isConfirmed) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const title = 'Enregistrer les modifications';
+                const message = 'Voulez-vous vraiment enregistrer les modifications de ce post ?';
+
+                if (typeof window.firmaOpenConfirmModal === 'function') {
+                    pendingSubmit = true;
+                    window.firmaOpenConfirmModal('edit-post-form', title, message, 'Enregistrer', 'primary');
+                    return;
+                }
+
+                isConfirmed = true;
+                setEditSuccessToast();
+                form.submit();
+            });
+        });
+    </script>
 {% endblock %}
