@@ -1,0 +1,11 @@
+{# Reusable flash messages and back-button for marketplace pages #}
+{% macro flashes() %}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="mp-alert mp-alert-{{ type }}">
+                {{ message }}
+                <button type="button" class="mp-alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endmacro %}
