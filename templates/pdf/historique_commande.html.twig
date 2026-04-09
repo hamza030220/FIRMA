@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { margin: 30px 40px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 11px; color: #333; }
+
+    /* ── Header ── */
+    .header { border-bottom: 3px solid #2563eb; padding-bottom: 14px; margin-bottom: 18px; }
+    .header table { width: 100%; }
+    .header td { vertical-align: top; }
+    .logo { width: 80px; height: auto; }
+    .company-name { font-size: 26px; font-weight: bold; color: #20452c; letter-spacing: 1px; }
+    .company-sub { font-size: 10px; color: #666; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 { font-size: 20px; color: #2563eb; text-transform: uppercase; letter-spacing: 2px; }
+    .doc-title .doc-num { font-size: 11px; color: #666; margin-top: 4px; }
+
+    /* ── Blue accent bar ── */
+    .accent-bar { background: #2563eb; color: #fff; padding: 8px 14px; font-size: 11px; font-weight: bold; border-radius: 4px; margin-bottom: 14px; }
+
+    /* ── Info blocks ── */
+    .info-row { width: 100%; margin-bottom: 16px; }
+    .info-row td { vertical-align: top; width: 50%; }
+    .info-block { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 12px; }
+    .info-block h4 { font-size: 10px; color: #2563eb; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-block p { font-size: 10.5px; line-height: 1.5; color: #444; }
+
+    /* ── Products table ── */
+    .products-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .products-table th { background: #2563eb; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .products-table th:first-child { width: 30px; text-align: center; }
+    .products-table th:nth-child(3), .products-table td:nth-child(3) { text-align: center; }
+    .products-table th:nth-child(4), .products-table td:nth-child(4) { text-align: right; }
+    .products-table th:last-child, .products-table td:last-child { text-align: right; }
+    .products-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .products-table td:first-child { text-align: center; color: #666; }
+    .products-table tr:nth-child(even) td { background: #f0f4ff; }
+
+    /* ── Total row ── */
+    .total-row { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .total-row td { padding: 10px 10px; font-size: 13px; font-weight: bold; border-top: 2px solid #2563eb; }
+    .total-row .label { text-align: right; color: #333; }
+    .total-row .value { text-align: right; color: #2563eb; width: 140px; }
+
+    /* ── Status badges ── */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; letter-spacing: 0.3px; }
+    .badge-paid { background: #dcfce7; color: #166534; }
+    .badge-pending { background: #fef9c3; color: #854d0e; }
+    .badge-delivered { background: #dbeafe; color: #1e40af; }
+    .badge-shipping { background: #fef3c7; color: #92400e; }
+
+    /* ── Footer ── */
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:70%">
+                <table><tr>
+                    <td style="width:90px"><img src="{{ logo_base64 }}" class="logo"></td>
+                    <td>
+                        <div class="company-name">FIRMA</div>
+                        <div class="company-sub">Marketplace Agricole</div>
+                    </td>
+                </tr></table>
+            </td>
+            <td class="doc-title">
+                <h1>Historique Commande</h1>
+                <div class="doc-num">N° {{ commande.numeroCommande }}</div>
+                <div class="doc-num">{{ commande.dateCommande|date('d/m/Y à H:i') }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Info block -->
+<div class="accent-bar">Informations de la commande</div>
+<table class="info-row">
+    <tr>
+        <td style="padding-right:8px">
+            <div class="info-block">
+                <h4>Commande</h4>
+                <p>
+                    <strong>N° {{ commande.numeroCommande }}</strong><br>
+                    Date : {{ commande.dateCommande|date('d/m/Y à H:i') }}<br>
+                    Paiement :
+                    {% if commande.statutPaiement == 'payé' or commande.statutPaiement == 'Payé' %}
+                        <span class="badge badge-paid">{{ commande.statutPaiement }}</span>
+                    {% else %}
+                        <span class="badge badge-pending">{{ commande.statutPaiement }}</span>
+                    {% endif %}
+                    <br>
+                    Livraison :
+                    {% if commande.statutLivraison == 'livré' or commande.statutLivraison == 'Livré' %}
+                        <span class="badge badge-delivered">{{ commande.statutLivraison }}</span>
+                    {% else %}
+                        <span class="badge badge-shipping">{{ commande.statutLivraison }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </td>
+        <td style="padding-left:8px">
+            <div class="info-block">
+                <h4>Adresse de livraison</h4>
+                <p>
+                    {{ commande.adresseLivraison }}<br>
+                    {{ commande.villeLivraison }}
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- Products -->
+<div class="accent-bar">Détails des produits</div>
+<table class="products-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Produit</th>
+            <th>Qté</th>
+            <th>Prix unit.</th>
+            <th>Sous-total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for detail in commande.details %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ detail.equipement.nom }}</td>
+            <td>{{ detail.quantite }}</td>
+            <td>{{ detail.prixUnitaire|number_format(2, ',', ' ') }} DT</td>
+            <td>{{ detail.sousTotal|number_format(2, ',', ' ') }} DT</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Total -->
+<table class="total-row">
+    <tr>
+        <td class="label">Montant Total</td>
+        <td class="value">{{ commande.montantTotal|number_format(2, ',', ' ') }} DT</td>
+    </tr>
+</table>
+
+<!-- Firma illustration -->
+<div style="margin-top: 10px;">
+    <img src="{{ firma_base64 }}" style="width: 80px; height: auto; opacity: 0.85;">
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    FIRMA Marketplace &bull; Document généré le {{ "now"|date('d/m/Y') }} &bull; Historique de commande
+</div>
+
+</body>
+</html>

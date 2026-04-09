@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% block page_title %}Tableau de bord{% endblock %} — FIRMA{% endblock %}
+
+{% block body %}
+<div class="user-layout">
+    {# ── Top Navbar ── #}
+    <nav class="user-navbar">
+        {# ── Left: Brand ── #}
+        <a href="{{ path('user_dashboard') }}" class="user-navbar-brand">
+            <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="user-navbar-logo">
+            <span class="user-navbar-brand-text">FIRMA</span>
+        </a>
+
+        <button class="user-navbar-toggle" id="navToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        {# ── Center: Main nav links ── #}
+        <ul class="user-navbar-center" id="navLinks">
+            <li><a href="{{ path('user_marketplace') }}" class="{% if app.request.get('_route') starts with 'user_marketplace' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Marketplace
+            </a></li>
+            <li><a href="{{ path('user_forum') }}" class="{% if app.request.get('_route') starts with 'user_forum' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Forum
+            </a></li>
+            <li><a href="{{ path('user_maladie') }}" class="{% if app.request.get('_route') starts with 'user_maladie' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                Maladies
+            </a></li>
+            <li><a href="{{ path('user_evenements') }}" class="{% if app.request.get('_route') starts with 'user_evenement' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Événements
+            </a></li>
+        </ul>
+
+        {# ── Right: Profil + Logout ── #}
+        <div class="user-navbar-right">
+            <a href="{{ path('user_profile') }}" class="user-navbar-profile {% if app.request.get('_route') starts with 'user_profile' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profil
+            </a>
+            <a href="{{ path('app_logout') }}" class="user-navbar-logout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </a>
+        </div>
+    </nav>
+
+    {# ── Main Content ── #}
+    <main class="user-main">
+        {% block user_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
