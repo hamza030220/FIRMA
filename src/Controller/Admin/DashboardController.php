@@ -2,6 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\Repository\Event\EvenementRepository;
+use App\Repository\Event\ParticipationRepository;
+use App\Repository\Event\SponsorRepository;
 use App\Repository\Marketplace\CommandeRepository;
 use App\Repository\Marketplace\EquipementRepository;
 use App\Repository\Marketplace\FournisseurRepository;
@@ -25,11 +28,25 @@ class DashboardController extends AbstractController
         FournisseurRepository $fournRepo,
         CommandeRepository $cmdRepo,
         LocationRepository $locRepo,
+        EvenementRepository $evtRepo,
+        ParticipationRepository $partRepo,
+        SponsorRepository $sponsorRepo,
     ): Response {
         $totalProducts = $equipRepo->count([]) + $vehicRepo->count([]) + $terrainRepo->count([]);
         $pendingOrders = $cmdRepo->count(['statutPaiement' => 'en_attente']);
         $activeLocations = $locRepo->count(['statut' => 'en_cours']);
         $totalFournisseurs = $fournRepo->count(['actif' => true]);
+
+        $totalEvenements = $evtRepo->countAll();
+        $evenementsActifs = $evtRepo->countActifs();
+        $tauxRemplissage = $evtRepo->tauxRemplissageMoyen();
+        $totalParticipants = $partRepo->countTotalParticipants();
+        $confirmees = $partRepo->countConfirmees();
+        $enAttente = $partRepo->countEnAttente();
+        $totalSponsors = $sponsorRepo->count([]);
+        $totalContributions = $sponsorRepo->totalContributions();
+        $evtCetteSemaine = $evtRepo->countCetteSemaine();
+        $evtCeMois = $evtRepo->countCeMois();
 
         return $this->render('admin/dashboard.html.twig', [
             'totalProducts' => $totalProducts,
@@ -39,30 +56,28 @@ class DashboardController extends AbstractController
             'totalCommandes' => $cmdRepo->count([]),
             'totalLocations' => $locRepo->count([]),
             'totalTerrains' => $terrainRepo->count([]),
+            'totalEvenements' => $totalEvenements,
+            'evenementsActifs' => $evenementsActifs,
+            'tauxRemplissage' => $tauxRemplissage,
+            'totalParticipants' => $totalParticipants,
+            'confirmees' => $confirmees,
+            'enAttente' => $enAttente,
+            'totalSponsors' => $totalSponsors,
+            'totalContributions' => $totalContributions,
+            'evtCetteSemaine' => $evtCetteSemaine,
+            'evtCeMois' => $evtCeMois,
         ]);
     }
 
-    #[Route('/evenements', name: 'admin_evenements')]
-    public function evenements(): Response
+    #[Route('/marketplace', name: 'admin_marketplace')]
+    public function marketplace(): Response
     {
-        return $this->render('admin/event/index.html.twig');
+        return $this->render('admin/marketplace/index.html.twig');
     }
 
-    #[Route('/techniciens', name: 'admin_techniciens')]
-    public function techniciens(): Response
+    #[Route('/maladies', name: 'admin_maladie_list')]
+    public function maladies(): Response
     {
-        return $this->render('admin/tech/index.html.twig');
-    }
-
-    #[Route('/forum', name: 'admin_forum')]
-    public function forum(): Response
-    {
-        return $this->render('admin/forum/index.html.twig');
-    }
-
-    #[Route('/utilisateurs', name: 'admin_utilisateurs')]
-    public function utilisateurs(): Response
-    {
-        return $this->render('admin/user/index.html.twig');
+        return $this->redirectToRoute('admin_maladie_index');
     }
 }

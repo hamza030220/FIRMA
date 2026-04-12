@@ -75,6 +75,30 @@
         /* ── Paiement équipements ── */
         'payAdresse':                 { required: true, label: 'Adresse' },
         'payVille':                   { required: true, label: 'Ville' },
+
+        /* ── Événement (admin create/edit) ── */
+        'evt_titre':                  { required: true, label: 'Titre' },
+        'evt_description':            { label: 'Description' },
+        'evt_organisateur':           { required: true, label: 'Organisateur' },
+        'evt_type':                   { required: true, select: true, label: 'Type' },
+        'evt_date_debut':             { required: true, label: 'Date début' },
+        'evt_date_fin':               { required: true, label: 'Date fin' },
+        'evt_horaire_debut':          { required: true, label: 'Horaire début' },
+        'evt_horaire_fin':            { required: true, label: 'Horaire fin' },
+        'evt_capacite_max':           { required: true, integer: true, min: 1, max: 100000, label: 'Capacité max' },
+        'evt_lieu':                   { label: 'Lieu' },
+        'evt_adresse':                { label: 'Adresse' },
+
+        /* ── Sponsor (admin modal + sponsor page) ── */
+        'spF_nom':                    { required: true, label: 'Nom du sponsor' },
+        'spF_secteur':                { required: true, select: true, label: "Secteur d'activité" },
+        'spF_email':                  { required: true, email: true, label: 'Email de contact' },
+        'spF_tel':                    { required: true, tel: true, label: 'Téléphone' },
+        'spF_web':                    { label: 'Site web' },
+        'spF_montant':                { number: true, min: 0, label: 'Montant contribution' },
+
+        /* ── Participation (user) ── */
+        'participNbAccomp':           { integer: true, min: 0, max: 10, label: "Nombre d'accompagnants" },
     };
 
     /* ── Validate a single field against its rule ── */
@@ -105,7 +129,7 @@
         /* required */
         if (rule.required) {
             if (rule.select || tag === 'select') {
-                if (!value || value === '-- Choisir --') return rule.label + ' : veuillez sélectionner une option.';
+                if (!value || value === '-- Choisir --' || value === '— Choisir —') return rule.label + ' : veuillez sélectionner une option.';
             } else if (type === 'file') {
                 if (!field.files || !field.files.length) return rule.label + ' : ce champ est obligatoire.';
             } else if (!value) {
@@ -146,6 +170,7 @@
             if (isNaN(ni) || !Number.isInteger(ni)) return rule.label + ' : nombre entier requis.';
             if (rule.gt !== undefined && ni <= rule.gt) return rule.label + ' : doit être supérieur à ' + rule.gt + '.';
             if (rule.min !== undefined && ni < rule.min) return rule.label + ' : doit être ≥ ' + rule.min + '.';
+            if (rule.max !== undefined && ni > rule.max) return rule.label + ' : doit être ≤ ' + rule.max + '.';
         }
 
         /* number / decimal (Symfony NumberType) */
@@ -154,6 +179,7 @@
             if (isNaN(nd)) return rule.label + ' : nombre invalide.';
             if (rule.gt !== undefined && nd <= rule.gt) return rule.label + ' : doit être supérieur à ' + rule.gt + '.';
             if (rule.min !== undefined && nd < rule.min) return rule.label + ' : doit être ≥ ' + rule.min + '.';
+            if (rule.max !== undefined && nd > rule.max) return rule.label + ' : doit être ≤ ' + rule.max + '.';
         }
 
         /* image file */

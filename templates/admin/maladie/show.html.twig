@@ -1,0 +1,846 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ maladie.nom }} - Détail{% endblock %}
+{% block admin_page_title %}Détail de la maladie{% endblock %}
+
+{% block admin_content %}
+<style>
+:root {
+    --primary: #0f5c2f;
+    --primary-dark: #0a3d1f;
+    --primary-light: #e8f5e9;
+    --secondary: #1e6f9f;
+    --secondary-light: #e3f2fd;
+    --danger: #e74c3c;
+    --danger-light: #fdeaea;
+    --warning: #f39c12;
+    --warning-light: #fff3e0;
+    --success: #27ae60;
+    --success-light: #eafaf1;
+    --gray-50: #f8f9fa;
+    --gray-100: #f5f5f5;
+    --gray-200: #eeeeee;
+    --gray-300: #e0e0e0;
+    --gray-400: #bdbdbd;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; }
+
+.adm-wrap { max-width: 1400px; margin: 0 auto; padding: 0 0 3rem; font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
+
+/* ===== TOPBAR ===== */
+.adm-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.adm-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.83rem;
+    color: var(--gray-600);
+}
+.adm-breadcrumb a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.adm-breadcrumb a:hover { text-decoration: underline; }
+.adm-breadcrumb-sep { color: var(--gray-400); }
+.adm-actions { display: flex; gap: 0.75rem; }
+.adm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+.adm-btn-edit { background: var(--warning-light); color: #b36b00; border: 1px solid #f0c060; }
+.adm-btn-edit:hover { background: #ffe4a0; color: #8a5000; }
+.adm-btn-delete { background: var(--danger-light); color: var(--danger); border: 1px solid #f5b8b2; }
+.adm-btn-delete:hover { background: #fcc9c4; }
+.adm-btn-back { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.adm-btn-back:hover { background: var(--gray-200); }
+
+/* ===== HERO CARD ===== */
+.adm-hero {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0;
+}
+.adm-hero-img {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.adm-hero-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.adm-hero-img-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-400);
+    padding: 2rem;
+    text-align: center;
+}
+.adm-hero-img-placeholder svg { opacity: 0.3; }
+.adm-hero-img-placeholder span { font-size: 0.78rem; }
+.adm-hero-content {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid var(--gray-200);
+}
+.adm-hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+.adm-hero-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+    line-height: 1.2;
+}
+.adm-hero-sci {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    font-style: italic;
+    margin: 0.3rem 0 1rem;
+}
+.adm-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.adm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+.adm-badge-critique { background: var(--danger-light); color: var(--danger); border: 1px solid #f5b8b2; }
+.adm-badge-eleve { background: var(--warning-light); color: #b36b00; border: 1px solid #f0c060; }
+.adm-badge-moyen { background: var(--secondary-light); color: var(--secondary); border: 1px solid #b3d4f0; }
+.adm-badge-faible { background: var(--primary-light); color: var(--primary); border: 1px solid #b8d8c0; }
+.adm-badge-saison { background: #f3e5f5; color: #7b1fa2; border: 1px solid #d8b0e8; }
+.adm-badge-date { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-300); }
+
+.adm-hero-stats {
+    display: flex;
+    gap: 0;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+.adm-hstat {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    text-align: center;
+    border-right: 1px solid var(--gray-200);
+}
+.adm-hstat:last-child { border-right: none; }
+.adm-hstat-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    display: block;
+    line-height: 1;
+}
+.adm-hstat-num.green { color: var(--success); }
+.adm-hstat-num.red { color: var(--danger); }
+.adm-hstat-num.blue { color: var(--secondary); }
+.adm-hstat-label { font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem; display: block; }
+
+/* ===== GRID ===== */
+.adm-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 1.5rem; }
+
+/* ===== CARD ===== */
+.adm-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+.adm-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 38px rgba(15,92,47,0.12), 0 6px 18px rgba(0,0,0,0.06);
+    border-color: rgba(15, 92, 47, 0.16);
+}
+.adm-card-head {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--gray-50);
+}
+.adm-card-head-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.adm-card-head-icon.green { background: var(--primary-light); color: var(--primary); }
+.adm-card-head-icon.blue { background: var(--secondary-light); color: var(--secondary); }
+.adm-card-head h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    flex: 1;
+}
+.adm-card-count {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0.15rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.adm-card-body { padding: 1.4rem; }
+
+/* ===== INFO ROWS ===== */
+.adm-info-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.875rem;
+}
+.adm-info-row:last-child { border-bottom: none; }
+.adm-info-label {
+    width: 110px;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-400);
+    padding-top: 0.1rem;
+}
+.adm-info-val { flex: 1; color: var(--gray-800); line-height: 1.5; }
+
+/* ===== SEARCH ===== */
+.adm-search-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+.adm-search-wrap {
+    flex: 1;
+    position: relative;
+    min-width: 200px;
+}
+.adm-search-wrap svg {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+}
+.adm-search-inp {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.4rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: inherit;
+}
+.adm-search-inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.adm-filter-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.adm-filter-btn {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 20px;
+    background: white;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    color: var(--gray-700);
+}
+.adm-filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.adm-filter-btn:hover:not(.active) { background: var(--gray-100); }
+
+/* ===== TRAITEMENT ITEMS ===== */
+.adm-traitement {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: box-shadow 0.18s;
+}
+.adm-traitement:hover { box-shadow: var(--shadow-md); }
+.adm-trt-head {
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, box-shadow 0.18s, transform 0.18s;
+}
+.adm-trt-head:hover {
+    background: var(--gray-50);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(30,111,159,0.10);
+}
+.adm-trt-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    background: var(--secondary-light);
+    color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.adm-trt-title { flex: 1; }
+.adm-trt-title h3 { font-size: 0.92rem; font-weight: 600; color: var(--gray-800); margin: 0; }
+.adm-trt-meta { display: flex; gap: 0.4rem; margin-top: 0.25rem; flex-wrap: wrap; }
+.adm-trt-tag {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+.adm-trt-preview { display: flex; align-items: center; gap: 0.75rem; }
+.adm-trt-mini-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.adm-trt-mini-stat.pos { color: var(--success); }
+.adm-trt-mini-stat.neg { color: var(--danger); }
+.adm-trt-chevron { color: var(--gray-400); transition: transform 0.2s; flex-shrink: 0; }
+.adm-trt-chevron.open { transform: rotate(180deg); }
+
+.adm-trt-body {
+    display: none;
+    padding: 1.1rem;
+    border-top: 1px solid var(--gray-100);
+    background: var(--gray-50);
+}
+.adm-trt-body.open { display: block; }
+.adm-trt-section { margin-bottom: 0.9rem; }
+.adm-trt-section:last-child { margin-bottom: 0; }
+.adm-trt-section-lbl {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gray-600);
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.adm-trt-section-val {
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    line-height: 1.55;
+    background: white;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--gray-200);
+}
+
+/* Stats bar dans le traitement */
+.adm-trt-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+.adm-trt-stat {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem;
+    text-align: center;
+}
+.adm-trt-stat-num {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: block;
+    color: var(--gray-800);
+}
+.adm-trt-stat-num.green { color: var(--success); }
+.adm-trt-stat-num.red { color: var(--danger); }
+.adm-trt-stat-num.blue { color: var(--secondary); }
+.adm-trt-stat-lbl { font-size: 0.68rem; color: var(--gray-600); margin-top: 0.15rem; display: block; }
+
+/* Progress bar taux succès */
+.adm-progress-wrap { margin-top: 0.8rem; }
+.adm-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin-bottom: 0.3rem;
+}
+.adm-progress-bar {
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.adm-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    transition: width 0.6s ease;
+}
+
+/* ===== EMPTY ===== */
+.adm-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray-400);
+}
+.adm-empty-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--gray-400);
+}
+.adm-empty p { font-size: 0.875rem; color: var(--gray-600); margin: 0 0 1rem; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1000px) {
+    .adm-grid { grid-template-columns: 1fr; }
+    .adm-hero { flex-direction: column; }
+    .adm-hero-img { width: 100%; height: 200px; }
+    .adm-hero-content { border-left: none; border-top: 1px solid var(--gray-200); }
+    .adm-trt-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .adm-hero-stats { flex-direction: column; }
+    .adm-hstat { border-right: none; border-bottom: 1px solid var(--gray-200); }
+    .adm-hstat:last-child { border-bottom: none; }
+    .adm-trt-preview { display: none; }
+}
+</style>
+
+<div class="adm-wrap">
+
+    {# ===== TOPBAR ===== #}
+    <div class="adm-topbar">
+        <div class="adm-breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+            <span class="adm-breadcrumb-sep">›</span>
+            <a href="{{ path('admin_maladie_index') }}">Maladies</a>
+            <span class="adm-breadcrumb-sep">›</span>
+            <span>{{ maladie.nom }}</span>
+        </div>
+        <div class="adm-actions">
+            <a href="{{ path('admin_maladie_index') }}" class="adm-btn adm-btn-back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+                Retour
+            </a>
+            <a href="{{ path('admin_maladie_edit', {'id': maladie.id}) }}" class="adm-btn adm-btn-edit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Modifier
+            </a>
+            <form method="post" action="{{ path('admin_maladie_delete', {'id': maladie.id}) }}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir supprimer cette maladie et tous ses traitements ?">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ maladie.id) }}">
+                <button type="submit" class="adm-btn adm-btn-delete">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# ===== HERO ===== #}
+    <div class="adm-hero">
+        <div class="adm-hero-img">
+            {% if maladie.imageUrl %}
+                <img src="{{ asset('uploads/maladies/' ~ maladie.imageUrl) }}" alt="{{ maladie.nom }}">
+            {% else %}
+                <div class="adm-hero-img-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8.5 10 2.5 3 1.5-2 2.5 3H5l3.5-4z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+                    <span>Aucune image</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="adm-hero-content">
+            <div class="adm-hero-top">
+                <div>
+                    <h1 class="adm-hero-name">{{ maladie.nom }}</h1>
+                    {% if maladie.nomScientifique %}
+                        <p class="adm-hero-sci">{{ maladie.nomScientifique }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="adm-badges">
+                <span class="adm-badge adm-badge-{{ maladie.niveauGravite }}">
+                    {% if maladie.niveauGravite == 'critique' %}⚠{% elseif maladie.niveauGravite == 'eleve' %}↑{% elseif maladie.niveauGravite == 'moyen' %}~{% else %}✓{% endif %}
+                    {{ maladie.niveauGravite|capitalize }}
+                </span>
+                {% if maladie.saisonFrequente %}
+                    <span class="adm-badge adm-badge-saison">🌸 {{ maladie.saisonFrequente }}</span>
+                {% endif %}
+                <span class="adm-badge adm-badge-date">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ maladie.createdAt|date('d/m/Y') }}
+                </span>
+            </div>
+
+            {# Stats globales #}
+            {% set totalUsages = 0 %}
+            {% set totalLikes = 0 %}
+            {% set totalDislikes = 0 %}
+            {% for t in traitements %}
+                {% set totalUsages = totalUsages + t.usageCount %}
+                {% set totalLikes = totalLikes + t.feedbackPositive %}
+                {% set totalDislikes = totalDislikes + t.feedbackNegative %}
+            {% endfor %}
+            <div class="adm-hero-stats">
+                <div class="adm-hstat">
+                    <span class="adm-hstat-num blue">{{ traitements|length }}</span>
+                    <span class="adm-hstat-label">Traitements</span>
+                </div>
+                <div class="adm-hstat">
+                    <span class="adm-hstat-num">{{ totalUsages }}</span>
+                    <span class="adm-hstat-label">Utilisations</span>
+                </div>
+                <div class="adm-hstat">
+                    <span class="adm-hstat-num green">{{ totalLikes }}</span>
+                    <span class="adm-hstat-label">Avis positifs</span>
+                </div>
+                <div class="adm-hstat">
+                    <span class="adm-hstat-num red">{{ totalDislikes }}</span>
+                    <span class="adm-hstat-label">Avis négatifs</span>
+                </div>
+                <div class="adm-hstat">
+                    <span class="adm-hstat-num blue">
+                        {% if totalUsages > 0 %}{{ (totalLikes * 100 / totalUsages)|round }}%{% else %}—{% endif %}
+                    </span>
+                    <span class="adm-hstat-label">Taux de succès</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ===== GRID ===== #}
+    <div class="adm-grid">
+
+        {# ---- INFOS ---- #}
+        <div class="adm-card">
+            <div class="adm-card-head">
+                <div class="adm-card-head-icon green">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg>
+                </div>
+                <h2>Informations générales</h2>
+            </div>
+            <div class="adm-card-body">
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Nom</div>
+                    <div class="adm-info-val"><strong>{{ maladie.nom }}</strong></div>
+                </div>
+                {% if maladie.nomScientifique %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Scientifique</div>
+                    <div class="adm-info-val"><em>{{ maladie.nomScientifique }}</em></div>
+                </div>
+                {% endif %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Gravité</div>
+                    <div class="adm-info-val">
+                        <span class="adm-badge adm-badge-{{ maladie.niveauGravite }}">{{ maladie.niveauGravite|capitalize }}</span>
+                    </div>
+                </div>
+                {% if maladie.saisonFrequente %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Saison</div>
+                    <div class="adm-info-val">{{ maladie.saisonFrequente }}</div>
+                </div>
+                {% endif %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Créée le</div>
+                    <div class="adm-info-val">{{ maladie.createdAt|date('d/m/Y à H:i') }}</div>
+                </div>
+                {% if maladie.updatedAt %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Modifiée le</div>
+                    <div class="adm-info-val">{{ maladie.updatedAt|date('d/m/Y à H:i') }}</div>
+                </div>
+                {% endif %}
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Description</div>
+                    <div class="adm-info-val">{{ maladie.description|nl2br|default('Non renseignée') }}</div>
+                </div>
+                <div class="adm-info-row">
+                    <div class="adm-info-label">Symptômes</div>
+                    <div class="adm-info-val">{{ maladie.symptomes|nl2br|default('Non renseignés') }}</div>
+                </div>
+            </div>
+        </div>
+
+        {# ---- TRAITEMENTS ---- #}
+        <div class="adm-card">
+            <div class="adm-card-head">
+                <div class="adm-card-head-icon blue">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 3-6 6 6 6"/><path d="M3 9h14a4 4 0 0 1 0 8H3"/></svg>
+                </div>
+                <h2>Solutions de traitement</h2>
+                <span class="adm-card-count">{{ traitements|length }}</span>
+            </div>
+            <div class="adm-card-body">
+
+                {# Recherche + filtres #}
+                <div class="adm-search-row">
+                    <div class="adm-search-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        <input type="text" id="searchInput" class="adm-search-inp" placeholder="Rechercher un traitement...">
+                    </div>
+                    <div class="adm-filter-btns">
+                        <button class="adm-filter-btn active" data-filter="all" onclick="setFilter('all')">Tous</button>
+                        <button class="adm-filter-btn" data-filter="positive" onclick="setFilter('positive')">👍 Populaires</button>
+                        <button class="adm-filter-btn" data-filter="high" onclick="setFilter('high')">⭐ Haut taux</button>
+                    </div>
+                </div>
+
+                <div id="traitementsContainer">
+                    {% if traitements is empty %}
+                        <div class="adm-empty">
+                            <div class="adm-empty-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                            </div>
+                            <p>Aucun traitement associé à cette maladie.</p>
+                            <a href="{{ path('admin_maladie_edit', {'id': maladie.id}) }}" class="adm-btn" style="background: var(--secondary-light); color: var(--secondary); border: 1px solid #b3d4f0;">
+                                + Ajouter un traitement
+                            </a>
+                        </div>
+                    {% else %}
+                        {% for t in traitements %}
+                        {% set rate = t.usageCount > 0 ? (t.feedbackPositive * 100 / t.usageCount)|round : 0 %}
+                        <div class="adm-traitement"
+                             data-titre="{{ t.titre|e('html_attr') }}"
+                             data-solution="{{ t.solution|e('html_attr') }}"
+                             data-positive="{{ t.feedbackPositive }}"
+                             data-rate="{{ rate }}">
+
+                            <div class="adm-trt-head" onclick="toggleT({{ t.id }})">
+                                <div class="adm-trt-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                                </div>
+                                <div class="adm-trt-title">
+                                    <h3>{{ t.titre }}</h3>
+                                    <div class="adm-trt-meta">
+                                        {% if t.dureeTraitement %}
+                                            <span class="adm-trt-tag">⏱ {{ t.dureeTraitement }}</span>
+                                        {% endif %}
+                                        <span class="adm-trt-tag">{{ t.usageCount }} utilisation{% if t.usageCount > 1 %}s{% endif %}</span>
+                                    </div>
+                                </div>
+                                <div class="adm-trt-preview">
+                                    <span class="adm-trt-mini-stat pos">👍 {{ t.feedbackPositive }}</span>
+                                    <span class="adm-trt-mini-stat neg">👎 {{ t.feedbackNegative }}</span>
+                                    <span class="adm-trt-mini-stat" style="color: var(--secondary);">{{ rate }}%</span>
+                                </div>
+                                <div class="adm-trt-chevron" id="chev-{{ t.id }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                                </div>
+                            </div>
+
+                            <div class="adm-trt-body" id="tbody-{{ t.id }}">
+                                {% if t.solution %}
+                                <div class="adm-trt-section">
+                                    <div class="adm-trt-section-lbl">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                                        Solution
+                                    </div>
+                                    <div class="adm-trt-section-val">{{ t.solution|nl2br }}</div>
+                                </div>
+                                {% endif %}
+                                {% if t.etapes %}
+                                <div class="adm-trt-section">
+                                    <div class="adm-trt-section-lbl">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                        Étapes
+                                    </div>
+                                    <div class="adm-trt-section-val">{{ t.etapes|nl2br }}</div>
+                                </div>
+                                {% endif %}
+                                {% if t.produitsRecommandes %}
+                                <div class="adm-trt-section">
+                                    <div class="adm-trt-section-lbl">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                        Produits recommandés
+                                    </div>
+                                    <div class="adm-trt-section-val">{{ t.produitsRecommandes|nl2br }}</div>
+                                </div>
+                                {% endif %}
+                                {% if t.conseilsPrevention %}
+                                <div class="adm-trt-section">
+                                    <div class="adm-trt-section-lbl">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        Prévention
+                                    </div>
+                                    <div class="adm-trt-section-val">{{ t.conseilsPrevention|nl2br }}</div>
+                                </div>
+                                {% endif %}
+
+                                {# Stats #}
+                                <div class="adm-trt-stats">
+                                    <div class="adm-trt-stat">
+                                        <span class="adm-trt-stat-num blue">{{ t.usageCount }}</span>
+                                        <span class="adm-trt-stat-lbl">Utilisations</span>
+                                    </div>
+                                    <div class="adm-trt-stat">
+                                        <span class="adm-trt-stat-num green">👍 {{ t.feedbackPositive }}</span>
+                                        <span class="adm-trt-stat-lbl">Positifs</span>
+                                    </div>
+                                    <div class="adm-trt-stat">
+                                        <span class="adm-trt-stat-num red">👎 {{ t.feedbackNegative }}</span>
+                                        <span class="adm-trt-stat-lbl">Négatifs</span>
+                                    </div>
+                                    <div class="adm-trt-stat">
+                                        <span class="adm-trt-stat-num {% if rate >= 70 %}green{% elseif rate >= 40 %}blue{% else %}red{% endif %}">{{ rate }}%</span>
+                                        <span class="adm-trt-stat-lbl">Taux succès</span>
+                                    </div>
+                                </div>
+
+                                {# Barre de progression #}
+                                <div class="adm-progress-wrap">
+                                    <div class="adm-progress-label">
+                                        <span>Taux de satisfaction</span>
+                                        <span>{{ rate }}%</span>
+                                    </div>
+                                    <div class="adm-progress-bar">
+                                        <div class="adm-progress-fill" style="width: {{ rate }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFilter = 'all';
+
+function toggleT(id) {
+    const body = document.getElementById('tbody-' + id);
+    const chev = document.getElementById('chev-' + id);
+    body.classList.toggle('open');
+    chev.classList.toggle('open');
+}
+
+function filterTreatments() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.adm-traitement').forEach(el => {
+        const titre = (el.dataset.titre || '').toLowerCase();
+        const sol   = (el.dataset.solution || '').toLowerCase();
+        const pos   = parseInt(el.dataset.positive) || 0;
+        const rate  = parseInt(el.dataset.rate) || 0;
+        const matchSearch = titre.includes(q) || sol.includes(q);
+        const matchFilter = currentFilter === 'all'
+            || (currentFilter === 'positive' && pos > 0)
+            || (currentFilter === 'high' && rate >= 70);
+        el.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+    });
+}
+
+function setFilter(f) {
+    currentFilter = f;
+    document.querySelectorAll('.adm-filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.adm-filter-btn[data-filter="${f}"]`).classList.add('active');
+    filterTreatments();
+}
+
+document.getElementById('searchInput').addEventListener('input', filterTreatments);
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest('form[data-firma-confirm]');
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    if (form.dataset.confirmed === 'true') {
+        form.dataset.confirmed = '';
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const formId = form.id || `maladie-show-delete-${Math.random().toString(36).slice(2, 9)}`;
+    form.id = formId;
+    const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
+
+    if (window.firmaOpenConfirmModal) {
+        window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
+    } else if (window.firmaToast) {
+        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
+    }
+}, true);
+</script>
+{% endblock %}

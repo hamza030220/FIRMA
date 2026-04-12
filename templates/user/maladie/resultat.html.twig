@@ -1,0 +1,200 @@
+{# templates/user/resultat.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultat : {{ maladie.nom }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('user_diagnostiquer') }}">Diagnostic</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Résultat</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        {# Colonne gauche - Informations maladie #}
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-header bg-danger text-white text-center rounded-top-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-biohazard me-2"></i>
+                        {{ maladie.nom }}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    
+                    {# Photo #}
+                    {% if maladie.imageUrl %}
+                        <div class="text-center mb-4">
+                            <img src="{{ asset('uploads/maladies/' ~ maladie.imageUrl) }}" 
+                                 alt="{{ maladie.nom }}" 
+                                 class="img-fluid rounded-3 shadow-sm"
+                                 style="max-height: 250px; width: auto;">
+                        </div>
+                    {% else %}
+                        <div class="text-center mb-4">
+                            <div class="bg-light rounded-3 p-4">
+                                <i class="fas fa-image fa-4x text-muted"></i>
+                                <p class="text-muted mt-2">Aucune photo disponible</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {# Informations #}
+                    <div class="mb-3">
+                        <span class="badge 
+                            {% if maladie.niveauGravite == 'critique' %}bg-danger
+                            {% elseif maladie.niveauGravite == 'eleve' %}bg-warning
+                            {% elseif maladie.niveauGravite == 'moyen' %}bg-info
+                            {% else %}bg-success{% endif %} 
+                            p-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Niveau de gravité : 
+                            {% if maladie.niveauGravite == 'critique' %}Critique
+                            {% elseif maladie.niveauGravite == 'eleve' %}Élevé
+                            {% elseif maladie.niveauGravite == 'moyen' %}Moyen
+                            {% else %}Faible{% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if maladie.nomScientifique %}
+                    <p><strong><i class="fas fa-microscope me-2"></i>Nom scientifique :</strong><br>
+                    <em>{{ maladie.nomScientifique }}</em></p>
+                    {% endif %}
+                    
+                    {% if maladie.saisonFrequente %}
+                    <p><strong><i class="fas fa-calendar-alt me-2"></i>Saison fréquente :</strong><br>
+                    {{ maladie.saisonFrequente }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <h5><i class="fas fa-align-left me-2 text-danger"></i>Description</h5>
+                    <p class="text-justify">{{ maladie.description|nl2br }}</p>
+                    
+                    <h5 class="mt-4"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Symptômes</h5>
+                    <div class="bg-light p-3 rounded-3">
+                        {{ maladie.symptomes|nl2br }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {# Colonne droite - Traitements #}
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-header bg-success text-white rounded-top-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-notes-medical me-2"></i>
+                        Solutions et Traitements
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    
+                    {% if traitements is empty %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Aucun traitement n'est encore enregistré pour cette maladie.
+                        </div>
+                    {% else %}
+                        {% for traitement in traitements %}
+                            <div class="card mb-4 border-success">
+                                <div class="card-header bg-success bg-opacity-10">
+                                    <h4 class="mb-0 text-success">
+                                        <i class="fas fa-capsules me-2"></i>
+                                        {{ traitement.titre }}
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <h6><i class="fas fa-info-circle me-2 text-info"></i>Description</h6>
+                                    <p>{{ traitement.description|nl2br }}</p>
+                                    
+                                    {% if traitement.etapes %}
+                                    <h6 class="mt-3"><i class="fas fa-list-ol me-2 text-info"></i>Étapes à suivre</h6>
+                                    <div class="bg-light p-3 rounded-3">
+                                        {{ traitement.etapes|nl2br }}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if traitement.produits %}
+                                    <h6 class="mt-3"><i class="fas fa-shopping-cart me-2 text-info"></i>Produits recommandés</h6>
+                                    <div class="alert alert-secondary">
+                                        <i class="fas fa-tag me-2"></i>
+                                        {{ traitement.produits|nl2br }}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if traitement.prevention %}
+                                    <h6 class="mt-3"><i class="fas fa-shield-alt me-2 text-info"></i>Prévention</h6>
+                                    <p>{{ traitement.prevention|nl2br }}</p>
+                                    {% endif %}
+                                    
+                                    {% if traitement.duree %}
+                                    <div class="mt-3">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-hourglass-half me-1"></i>
+                                            Durée : {{ traitement.duree }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <hr>
+                                    
+                                    {# Statistiques #}
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="small text-muted">Utilisations</div>
+                                            <strong>{{ traitement.usageCount }}</strong>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="small text-muted">👍 Taux succès</div>
+                                            <strong class="text-success">
+                                                {{ traitement.successRate|default(0) }}%
+                                            </strong>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="small text-muted">👎 Retours</div>
+                                            <strong class="text-danger">{{ traitement.feedbackNegative }}</strong>
+                                        </div>
+                                    </div>
+                                    
+                                    {# Feedback utilisateur #}
+                                    <div class="mt-3 text-center">
+                                        <p class="small text-muted">Ce traitement vous a-t-il aidé ?</p>
+                                        <form method="post" action="{{ path('user_feedback', {'id': traitement.id, 'type': 'positif'}) }}" style="display:inline">
+                                            <button type="submit" class="btn btn-sm btn-success me-2">
+                                                <i class="fas fa-thumbs-up me-1"></i> Oui, efficace
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{{ path('user_feedback', {'id': traitement.id, 'type': 'negatif'}) }}" style="display:inline">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-thumbs-down me-1"></i> Non, inefficace
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            {# Actions #}
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('user_diagnostiquer') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Nouveau diagnostic
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-primary">
+                    <i class="fas fa-print me-2"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
