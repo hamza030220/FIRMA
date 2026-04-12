@@ -1012,7 +1012,7 @@ function initPaymentPage() {
                 'Payer à la livraison',
                 'Vous allez passer commande avec paiement à la livraison. Confirmer ?',
                 'Confirmer',
-                'Annuler'
+                'warning'
             ).then((confirmed) => {
                 if (confirmed) {
                     document.getElementById('umLivAdresse').value = adresse;
