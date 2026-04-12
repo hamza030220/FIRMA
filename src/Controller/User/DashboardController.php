@@ -89,6 +89,12 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('user_profile');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('user/profile/index.html.twig', ['form' => $form]);
     }
 }

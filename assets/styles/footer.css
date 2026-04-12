@@ -1,0 +1,151 @@
+/* ══════════════════════════════════════════════════════════════
+   FIRMA — Global Footer Styles
+   ══════════════════════════════════════════════════════════════ */
+
+.firma-footer{
+  background:#1a1a1a;
+  color:#c8c8c8;
+  font-family:'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  padding:0;
+  margin-top:auto;
+}
+
+/* ── Inner grid ── */
+.firma-footer-inner{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:40px;
+  max-width:1280px;
+  margin:0 auto;
+  padding:56px 40px 40px;
+}
+
+/* ── Brand column ── */
+.firma-footer-brand{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.firma-footer-logo{
+  height:48px;
+  width:auto;
+  object-fit:contain;
+  align-self:flex-start;
+  filter:brightness(1.1);
+}
+.firma-footer-tagline{
+  font-size:.9rem;
+  line-height:1.6;
+  color:#9a9a9a;
+  margin:0;
+}
+
+/* ── Social icons ── */
+.firma-footer-social{
+  display:flex;
+  gap:10px;
+  margin-top:4px;
+}
+.firma-footer-social-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;height:36px;
+  border-radius:8px;
+  background:rgba(255,255,255,.07);
+  color:#9a9a9a;
+  transition:all .25s ease;
+  text-decoration:none;
+}
+.firma-footer-social-link:hover{
+  background:#4aac33;
+  color:#fff;
+  transform:translateY(-2px);
+}
+
+/* ── Column headings ── */
+.firma-footer-heading{
+  font-size:.8rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:#fff;
+  margin:0 0 18px;
+}
+
+/* ── Link lists ── */
+.firma-footer-links,
+.firma-footer-contact{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.firma-footer-links a{
+  color:#9a9a9a;
+  text-decoration:none;
+  font-size:.88rem;
+  transition:color .2s ease, padding-left .2s ease;
+}
+.firma-footer-links a:hover{
+  color:#4aac33;
+  padding-left:4px;
+}
+
+/* ── Contact items ── */
+.firma-footer-contact li{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:.88rem;
+  color:#9a9a9a;
+}
+.firma-footer-contact li svg{
+  flex-shrink:0;
+  color:#4aac33;
+}
+
+/* ── Bottom bar ── */
+.firma-footer-bottom{
+  border-top:1px solid rgba(255,255,255,.08);
+  text-align:center;
+  padding:18px 40px;
+}
+.firma-footer-bottom p{
+  margin:0;
+  font-size:.8rem;
+  color:#6a6a6a;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════════════════════════════ */
+
+@media(max-width:1024px){
+  .firma-footer-inner{
+    grid-template-columns:1fr 1fr;
+    gap:32px;
+    padding:40px 28px 32px;
+  }
+  .firma-footer-brand{
+    grid-column:1 / -1;
+  }
+}
+
+@media(max-width:600px){
+  .firma-footer-inner{
+    grid-template-columns:1fr;
+    gap:28px;
+    padding:32px 20px 24px;
+  }
+  .firma-footer-bottom{
+    padding:14px 20px;
+  }
+}
+
+/* ── Admin layout override: footer starts after sidebar ── */
+.admin-layout ~ .firma-footer{
+  margin-left:0;
+}

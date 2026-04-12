@@ -88,6 +88,12 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('security/signup.html.twig', ['form' => $form]);
     }
 

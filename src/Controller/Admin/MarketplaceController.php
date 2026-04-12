@@ -42,23 +42,20 @@ class MarketplaceController extends AbstractController
        ================================================================ */
 
     #[Route('', name: 'admin_marketplace')]
-    public function index(
-        EquipementRepository $equipRepo,
-        VehiculeRepository $vehicRepo,
-        TerrainRepository $terrainRepo,
-        FournisseurRepository $fournRepo,
-        CommandeRepository $cmdRepo,
-        LocationRepository $locRepo,
-    ): Response {
+    public function index(): Response
+    {
+        $counts = $this->em->getConnection()->executeQuery("
+            SELECT
+                (SELECT COUNT(*) FROM equipements) as equipements,
+                (SELECT COUNT(*) FROM vehicules) as vehicules,
+                (SELECT COUNT(*) FROM terrains) as terrains,
+                (SELECT COUNT(*) FROM fournisseurs) as fournisseurs,
+                (SELECT COUNT(*) FROM commandes) as commandes,
+                (SELECT COUNT(*) FROM locations) as locations
+        ")->fetchAssociative();
+
         return $this->render('admin/marketplace/index.html.twig', [
-            'counts' => [
-                'equipements'  => $equipRepo->count([]),
-                'vehicules'    => $vehicRepo->count([]),
-                'terrains'     => $terrainRepo->count([]),
-                'fournisseurs' => $fournRepo->count([]),
-                'commandes'    => $cmdRepo->count([]),
-                'locations'    => $locRepo->count([]),
-            ],
+            'counts' => $counts,
         ]);
     }
 
@@ -81,9 +78,16 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_equipements');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('admin/marketplace/equipements.html.twig', [
-            'equipements' => $repo->findBy([], ['dateCreation' => 'DESC']),
+            'equipements' => $repo->findAllWithRelations(),
             'form' => $form,
+            'formHasErrors' => $form->isSubmitted() && !$form->isValid(),
         ]);
     }
 
@@ -98,6 +102,12 @@ class MarketplaceController extends AbstractController
             $this->em->flush();
             $this->addFlash('success', 'Équipement modifié avec succès.');
             return $this->redirectToRoute('admin_marketplace_equipements');
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('admin/marketplace/equipements_edit.html.twig', [
@@ -125,8 +135,7 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_equipements');
         }
 
-        $all = $repo->findAll();
-        $lowStock = array_filter($all, fn(Equipement $e) => $e->getQuantiteStock() < $e->getSeuilAlerte());
+        $lowStock = $repo->findLowStock();
 
         if (empty($lowStock)) {
             $this->addFlash('success', 'Tous les équipements ont un stock suffisant. Aucune alerte à signaler.');
@@ -162,9 +171,16 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_vehicules');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('admin/marketplace/vehicules.html.twig', [
-            'vehicules' => $repo->findBy([], ['dateCreation' => 'DESC']),
+            'vehicules' => $repo->findAllWithRelations(),
             'form' => $form,
+            'formHasErrors' => $form->isSubmitted() && !$form->isValid(),
         ]);
     }
 
@@ -179,6 +195,12 @@ class MarketplaceController extends AbstractController
             $this->em->flush();
             $this->addFlash('success', 'Véhicule modifié avec succès.');
             return $this->redirectToRoute('admin_marketplace_vehicules');
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('admin/marketplace/vehicules_edit.html.twig', [
@@ -217,9 +239,16 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_terrains');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('admin/marketplace/terrains.html.twig', [
-            'terrains' => $repo->findBy([], ['dateCreation' => 'DESC']),
+            'terrains' => $repo->findAllWithRelations(),
             'form' => $form,
+            'formHasErrors' => $form->isSubmitted() && !$form->isValid(),
         ]);
     }
 
@@ -234,6 +263,12 @@ class MarketplaceController extends AbstractController
             $this->em->flush();
             $this->addFlash('success', 'Terrain modifié avec succès.');
             return $this->redirectToRoute('admin_marketplace_terrains');
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('admin/marketplace/terrains_edit.html.twig', [
@@ -271,9 +306,16 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('admin_marketplace_fournisseurs');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('admin/marketplace/fournisseurs.html.twig', [
             'fournisseurs' => $repo->findBy([], ['dateCreation' => 'DESC']),
             'form' => $form,
+            'formHasErrors' => $form->isSubmitted() && !$form->isValid(),
         ]);
     }
 
@@ -287,6 +329,12 @@ class MarketplaceController extends AbstractController
             $this->em->flush();
             $this->addFlash('success', 'Fournisseur modifié avec succès.');
             return $this->redirectToRoute('admin_marketplace_fournisseurs');
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('admin/marketplace/fournisseurs_edit.html.twig', [
@@ -314,7 +362,7 @@ class MarketplaceController extends AbstractController
     public function commandes(CommandeRepository $repo): Response
     {
         return $this->render('admin/marketplace/commandes.html.twig', [
-            'commandes' => $repo->findBy([], ['dateCommande' => 'DESC']),
+            'commandes' => $repo->findAllWithUser(),
         ]);
     }
 
@@ -365,7 +413,7 @@ class MarketplaceController extends AbstractController
     public function locations(LocationRepository $repo): Response
     {
         return $this->render('admin/marketplace/locations.html.twig', [
-            'locations' => $repo->findBy([], ['dateReservation' => 'DESC']),
+            'locations' => $repo->findAllWithRelations(),
         ]);
     }
 

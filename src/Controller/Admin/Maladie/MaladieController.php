@@ -145,8 +145,12 @@ class MaladieController extends AbstractController
             }
         }
 
+        foreach ($errors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         return $this->render('admin/maladie/new.html.twig', [
-            'errors' => $errors,
+            'errors' => [],
             'old'    => $old,
         ]);
     }
@@ -246,10 +250,14 @@ class MaladieController extends AbstractController
             }
         }
 
+        foreach ($errors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         return $this->render('admin/maladie/edit.html.twig', [
             'maladie'     => $maladie,
             'traitements' => $this->traitementRepo->findByMaladieId($maladie->getId()),
-            'errors'      => $errors,
+            'errors'      => [],
         ]);
     }
 

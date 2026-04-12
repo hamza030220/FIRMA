@@ -15,4 +15,18 @@ class LocationRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Location::class);
     }
+
+    public function findAllWithRelations(array $orderBy = ['dateReservation' => 'DESC']): array
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->leftJoin('l.utilisateur', 'u')->addSelect('u')
+            ->leftJoin('l.vehicule', 'v')->addSelect('v')
+            ->leftJoin('l.terrain', 't')->addSelect('t');
+
+        foreach ($orderBy as $field => $dir) {
+            $qb->addOrderBy('l.' . $field, $dir);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

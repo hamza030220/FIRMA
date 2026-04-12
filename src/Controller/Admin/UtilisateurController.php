@@ -63,6 +63,12 @@ class UtilisateurController extends AbstractController
             return $this->redirectToRoute('admin_utilisateurs');
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
+        }
+
         return $this->render('admin/user/new.html.twig', ['form' => $form]);
     }
 
@@ -102,6 +108,12 @@ class UtilisateurController extends AbstractController
             $repo->getEntityManager()->flush();
             $this->addFlash('success', 'Utilisateur modifié avec succès.');
             return $this->redirectToRoute('admin_utilisateurs');
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('admin/user/edit.html.twig', [

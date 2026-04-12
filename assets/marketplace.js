@@ -255,6 +255,13 @@ function initCatalogue() {
         });
     });
 
+    /* ── Restore active tab from URL ── */
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab) {
+        const tabBtn = document.querySelector('.um-tab[data-tab="' + urlTab + '"]');
+        if (tabBtn) tabBtn.click();
+    }
+
     /* ── Search ── */
     const searchInput = document.getElementById('umSearch');
     if (searchInput) {
@@ -1322,100 +1329,4 @@ function initTerrainMiniMap(containerEl, adresse, ville) {
     });
 }
 
-/* ── All-Terrains Map Overlay (admin dashboard) ── */
-let _allTerrainsOpen = false;
-const _geocodeCache = {};
 
-function openAllTerrainsMap(terrains) {
-    if (_allTerrainsOpen) return;
-    _allTerrainsOpen = true;
-
-    loadLeaflet().then(async () => {
-        // Create overlay (no IDs — use direct refs)
-        const overlay = document.createElement('div');
-        overlay.className = 'firma-map-overlay';
-        overlay.style.display = 'flex';
-        overlay.innerHTML = `
-            <div class="firma-map-container">
-                <div class="firma-map-header">
-                    <h3>Nos Terrains (${terrains.length})</h3>
-                    <button class="firma-map-close">&times;</button>
-                </div>
-                <div class="firma-map-area"></div>
-            </div>`;
-        document.body.appendChild(overlay);
-
-        const closeBtn = overlay.querySelector('.firma-map-close');
-        const mapEl = overlay.querySelector('.firma-map-area');
-
-        let map = null;
-        function closeOverlay() {
-            if (map) { map.remove(); map = null; }
-            overlay.remove();
-            _allTerrainsOpen = false;
-        }
-        closeBtn.addEventListener('click', closeOverlay);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
-
-        // Init map centered on Tunisia
-        map = L.map(mapEl).setView([34.0, 9.0], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OSM',
-            maxZoom: 19,
-        }).addTo(map);
-
-        setTimeout(() => { if (map) map.invalidateSize(); }, 150);
-
-        // Cached geocode helper
-        async function cachedGeocode(query) {
-            if (_geocodeCache[query] !== undefined) return _geocodeCache[query];
-            const result = await forwardGeocode(query);
-            _geocodeCache[query] = result;
-            return result;
-        }
-
-        // Geocode terrains with throttling (Nominatim: max 1 req/sec)
-        const markers = [];
-        for (let i = 0; i < terrains.length; i++) {
-            if (!_allTerrainsOpen) break;
-            const t = terrains[i];
-            const fullQuery = ((t.adresse || '') + ' ' + (t.ville || '')).trim();
-            let pos = null;
-            const isCachedFull = _geocodeCache[fullQuery] !== undefined;
-            if (fullQuery.length >= 3) pos = await cachedGeocode(fullQuery);
-            const isCachedVille = _geocodeCache[t.ville || ''] !== undefined;
-            if (!pos && t.ville && t.ville.length >= 2) pos = await cachedGeocode(t.ville);
-            if (pos) {
-                const marker = L.marker([pos.lat, pos.lng]).addTo(map);
-                marker.bindPopup(`<strong>${t.titre}</strong><br>${t.adresse || ''}<br><em>${t.ville || ''}</em>`);
-                markers.push(marker);
-            }
-            // Only throttle if we actually hit the API (not cached)
-            if (i < terrains.length - 1 && (!isCachedFull || !isCachedVille)) {
-                await new Promise(r => setTimeout(r, 1200));
-            }
-        }
-
-        // Fit bounds if we have markers
-        if (markers.length > 0 && map) {
-            const group = L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.15));
-        }
-    });
-}
-
-// Bind to dashboard card
-function bindTerrainsCard() {
-    const card = document.getElementById('terrains-map-card');
-    if (card) {
-        card.addEventListener('click', () => {
-            const terrains = JSON.parse(card.dataset.terrains || '[]');
-            openAllTerrainsMap(terrains);
-        });
-    }
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindTerrainsCard);
-} else {
-    bindTerrainsCard();
-}

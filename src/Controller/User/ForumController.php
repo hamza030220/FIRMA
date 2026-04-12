@@ -155,6 +155,9 @@ class ForumController extends AbstractController
 
             $errors = $this->getPostValidationErrors($titre, $contenu, $categorie, $categorieForumRepository->findCategoryNames());
             if ($errors !== []) {
+                foreach ($errors as $err) {
+                    $this->addFlash('danger', $err);
+                }
                 return $this->render('user/forum/edit.html.twig', [
                     'post' => $post,
                     'categories' => $categorieForumRepository->findCategoryNames(),
@@ -163,7 +166,7 @@ class ForumController extends AbstractController
                         'contenu' => $contenu,
                         'categorie' => $categorie ?? '',
                     ],
-                    'form_errors' => $errors,
+                    'form_errors' => [],
                 ]);
             }
 
@@ -445,6 +448,10 @@ class ForumController extends AbstractController
             return null;
         }
 
+        foreach ($errors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         $search = trim((string) $request->query->get('q', ''));
         $sort = $this->resolveSort((string) $request->query->get('sort', 'recent'));
 
@@ -458,7 +465,7 @@ class ForumController extends AbstractController
                 'contenu' => $contenu,
                 'categorie' => $categorie ?? '',
             ],
-            'form_errors' => $errors,
+            'form_errors' => [],
         ]);
     }
 
@@ -577,6 +584,10 @@ class ForumController extends AbstractController
         array $commentFormErrors = [],
         ?CategorieForumRepository $categorieForumRepository = null
     ): Response {
+        foreach ($commentFormErrors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         return $this->render('user/forum/show.html.twig', [
             'post' => $post,
             'categories' => $categorieForumRepository?->findCategoryNames() ?? [],
@@ -584,7 +595,7 @@ class ForumController extends AbstractController
             'comment_form_data' => [
                 'contenu' => $commentFormData['contenu'] ?? $editableComment?->getContenu() ?? '',
             ],
-            'comment_form_errors' => $commentFormErrors,
+            'comment_form_errors' => [],
         ]);
     }
 

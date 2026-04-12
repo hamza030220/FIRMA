@@ -87,7 +87,7 @@ class SponsorController extends AbstractController
     //  CREATE
     // ──────────────────────────────────────────
     #[Route('/create', name: 'admin_sponsor_create', methods: ['POST'])]
-    public function create(Request $request): Response
+    public function create(Request $request): JsonResponse
     {
         $sponsor = new Sponsor();
         $form = $this->createForm(SponsorType::class, $sponsor);
@@ -95,29 +95,38 @@ class SponsorController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+            $errorFields = [];
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $field . ': ' . $error->getMessage();
+                $errors[] = $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
             }
-            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+            return $this->json([
+                'success'     => false,
+                'errors'      => $errors,
+                'errorFields' => array_values(array_unique($errorFields)),
+            ], 422);
         }
 
         $this->sponsorService->addToCatalog($sponsor);
-        $this->addFlash('success', 'Sponsor ajouté au catalogue.');
 
-        return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+        return $this->json([
+            'success' => true,
+            'message' => 'Sponsor ajouté au catalogue.',
+        ]);
     }
 
     // ──────────────────────────────────────────
     //  UPDATE
     // ──────────────────────────────────────────
     #[Route('/{id}/update', name: 'admin_sponsor_update', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function update(int $id, Request $request): Response
+    public function update(int $id, Request $request): JsonResponse
     {
         $sponsor = $this->sponsorService->getById($id);
         if (!$sponsor) {
-            throw $this->createNotFoundException();
+            return $this->json(['success' => false, 'errors' => ['Sponsor introuvable.']], 404);
         }
 
         $form = $this->createForm(SponsorType::class, $sponsor);
@@ -125,18 +134,27 @@ class SponsorController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+            $errorFields = [];
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $field . ': ' . $error->getMessage();
+                $errors[] = $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
             }
-            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+            return $this->json([
+                'success'     => false,
+                'errors'      => $errors,
+                'errorFields' => array_values(array_unique($errorFields)),
+            ], 422);
         }
 
         $this->sponsorService->update($sponsor);
 
-        $this->addFlash('success', 'Sponsor modifié avec succès.');
-        return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+        return $this->json([
+            'success' => true,
+            'message' => 'Sponsor modifié avec succès.',
+        ]);
     }
 
     // ──────────────────────────────────────────

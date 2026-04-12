@@ -14,12 +14,12 @@
     {{ macros.flashes() }}
 
     <div class="mp-tabs">
-        <button class="mp-tab active" data-tab="list">Liste des Terrains</button>
-        <button class="mp-tab" data-tab="add">Ajouter un Terrain</button>
+        <button class="mp-tab {{ not formHasErrors ? 'active' : '' }}" data-tab="list">Liste des Terrains</button>
+        <button class="mp-tab {{ formHasErrors ? 'active' : '' }}" data-tab="add">Ajouter un Terrain</button>
     </div>
 
     {# ── TAB 1 : Liste ── #}
-    <div class="mp-tab-pane active" id="tab-list">
+    <div class="mp-tab-pane {{ not formHasErrors ? 'active' : '' }}" id="tab-list">
         {% if terrains is empty %}
             <div class="mp-empty">Aucun terrain enregistré.</div>
         {% else %}
@@ -55,7 +55,7 @@
                     <tr>
                         <td>
                             {% if t.imageUrl %}
-                                <img src="{{ asset(t.imageUrl) }}" alt="" class="mp-thumb">
+                                <img src="{{ asset(t.imageUrl) }}" alt="" class="mp-thumb" loading="lazy">
                             {% else %}
                                 <span class="mp-no-img">—</span>
                             {% endif %}
@@ -95,7 +95,7 @@
     </div>
 
     {# ── TAB 2 : Ajouter ── #}
-    <div class="mp-tab-pane" id="tab-add">
+    <div class="mp-tab-pane {{ formHasErrors ? 'active' : '' }}" id="tab-add">
         {{ form_start(form, {'attr': {'class': 'mp-form', 'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
             <div class="mp-form-grid">
                 {{ form_row(form.titre) }}
