@@ -1,5 +1,6 @@
 twig:
     file_name_pattern: '*.twig'
+    form_themes: ['form/firma_theme.html.twig']
     date:
         timezone: 'Africa/Lagos'
 

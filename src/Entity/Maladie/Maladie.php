@@ -6,6 +6,7 @@ use App\Repository\Maladie\MaladieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MaladieRepository::class)]
 #[ORM\Table(name: "maladie")]
@@ -18,15 +19,21 @@ class Maladie
     private ?int $id = null;
 
     #[ORM\Column(name: "nom", length: 150)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    #[Assert\Length(min: 3, minMessage: 'Le nom doit contenir au moins 3 caractères.', max: 150, maxMessage: 'Le nom ne peut pas dépasser 150 caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column(name: "nom_scientifique", length: 200, nullable: true)]
     private ?string $nomScientifique = null;
 
     #[ORM\Column(name: "description", type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'La description est obligatoire.')]
+    #[Assert\Length(min: 10, minMessage: 'La description doit contenir au moins 10 caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(name: "symptomes", type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: 'Les symptômes sont obligatoires.')]
+    #[Assert\Length(min: 10, minMessage: 'Les symptômes doivent contenir au moins 10 caractères.')]
     private ?string $symptomes = null;
 
     #[ORM\Column(name: "image_url", length: 255, nullable: true)]
