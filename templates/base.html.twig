@@ -17,6 +17,88 @@
     </head>
     <body data-turbo="false">
         {% include 'shared/components/_toast_confirm.html.twig' %}
+        {% include 'shared/_flash_toasts.html.twig' %}
         {% block body %}{% endblock %}
+        {% block footer %}{% include 'shared/_footer.html.twig' %}{% endblock %}
+
+        <div class="app-confirm-modal" id="appConfirmModal" hidden>
+            <div class="app-confirm-backdrop" data-confirm-cancel></div>
+            <div class="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle" aria-describedby="appConfirmMessage">
+                <p class="app-confirm-eyebrow">Confirmation</p>
+                <h2 id="appConfirmTitle">Supprimer ce post</h2>
+                <p id="appConfirmMessage">Voulez-vous vraiment supprimer ce post ?</p>
+                <div class="app-confirm-actions">
+                    <button type="button" class="forum-button forum-button-secondary" data-confirm-cancel onclick="window.firmaCloseConfirmModal()">Annuler</button>
+                    <button type="button" class="forum-button forum-button-danger" id="appConfirmSubmit">Supprimer</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (() => {
+                let pendingFormId = null;
+
+                window.firmaOpenConfirmModal = (formId, title, message, submitLabel = 'Supprimer', submitVariant = 'danger') => {
+                    const modal = document.getElementById('appConfirmModal');
+                    const modalTitle = document.getElementById('appConfirmTitle');
+                    const modalMessage = document.getElementById('appConfirmMessage');
+                    const modalSubmit = document.getElementById('appConfirmSubmit');
+
+                    if (!modal || !modalTitle || !modalMessage) {
+                        return;
+                    }
+
+                    pendingFormId = formId;
+                    modalTitle.textContent = title || 'Confirmation';
+                    modalMessage.textContent = message || 'Voulez-vous confirmer cette action ?';
+                    if (modalSubmit) {
+                        modalSubmit.textContent = submitLabel || 'Confirmer';
+                        modalSubmit.classList.toggle('forum-button-danger', submitVariant === 'danger');
+                    }
+                    modal.hidden = false;
+                };
+
+                window.firmaCloseConfirmModal = () => {
+                    const modal = document.getElementById('appConfirmModal');
+                    if (!modal) {
+                        return;
+                    }
+
+                    modal.hidden = true;
+                    pendingFormId = null;
+                };
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const confirmSubmit = document.getElementById('appConfirmSubmit');
+                    const backdrop = document.querySelector('.app-confirm-backdrop');
+
+                    if (backdrop) {
+                        backdrop.addEventListener('click', () => window.firmaCloseConfirmModal());
+                    }
+
+                    if (confirmSubmit) {
+                        confirmSubmit.addEventListener('click', () => {
+                            if (!pendingFormId) {
+                                return;
+                            }
+
+                            const form = document.getElementById(pendingFormId);
+                            window.firmaCloseConfirmModal();
+
+                            if (form) {
+                                form.submit();
+                            }
+                        });
+                    }
+
+                    document.addEventListener('keydown', (event) => {
+                        const modal = document.getElementById('appConfirmModal');
+                        if (event.key === 'Escape' && modal && !modal.hidden) {
+                            window.firmaCloseConfirmModal();
+                        }
+                    });
+                });
+            })();
+        </script>
     </body>
 </html>

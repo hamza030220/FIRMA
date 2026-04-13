@@ -287,12 +287,17 @@ class EvenementController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+            $errorFields = [];
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
                 $errors[] = $field . ': ' . $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
             }
             $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            return $this->redirectToRoute('admin_evenements');
+            $this->addFlash('error_fields', implode(',', array_unique($errorFields)));
+            return $this->redirectToRoute('admin_evenements', ['tab' => 'creer']);
         }
 
         $this->evenementService->create($evt);
@@ -325,12 +330,17 @@ class EvenementController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+            $errorFields = [];
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
                 $errors[] = $field . ': ' . $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
             }
             $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            return $this->redirectToRoute('admin_evenements');
+            $this->addFlash('error_fields', implode(',', array_unique($errorFields)));
+            return $this->redirectToRoute('admin_evenements', ['tab' => 'modifier', 'edit' => $id]);
         }
 
         // Adjust available places if capacity changed

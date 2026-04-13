@@ -1,83 +1,8 @@
 {# ═══════════════════════════════════════════════════════
-   FIRMA — Form validation helper + field error styles
+   FIRMA — Field error styles (validation handled server-side)
    Toast & Confirm are handled by app.js
    Include once in base.html.twig
    ═══════════════════════════════════════════════════════ #}
-
-<script>
-(function(){
-    /* ── Form validation helper ── */
-    window.firmaValidateForm = function(form) {
-        var ok = true;
-        form.querySelectorAll('.firma-field-error').forEach(function(el){ el.remove(); });
-        form.querySelectorAll('.firma-input-invalid').forEach(function(el){ el.classList.remove('firma-input-invalid'); });
-
-        form.querySelectorAll('[data-validate]').forEach(function(input) {
-            var rules = input.getAttribute('data-validate').split('|');
-            var value = input.value.trim();
-            var errorMsg = null;
-
-            for (var i = 0; i < rules.length; i++) {
-                var rule = rules[i];
-                if (rule === 'required' && value === '') {
-                    errorMsg = input.getAttribute('data-msg-required') || 'Ce champ est requis.';
-                    break;
-                }
-                if (rule.startsWith('min:') && value !== '') {
-                    var min = parseFloat(rule.split(':')[1]);
-                    if (parseFloat(value) < min) { errorMsg = 'Valeur minimum : ' + min; break; }
-                }
-                if (rule.startsWith('max:') && value !== '') {
-                    var max = parseFloat(rule.split(':')[1]);
-                    if (parseFloat(value) > max) { errorMsg = 'Valeur maximum : ' + max; break; }
-                }
-                if (rule.startsWith('minlen:') && value !== '') {
-                    var ml = parseInt(rule.split(':')[1]);
-                    if (value.length < ml) { errorMsg = 'Minimum ' + ml + ' caractères.'; break; }
-                }
-                if (rule.startsWith('maxlen:') && value !== '') {
-                    var xl = parseInt(rule.split(':')[1]);
-                    if (value.length > xl) { errorMsg = 'Maximum ' + xl + ' caractères.'; break; }
-                }
-                if (rule === 'email' && value !== '') {
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) { errorMsg = 'Email invalide.'; break; }
-                }
-                if (rule === 'url' && value !== '') {
-                    if (!/^https?:\/\/.+/.test(value)) { errorMsg = 'URL invalide (commencez par http:// ou https://).'; break; }
-                }
-                if (rule === 'phone' && value !== '') {
-                    var digits = value.replace(/[\s\-\.\(\)\+]/g, '');
-                    if (!/^\d{8,15}$/.test(digits)) { errorMsg = 'Numéro de téléphone invalide (8 à 15 chiffres).'; break; }
-                }
-                if (rule === 'numeric' && value !== '') {
-                    if (!/^-?\d+(\.\d+)?$/.test(value)) { errorMsg = 'Veuillez entrer un nombre valide.'; break; }
-                }
-                if (rule === 'integer' && value !== '') {
-                    if (!/^\d+$/.test(value)) { errorMsg = 'Veuillez entrer un nombre entier.'; break; }
-                }
-                if (rule === 'date' && value !== '') {
-                    if (isNaN(Date.parse(value))) { errorMsg = 'Date invalide.'; break; }
-                }
-            }
-
-            if (errorMsg) {
-                ok = false;
-                input.classList.add('firma-input-invalid');
-                var span = document.createElement('span');
-                span.className = 'firma-field-error';
-                span.textContent = errorMsg;
-                input.parentNode.insertBefore(span, input.nextSibling);
-            }
-        });
-
-        if (!ok) {
-            var first = form.querySelector('.firma-input-invalid');
-            if (first) first.focus();
-        }
-        return ok;
-    };
-})();
-</script>
 
 <style>
 /* ── Field validation styles ── */

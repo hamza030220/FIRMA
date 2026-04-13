@@ -75,4 +75,19 @@ class MaladieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function findOneByNormalizedName(string $name, ?int $ignoreId = null): ?Maladie
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->andWhere('LOWER(m.nom) = :name')
+            ->setParameter('name', mb_strtolower(trim($name)))
+            ->setMaxResults(1);
+
+        if ($ignoreId !== null) {
+            $qb->andWhere('m.id != :ignoreId')
+                ->setParameter('ignoreId', $ignoreId);
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

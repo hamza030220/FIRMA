@@ -818,5 +818,29 @@ function setFilter(f) {
 }
 
 document.getElementById('searchInput').addEventListener('input', filterTreatments);
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest('form[data-firma-confirm]');
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    if (form.dataset.confirmed === 'true') {
+        form.dataset.confirmed = '';
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const formId = form.id || `maladie-show-delete-${Math.random().toString(36).slice(2, 9)}`;
+    form.id = formId;
+    const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
+
+    if (window.firmaOpenConfirmModal) {
+        window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
+    } else if (window.firmaToast) {
+        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
+    }
+}, true);
 </script>
 {% endblock %}

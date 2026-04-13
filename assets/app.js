@@ -12,16 +12,19 @@ import './styles/user/dashboard.css';
 import './styles/admin/dashboard.css';
 import './styles/admin/marketplace.css';
 import './styles/user/marketplace.css';
-import './styles/user/evenements.css';
-import './styles/admin/evenements.css';
+import './styles/footer.css';
+import './styles/static-pages.css';
 
 
 import './marketplace.js';
-import './validation.js';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 
-/* ── Shared SVG icons ── */
+/* ══════════════════════════════════════════════════════
+   FIRMA — Global Custom Modal & Toast System
+   ══════════════════════════════════════════════════════ */
+
+/* ── SVG Icons (custom, FIRMA-themed) ── */
 const FIRMA_ICONS = {
     danger: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r=".5" fill="currentColor" stroke="none"/></svg>',
     warning: '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>',
@@ -50,7 +53,6 @@ function getToastContainer() {
  * @param {number} duration  ms (default 10000)
  */
 function firmaToast(message, type = 'success', duration = 10000) {
-    if (type === 'error') type = 'danger';
     const container = getToastContainer();
     const toast = document.createElement('div');
     toast.className = 'firma-toast firma-toast-' + type;
@@ -178,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/* ── Mobile navigation toggles ── */
 document.addEventListener('DOMContentLoaded', () => {
     // User navbar toggle
     const navToggle = document.getElementById('navToggle');
@@ -193,36 +194,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
     }
-});
-
-/* -- Auto-submit search forms after N letters -- */
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form[data-auto-search]').forEach((form) => {
-        const input = form.querySelector('input[name="q"], input[type="search"], input[data-auto-search-input]');
-        if (!input) return;
-
-        const minLength = Number(form.dataset.autoSearchMin || 2);
-        const delay = Number(form.dataset.autoSearchDelay || 300);
-        let timer = null;
-        let lastSubmittedValue = input.value.trim();
-
-        const submitForm = () => {
-            const value = input.value.trim();
-
-            if (value === lastSubmittedValue) return;
-            if (value !== '' && value.length < minLength) return;
-
-            lastSubmittedValue = value;
-            if (typeof form.requestSubmit === 'function') {
-                form.requestSubmit();
-            } else {
-                form.submit();
-            }
-        };
-
-        input.addEventListener('input', () => {
-            window.clearTimeout(timer);
-            timer = window.setTimeout(submitForm, delay);
-        });
-    });
 });

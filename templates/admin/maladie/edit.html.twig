@@ -224,6 +224,8 @@
 }
 .edt-input.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
 .edt-input.valid { border-color: var(--success); }
+.edt-select.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
+.edt-select.valid { border-color: var(--success); }
 .edt-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
 .edt-err { font-size: 0.72rem; color: var(--danger); margin-top: 0.3rem; display: none; }
 .edt-err.show { display: block; }
@@ -822,8 +824,17 @@
                 </div>
                 <div class="edt-form-group">
                     <label class="edt-label">Durée du traitement</label>
-                    <input type="text" id="solDuree" class="edt-input" placeholder="Ex: 4 jours, 5 jours, 2 semaines">
-                    <div class="edt-inline-help">Vous choisissez librement la duree.</div>
+                    <select id="solDuree" class="edt-select">
+                        <option value="">Choisir une duree</option>
+                        <option value="4 jours">4 jours</option>
+                        <option value="7 jours">7 jours</option>
+                        <option value="10 jours">10 jours</option>
+                        <option value="14 jours (2 semaines)">14 jours (2 semaines)</option>
+                        <option value="21 jours (3 semaines)">21 jours (3 semaines)</option>
+                        <option value="30 jours (1 mois)">30 jours (1 mois)</option>
+                    </select>
+                    <div class="edt-inline-help">Selectionnez une duree type du traitement.</div>
+                    <div class="edt-err" id="dureeErr">Veuillez choisir une duree de traitement.</div>
                 </div>
             </div>
         </div>
@@ -897,6 +908,11 @@ document.getElementById('maladieSymptomes')?.addEventListener('input', function(
 });
 
 document.getElementById('maladieForm')?.addEventListener('submit', function(e) {
+    if (this.dataset.confirmed === 'true') {
+        this.dataset.confirmed = '';
+        return;
+    }
+
     const nom = document.getElementById('maladieNom');
     const description = document.getElementById('maladieDescription');
     const symptomes = document.getElementById('maladieSymptomes');
@@ -926,8 +942,28 @@ document.getElementById('maladieForm')?.addEventListener('submit', function(e) {
     if (!isValid) {
         if (window.firmaToast) {
             window.firmaToast('Veuillez corriger les champs du formulaire avant de continuer.', 'danger');
+        } else {
+            const el = document.createElement('div');
+            el.textContent = 'Veuillez corriger les champs du formulaire avant de continuer.';
+            el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:#fdeaea;color:#a32d2d;border:1px solid #f5c5c0';
+            document.body.appendChild(el);
+            window.setTimeout(() => el.remove(), 4200);
         }
         (nom.value.trim().length < 3 ? nom : (!description.value.trim() || description.value.trim().length < 10 ? description : symptomes)).focus();
+        return;
+    }
+
+    e.preventDefault();
+    if (window.firmaOpenConfirmModal) {
+        window.firmaOpenConfirmModal(
+            this.id || 'maladieForm',
+            'Confirmer la modification',
+            'Voulez-vous vraiment enregistrer ces modifications ?',
+            'Enregistrer',
+            'primary'
+        );
+    } else if (window.firmaToast) {
+        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
     }
 });
 
@@ -961,7 +997,18 @@ function openEditModal(id) {
     document.getElementById('solEtapes').value = row.dataset.etapes || '';
     document.getElementById('solProduits').value = row.dataset.produits || '';
     document.getElementById('solPrevention').value = row.dataset.prevention || '';
-    document.getElementById('solDuree').value = row.dataset.duree || '';
+    const dureeSelect = document.getElementById('solDuree');
+    const dureeValue = row.dataset.duree || '';
+    if (dureeSelect) {
+        const hasOption = Array.from(dureeSelect.options).some((opt) => opt.value === dureeValue);
+        if (dureeValue && !hasOption) {
+            const option = document.createElement('option');
+            option.value = dureeValue;
+            option.textContent = dureeValue;
+            dureeSelect.appendChild(option);
+        }
+        dureeSelect.value = dureeValue;
+    }
     document.getElementById('solModal').classList.add('open');
 }
 
@@ -969,28 +1016,73 @@ function closeModal() {
     document.getElementById('solModal').classList.remove('open');
 }
 
+function maladieNotify(message, type = 'success', duration = 10000) {
+    if (window.firmaToast) {
+        window.firmaToast(message, type, duration);
+        return;
+    }
+
+    if (!document.getElementById('maladie-toast-fallback-style')) {
+        const style = document.createElement('style');
+        style.id = 'maladie-toast-fallback-style';
+        style.textContent = '@keyframes maladieToastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}';
+        document.head.appendChild(style);
+    }
+
+    const el = document.createElement('div');
+    const isDanger = type === 'danger' || type === 'error';
+    el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;min-width:260px;max-width:420px;padding:12px 14px;border-radius:12px;background:' + (isDanger ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97') + ';box-shadow:0 14px 30px rgba(0,0,0,.14);overflow:hidden;';
+    el.innerHTML = '<div style="position:absolute;top:0;left:0;height:3px;width:100%;background:' + (isDanger ? '#dc2626' : '#2f7d55') + ';transform-origin:left;animation:maladieToastProgress ' + duration + 'ms linear forwards"></div><div>' + String(message) + '</div>';
+    document.body.appendChild(el);
+    window.setTimeout(() => el.remove(), duration + 350);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    const notify = maladieNotify;
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('form[data-firma-confirm]');
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        if (form.dataset.confirmed === 'true') {
+            form.dataset.confirmed = '';
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        const formId = form.id || `maladie-confirm-${Math.random().toString(36).slice(2, 9)}`;
+        form.id = formId;
+        const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
+
+        if (window.firmaOpenConfirmModal) {
+            window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
+        } else {
+            notify('La fenetre de confirmation est indisponible.', 'danger');
+        }
+    }, true);
+
     const flash = sessionStorage.getItem('adminMaladieToast');
     if (flash) {
         try {
             const data = JSON.parse(flash);
-            if (window.firmaToast && data.message) {
-                window.firmaToast(data.message, data.type || 'success');
+            if (data.message) {
+                notify(data.message, data.type || 'success', 10000);
             }
         } catch (e) {}
         sessionStorage.removeItem('adminMaladieToast');
     }
 
-    if (window.firmaToast) {
-        serverFlashMessages.forEach(({ message, type }) => {
-            window.firmaToast(message, type === 'error' ? 'danger' : type);
-        });
+    serverFlashMessages.forEach(({ message, type }) => {
+        notify(message, type === 'error' ? 'danger' : type, 10000);
+    });
 
-        if (!serverFlashMessages.length) {
-            serverValidationErrors.forEach((message) => {
-                window.firmaToast(message, 'danger');
-            });
-        }
+    if (!serverFlashMessages.length) {
+        serverValidationErrors.forEach((message) => {
+            notify(message, 'danger', 10000);
+        });
     }
 });
 
@@ -998,6 +1090,7 @@ function validateModal() {
     let valid = true;
     const titre = document.getElementById('solTitre');
     const sol = document.getElementById('solSolution');
+    const duree = document.getElementById('solDuree');
     if (!titre.value.trim() || titre.value.trim().length < 3) {
         titre.classList.add('invalid');
         document.getElementById('titreErr').classList.add('show');
@@ -1008,11 +1101,29 @@ function validateModal() {
         document.getElementById('solutionErr').classList.add('show');
         valid = false;
     } else { sol.classList.remove('invalid'); document.getElementById('solutionErr').classList.remove('show'); }
+
+    if (!duree.value.trim()) {
+        duree.classList.add('invalid');
+        document.getElementById('dureeErr').classList.add('show');
+        valid = false;
+    } else {
+        duree.classList.remove('invalid');
+        duree.classList.add('valid');
+        document.getElementById('dureeErr').classList.remove('show');
+    }
+
     return valid;
 }
 
 async function saveSolution() {
-    if (!validateModal()) return;
+    if (!validateModal()) {
+        maladieNotify('Veuillez remplir correctement les champs obligatoires avant d\'enregistrer.', 'danger', 10000);
+        const firstInvalid = document.querySelector('#solModal .invalid');
+        if (firstInvalid && typeof firstInvalid.focus === 'function') {
+            firstInvalid.focus();
+        }
+        return;
+    }
     const data = {
         titre: document.getElementById('solTitre').value.trim(),
         solution: document.getElementById('solSolution').value.trim(),
@@ -1024,6 +1135,10 @@ async function saveSolution() {
     const url = currentEditId
         ? `/admin/solution-traitement/edit/${currentEditId}`
         : `/admin/solution-traitement/new/{{ maladie.id }}`;
+    const saveBtn = document.querySelector('#solModal .edt-btn-save');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+    }
     try {
         const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const result = await res.json();
@@ -1033,12 +1148,14 @@ async function saveSolution() {
                 type: 'success'
             }));
             location.reload();
-        } else if (window.firmaToast) {
-            window.firmaToast('Erreur : ' + (result.error || 'Operation impossible.'), 'danger');
+        } else {
+            maladieNotify('Erreur : ' + (result.error || 'Operation impossible.'), 'danger', 10000);
         }
     } catch(e) {
-        if (window.firmaToast) {
-            window.firmaToast('Erreur reseau lors de l\'enregistrement.', 'danger');
+        maladieNotify('Erreur reseau lors de l\'enregistrement.', 'danger', 10000);
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
         }
     }
 }

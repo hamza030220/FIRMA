@@ -69,6 +69,8 @@ class MaladieController extends AbstractController
                 $errors['nom'] = 'Le nom ne peut pas dépasser 150 caractères.';
             } elseif (!preg_match('/^[\p{L}\s\-\'\.]+$/u', $nom)) {
                 $errors['nom'] = 'Le nom ne doit contenir que des lettres.';
+            } elseif ($this->maladieRepo->findOneByNormalizedName($nom) !== null) {
+                $errors['nom'] = 'Cette maladie existe déjà. Veuillez choisir un autre nom.';
             }
 
             if (!empty($nomScientifique)) {
@@ -143,8 +145,12 @@ class MaladieController extends AbstractController
             }
         }
 
+        foreach ($errors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         return $this->render('admin/maladie/new.html.twig', [
-            'errors' => $errors,
+            'errors' => [],
             'old'    => $old,
         ]);
     }
@@ -171,6 +177,8 @@ class MaladieController extends AbstractController
                 $errors['nom'] = 'Le nom ne peut pas dépasser 150 caractères.';
             } elseif (!preg_match('/^[\p{L}\s\-\'\.]+$/u', $nom)) {
                 $errors['nom'] = 'Le nom ne doit contenir que des lettres.';
+            } elseif ($this->maladieRepo->findOneByNormalizedName($nom, $maladie->getId()) !== null) {
+                $errors['nom'] = 'Cette maladie existe déjà. Veuillez choisir un autre nom.';
             }
 
             if (!empty($nomScientifique)) {
@@ -242,10 +250,14 @@ class MaladieController extends AbstractController
             }
         }
 
+        foreach ($errors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
         return $this->render('admin/maladie/edit.html.twig', [
             'maladie'     => $maladie,
             'traitements' => $this->traitementRepo->findByMaladieId($maladie->getId()),
-            'errors'      => $errors,
+            'errors'      => [],
         ]);
     }
 

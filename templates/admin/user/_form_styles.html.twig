@@ -1,0 +1,48 @@
+<style>
+.admin-form-page { max-width: 780px; }
+
+.admin-form-header { display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1.5rem; flex-wrap:wrap; gap:.75rem; }
+.admin-form-header h2 { margin:0; font-size:1.25rem; font-weight:700; color:#1a1a1a; }
+
+.btn-back { display:inline-flex; align-items:center; gap:.4rem; padding:.55rem 1rem;
+  background:#f3f4f6; color:#374151; border:1.5px solid #e2e8f0; border-radius:9px;
+  text-decoration:none; font-size:.9rem; font-weight:600; }
+.btn-back:hover { background:#e5e7eb; }
+
+.admin-flash { display:flex; align-items:center; gap:.5rem; padding:.75rem 1.2rem;
+  border-radius:10px; margin-bottom:1rem; font-size:.9rem; }
+.admin-flash--error { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+
+.admin-form-card { background:#fff; border-radius:16px; padding:2rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.06); }
+
+.admin-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:600px){ .admin-form-grid{grid-template-columns:1fr;} }
+
+.admin-user-form .form-group { margin-bottom:1rem; }
+.admin-user-form .form-group label { display:block; font-weight:600; font-size:.875rem;
+  color:#374151; margin-bottom:.35rem; }
+.admin-user-form .form-input { width:100%; padding:.6rem .9rem; border:1.5px solid #e2e8f0;
+  border-radius:8px; font-size:.95rem; transition:border-color .2s; box-sizing:border-box; }
+.admin-user-form .form-input:focus { outline:none; border-color:#2d7a3a; }
+.admin-user-form ul.form-error { color:#dc2626; font-size:.82rem; margin:.3rem 0 0;
+  padding:0; list-style:none; }
+
+.admin-user-form .input-wrapper { position:relative; }
+.admin-user-form .toggle-password { position:absolute; right:.7rem; top:50%;
+  transform:translateY(-50%); background:none; border:none; cursor:pointer;
+  color:#9ca3af; padding:0; }
+.admin-user-form .toggle-password:hover { color:#374151; }
+.admin-user-form .eye-icon { width:18px; height:18px; }
+
+.admin-form-actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:1.5rem; }
+
+.btn-cancel { padding:.65rem 1.3rem; background:#f3f4f6; color:#374151;
+  border:1.5px solid #e2e8f0; border-radius:9px; text-decoration:none;
+  font-size:.9rem; font-weight:600; }
+.btn-save { display:inline-flex; align-items:center; gap:.4rem; padding:.65rem 1.5rem;
+  background:linear-gradient(135deg,#2d7a3a,#4caf50); color:#fff; border:none;
+  border-radius:9px; font-size:.9rem; font-weight:600; cursor:pointer; }
+.btn-save:hover { opacity:.9; }
+</style>

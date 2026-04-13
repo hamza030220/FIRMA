@@ -562,23 +562,6 @@
   background:#f9fafb;border:1px solid #e5e7eb;
   margin-bottom:6px;
 }
-.um-hist-loc-icon{
-  width:32px;height:32px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.um-hist-loc-icon.vehicule{background:#dbeafe;color:#2563eb;}
-.um-hist-loc-icon.terrain{background:#fef3c7;color:#d97706;}
-.um-hist-loc-info{flex:1;min-width:0;}
-.um-hist-loc-info strong{
-  display:block;font-size:.8rem;color:#1f2937;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.um-hist-loc-info small{font-size:.7rem;color:#9ca3af;}
-.um-hist-loc-price{font-size:.82rem;font-weight:700;color:#20452c;white-space:nowrap;}
-
-.um-hist-empty{
-  text-align:center;color:#d1d5db;font-size:.82rem;padding:16px 0;
-}
 
 /* Historique overlay modal */
 .um-hist-overlay{
@@ -943,4 +926,30 @@
   .um-card-btn{margin:6px 10px 10px;padding:8px;font-size:.8rem;}
   .um-tabs{gap:4px;}
   .um-tab{padding:8px 14px;font-size:.8rem;}
+}
+
+/* ══════════════════════════════════════════════════════
+   Pagination
+   ══════════════════════════════════════════════════════ */
+.um-pagination{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin:24px 0 8px;flex-wrap:wrap;
+}
+.um-page-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:36px;height:36px;padding:0 10px;
+  border-radius:8px;font-size:.9rem;font-weight:600;
+  color:#20452c;background:#f0f2f5;text-decoration:none;
+  transition:all .2s ease;cursor:pointer;border:none;
+}
+.um-page-link:hover{
+  background:#20452c;color:#fff;
+}
+.um-page-active{
+  background:linear-gradient(135deg,#20452c,#4aac33);color:#fff;
+  pointer-events:none;
+}
+.um-page-dots{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:28px;height:36px;color:#8b9a8e;font-size:.9rem;
 }
