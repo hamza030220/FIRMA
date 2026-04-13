@@ -33,6 +33,29 @@
         <input type="text" id="umSearch" placeholder="Rechercher un article…" autocomplete="off">
     </div>
 
+    {# ── Pagination macro ── #}
+    {% macro pagination(currentPage, totalPages, paramName, activeTab) %}
+        {% if totalPages > 1 %}
+        <nav class="um-pagination">
+            {% if currentPage > 1 %}
+                <a href="?{{ paramName }}={{ currentPage - 1 }}&tab={{ activeTab }}" class="um-page-link">&laquo;</a>
+            {% endif %}
+            {% for p in 1..totalPages %}
+                {% if p == currentPage %}
+                    <span class="um-page-link um-page-active">{{ p }}</span>
+                {% elseif p == 1 or p == totalPages or (p >= currentPage - 2 and p <= currentPage + 2) %}
+                    <a href="?{{ paramName }}={{ p }}&tab={{ activeTab }}" class="um-page-link">{{ p }}</a>
+                {% elseif p == currentPage - 3 or p == currentPage + 3 %}
+                    <span class="um-page-dots">…</span>
+                {% endif %}
+            {% endfor %}
+            {% if currentPage < totalPages %}
+                <a href="?{{ paramName }}={{ currentPage + 1 }}&tab={{ activeTab }}" class="um-page-link">&raquo;</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    {% endmacro %}
+
     {# ══════════════ Équipements ══════════════ #}
     <div class="um-tab-pane active" id="pane-equipements">
         {% if equipements is empty %}
@@ -43,7 +66,7 @@
             <div class="um-card" data-search="{{ e.nom|lower }} {{ e.categorie|lower|default('') }} {{ e.description|lower|default('') }}">
                 <div class="um-card-img">
                     {% if e.imageUrl %}
-                        <img src="{{ asset(e.imageUrl) }}" alt="{{ e.nom }}">
+                        <img src="{{ asset(e.imageUrl) }}" alt="{{ e.nom }}" loading="lazy">
                     {% else %}
                         <div class="um-card-no-img">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -75,6 +98,7 @@
             </div>
             {% endfor %}
         </div>
+        {{ _self.pagination(pageE, totalPagesE, 'page_e', 'equipements') }}
         {% endif %}
     </div>
 
@@ -88,7 +112,7 @@
             <div class="um-card" data-search="{{ v.nom|lower }} {{ v.marque|lower|default('') }} {{ v.modele|lower|default('') }} {{ v.description|lower|default('') }}">
                 <div class="um-card-img">
                     {% if v.imageUrl %}
-                        <img src="{{ asset(v.imageUrl) }}" alt="{{ v.nom }}">
+                        <img src="{{ asset(v.imageUrl) }}" alt="{{ v.nom }}" loading="lazy">
                     {% else %}
                         <div class="um-card-no-img">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -118,6 +142,7 @@
             </div>
             {% endfor %}
         </div>
+        {{ _self.pagination(pageV, totalPagesV, 'page_v', 'vehicules') }}
         {% endif %}
     </div>
 
@@ -131,7 +156,7 @@
             <div class="um-card" data-search="{{ t.titre|lower }} {{ t.ville|lower|default('') }} {{ t.description|lower|default('') }}">
                 <div class="um-card-img">
                     {% if t.imageUrl %}
-                        <img src="{{ asset(t.imageUrl) }}" alt="{{ t.titre }}">
+                        <img src="{{ asset(t.imageUrl) }}" alt="{{ t.titre }}" loading="lazy">
                     {% else %}
                         <div class="um-card-no-img">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg>
@@ -160,6 +185,7 @@
             </div>
             {% endfor %}
         </div>
+        {{ _self.pagination(pageT, totalPagesT, 'page_t', 'terrains') }}
         {% endif %}
     </div>
 

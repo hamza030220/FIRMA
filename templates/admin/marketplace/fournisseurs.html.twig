@@ -14,12 +14,12 @@
     {{ macros.flashes() }}
 
     <div class="mp-tabs">
-        <button class="mp-tab active" data-tab="list">Liste des Fournisseurs</button>
-        <button class="mp-tab" data-tab="add">Ajouter un Fournisseur</button>
+        <button class="mp-tab {{ not formHasErrors ? 'active' : '' }}" data-tab="list">Liste des Fournisseurs</button>
+        <button class="mp-tab {{ formHasErrors ? 'active' : '' }}" data-tab="add">Ajouter un Fournisseur</button>
     </div>
 
     {# ── TAB 1 : Liste ── #}
-    <div class="mp-tab-pane active" id="tab-list">
+    <div class="mp-tab-pane {{ not formHasErrors ? 'active' : '' }}" id="tab-list">
         {% if fournisseurs is empty %}
             <div class="mp-empty">Aucun fournisseur enregistré.</div>
         {% else %}
@@ -87,7 +87,7 @@
     </div>
 
     {# ── TAB 2 : Ajouter ── #}
-    <div class="mp-tab-pane" id="tab-add">
+    <div class="mp-tab-pane {{ formHasErrors ? 'active' : '' }}" id="tab-add">
         {{ form_start(form, {'attr': {'class': 'mp-form', 'novalidate': 'novalidate'}}) }}
             <div class="mp-form-grid">
                 {{ form_row(form.nomEntreprise) }}

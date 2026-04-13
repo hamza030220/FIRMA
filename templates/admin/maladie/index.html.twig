@@ -6,6 +6,16 @@
 {% block admin_content %}
 
 <style>
+:root {
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #6b7280;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-border-secondary: #d1d5db;
+  --color-border-tertiary: #e5e7eb;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
 *{box-sizing:border-box}
 .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
 .top-left h2{font-size:20px;font-weight:500;color:var(--color-text-primary);margin:0}
@@ -105,7 +115,8 @@
     </a>
 </div>
 
-{% for message in app.flashes('success') %}
+{% set maladie_success_flashes = app.flashes('success') %}
+{% for message in maladie_success_flashes %}
 <div class="flash-ok">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     {{ message }}
@@ -254,6 +265,52 @@ function render(){
 
 document.getElementById('sort-id')?.classList.add('asc');
 render();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const successMessages = {{ maladie_success_flashes|json_encode|raw }};
+    const notify = (message, type = 'success') => {
+        if (window.firmaToast) {
+            window.firmaToast(message, type);
+            return;
+        }
+
+        const el = document.createElement('div');
+        el.textContent = message;
+        el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:' + (type === 'danger' ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97');
+        document.body.appendChild(el);
+        window.setTimeout(() => el.remove(), 4200);
+    };
+
+    if (Array.isArray(successMessages)) {
+        successMessages.forEach((message) => {
+            notify(message, 'success');
+        });
+    }
+});
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest('.table-wrap form[data-firma-confirm]');
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    if (form.dataset.confirmed === 'true') {
+        form.dataset.confirmed = '';
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
+    const formId = form.id || `maladie-delete-${Math.random().toString(36).slice(2, 9)}`;
+    form.id = formId;
+
+    if (window.firmaOpenConfirmModal) {
+        window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
+    } else if (window.firmaToast) {
+        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
+    }
+}, true);
 </script>
 
 {% endblock %}

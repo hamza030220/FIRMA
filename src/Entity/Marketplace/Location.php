@@ -9,6 +9,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
 #[ORM\Table(name: 'locations')]
+#[ORM\Index(columns: ['id_utilisateur'], name: 'idx_loc_utilisateur')]
+#[ORM\Index(columns: ['date_reservation'], name: 'idx_loc_date_reservation')]
+#[ORM\Index(columns: ['statut'], name: 'idx_loc_statut')]
+#[ORM\Index(columns: ['type_location'], name: 'idx_loc_type')]
 class Location
 {
     #[ORM\Id]
