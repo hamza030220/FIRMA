@@ -21,6 +21,7 @@ use App\Repository\Marketplace\LocationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -57,6 +58,69 @@ class MarketplaceController extends AbstractController
         return $this->render('admin/marketplace/index.html.twig', [
             'counts' => $counts,
         ]);
+    }
+
+    /* ================================================================
+       CALENDRIER LOCATIONS  (FullCalendar)
+       ================================================================ */
+
+    #[Route('/calendrier', name: 'admin_marketplace_calendrier')]
+    public function calendrier(
+        VehiculeRepository $vehicRepo,
+        TerrainRepository $terrainRepo,
+    ): Response {
+        $vehicules = $vehicRepo->findBy([], ['nom' => 'ASC']);
+        $terrains = $terrainRepo->findBy([], ['titre' => 'ASC']);
+
+        return $this->render('admin/marketplace/calendrier.html.twig', [
+            'vehicules' => $vehicules,
+            'terrains' => $terrains,
+        ]);
+    }
+
+    #[Route('/calendrier/events', name: 'admin_marketplace_calendrier_events', methods: ['GET'])]
+    public function calendarEvents(Request $request, LocationRepository $locRepo): JsonResponse
+    {
+        $locations = $locRepo->findCurrentAndFutureWithRelations();
+
+        $filterType = $request->query->get('filterType', 'all');
+        $filterId = $request->query->getInt('filterId', 0);
+
+        $events = [];
+        foreach ($locations as $loc) {
+            $type = $loc->getTypeLocation();
+
+            if ($filterType !== 'all' && $filterType !== $type) {
+                continue;
+            }
+            if ($filterId > 0) {
+                if ($type === 'vehicule' && $loc->getVehicule()?->getId() !== $filterId) continue;
+                if ($type === 'terrain' && $loc->getTerrain()?->getId() !== $filterId) continue;
+            }
+
+            $user = $loc->getUtilisateur();
+            $itemName = $loc->getItemName();
+            $userName = $user ? $user->getFullName() : 'Inconnu';
+
+            $events[] = [
+                'id' => $loc->getId(),
+                'title' => $itemName,
+                'start' => $loc->getDateDebut()->format('Y-m-d'),
+                'end' => (clone $loc->getDateFin())->modify('+1 day')->format('Y-m-d'),
+                'color' => $type === 'terrain' ? '#27ae60' : '#e67e22',
+                'extendedProps' => [
+                    'type' => $type,
+                    'itemName' => $itemName,
+                    'userName' => $userName,
+                    'prixTotal' => $loc->getPrixTotal() . ' TND',
+                    'statut' => $loc->getStatut(),
+                    'dateDebut' => $loc->getDateDebut()->format('d/m/Y'),
+                    'dateFin' => $loc->getDateFin()->format('d/m/Y'),
+                ],
+            ];
+        }
+
+        return new JsonResponse($events);
     }
 
     /* ================================================================
