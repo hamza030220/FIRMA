@@ -1,0 +1,246 @@
+<style>
+.firma-weather-widget {
+    min-width: 250px;
+    max-width: 340px;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #134637 0%, #1f6e57 58%, #a9ddce 145%);
+    color: #fff;
+    box-shadow: 0 16px 32px rgba(15, 62, 45, 0.2);
+}
+.firma-weather-widget__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.9rem;
+}
+.firma-weather-widget__eyebrow {
+    margin: 0 0 0.18rem;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.76;
+}
+.firma-weather-widget__title {
+    display: block;
+    font-size: 0.92rem;
+    line-height: 1.2;
+}
+.firma-weather-widget__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+.firma-weather-widget__main {
+    margin-top: 0.85rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.8rem;
+}
+.firma-weather-widget__temp {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.firma-weather-widget__summary span,
+.firma-weather-widget__summary small {
+    display: block;
+}
+.firma-weather-widget__summary span {
+    font-size: 0.84rem;
+}
+.firma-weather-widget__summary small {
+    margin-top: 0.14rem;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.74);
+}
+.firma-weather-widget__metrics {
+    margin-top: 0.85rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+.firma-weather-widget__metric {
+    padding: 0.5rem 0.4rem;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.12);
+    text-align: center;
+}
+.firma-weather-widget__metric span,
+.firma-weather-widget__metric strong {
+    display: block;
+}
+.firma-weather-widget__metric span {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.75);
+}
+.firma-weather-widget__metric strong {
+    margin-top: 0.12rem;
+    font-size: 0.76rem;
+}
+.firma-weather-widget__action {
+    margin-top: 0.75rem;
+    width: 100%;
+    border: none;
+    border-radius: 11px;
+    padding: 0.55rem 0.8rem;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+.firma-weather-widget__action:hover {
+    background: rgba(255,255,255,0.22);
+}
+.firma-weather-widget--user {
+    min-width: 220px;
+    max-width: 280px;
+    padding: 0.72rem 0.82rem;
+}
+.firma-weather-widget--user .firma-weather-widget__temp {
+    font-size: 1.7rem;
+}
+.firma-weather-widget--user .firma-weather-widget__metrics {
+    gap: 0.35rem;
+}
+.firma-weather-widget--user .firma-weather-widget__metric {
+    padding: 0.42rem 0.28rem;
+}
+@media (max-width: 1100px) {
+    .firma-weather-widget {
+        width: 100%;
+        max-width: none;
+    }
+}
+</style>
+
+<div class="firma-weather-widget {{ variant|default('') }}" data-weather-widget>
+    <div class="firma-weather-widget__head">
+        <div>
+            <p class="firma-weather-widget__eyebrow">Meteo en direct</p>
+            <strong class="firma-weather-widget__title">Recherche de la meteo...</strong>
+        </div>
+        <div class="firma-weather-widget__icon" data-weather-icon>🌤️</div>
+    </div>
+
+    <div class="firma-weather-widget__main">
+        <div class="firma-weather-widget__temp" data-weather-temp>--°C</div>
+        <div class="firma-weather-widget__summary">
+            <span data-weather-desc>Autorisez la localisation pour voir la temperature.</span>
+            <small data-weather-location>Geolocalisation automatique</small>
+        </div>
+    </div>
+
+    <div class="firma-weather-widget__metrics">
+        <div class="firma-weather-widget__metric">
+            <span>Humidite</span>
+            <strong data-weather-humidity>--%</strong>
+        </div>
+        <div class="firma-weather-widget__metric">
+            <span>Pluie</span>
+            <strong data-weather-rain>-- mm</strong>
+        </div>
+        <div class="firma-weather-widget__metric">
+            <span>Vent</span>
+            <strong data-weather-wind>-- km/h</strong>
+        </div>
+    </div>
+
+    <button type="button" class="firma-weather-widget__action" data-weather-refresh>Actualiser</button>
+</div>
+
+<script>
+(function () {
+    const widgets = document.querySelectorAll('[data-weather-widget]');
+    if (!widgets.length) {
+        return;
+    }
+
+    const weatherCodes = {
+        0: ['Ciel degage', '☀️'],
+        1: ['Peu nuageux', '🌤️'],
+        2: ['Partiellement nuageux', '⛅'],
+        3: ['Couvert', '☁️'],
+        45: ['Brouillard', '🌫️'],
+        48: ['Brouillard givrant', '🌫️'],
+        51: ['Bruine legere', '🌦️'],
+        53: ['Bruine', '🌦️'],
+        55: ['Bruine dense', '🌧️'],
+        61: ['Pluie legere', '🌦️'],
+        63: ['Pluie', '🌧️'],
+        65: ['Pluie forte', '⛈️'],
+        80: ['Averses', '🌦️'],
+        81: ['Averses moderees', '🌧️'],
+        82: ['Averses fortes', '⛈️'],
+        95: ['Orage', '⛈️']
+    };
+
+    function setError(widget, message) {
+        widget.querySelector('.firma-weather-widget__title').textContent = 'Meteo indisponible';
+        widget.querySelector('[data-weather-desc]').textContent = message;
+        widget.querySelector('[data-weather-location]').textContent = 'Localisation non disponible';
+        widget.querySelector('[data-weather-icon]').textContent = '⚠️';
+    }
+
+    function fillWidget(widget, payload) {
+        const current = payload.current || {};
+        const code = current.weather_code;
+        const info = weatherCodes[code] || ['Condition meteo', '🌍'];
+
+        widget.querySelector('.firma-weather-widget__title').textContent = 'Meteo locale';
+        widget.querySelector('[data-weather-icon]').textContent = info[1];
+        widget.querySelector('[data-weather-temp]').textContent = current.temperature_2m !== undefined ? `${Math.round(current.temperature_2m)}°C` : '--°C';
+        widget.querySelector('[data-weather-desc]').textContent = info[0];
+        widget.querySelector('[data-weather-location]').textContent = (payload.timezone || 'Zone locale').replace('_', ' ');
+        widget.querySelector('[data-weather-humidity]').textContent = current.relative_humidity_2m !== undefined ? `${current.relative_humidity_2m}%` : '--%';
+        widget.querySelector('[data-weather-rain]').textContent = current.precipitation !== undefined ? `${current.precipitation} mm` : '-- mm';
+        widget.querySelector('[data-weather-wind]').textContent = current.wind_speed_10m !== undefined ? `${Math.round(current.wind_speed_10m)} km/h` : '-- km/h';
+    }
+
+    async function requestWeather(widget, latitude, longitude) {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude='
+            + encodeURIComponent(latitude)
+            + '&longitude=' + encodeURIComponent(longitude)
+            + '&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m'
+            + '&timezone=auto';
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Impossible de charger la meteo actuelle.');
+        }
+
+        const payload = await response.json();
+        fillWidget(widget, payload);
+    }
+
+    function loadWeather(widget) {
+        widget.querySelector('.firma-weather-widget__title').textContent = 'Recherche de la meteo...';
+        widget.querySelector('[data-weather-desc]').textContent = 'Autorisez la localisation pour afficher les conditions actuelles.';
+        widget.querySelector('[data-weather-location]').textContent = 'Geolocalisation automatique';
+
+        if (!navigator.geolocation) {
+            setError(widget, 'La geolocalisation est indisponible sur ce navigateur.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                requestWeather(widget, position.coords.latitude, position.coords.longitude)
+                    .catch(() => setError(widget, 'Erreur lors du chargement des donnees meteo.'));
+            },
+            () => setError(widget, 'Autorisation de localisation refusee.'),
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    widgets.forEach((widget) => {
+        widget.querySelector('[data-weather-refresh]')?.addEventListener('click', () => loadWeather(widget));
+        loadWeather(widget);
+    });
+})();
+</script>

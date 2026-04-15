@@ -1,0 +1,9 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Meteo maladies{% endblock %}
+
+{% block user_content %}
+    {% include 'partials/maladie_weather_panel.html.twig' with {
+        back_url: path('user_maladie')
+    } %}
+{% endblock %}
