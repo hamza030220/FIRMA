@@ -6,7 +6,6 @@ use App\Repository\Maladie\MaladieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MaladieRepository::class)]
 #[ORM\Table(name: "maladie")]
@@ -19,21 +18,15 @@ class Maladie
     private ?int $id = null;
 
     #[ORM\Column(name: "nom", length: 150)]
-    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
-    #[Assert\Length(min: 3, minMessage: 'Le nom doit contenir au moins 3 caractères.', max: 150, maxMessage: 'Le nom ne peut pas dépasser 150 caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column(name: "nom_scientifique", length: 200, nullable: true)]
     private ?string $nomScientifique = null;
 
     #[ORM\Column(name: "description", type: 'text', nullable: true)]
-    #[Assert\NotBlank(message: 'La description est obligatoire.')]
-    #[Assert\Length(min: 10, minMessage: 'La description doit contenir au moins 10 caractères.')]
     private ?string $description = null;
 
     #[ORM\Column(name: "symptomes", type: 'text', nullable: true)]
-    #[Assert\NotBlank(message: 'Les symptômes sont obligatoires.')]
-    #[Assert\Length(min: 10, minMessage: 'Les symptômes doivent contenir au moins 10 caractères.')]
     private ?string $symptomes = null;
 
     #[ORM\Column(name: "image_url", length: 255, nullable: true)]
@@ -44,6 +37,15 @@ class Maladie
 
     #[ORM\Column(name: "saison_frequente", length: 100, nullable: true)]
     private ?string $saisonFrequente = null;
+
+    #[ORM\Column(name: "temp_min", nullable: true)]
+    private ?float $tempMin = null;
+
+    #[ORM\Column(name: "temp_max", nullable: true)]
+    private ?float $tempMax = null;
+
+    #[ORM\Column(name: "humidite_min", nullable: true)]
+    private ?int $humiditeMin = null;
 
     #[ORM\Column(name: "created_by", nullable: true)]
     private ?int $createdBy = null;
@@ -91,6 +93,12 @@ class Maladie
     public function setNiveauGravite(?string $niveauGravite): self { $this->niveauGravite = $niveauGravite; return $this; }
     public function getSaisonFrequente(): ?string { return $this->saisonFrequente; }
     public function setSaisonFrequente(?string $saisonFrequente): self { $this->saisonFrequente = $saisonFrequente; return $this; }
+    public function getTempMin(): ?float { return $this->tempMin; }
+    public function setTempMin(?float $tempMin): self { $this->tempMin = $tempMin; return $this; }
+    public function getTempMax(): ?float { return $this->tempMax; }
+    public function setTempMax(?float $tempMax): self { $this->tempMax = $tempMax; return $this; }
+    public function getHumiditeMin(): ?int { return $this->humiditeMin; }
+    public function setHumiditeMin(?int $humiditeMin): self { $this->humiditeMin = $humiditeMin; return $this; }
     public function getCreatedBy(): ?int { return $this->createdBy; }
     public function setCreatedBy(?int $createdBy): self { $this->createdBy = $createdBy; return $this; }
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }

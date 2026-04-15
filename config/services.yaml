@@ -16,6 +16,9 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             string $projectDir: '%kernel.project_dir%'
+            string $openWeatherApiKey: '%env(default::OPENWEATHER_API_KEY)%'
+            string $weatherAlertSender: '%env(default::MAILER_FROM)%'
+            string $weatherAlertAdminFallback: '%env(default::ADMIN_ALERT_EMAIL)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

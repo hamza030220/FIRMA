@@ -6,22 +6,15 @@
 {% block admin_content %}
 
 <style>
-:root {
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6b7280;
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f8fafc;
-  --color-border-secondary: #d1d5db;
-  --color-border-tertiary: #e5e7eb;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-}
 *{box-sizing:border-box}
 .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
 .top-left h2{font-size:20px;font-weight:500;color:var(--color-text-primary);margin:0}
 .top-left p{font-size:14px;color:var(--color-text-secondary);margin-top:4px}
 .btn-new{display:inline-flex;align-items:center;gap:7px;background:#2d7a3a;color:#fff;border:none;padding:10px 20px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none}
 .btn-new:hover{background:#245f2d;color:#fff;text-decoration:none}
+.top-actions{display:flex;gap:0.75rem;flex-wrap:wrap}
+.btn-weather{display:inline-flex;align-items:center;gap:7px;background:#e6f1fb;color:#185fa5;border:1px solid #b9d8f6;padding:10px 18px;border-radius:var(--border-radius-md);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn-weather:hover{background:#d6e9fb;color:#0f4e8a;text-decoration:none}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
 .stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.2rem;display:flex;align-items:center;gap:12px}
 .stat-icon{width:40px;height:40px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -109,14 +102,19 @@
         <h2>Maladies des plantes</h2>
         <p>Gérez, filtrez et surveillez toutes les pathologies</p>
     </div>
-    <a href="{{ path('admin_maladie_new') }}" class="btn-new">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nouvelle maladie
-    </a>
+    <div class="top-actions">
+        <a href="{{ path('admin_maladie_weather') }}" class="btn-weather">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19a4 4 0 1 1 .88-7.903A5 5 0 0 1 21 12a4 4 0 0 1-1 7.874"/><path d="M8 19l2-3h2l-2 3h2l-3 4 1-3z"/></svg>
+            Meteo maladies
+        </a>
+        <a href="{{ path('admin_maladie_new') }}" class="btn-new">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouvelle maladie
+        </a>
+    </div>
 </div>
 
-{% set maladie_success_flashes = app.flashes('success') %}
-{% for message in maladie_success_flashes %}
+{% for message in app.flashes('success') %}
 <div class="flash-ok">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     {{ message }}
@@ -265,52 +263,6 @@ function render(){
 
 document.getElementById('sort-id')?.classList.add('asc');
 render();
-
-document.addEventListener('DOMContentLoaded', () => {
-    const successMessages = {{ maladie_success_flashes|json_encode|raw }};
-    const notify = (message, type = 'success') => {
-        if (window.firmaToast) {
-            window.firmaToast(message, type);
-            return;
-        }
-
-        const el = document.createElement('div');
-        el.textContent = message;
-        el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:' + (type === 'danger' ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97');
-        document.body.appendChild(el);
-        window.setTimeout(() => el.remove(), 4200);
-    };
-
-    if (Array.isArray(successMessages)) {
-        successMessages.forEach((message) => {
-            notify(message, 'success');
-        });
-    }
-});
-
-document.addEventListener('submit', (event) => {
-    const form = event.target.closest('.table-wrap form[data-firma-confirm]');
-    if (!(form instanceof HTMLFormElement)) {
-        return;
-    }
-
-    if (form.dataset.confirmed === 'true') {
-        form.dataset.confirmed = '';
-        return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
-    const formId = form.id || `maladie-delete-${Math.random().toString(36).slice(2, 9)}`;
-    form.id = formId;
-
-    if (window.firmaOpenConfirmModal) {
-        window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
-    } else if (window.firmaToast) {
-        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
-    }
-}, true);
 </script>
 
 {% endblock %}
