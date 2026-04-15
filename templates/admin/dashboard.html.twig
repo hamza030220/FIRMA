@@ -70,6 +70,7 @@
             </span>
         </a>
 
+<<<<<<< HEAD
         <a href="{{ path('admin_maladie_index') }}" class="admin-stat-card admin-stat-card-link">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 4 13C4 7 10 3 20 4c-1 10-5 16-11 16z"/><path d="M2 21c3-2 5-4 7-7"/></svg>
             <span class="admin-stat-label">Maladies</span>
@@ -77,6 +78,8 @@
             <span class="admin-stat-extra">Gestion des maladies et traitements</span>
         </a>
 
+=======
+>>>>>>> origin/main
         <a href="{{ path('admin_evenements') }}" class="admin-stat-card admin-stat-card-link">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span class="admin-stat-label">Participants</span>
@@ -86,7 +89,11 @@
                 {{ enAttente }} en attente
             </span>
             {% else %}
+<<<<<<< HEAD
             <span class="admin-stat-extra">{{ confirmees }} confirmÃ©e{{ confirmees > 1 ? 's' : '' }}</span>
+=======
+            <span class="admin-stat-extra">{{ confirmees }} confirmée{{ confirmees > 1 ? 's' : '' }}</span>
+>>>>>>> origin/main
             {% endif %}
         </a>
 
@@ -95,7 +102,11 @@
             <span class="admin-stat-label">Taux de remplissage</span>
             <span class="admin-stat-value">{{ tauxRemplissage|number_format(0) }}%</span>
             <span class="admin-stat-extra">
+<<<<<<< HEAD
                 {{ evtCetteSemaine }} cette semaine Â· {{ evtCeMois }} ce mois
+=======
+                {{ evtCetteSemaine }} cette semaine · {{ evtCeMois }} ce mois
+>>>>>>> origin/main
             </span>
         </div>
 

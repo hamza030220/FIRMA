@@ -148,7 +148,11 @@ class Evenement
     public function getIdEvenement(): ?int { return $this->idEvenement; }
 
     public function getTitre(): ?string { return $this->titre; }
+<<<<<<< HEAD
     public function setTitre(string $titre): static { $this->titre = $titre; return $this; }
+=======
+    public function setTitre(?string $titre): static { $this->titre = $titre; return $this; }
+>>>>>>> origin/main
 
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): static { $this->description = $description; return $this; }
@@ -157,6 +161,7 @@ class Evenement
     public function setImageUrl(?string $imageUrl): static { $this->imageUrl = $imageUrl; return $this; }
 
     public function getTypeEvenement(): ?string { return $this->typeEvenement; }
+<<<<<<< HEAD
     public function setTypeEvenement(string $typeEvenement): static { $this->typeEvenement = $typeEvenement; return $this; }
 
     public function getDateDebut(): ?\DateTimeInterface { return $this->dateDebut; }
@@ -170,6 +175,21 @@ class Evenement
 
     public function getHoraireFin(): ?\DateTimeInterface { return $this->horaireFin; }
     public function setHoraireFin(\DateTimeInterface $horaireFin): static { $this->horaireFin = $horaireFin; return $this; }
+=======
+    public function setTypeEvenement(?string $typeEvenement): static { $this->typeEvenement = $typeEvenement; return $this; }
+
+    public function getDateDebut(): ?\DateTimeInterface { return $this->dateDebut; }
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static { $this->dateDebut = $dateDebut; return $this; }
+
+    public function getDateFin(): ?\DateTimeInterface { return $this->dateFin; }
+    public function setDateFin(?\DateTimeInterface $dateFin): static { $this->dateFin = $dateFin; return $this; }
+
+    public function getHoraireDebut(): ?\DateTimeInterface { return $this->horaireDebut; }
+    public function setHoraireDebut(?\DateTimeInterface $horaireDebut): static { $this->horaireDebut = $horaireDebut; return $this; }
+
+    public function getHoraireFin(): ?\DateTimeInterface { return $this->horaireFin; }
+    public function setHoraireFin(?\DateTimeInterface $horaireFin): static { $this->horaireFin = $horaireFin; return $this; }
+>>>>>>> origin/main
 
     public function getLieu(): ?string { return $this->lieu; }
     public function setLieu(?string $lieu): static { $this->lieu = $lieu; return $this; }
@@ -178,7 +198,11 @@ class Evenement
     public function setAdresse(?string $adresse): static { $this->adresse = $adresse; return $this; }
 
     public function getCapaciteMax(): ?int { return $this->capaciteMax; }
+<<<<<<< HEAD
     public function setCapaciteMax(int $capaciteMax): static { $this->capaciteMax = $capaciteMax; return $this; }
+=======
+    public function setCapaciteMax(?int $capaciteMax): static { $this->capaciteMax = $capaciteMax; return $this; }
+>>>>>>> origin/main
 
     public function getPlacesDisponibles(): ?int { return $this->placesDisponibles; }
     public function setPlacesDisponibles(int $placesDisponibles): static { $this->placesDisponibles = $placesDisponibles; return $this; }

@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommandeRepository::class)]
 #[ORM\Table(name: 'commandes')]
+#[ORM\Index(columns: ['id_utilisateur'], name: 'idx_cmd_utilisateur')]
+#[ORM\Index(columns: ['date_commande'], name: 'idx_cmd_date')]
+#[ORM\Index(columns: ['statut_paiement'], name: 'idx_cmd_statut_paiement')]
+#[ORM\Index(columns: ['statut_livraison'], name: 'idx_cmd_statut_livraison')]
 class Commande
 {
     #[ORM\Id]

@@ -36,16 +36,30 @@ class MarketplaceController extends AbstractController
 
     #[Route('', name: 'user_marketplace', methods: ['GET'])]
     public function index(
+        Request $request,
         EquipementRepository $equipRepo,
         VehiculeRepository $vehicRepo,
         TerrainRepository $terrainRepo,
     ): Response {
+        $limit = 12;
+
+        $pageE = max(1, $request->query->getInt('page_e', 1));
+        $pageV = max(1, $request->query->getInt('page_v', 1));
+        $pageT = max(1, $request->query->getInt('page_t', 1));
+
+        $totalE = $equipRepo->countAvailable();
+        $totalV = $vehicRepo->countAvailable();
+        $totalT = $terrainRepo->countAvailable();
+
         return $this->render('user/marketplace/index.html.twig', [
-            'equipements' => $equipRepo->findBy(['disponible' => true]),
-            'vehicules' => $vehicRepo->findBy(['disponible' => true]),
-            'terrains' => $terrainRepo->findBy(['disponible' => true]),
-            'cart' => $this->cartSummary($this->getCart()),
-            'locations' => $this->locSummary($this->getLocationsSession()),
+            'equipements' => $equipRepo->findAvailablePaginated($pageE, $limit),
+            'vehicules'   => $vehicRepo->findAvailablePaginated($pageV, $limit),
+            'terrains'    => $terrainRepo->findAvailablePaginated($pageT, $limit),
+            'cart'        => $this->cartSummary($this->getCart()),
+            'locations'   => $this->locSummary($this->getLocationsSession()),
+            'pageE' => $pageE, 'totalPagesE' => max(1, (int) ceil($totalE / $limit)),
+            'pageV' => $pageV, 'totalPagesV' => max(1, (int) ceil($totalV / $limit)),
+            'pageT' => $pageT, 'totalPagesT' => max(1, (int) ceil($totalT / $limit)),
         ]);
     }
 

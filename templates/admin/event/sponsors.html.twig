@@ -26,12 +26,16 @@
         </a>
     </nav>
 
+<<<<<<< HEAD
     {# ── Flash messages ── #}
     {% for type, messages in app.flashes %}
         {% for message in messages %}
             <div class="sp-flash sp-flash--{{ type }}">{{ message }}</div>
         {% endfor %}
     {% endfor %}
+=======
+    {# Flash messages handled by global _flash_toasts.html.twig + AJAX toasts #}
+>>>>>>> origin/main
 
     {# ════════════════════════════════════════════════
        TAB 1 — LISTE
@@ -114,7 +118,11 @@
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Nom *</label>
+<<<<<<< HEAD
                     <input type="text" name="nom" id="spF_nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" placeholder="Nom du sponsor">
+=======
+                    <input type="text" name="nom" id="spF_nom" class="sp-form__input" placeholder="Nom du sponsor">
+>>>>>>> origin/main
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Secteur d'activité</label>
@@ -129,22 +137,38 @@
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Email de contact *</label>
+<<<<<<< HEAD
                     <input type="text" name="email_contact" id="spF_email" class="sp-form__input" data-validate="required|email|maxlen:150" placeholder="contact@example.com">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Téléphone *</label>
                     <input type="text" name="telephone" id="spF_tel" class="sp-form__input" data-validate="phone" placeholder="+216 XX XXX XXX">
+=======
+                    <input type="text" name="email_contact" id="spF_email" class="sp-form__input" placeholder="contact@example.com">
+                </div>
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Téléphone *</label>
+                    <input type="text" name="telephone" id="spF_tel" class="sp-form__input" placeholder="+216 XX XXX XXX">
+>>>>>>> origin/main
                 </div>
             </div>
 
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Site web</label>
+<<<<<<< HEAD
                     <input type="text" name="site_web" id="spF_web" class="sp-form__input" data-validate="url|maxlen:255" placeholder="https://...">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Montant contribution (TND)</label>
                     <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" data-validate="numeric|min:0" value="0">
+=======
+                    <input type="text" name="site_web" id="spF_web" class="sp-form__input" placeholder="https://...">
+                </div>
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Montant contribution (TND)</label>
+                    <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" value="0">
+>>>>>>> origin/main
                 </div>
             </div>
 
@@ -184,7 +208,11 @@
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Nom *</label>
+<<<<<<< HEAD
                         <input type="text" name="nom" id="spF_nom" class="sp-form__input" data-validate="required|minlen:2|maxlen:200" value="{{ editSponsor.nom }}">
+=======
+                        <input type="text" name="nom" id="spF_nom" class="sp-form__input" value="{{ editSponsor.nom }}">
+>>>>>>> origin/main
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Secteur d'activité</label>
@@ -199,22 +227,38 @@
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Email de contact *</label>
+<<<<<<< HEAD
                         <input type="text" name="email_contact" id="spF_email" class="sp-form__input" data-validate="required|email|maxlen:150" value="{{ editSponsor.emailContact }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Téléphone *</label>
                         <input type="text" name="telephone" id="spF_tel" class="sp-form__input" data-validate="phone" value="{{ editSponsor.telephone }}">
+=======
+                        <input type="text" name="email_contact" id="spF_email" class="sp-form__input" value="{{ editSponsor.emailContact }}">
+                    </div>
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Téléphone *</label>
+                        <input type="text" name="telephone" id="spF_tel" class="sp-form__input" value="{{ editSponsor.telephone }}">
+>>>>>>> origin/main
                     </div>
                 </div>
 
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Site web</label>
+<<<<<<< HEAD
                         <input type="text" name="site_web" id="spF_web" class="sp-form__input" data-validate="url|maxlen:255" value="{{ editSponsor.siteWeb }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Montant contribution (TND)</label>
                         <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" data-validate="numeric|min:0" value="{{ editSponsor.montantContribution }}">
+=======
+                        <input type="text" name="site_web" id="spF_web" class="sp-form__input" value="{{ editSponsor.siteWeb }}">
+                    </div>
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Montant contribution (TND)</label>
+                        <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" value="{{ editSponsor.montantContribution }}">
+>>>>>>> origin/main
                     </div>
                 </div>
 
@@ -519,6 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ═══════════════════════════════
+<<<<<<< HEAD
     // JS form validation
     // ═══════════════════════════════
     document.querySelectorAll('form.sp-form[novalidate]').forEach(function(form) {
@@ -528,6 +573,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+=======
+    // Form validation handled server-side
+    // ═══════════════════════════════
+>>>>>>> origin/main
 });
 </script>
 {% endblock %}

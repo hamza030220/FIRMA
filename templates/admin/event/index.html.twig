@@ -150,7 +150,11 @@
         <form method="post" action="{{ path('admin_evenement_create') }}" class="aevt-form" novalidate>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Titre *</label>
+<<<<<<< HEAD
                 <input type="text" name="titre" id="evt_titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" placeholder="Titre de l'événement">
+=======
+                <input type="text" name="titre" id="evt_titre" class="aevt-form__input" placeholder="Titre de l'événement">
+>>>>>>> origin/main
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Description</label>
@@ -158,11 +162,19 @@
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Organisateur *</label>
+<<<<<<< HEAD
                 <input type="text" name="organisateur" id="evt_organisateur" data-validate="required|maxlen:255" class="aevt-form__input" placeholder="Nom de l'organisateur">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Type *</label>
                 <select name="type_evenement" id="evt_type" data-validate="required" class="aevt-form__select">
+=======
+                <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" placeholder="Nom de l'organisateur">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Type *</label>
+                <select name="type_evenement" id="evt_type" class="aevt-form__select">
+>>>>>>> origin/main
                     <option value="">— Choisir —</option>
                     {% for t in typeOptions %}
                         <option value="{{ t.value }}">{{ t.label }}</option>
@@ -172,25 +184,42 @@
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date début *</label>
+<<<<<<< HEAD
                     <input type="date" name="date_debut" id="evt_date_debut" data-validate="required" class="aevt-form__input">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date fin *</label>
                     <input type="date" name="date_fin" id="evt_date_fin" data-validate="required" class="aevt-form__input">
+=======
+                    <input type="date" name="date_debut" id="evt_date_debut" class="aevt-form__input">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Date fin *</label>
+                    <input type="date" name="date_fin" id="evt_date_fin" class="aevt-form__input">
+>>>>>>> origin/main
                 </div>
             </div>
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Horaire début *</label>
+<<<<<<< HEAD
                     <input type="time" name="horaire_debut" id="evt_horaire_debut" data-validate="required" class="aevt-form__input">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Horaire fin *</label>
                     <input type="time" name="horaire_fin" id="evt_horaire_fin" data-validate="required" class="aevt-form__input">
+=======
+                    <input type="time" name="horaire_debut" id="evt_horaire_debut" class="aevt-form__input">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Horaire fin *</label>
+                    <input type="time" name="horaire_fin" id="evt_horaire_fin" class="aevt-form__input">
+>>>>>>> origin/main
                 </div>
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Capacité max *</label>
+<<<<<<< HEAD
                 <input type="text" name="capacite_max" id="evt_capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="50" placeholder="50">
             </div>
             <div class="aevt-form__row">
@@ -200,6 +229,17 @@
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Adresse</label>
                 <input type="text" name="adresse" id="evt_adresse" data-validate="maxlen:255" class="aevt-form__input" placeholder="Adresse complète">
+=======
+                <input type="text" name="capacite_max" id="evt_capacite_max" class="aevt-form__input" value="50" placeholder="50">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Lieu</label>
+                <input type="text" name="lieu" id="evt_lieu" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel">
+            </div>
+            <div class="aevt-form__row">
+                <label class="aevt-form__label">Adresse</label>
+                <input type="text" name="adresse" id="evt_adresse" class="aevt-form__input" placeholder="Adresse complète">
+>>>>>>> origin/main
             </div>
 
             {# Image #}
@@ -254,7 +294,11 @@
             <form method="post" action="{{ path('admin_evenement_update', {id: editEvent.idEvenement}) }}" class="aevt-form" novalidate>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Titre *</label>
+<<<<<<< HEAD
                     <input type="text" name="titre" id="evt_titre" data-validate="required|minlen:3|maxlen:100" class="aevt-form__input" value="{{ editEvent.titre }}">
+=======
+                    <input type="text" name="titre" id="evt_titre" class="aevt-form__input" value="{{ editEvent.titre }}">
+>>>>>>> origin/main
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Description</label>
@@ -262,11 +306,19 @@
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Organisateur *</label>
+<<<<<<< HEAD
                     <input type="text" name="organisateur" id="evt_organisateur" data-validate="required|maxlen:255" class="aevt-form__input" value="{{ editEvent.organisateur }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Type *</label>
                     <select name="type_evenement" id="evt_type" data-validate="required" class="aevt-form__select">
+=======
+                    <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" value="{{ editEvent.organisateur }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Type *</label>
+                    <select name="type_evenement" id="evt_type" class="aevt-form__select">
+>>>>>>> origin/main
                         <option value="">— Choisir —</option>
                         {% for t in typeOptions %}
                             <option value="{{ t.value }}" {% if editEvent.typeEvenement == t.value %}selected{% endif %}>{{ t.label }}</option>
@@ -276,25 +328,42 @@
                 <div class="aevt-form__grid2">
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Date début *</label>
+<<<<<<< HEAD
                         <input type="date" name="date_debut" id="evt_date_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateDebut|date('Y-m-d') }}">
                     </div>
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Date fin *</label>
                         <input type="date" name="date_fin" id="evt_date_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.dateFin|date('Y-m-d') }}">
+=======
+                        <input type="date" name="date_debut" id="evt_date_debut" class="aevt-form__input" value="{{ editEvent.dateDebut|date('Y-m-d') }}">
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Date fin *</label>
+                        <input type="date" name="date_fin" id="evt_date_fin" class="aevt-form__input" value="{{ editEvent.dateFin|date('Y-m-d') }}">
+>>>>>>> origin/main
                     </div>
                 </div>
                 <div class="aevt-form__grid2">
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Horaire début *</label>
+<<<<<<< HEAD
                         <input type="time" name="horaire_debut" id="evt_horaire_debut" data-validate="required" class="aevt-form__input" value="{{ editEvent.horaireDebut ? editEvent.horaireDebut|date('H:i') : '' }}">
                     </div>
                     <div class="aevt-form__row">
                         <label class="aevt-form__label">Horaire fin *</label>
                         <input type="time" name="horaire_fin" id="evt_horaire_fin" data-validate="required" class="aevt-form__input" value="{{ editEvent.horaireFin ? editEvent.horaireFin|date('H:i') : '' }}">
+=======
+                        <input type="time" name="horaire_debut" id="evt_horaire_debut" class="aevt-form__input" value="{{ editEvent.horaireDebut ? editEvent.horaireDebut|date('H:i') : '' }}">
+                    </div>
+                    <div class="aevt-form__row">
+                        <label class="aevt-form__label">Horaire fin *</label>
+                        <input type="time" name="horaire_fin" id="evt_horaire_fin" class="aevt-form__input" value="{{ editEvent.horaireFin ? editEvent.horaireFin|date('H:i') : '' }}">
+>>>>>>> origin/main
                     </div>
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Capacité max *</label>
+<<<<<<< HEAD
                     <input type="text" name="capacite_max" id="evt_capacite_max" data-validate="required|integer|min:1|max:100000" class="aevt-form__input" value="{{ editEvent.capaciteMax }}">
                 </div>
                 <div class="aevt-form__row">
@@ -304,6 +373,17 @@
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Adresse</label>
                     <input type="text" name="adresse" id="evt_adresse" data-validate="maxlen:255" class="aevt-form__input" value="{{ editEvent.adresse }}">
+=======
+                    <input type="text" name="capacite_max" id="evt_capacite_max" class="aevt-form__input" value="{{ editEvent.capaciteMax }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Lieu</label>
+                    <input type="text" name="lieu" id="evt_lieu" class="aevt-form__input" value="{{ editEvent.lieu }}">
+                </div>
+                <div class="aevt-form__row">
+                    <label class="aevt-form__label">Adresse</label>
+                    <input type="text" name="adresse" id="evt_adresse" class="aevt-form__input" value="{{ editEvent.adresse }}">
+>>>>>>> origin/main
                 </div>
 
                 {# Image #}
@@ -484,7 +564,11 @@
                     <div class="aevt-form__grid2">
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Nom *</label>
+<<<<<<< HEAD
                             <input type="text" name="nom" id="spF_nom" class="aevt-form__input" data-validate="required|minlen:2|maxlen:200" placeholder="Nom du sponsor">
+=======
+                            <input type="text" name="nom" id="spF_nom" class="aevt-form__input" placeholder="Nom du sponsor">
+>>>>>>> origin/main
                         </div>
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Secteur d'activité</label>
@@ -498,21 +582,37 @@
                     <div class="aevt-form__grid2">
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Email de contact *</label>
+<<<<<<< HEAD
                             <input type="text" name="email_contact" id="spF_email" class="aevt-form__input" data-validate="required|email|maxlen:150" placeholder="contact@example.com">
                         </div>
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Téléphone *</label>
                             <input type="text" name="telephone" id="spF_tel" class="aevt-form__input" data-validate="required|phone" placeholder="+216 XX XXX XXX">
+=======
+                            <input type="text" name="email_contact" id="spF_email" class="aevt-form__input" placeholder="contact@example.com">
+                        </div>
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Téléphone *</label>
+                            <input type="text" name="telephone" id="spF_tel" class="aevt-form__input" placeholder="+216 XX XXX XXX">
+>>>>>>> origin/main
                         </div>
                     </div>
                     <div class="aevt-form__grid2">
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Site web</label>
+<<<<<<< HEAD
                             <input type="text" name="site_web" id="spF_web" class="aevt-form__input" data-validate="url|maxlen:255" placeholder="https://...">
                         </div>
                         <div class="aevt-form__row">
                             <label class="aevt-form__label">Montant (TND)</label>
                             <input type="text" name="montant_contribution" id="spF_montant" class="aevt-form__input" data-validate="numeric|min:0" value="0">
+=======
+                            <input type="text" name="site_web" id="spF_web" class="aevt-form__input" placeholder="https://...">
+                        </div>
+                        <div class="aevt-form__row">
+                            <label class="aevt-form__label">Montant (TND)</label>
+                            <input type="text" name="montant_contribution" id="spF_montant" class="aevt-form__input" value="0">
+>>>>>>> origin/main
                         </div>
                     </div>
                     <div class="aevt-form__row">
@@ -1455,6 +1555,58 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() { spOpenFormEdit(this.dataset.id); });
     });
 
+<<<<<<< HEAD
+=======
+    // AJAX submit for sponsor form (no page redirect)
+    spForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Clear previous highlights
+        spForm.querySelectorAll('.firma-input-invalid').forEach(function(el) {
+            el.classList.remove('firma-input-invalid');
+        });
+
+        var formData = new URLSearchParams(new FormData(spForm));
+        var originalText = spFormSubmit.textContent;
+        spFormSubmit.disabled = true;
+        spFormSubmit.textContent = 'Envoi…';
+
+        fetch(spForm.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            if (data.success) {
+                window.firmaToast(data.message, 'success');
+                spCloseFormModal();
+                setTimeout(function() { window.location.reload(); }, 600);
+            } else {
+                if (data.errors && data.errors.length) {
+                    data.errors.forEach(function(msg) {
+                        window.firmaToast(msg, 'danger');
+                    });
+                }
+                if (data.errorFields && data.errorFields.length) {
+                    data.errorFields.forEach(function(name) {
+                        var el = spForm.querySelector('[name="' + name + '"]');
+                        if (el) el.classList.add('firma-input-invalid');
+                    });
+                }
+            }
+        })
+        .catch(function(err) {
+            console.error('Sponsor form error:', err);
+            window.firmaToast('Erreur réseau, veuillez réessayer.', 'danger');
+        })
+        .finally(function() {
+            spFormSubmit.disabled = false;
+            spFormSubmit.textContent = originalText;
+        });
+    });
+
+>>>>>>> origin/main
     // ═══════════════════════════════
     // Sponsor Detail Modal
     // ═══════════════════════════════
@@ -1620,6 +1772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ═══════════════════════════════
+<<<<<<< HEAD
     // JS form validation on submit
     // ═══════════════════════════════
     document.querySelectorAll('form.aevt-form[novalidate]').forEach(function(form) {
@@ -1638,6 +1791,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+=======
+    // Form validation handled server-side
+    // ═══════════════════════════════
+>>>>>>> origin/main
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>

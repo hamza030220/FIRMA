@@ -5,6 +5,10 @@ namespace App\Entity\Maladie;
 
 use App\Repository\Maladie\SolutionTraitementRepository;
 use Doctrine\ORM\Mapping as ORM;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Validator\Constraints as Assert;
+>>>>>>> origin/main
 
 #[ORM\Entity(repositoryClass: SolutionTraitementRepository::class)]
 #[ORM\Table(name: "solution_traitement")]
@@ -21,9 +25,19 @@ class SolutionTraitement
     private ?Maladie $maladie = null;
 
     #[ORM\Column(name: "titre", length: 200)]
+<<<<<<< HEAD
     private ?string $titre = null;
 
     #[ORM\Column(name: "solution", type: 'text')]
+=======
+    #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+    #[Assert\Length(min: 3, minMessage: 'Le titre doit contenir au moins 3 caractères.', max: 200, maxMessage: 'Le titre ne peut pas dépasser 200 caractères.')]
+    private ?string $titre = null;
+
+    #[ORM\Column(name: "solution", type: 'text')]
+    #[Assert\NotBlank(message: 'La solution est obligatoire.')]
+    #[Assert\Length(min: 10, minMessage: 'La solution doit contenir au moins 10 caractères.')]
+>>>>>>> origin/main
     private ?string $solution = null;
 
     #[ORM\Column(name: "etapes", type: 'text', nullable: true)]

@@ -1,0 +1,39 @@
+{# ═══════════════════════════════════════════════════════
+   FIRMA — Custom Twig Form Theme
+   Suppresses inline error rendering (errors are shown as toasts).
+   Adds firma-input-invalid class to invalid field widgets.
+   ═══════════════════════════════════════════════════════ #}
+{% use "form_div_layout.html.twig" %}
+
+{# Don't render field-level errors inline — they appear as toast popups #}
+{% block form_errors %}{% endblock %}
+
+{# Add firma-input-invalid class to widgets that have errors #}
+{% block form_row %}
+    {% set row_attr = row_attr|default({}) %}
+    {% if errors|length > 0 %}
+        {% set row_attr = row_attr|merge({'class': (row_attr.class|default('') ~ ' firma-field-error')|trim}) %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
+
+{% block form_widget_simple %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({'class': (attr.class|default('') ~ ' firma-input-invalid')|trim}) %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
+
+{% block textarea_widget %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({'class': (attr.class|default('') ~ ' firma-input-invalid')|trim}) %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
+
+{% block choice_widget_collapsed %}
+    {% if errors|length > 0 %}
+        {% set attr = attr|merge({'class': (attr.class|default('') ~ ' firma-input-invalid')|trim}) %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}

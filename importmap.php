@@ -16,13 +16,23 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+<<<<<<< HEAD
     '@hotwired/stimulus' => [
         'path' => './assets/vendor/hotwired/stimulus.js',
     ],
+=======
+>>>>>>> origin/main
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
+    '@hotwired/stimulus' => [
+        'version' => '3.2.2',
+    ],
     '@hotwired/turbo' => [
+<<<<<<< HEAD
         'path' => './assets/vendor/hotwired/turbo.js',
+=======
+        'version' => '8.0.23',
+>>>>>>> origin/main
     ],
 ];

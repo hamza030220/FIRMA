@@ -87,7 +87,11 @@ class SponsorController extends AbstractController
     //  CREATE
     // ──────────────────────────────────────────
     #[Route('/create', name: 'admin_sponsor_create', methods: ['POST'])]
+<<<<<<< HEAD
     public function create(Request $request): Response
+=======
+    public function create(Request $request): JsonResponse
+>>>>>>> origin/main
     {
         $sponsor = new Sponsor();
         $form = $this->createForm(SponsorType::class, $sponsor);
@@ -95,6 +99,7 @@ class SponsorController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+<<<<<<< HEAD
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
                 $errors[] = $field . ': ' . $error->getMessage();
@@ -107,17 +112,48 @@ class SponsorController extends AbstractController
         $this->addFlash('success', 'Sponsor ajouté au catalogue.');
 
         return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+=======
+            $errorFields = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
+            }
+            return $this->json([
+                'success'     => false,
+                'errors'      => $errors,
+                'errorFields' => array_values(array_unique($errorFields)),
+            ], 422);
+        }
+
+        $this->sponsorService->addToCatalog($sponsor);
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Sponsor ajouté au catalogue.',
+        ]);
+>>>>>>> origin/main
     }
 
     // ──────────────────────────────────────────
     //  UPDATE
     // ──────────────────────────────────────────
     #[Route('/{id}/update', name: 'admin_sponsor_update', requirements: ['id' => '\d+'], methods: ['POST'])]
+<<<<<<< HEAD
     public function update(int $id, Request $request): Response
     {
         $sponsor = $this->sponsorService->getById($id);
         if (!$sponsor) {
             throw $this->createNotFoundException();
+=======
+    public function update(int $id, Request $request): JsonResponse
+    {
+        $sponsor = $this->sponsorService->getById($id);
+        if (!$sponsor) {
+            return $this->json(['success' => false, 'errors' => ['Sponsor introuvable.']], 404);
+>>>>>>> origin/main
         }
 
         $form = $this->createForm(SponsorType::class, $sponsor);
@@ -125,18 +161,41 @@ class SponsorController extends AbstractController
 
         if (!$form->isValid()) {
             $errors = [];
+<<<<<<< HEAD
             foreach ($form->getErrors(true) as $error) {
                 $field = $error->getOrigin()?->getName() ?? 'global';
                 $errors[] = $field . ': ' . $error->getMessage();
             }
             $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
             return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+=======
+            $errorFields = [];
+            foreach ($form->getErrors(true) as $error) {
+                $field = $error->getOrigin()?->getName() ?? 'global';
+                $errors[] = $error->getMessage();
+                if ($field !== 'global') {
+                    $errorFields[] = $field;
+                }
+            }
+            return $this->json([
+                'success'     => false,
+                'errors'      => $errors,
+                'errorFields' => array_values(array_unique($errorFields)),
+            ], 422);
+>>>>>>> origin/main
         }
 
         $this->sponsorService->update($sponsor);
 
+<<<<<<< HEAD
         $this->addFlash('success', 'Sponsor modifié avec succès.');
         return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
+=======
+        return $this->json([
+            'success' => true,
+            'message' => 'Sponsor modifié avec succès.',
+        ]);
+>>>>>>> origin/main
     }
 
     // ──────────────────────────────────────────
