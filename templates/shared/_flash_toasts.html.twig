@@ -1,0 +1,36 @@
+{# ═══════════════════════════════════════════════════════
+   FIRMA — Global Flash → Toast Renderer
+   Converts all Symfony flash messages into firmaToast() calls.
+   Included once in base.html.twig, BEFORE {% block body %}.
+   This consumes flash messages so per-template renderers see empty bags.
+   ═══════════════════════════════════════════════════════ #}
+{% set _all_flashes = app.flashes %}
+{% if _all_flashes|length > 0 %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for type, messages in _all_flashes %}
+        {% if type == 'error_fields' %}
+            {% for message in messages %}
+    (function() {
+        var fields = "{{ message|e('js') }}".split(',');
+        var activePanel = document.querySelector('.aevt-panel--active, .sp-panel--active, .mp-tab-pane.active');
+        fields.forEach(function(name) {
+            if (!name) return;
+            var el = activePanel
+                ? activePanel.querySelector('[name="' + name + '"]')
+                : null;
+            if (!el) el = document.querySelector('[name="' + name + '"]');
+            if (el) el.classList.add('firma-input-invalid');
+        });
+    })();
+            {% endfor %}
+        {% else %}
+            {% set toast_type = type == 'error' ? 'danger' : type %}
+            {% for message in messages %}
+    window.firmaToast("{{ message|e('js') }}", "{{ toast_type|e('js') }}");
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+});
+</script>
+{% endif %}

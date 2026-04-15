@@ -17,7 +17,13 @@
     </head>
     <body data-turbo="false">
         {% include 'shared/components/_toast_confirm.html.twig' %}
+<<<<<<< HEAD
         {% block body %}{% endblock %}
+=======
+        {% include 'shared/_flash_toasts.html.twig' %}
+        {% block body %}{% endblock %}
+        {% block footer %}{% include 'shared/_footer.html.twig' %}{% endblock %}
+>>>>>>> origin/main
 
         <div class="app-confirm-modal" id="appConfirmModal" hidden>
             <div class="app-confirm-backdrop" data-confirm-cancel></div>

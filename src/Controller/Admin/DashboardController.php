@@ -79,11 +79,14 @@ class DashboardController extends AbstractController
     public function maladies(): Response
     {
         return $this->redirectToRoute('admin_maladie_index');
+<<<<<<< HEAD
     }
 
     #[Route('/utilisateurs', name: 'admin_utilisateurs')]
     public function utilisateurs(): Response
     {
         return $this->render('admin/user/index.html.twig');
+=======
+>>>>>>> origin/main
     }
 }

@@ -127,7 +127,13 @@ cd FIRMA
 composer install
 ```
 
-### 3. Configurer l'environnement
+### 3. Installer les assets JavaScript
+
+```bash
+php bin/console importmap:install
+```
+
+### 4. Configurer l'environnement
 
 Copier le fichier `.env` et adapter la configuration :
 
@@ -141,7 +147,7 @@ Modifier `DATABASE_URL` dans `.env.local` selon votre configuration :
 DATABASE_URL="mysql://root:@127.0.0.1:3306/firma?serverVersion=10.4.32-MariaDB&charset=utf8mb4"
 ```
 
-### 4. Créer la base de données
+### 5. Créer la base de données
 
 ```bash
 # Option A : Importer le dump SQL (recommandé — inclut les données de test)
@@ -152,13 +158,21 @@ php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 ```
 
-### 5. Lancer le serveur de développement
+### 6. Lancer le serveur de développement
 
 ```bash
 php -S 127.0.0.1:8000 -t public
 ```
 
 Ouvrir [http://127.0.0.1:8000](http://127.0.0.1:8000) dans votre navigateur.
+
+> **⚡ Conseil performance :** Si l'application est lente sur Windows/XAMPP, activez OPcache dans `php.ini` :
+> ```ini
+> zend_extension=opcache
+> opcache.enable=1
+> opcache.memory_consumption=256
+> opcache.max_accelerated_files=20000
+> ```
 
 ---
 

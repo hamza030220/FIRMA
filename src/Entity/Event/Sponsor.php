@@ -99,7 +99,11 @@ class Sponsor
     public function getIdSponsor(): ?int { return $this->idSponsor; }
 
     public function getNom(): ?string { return $this->nom; }
+<<<<<<< HEAD
     public function setNom(string $nom): static { $this->nom = $nom; return $this; }
+=======
+    public function setNom(?string $nom): static { $this->nom = $nom; return $this; }
+>>>>>>> origin/main
 
     public function getLogoUrl(): ?string { return $this->logoUrl; }
     public function setLogoUrl(?string $logoUrl): static { $this->logoUrl = $logoUrl; return $this; }
@@ -120,7 +124,11 @@ class Sponsor
     public function setMontantContribution(?string $m): static { $this->montantContribution = $m ?? '0'; return $this; }
 
     public function getSecteurActivite(): ?string { return $this->secteurActivite; }
+<<<<<<< HEAD
     public function setSecteurActivite(string $s): static { $this->secteurActivite = $s; return $this; }
+=======
+    public function setSecteurActivite(?string $s): static { $this->secteurActivite = $s; return $this; }
+>>>>>>> origin/main
 
     public function getEvenement(): ?Evenement { return $this->evenement; }
     public function setEvenement(?Evenement $e): static { $this->evenement = $e; return $this; }

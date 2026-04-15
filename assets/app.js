@@ -12,10 +12,16 @@ import './styles/user/dashboard.css';
 import './styles/admin/dashboard.css';
 import './styles/admin/marketplace.css';
 import './styles/user/marketplace.css';
+<<<<<<< HEAD
 import './styles/user/evenements.css';
 import './styles/admin/evenements.css';
+=======
+import './styles/footer.css';
+import './styles/static-pages.css';
+
+
+>>>>>>> origin/main
 import './marketplace.js';
-import './validation.js';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper!');
 
@@ -39,8 +45,18 @@ function getToastContainer() {
     return container;
 }
 
+<<<<<<< HEAD
 function firmaToast(message, type = 'success', duration = 10000) {
     const normalizedType = type === 'error' ? 'danger' : type;
+=======
+/**
+ * Show a toast notification at top of page.
+ * @param {string} message
+ * @param {'success'|'danger'|'warning'|'info'} type
+ * @param {number} duration  ms (default 10000)
+ */
+function firmaToast(message, type = 'success', duration = 10000) {
+>>>>>>> origin/main
     const container = getToastContainer();
     const toast = document.createElement('div');
     toast.className = `firma-toast firma-toast-${normalizedType}`;

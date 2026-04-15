@@ -219,6 +219,13 @@ class ForumController extends AbstractController
         array $categoryErrors = [],
         ?int $editingCategoryId = null
     ): Response {
+<<<<<<< HEAD
+=======
+        foreach ($categoryErrors as $err) {
+            $this->addFlash('danger', $err);
+        }
+
+>>>>>>> origin/main
         $categories = $categorieForumRepository->findAllOrdered();
         $mostUsedCategory = $postRepository->findMostUsedCategory();
 
@@ -235,7 +242,11 @@ class ForumController extends AbstractController
             'search' => '',
             'active_search' => '',
             'category_form_data' => $categoryFormData,
+<<<<<<< HEAD
             'category_errors' => $categoryErrors,
+=======
+            'category_errors' => [],
+>>>>>>> origin/main
             'editing_category_id' => $editingCategoryId,
         ]);
     }
