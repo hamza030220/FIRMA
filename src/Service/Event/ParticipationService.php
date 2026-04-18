@@ -202,7 +202,7 @@ class ParticipationService
         );
 
         $email = (new Email())
-            ->from('FIRMA <firma@firma.tn>')
+            ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
             ->subject('FIRMA — Confirmez votre participation : ' . $evt->getTitre())
             ->html($html);
@@ -285,7 +285,7 @@ class ParticipationService
         $pdfContent = $this->generateTicketsPdf($participation);
 
         $email = (new Email())
-            ->from('FIRMA <firma@firma.tn>')
+            ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
             ->subject('FIRMA — Participation confirmée : ' . $evt->getTitre())
             ->html($html)
@@ -361,8 +361,8 @@ class ParticipationService
         $html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d2d2d;padding:20px}
-.tkt-card{background:#fff;border:2px dashed #1a3a24;border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;page-break-inside:avoid}
-.tkt-top-bar{height:6px;background:linear-gradient(90deg,#1a3a24,#20452c,#2d6b3f);margin:-24px -24px 16px -24px}
+.tkt-card{background:#fff;border:2px dashed #1a3a24;border-radius:16px;padding:28px 24px 24px;margin-bottom:20px;position:relative;overflow:hidden;page-break-inside:avoid}
+.tkt-top-bar{height:8px;background:linear-gradient(90deg,#1a3a24,#2d6b3f,#3e8a52);margin:-28px -24px 16px -24px;border-radius:14px 14px 0 0}
 .tkt-header{margin-bottom:16px}
 .tkt-header table{width:100%}
 .tkt-event-name{font-size:18px;font-weight:700;color:#1a3a24;margin:0 0 4px}
@@ -680,7 +680,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         );
 
         $email = (new Email())
-            ->from('FIRMA <firma@firma.tn>')
+            ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
             ->subject('FIRMA — Événement modifié : ' . $evt->getTitre())
             ->html($html);
@@ -756,7 +756,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         );
 
         $email = (new Email())
-            ->from('FIRMA <firma@firma.tn>')
+            ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
             ->subject('FIRMA — Événement annulé : ' . $evt->getTitre())
             ->html($html);

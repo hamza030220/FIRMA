@@ -8,8 +8,8 @@
     <style>
     /* ── Ticket styles ── */
     .tkt-page{padding:16px 0}
-    .tkt-card{background:#fff;border:2px dashed #1a3a24;border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
-    .tkt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#1a3a24,#20452c,#2d6b3f)}
+    .tkt-card{background:#fff;border:2px dashed #1a3a24;border-radius:16px;padding:28px 24px 24px;margin-bottom:20px;position:relative;overflow:hidden}
+    .tkt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#1a3a24,#2d6b3f,#3e8a52);border-radius:14px 14px 0 0}
     .tkt-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:16px}
     .tkt-event-info{flex:1}
     .tkt-event-name{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24;margin:0 0 4px}
@@ -31,6 +31,60 @@
     .tkt-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8a9a8e}
     .tkt-section-title{font-size:16px;font-weight:700;color:#1a3a24;margin:24px 0 12px;padding-bottom:8px;border-bottom:2px solid #e8ede9}
     @media print{.tkt-card{break-inside:avoid;page-break-inside:avoid}}
+
+    /* ── Calendar styles ── */
+    .cal-toggle{display:flex;background:#f4f8f5;border-radius:10px;padding:3px;gap:2px;width:fit-content}
+    .cal-toggle button{border:none;background:transparent;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;color:#5a6e5f;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+    .cal-toggle button.active{background:#1a3a24;color:#fff;box-shadow:0 2px 8px rgba(26,58,36,.2)}
+    .cal-toggle button:not(.active):hover{background:#e8ede9;color:#1a3a24}
+
+    #calendarWrapper{display:none;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(26,58,36,.08);padding:24px;margin-top:0}
+    #calendarWrapper.visible{display:block}
+
+    /* FullCalendar theme overrides */
+    .fc{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+    .fc .fc-toolbar-title{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#1a3a24}
+    .fc .fc-button-primary{background:#1a3a24;border-color:#1a3a24;font-size:13px;font-weight:600;border-radius:8px;padding:6px 14px;text-transform:capitalize}
+    .fc .fc-button-primary:hover{background:#2d5a3a;border-color:#2d5a3a}
+    .fc .fc-button-primary:disabled{background:#c8d6cb;border-color:#c8d6cb}
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:not(:disabled):active{background:#0d1f14;border-color:#0d1f14;box-shadow:none}
+    .fc .fc-daygrid-day.fc-day-today{background:rgba(26,58,36,.06)}
+    .fc .fc-daygrid-day-number{color:#2d2d2d;font-weight:500;padding:8px}
+    .fc .fc-col-header-cell{background:#f4f8f5;border-color:#e8ede9}
+    .fc .fc-col-header-cell-cushion{color:#1a3a24;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:10px 4px}
+    .fc .fc-scrollgrid{border-color:#e8ede9;border-radius:12px;overflow:hidden}
+    .fc td,.fc th{border-color:#e8ede9}
+    .fc .fc-daygrid-event{border-radius:6px;padding:2px 6px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
+    .fc .fc-daygrid-event:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(26,58,36,.2)}
+    .fc .fc-event{background:linear-gradient(135deg,#1a3a24,#2d6b3f);color:#fff;border:none}
+    .fc .fc-daygrid-dot-event .fc-event-title{font-weight:600}
+    .fc .fc-popover{border-radius:12px;box-shadow:0 8px 30px rgba(26,58,36,.15);border:1px solid #e8ede9}
+    .fc .fc-popover-header{background:#1a3a24;color:#fff;border-radius:12px 12px 0 0;padding:10px 14px;font-weight:700}
+    .fc .fc-more-link{color:#1a3a24;font-weight:700;font-size:12px}
+    .fc .fc-daygrid-more-link:hover{background:#f4f8f5;border-radius:4px}
+
+    /* Calendar event tooltip */
+    .cal-tooltip{position:absolute;z-index:3000;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(26,58,36,.18);padding:16px;min-width:240px;pointer-events:none;animation:calTipIn .15s ease}
+    .cal-tooltip__title{font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:700;color:#1a3a24;margin:0 0 8px}
+    .cal-tooltip__row{display:flex;align-items:center;gap:6px;font-size:13px;color:#5a6e5f;padding:3px 0}
+    .cal-tooltip__row svg{flex-shrink:0;width:14px;height:14px}
+    .cal-tooltip__code{background:#f4f8f5;border-radius:8px;padding:6px 10px;margin-top:8px;font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:#1a3a24;text-align:center;letter-spacing:2px}
+    @keyframes calTipIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+    /* ── Weather styles ── */
+    .evt-weather{padding:.4rem 0;font-size:.85rem;color:#444}
+    .evt-weather-loading{display:flex;align-items:center;gap:.5rem;color:#888;font-size:.85rem}
+    .evt-weather-spinner{display:inline-block;width:16px;height:16px;border:2px solid #e0e0e0;border-top-color:#1a3a24;border-radius:50%;animation:evtSpin .7s linear infinite}
+    @keyframes evtSpin{to{transform:rotate(360deg)}}
+    .evt-weather-card{display:flex;align-items:center;gap:1rem;background:#f4f8f5;border:1px solid rgba(26,58,36,.1);border-radius:12px;padding:14px 18px}
+    .evt-weather-emoji{font-size:2.2rem;line-height:1}
+    .evt-weather-info{flex:1}
+    .evt-weather-temp{font-size:1.3rem;font-weight:700;color:#1a3a24;margin:0}
+    .evt-weather-desc{font-size:.88rem;color:#555;margin:2px 0 0}
+    .evt-weather-range{font-size:.8rem;color:#888;margin:2px 0 0}
+    .evt-weather-reliability{font-size:.75rem;color:#aaa;margin-top:4px;font-style:italic}
+    .evt-weather-error{color:#888;font-size:.85rem;font-style:italic}
     </style>
 {% endblock %}
 
@@ -67,6 +121,20 @@
         </div>
     </div>
 
+    {# ── View toggle: Liste / Calendrier ── #}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0">
+        <div class="cal-toggle">
+            <button type="button" id="viewList" class="active" onclick="switchView('list')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Liste
+            </button>
+            <button type="button" id="viewCal" onclick="switchView('calendar')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Calendrier
+            </button>
+        </div>
+    </div>
+
     {# ── Flash messages ── #}
     {% for type, messages in app.flashes %}
         {% for message in messages %}
@@ -90,6 +158,11 @@
             {% endfor %}
         </div>
     {% endif %}
+
+    {# ── Calendar view ── #}
+    <div id="calendarWrapper">
+        <div id="firmaCalendar"></div>
+    </div>
 </div>
 
 {# ═══════════════════════════════════════════════
@@ -124,6 +197,16 @@
                     <div class="evt-modal__section" id="mdSponsorsWrap" style="display:none">
                         <h3>Sponsors</h3>
                         <div class="evt-sponsors" id="mdSponsors"></div>
+                    </div>
+                    <div class="evt-modal__section" id="mdWeatherCard">
+                        <h3>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom;margin-right:6px"><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/><circle cx="12" cy="12" r="5"/></svg>Météo de l'événement
+                        </h3>
+                        <div class="evt-weather" id="mdWeather">
+                            <div class="evt-weather-loading">
+                                <span class="evt-weather-spinner"></span> Chargement de la météo…
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -238,16 +321,20 @@
    MODAL — TICKETS
    ═══════════════════════════════════════════════ #}
 <div class="evt-modal-overlay" id="evtTicketModal" style="display:none">
-    <div class="evt-modal evt-modal--lg">
-        <button type="button" class="evt-modal__close" id="ticketModalClose">&times;</button>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-            <h2 class="evt-modal__title" style="margin:0">Mes tickets</h2>
-            <button type="button" class="evt-btn evt-btn--primary evt-btn--sm" id="ticketExportPdf" style="gap:6px;display:inline-flex;align-items:center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Exporter en PDF
-            </button>
+    <div class="evt-modal evt-modal--lg" style="display:flex;flex-direction:column">
+        {# ── Sticky header bar ── #}
+        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:2px solid #e8ede9;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0">
+            <h2 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#1a3a24">Mes tickets</h2>
+            <div style="display:flex;align-items:center;gap:10px">
+                <button type="button" id="ticketExportPdf" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1a3a24,#2d5a3a);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;box-shadow:0 2px 8px rgba(26,58,36,.25)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Exporter en PDF
+                </button>
+                <button type="button" id="ticketModalClose" style="background:#f4f8f5;border:1px solid #d4ddd6;width:36px;height:36px;border-radius:50%;font-size:1.3rem;color:#1a3a24;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s">&times;</button>
+            </div>
         </div>
-        <div id="ticketContent"></div>
+        {# ── Scrollable ticket content ── #}
+        <div id="ticketContent" style="padding:24px;overflow-y:auto;flex:1"></div>
     </div>
 </div>
 
@@ -257,6 +344,8 @@
 {{ parent() }}
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/fr.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -281,20 +370,103 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var currentEvtData = null;
 
-    document.querySelectorAll('.evt-detail-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var id = this.getAttribute('data-id');
-            openModal(detailModal);
-            // reset
-            document.getElementById('mdImg').style.backgroundImage = '';
-            document.getElementById('mdTitre').textContent = 'Chargement…';
-            document.getElementById('mdDesc').textContent = '';
-            document.getElementById('mdParticipWrap').innerHTML = '';
+    // ═══════════════════════════════
+    // Weather (Open-Meteo)
+    // ═══════════════════════════════
+    var WMO_DESC = {0:'Ciel dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine',55:'Bruine forte',56:'Bruine verglaçante légère',57:'Bruine verglaçante',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',66:'Pluie verglaçante légère',67:'Pluie verglaçante forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',77:'Grains de neige',80:'Averses légères',81:'Averses modérées',82:'Averses violentes',85:'Averses de neige légères',86:'Averses de neige fortes',95:'Orage',96:'Orage avec grêle légère',99:'Orage avec grêle forte'};
+    var WMO_EMOJI = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',66:'🧊',67:'🧊',71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
 
-            fetch('{{ path("user_evenements") }}/' + id + '/json')
-                .then(function(r){ return r.json(); })
-                .then(function(d){
-                    currentEvtData = d;
+    function extractCity(lieu, adresse) {
+        // Prefer adresse (structured: "..., 2015 Tunis") then lieu
+        var sources = [adresse, lieu];
+        for (var i = 0; i < sources.length; i++) {
+            if (!sources[i]) continue;
+            var parts = sources[i].split(',');
+            var last = parts[parts.length - 1].trim();
+            // Strip postal code (4-5 digits) e.g. "2015 Tunis" → "Tunis"
+            var cleaned = last.replace(/^\d{4,5}\s*/, '').trim();
+            if (cleaned.length >= 2) return cleaned;
+        }
+        return null;
+    }
+
+    function getReliabilityText(daysAhead) {
+        if (daysAhead <= 2)  return 'Prévision très fiable';
+        if (daysAhead <= 5)  return 'Prévision fiable';
+        if (daysAhead <= 10) return 'Prévision indicative';
+        return 'Tendance générale';
+    }
+
+    function buildWeatherCard(code, tMin, tMax, label, cityName) {
+        var emoji = WMO_EMOJI[code] || '🌡️';
+        var desc  = WMO_DESC[code]  || 'Données météo';
+        return '<div class="evt-weather-card">'
+            + '<div class="evt-weather-emoji">' + emoji + '</div>'
+            + '<div class="evt-weather-info">'
+            + '<p class="evt-weather-temp">' + Math.round(tMin) + '° / ' + Math.round(tMax) + '°C</p>'
+            + '<p class="evt-weather-desc">' + desc + '</p>'
+            + '<p class="evt-weather-range">' + (cityName ? cityName + ' — ' : '') + label + '</p>'
+            + '</div></div>';
+    }
+
+    function loadWeatherForecast(lat, lon, cityName, dateStr, el) {
+        fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date='+dateStr+'&end_date='+dateStr)
+        .then(function(r){return r.json()}).then(function(j){
+            if (!j.daily || !j.daily.weathercode) { el.innerHTML='<span class="evt-weather-error">Pas de données météo.</span>'; return; }
+            var diff = Math.round((new Date(dateStr)-new Date())/(864e5));
+            el.innerHTML = buildWeatherCard(j.daily.weathercode[0], j.daily.temperature_2m_min[0], j.daily.temperature_2m_max[0], getReliabilityText(diff), cityName);
+        }).catch(function(){ el.innerHTML='<span class="evt-weather-error">Météo indisponible.</span>'; });
+    }
+
+    function loadWeatherArchive(lat, lon, cityName, dateStr, el) {
+        fetch('https://archive-api.open-meteo.com/v1/archive?latitude='+lat+'&longitude='+lon+'&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date='+dateStr+'&end_date='+dateStr)
+        .then(function(r){return r.json()}).then(function(j){
+            if (!j.daily || !j.daily.weathercode) { el.innerHTML='<span class="evt-weather-error">Pas de données météo.</span>'; return; }
+            el.innerHTML = buildWeatherCard(j.daily.weathercode[0], j.daily.temperature_2m_min[0], j.daily.temperature_2m_max[0], 'Météo enregistrée', cityName);
+        }).catch(function(){ el.innerHTML='<span class="evt-weather-error">Météo indisponible.</span>'; });
+    }
+
+    function loadWeatherHistoricalAvg(lat, lon, cityName, dateStr, el) {
+        var d = new Date(dateStr);
+        var lastYear = (d.getFullYear()-1)+'-'+(('0'+(d.getMonth()+1)).slice(-2))+'-'+(('0'+d.getDate()).slice(-2));
+        fetch('https://archive-api.open-meteo.com/v1/archive?latitude='+lat+'&longitude='+lon+'&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date='+lastYear+'&end_date='+lastYear)
+        .then(function(r){return r.json()}).then(function(j){
+            if (!j.daily || !j.daily.weathercode) { el.innerHTML='<span class="evt-weather-error">Pas de données météo.</span>'; return; }
+            el.innerHTML = buildWeatherCard(j.daily.weathercode[0], j.daily.temperature_2m_min[0], j.daily.temperature_2m_max[0], 'Moyenne historique (même date l\'an dernier)', cityName)
+                + '<p class="evt-weather-reliability">Estimation basée sur l\'historique</p>';
+        }).catch(function(){ el.innerHTML='<span class="evt-weather-error">Météo indisponible.</span>'; });
+    }
+
+    function loadWeather(lieu, adresse, dateDebutRaw) {
+        var el = document.getElementById('mdWeather');
+        if (!el) return;
+        el.innerHTML = '<div class="evt-weather-loading"><span class="evt-weather-spinner"></span> Chargement de la météo…</div>';
+        var city = extractCity(lieu, adresse);
+        if (!city || !dateDebutRaw) { el.innerHTML = '<span class="evt-weather-error">Lieu ou date manquant.</span>'; return; }
+        fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(city)+'&count=1&language=fr')
+        .then(function(r){return r.json()}).then(function(geo){
+            if (!geo.results || !geo.results.length) { el.innerHTML='<span class="evt-weather-error">Ville introuvable pour la météo.</span>'; return; }
+            var lat = geo.results[0].latitude, lon = geo.results[0].longitude;
+            var cityName = geo.results[0].name;
+            var diff = Math.round((new Date(dateDebutRaw) - new Date()) / 864e5);
+            if (diff < 0) { loadWeatherArchive(lat, lon, cityName, dateDebutRaw, el); }
+            else if (diff <= 15) { loadWeatherForecast(lat, lon, cityName, dateDebutRaw, el); }
+            else { loadWeatherHistoricalAvg(lat, lon, cityName, dateDebutRaw, el); }
+        }).catch(function(){ el.innerHTML='<span class="evt-weather-error">Météo indisponible.</span>'; });
+    }
+
+    // Reusable: load event detail by ID and show modal
+    window.openEventDetail = function(id) {
+        openModal(detailModal);
+        document.getElementById('mdImg').style.backgroundImage = '';
+        document.getElementById('mdTitre').textContent = 'Chargement…';
+        document.getElementById('mdDesc').textContent = '';
+        document.getElementById('mdParticipWrap').innerHTML = '';
+
+        fetch('{{ path("user_evenements") }}/' + id + '/json')
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                currentEvtData = d;
 
                     // Hero
                     if (d.imageUrl) {
@@ -379,6 +551,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         contactCard.style.display = 'none';
                     }
 
+                    // Weather
+                    loadWeather(d.lieu, d.adresse, d.dateDebutRaw);
+
                     // Participation status or button
                     var pw = document.getElementById('mdParticipWrap');
                     pw.innerHTML = '';
@@ -415,6 +590,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         pw.innerHTML = '<div class="evt-info-card" style="text-align:center;color:#c0392b"><strong>Complet</strong></div>';
                     }
                 });
+    };
+
+    // Bind card buttons to openEventDetail
+    document.querySelectorAll('.evt-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            window.openEventDetail(this.getAttribute('data-id'));
         });
     });
 
@@ -812,6 +993,84 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exporter en PDF';
         });
     });
+
+    // ═══════════════════════════════════════
+    // FullCalendar — Mes événements confirmés
+    // ═══════════════════════════════════════
+    var calendarEl = document.getElementById('firmaCalendar');
+    var tooltip = null;
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'fr',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listMonth'
+        },
+        buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
+        height: 'auto',
+        navLinks: true,
+        editable: false,
+        dayMaxEvents: 3,
+        eventSources: [{
+            url: '{{ path("user_calendar_events") }}',
+            failure: function() { console.warn('Erreur chargement événements calendrier'); }
+        }],
+        eventMouseEnter: function(info) {
+            var p = info.event.extendedProps;
+            tooltip = document.createElement('div');
+            tooltip.className = 'cal-tooltip';
+            tooltip.innerHTML =
+                '<div class="cal-tooltip__title">' + info.event.title + '</div>' +
+                (p.organisateur ? '<div class="cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' + p.organisateur + '</div>' : '') +
+                (p.lieu ? '<div class="cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + p.lieu + '</div>' : '');
+            document.body.appendChild(tooltip);
+            var rect = info.el.getBoundingClientRect();
+            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+            tooltip.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+        },
+        eventMouseLeave: function() {
+            if (tooltip) { tooltip.remove(); tooltip = null; }
+        },
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            if (tooltip) { tooltip.remove(); tooltip = null; }
+            var evtId = info.event.id;
+            // Open the detail modal for this event
+            if (typeof window.openEventDetail === 'function') {
+                window.openEventDetail(evtId);
+            }
+        }
+    });
+
+    // Track if calendar has been rendered
+    var calendarRendered = false;
+
+    // View toggle
+    window.switchView = function(view) {
+        var listBtn = document.getElementById('viewList');
+        var calBtn = document.getElementById('viewCal');
+        var gridSection = document.querySelector('.evt-grid') || document.querySelector('.evt-empty');
+        var calWrapper = document.getElementById('calendarWrapper');
+
+        if (view === 'calendar') {
+            listBtn.classList.remove('active');
+            calBtn.classList.add('active');
+            if (gridSection) gridSection.style.display = 'none';
+            calWrapper.classList.add('visible');
+            if (!calendarRendered) {
+                calendar.render();
+                calendarRendered = true;
+            } else {
+                calendar.updateSize();
+            }
+        } else {
+            calBtn.classList.remove('active');
+            listBtn.classList.add('active');
+            if (gridSection) gridSection.style.display = '';
+            calWrapper.classList.remove('visible');
+        }
+    };
 
 });
 </script>

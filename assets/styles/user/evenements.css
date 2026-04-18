@@ -275,8 +275,8 @@
   position:fixed;inset:0;z-index:2000;
   background:rgba(26,58,36,.45);
   backdrop-filter:blur(4px);
-  display:flex;align-items:center;justify-content:center;
-  padding:1.5rem;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:4.5rem 1.5rem 1.5rem;
   overflow-y:auto;
 }
 .evt-modal{

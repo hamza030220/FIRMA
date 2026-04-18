@@ -298,6 +298,41 @@ class EvenementController extends AbstractController
     }
 
     // ──────────────────────────────────────────
+    //  CALENDAR EVENTS JSON
+    // ──────────────────────────────────────────
+    #[Route('/calendar-events', name: 'admin_calendar_events', methods: ['GET'])]
+    public function calendarEvents(): JsonResponse
+    {
+        $allEvents = $this->evenementService->getAll();
+        $events = [];
+        foreach ($allEvents as $evt) {
+            $start = $evt->getDateDebut();
+            $end   = $evt->getDateFin() ?? $start;
+            if ($evt->getHoraireDebut()) {
+                $start = new \DateTime($start->format('Y-m-d') . ' ' . $evt->getHoraireDebut()->format('H:i'));
+            }
+            if ($evt->getHoraireFin()) {
+                $end = new \DateTime($end->format('Y-m-d') . ' ' . $evt->getHoraireFin()->format('H:i'));
+            } else {
+                $end = (clone $end)->modify('+1 day');
+            }
+            $events[] = [
+                'id'            => $evt->getIdEvenement(),
+                'title'         => $evt->getTitre(),
+                'start'         => $start->format('c'),
+                'end'           => $end->format('c'),
+                'extendedProps' => [
+                    'lieu'         => $evt->getLieu(),
+                    'adresse'      => $evt->getAdresse(),
+                    'organisateur' => $evt->getOrganisateur(),
+                    'imageUrl'     => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
+                ],
+            ];
+        }
+        return $this->json($events);
+    }
+
+    // ──────────────────────────────────────────
     //  CREATE (POST)
     // ──────────────────────────────────────────
     #[Route('/create', name: 'admin_evenement_create', methods: ['POST'])]

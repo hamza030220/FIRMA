@@ -32,6 +32,10 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a>
+        <a href="#" class="aevt-tab {% if tab == 'calendrier' %}aevt-tab--active{% endif %}" data-tab="calendrier">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendrier
+        </a>
     </nav>
 
     {# ── Flash messages ── #}
@@ -52,7 +56,6 @@
                 <button type="submit" class="aevt-search__btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
-                <button type="button" class="aevt-search__more">⋯</button>
             </form>
             <div class="aevt-sort">
                 <label>Trier par :</label>
@@ -158,7 +161,7 @@
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Organisateur *</label>
-                <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" placeholder="Nom de l'organisateur" value="{{ formData.organisateur ?? '' }}">
+                <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" placeholder="Nom de l'organisateur" value="{{ formData.organisateur ?? app.user.prenom ~ ' ' ~ app.user.nom }}">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Type *</label>
@@ -727,6 +730,15 @@
     </div>
 
     {# ════════════════════════════════════════════════
+       TAB 6 — CALENDRIER
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'calendrier' %}aevt-panel--active{% endif %}" id="panel-calendrier">
+        <div style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(26,58,36,.08);padding:24px">
+            <div id="adminCalendar"></div>
+        </div>
+    </div>
+
+    {# ════════════════════════════════════════════════
        MODAL — DETAIL POPUP
        ════════════════════════════════════════════════ #}
     <div class="aevt-modal-overlay" id="detailModal" style="display:none">
@@ -841,6 +853,8 @@
 
 {% block javascripts %}
 {{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/fr.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // ═══════════════════════════════
@@ -960,7 +974,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.getElementById('modal-close');
     const closeBtn2 = document.getElementById('modal-close2');
 
-    function openModal(id) {
+    window.openModal = function openModal(id) {
         fetch('{{ path('admin_evenements') }}/' + id + '/json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -2054,18 +2068,83 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(function(err){ console.error('Dashboard data error:', err); });
     }
 
-    /* Trigger when dashboard tab is selected */
-    var dashPanel = document.getElementById('panel-dashboard');
-    if (dashPanel && dashPanel.classList.contains('aevt-panel--active')) {
-        initDashboard();
-    }
+    /* ── DOM-dependent init (runs after page load) ── */
+    document.addEventListener('DOMContentLoaded', function() {
+        /* Trigger when dashboard tab is already selected */
+        var dashPanel = document.getElementById('panel-dashboard');
+        if (dashPanel && dashPanel.classList.contains('aevt-panel--active')) {
+            initDashboard();
+        }
 
-    /* Listen for tab clicks */
-    document.querySelectorAll('[data-tab]').forEach(function(btn){
-        btn.addEventListener('click', function(){
-            if (this.getAttribute('data-tab') === 'dashboard') {
-                setTimeout(initDashboard, 50);
-            }
+        // ═══════════════════════════════
+        // FullCalendar — Admin
+        // ═══════════════════════════════
+        var adminCalRendered = false;
+        var adminTooltip = null;
+        var adminCalendar = null;
+
+        function initAdminCalendar() {
+            var adminCalEl = document.getElementById('adminCalendar');
+            if (!adminCalEl || adminCalendar) return;
+            adminCalendar = new FullCalendar.Calendar(adminCalEl, {
+                locale: 'fr',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
+                height: 'auto',
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: 3,
+                eventSources: [{
+                    url: '{{ path("admin_calendar_events") }}',
+                    failure: function() { console.warn('Erreur chargement calendrier admin'); }
+                }],
+                eventMouseEnter: function(info) {
+                    var p = info.event.extendedProps;
+                    adminTooltip = document.createElement('div');
+                    adminTooltip.className = 'aevt-cal-tooltip';
+                    adminTooltip.innerHTML =
+                        '<div class="aevt-cal-tooltip__title">' + info.event.title + '</div>' +
+                        (p.organisateur ? '<div class="aevt-cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' + p.organisateur + '</div>' : '') +
+                        (p.lieu ? '<div class="aevt-cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + p.lieu + '</div>' : '');
+                    document.body.appendChild(adminTooltip);
+                    var rect = info.el.getBoundingClientRect();
+                    adminTooltip.style.left = rect.left + (rect.width / 2) - (adminTooltip.offsetWidth / 2) + 'px';
+                    adminTooltip.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+                },
+                eventMouseLeave: function() {
+                    if (adminTooltip) { adminTooltip.remove(); adminTooltip = null; }
+                },
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    if (adminTooltip) { adminTooltip.remove(); adminTooltip = null; }
+                    openModal(info.event.id);
+                }
+            });
+            adminCalendar.render();
+            adminCalRendered = true;
+        }
+
+        /* Listen for tab clicks — dashboard & calendar triggers */
+        document.querySelectorAll('[data-tab]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                if (this.getAttribute('data-tab') === 'dashboard') {
+                    setTimeout(initDashboard, 50);
+                }
+                if (this.getAttribute('data-tab') === 'calendrier') {
+                    setTimeout(function() {
+                        if (!adminCalRendered) {
+                            initAdminCalendar();
+                        } else if (adminCalendar) {
+                            adminCalendar.updateSize();
+                        }
+                    }, 50);
+                }
+            });
         });
     });
 })();
