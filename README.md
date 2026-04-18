@@ -46,6 +46,12 @@
 - Gestion véhicules & terrains avec cartographie
 - Validation des formulaires champ par champ avec notifications toast
 - Recherche, filtres et pagination côté admin & utilisateur
+- **Dashboard Analytics temps réel** avec KPIs, graphiques et tableaux :
+  - CA 30 jours avec variation vs mois précédent
+  - Panier moyen, CA locations, valeur du stock, locations en cours
+  - Graphiques : commandes/revenus (14j), revenus mensuels (6 mois), paiements, livraisons, types de location
+  - Tableaux : top 5 produits, alertes stock bas, top 5 clients, dernières commandes
+- **Microsoft Clarity** intégré pour le suivi comportemental utilisateur (heatmaps, sessions)
 
 ### 📅 Événements
 - Inscription aux foires, ateliers, formations et salons agricoles
@@ -233,6 +239,7 @@ Le schéma `firma` comporte **21 tables** :
 |---------|-----|-----|-------------|
 | GET | `/admin` | `admin_dashboard` | Tableau de bord |
 | GET | `/admin/marketplace` | `admin_marketplace` | Gérer Marketplace |
+| GET | `/admin/marketplace/analytics` | `admin_marketplace_analytics` | Analytics & statistiques temps réel |
 | GET | `/admin/evenements` | `admin_evenements` | Gérer Événements |
 | GET | `/admin/techniciens` | `admin_techniciens` | Gérer Techniciens |
 | GET | `/admin/forum` | `admin_forum` | Gérer Forum |
@@ -281,6 +288,8 @@ Le schéma `firma` comporte **21 tables** :
 | Stimulus (Hotwired) | Contrôleurs JS interactifs |
 | Stripe.js | Paiement sécurisé en ligne |
 | Leaflet / OpenStreetMap | Cartographie des terrains |
+| Chart.js 4.4.4 | Graphiques analytics (bar, line, doughnut) |
+| Microsoft Clarity | Suivi comportemental UX (heatmaps, sessions) |
 | Google Fonts | Playfair Display + Plus Jakarta Sans |
 | CSS custom | Design système sur mesure |
 
@@ -314,6 +323,7 @@ FIRMA/
 │   │   ├── landing.css           # Page d'accueil
 │   │   ├── login.css             # Page de connexion
 │   │   ├── admin/dashboard.css   # Interface admin
+│   │   ├── admin/marketplace.css # Marketplace + analytics styles
 │   │   └── user/dashboard.css    # Interface utilisateur
 │   └── controllers/              # Contrôleurs Stimulus
 ├── config/
@@ -331,6 +341,7 @@ FIRMA/
 │   │   ├── LandingController.php
 │   │   ├── SecurityController.php
 │   │   ├── Admin/DashboardController.php
+│   │   ├── Admin/MarketplaceController.php  # CRUD + Analytics
 │   │   └── User/DashboardController.php
 │   ├── Entity/
 │   │   └── User/Utilisateur.php
