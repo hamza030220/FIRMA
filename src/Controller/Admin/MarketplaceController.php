@@ -61,6 +61,165 @@ class MarketplaceController extends AbstractController
     }
 
     /* ================================================================
+       ANALYTICS  (Real-time KPIs & Stats)
+       ================================================================ */
+
+    #[Route('/analytics', name: 'admin_marketplace_analytics')]
+    public function analytics(
+        CommandeRepository $cmdRepo,
+        LocationRepository $locRepo,
+        EquipementRepository $equipRepo,
+        VehiculeRepository $vehicRepo,
+        TerrainRepository $terrainRepo,
+    ): Response {
+        $conn = $this->em->getConnection();
+
+        // Revenue stats (last 30 days vs previous 30 days)
+        $revenueCurrent = $conn->executeQuery("
+            SELECT COALESCE(SUM(CAST(montant_total AS DECIMAL(10,2))), 0) as total
+            FROM commandes WHERE date_commande >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ")->fetchOne();
+
+        $revenuePrevious = $conn->executeQuery("
+            SELECT COALESCE(SUM(CAST(montant_total AS DECIMAL(10,2))), 0) as total
+            FROM commandes WHERE date_commande >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+                             AND date_commande < DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ")->fetchOne();
+
+        // Orders per day (last 14 days)
+        $ordersPerDay = $conn->executeQuery("
+            SELECT DATE(date_commande) as jour, COUNT(*) as nb, SUM(CAST(montant_total AS DECIMAL(10,2))) as montant
+            FROM commandes WHERE date_commande >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+            GROUP BY DATE(date_commande) ORDER BY jour
+        ")->fetchAllAssociative();
+
+        // Locations per day (last 14 days)
+        $locsPerDay = $conn->executeQuery("
+            SELECT DATE(date_debut) as jour, COUNT(*) as nb
+            FROM locations WHERE date_debut >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+            GROUP BY DATE(date_debut) ORDER BY jour
+        ")->fetchAllAssociative();
+
+        // Top 5 best sellers
+        $topEquipements = $conn->executeQuery("
+            SELECT e.nom, SUM(d.quantite) as total_vendu, SUM(CAST(d.sous_total AS DECIMAL(10,2))) as ca
+            FROM details_commandes d
+            JOIN equipements e ON e.id = d.equipement_id
+            GROUP BY e.id, e.nom ORDER BY total_vendu DESC LIMIT 5
+        ")->fetchAllAssociative();
+
+        // Payment method distribution
+        $paymentStats = $conn->executeQuery("
+            SELECT statut_paiement, COUNT(*) as nb
+            FROM commandes GROUP BY statut_paiement
+        ")->fetchAllAssociative();
+
+        // Location type split
+        $locTypeStats = $conn->executeQuery("
+            SELECT type_location, COUNT(*) as nb, SUM(CAST(prix_total AS DECIMAL(10,2))) as ca
+            FROM locations GROUP BY type_location
+        ")->fetchAllAssociative();
+
+        // Low stock alerts
+        $lowStockItems = $conn->executeQuery("
+            SELECT nom, quantite_stock, seuil_alerte
+            FROM equipements WHERE quantite_stock <= seuil_alerte AND disponible = 1
+            ORDER BY quantite_stock ASC LIMIT 10
+        ")->fetchAllAssociative();
+
+        // Delivery status breakdown
+        $deliveryStats = $conn->executeQuery("
+            SELECT statut_livraison, COUNT(*) as nb
+            FROM commandes GROUP BY statut_livraison
+        ")->fetchAllAssociative();
+
+        // Overall counts
+        $totals = $conn->executeQuery("
+            SELECT
+                (SELECT COUNT(*) FROM commandes) as commandes,
+                (SELECT COUNT(*) FROM locations) as locations,
+                (SELECT COALESCE(SUM(CAST(montant_total AS DECIMAL(10,2))), 0) FROM commandes WHERE statut_paiement = 'paye') as ca_total,
+                (SELECT COUNT(*) FROM commandes WHERE statut_livraison = 'en_preparation') as en_preparation
+        ")->fetchAssociative();
+
+        // Average order value
+        $avgOrder = $conn->executeQuery("
+            SELECT COALESCE(AVG(CAST(montant_total AS DECIMAL(10,2))), 0) as avg_val
+            FROM commandes WHERE statut_paiement = 'paye'
+        ")->fetchOne();
+
+        // Revenue from locations
+        $locRevenue = $conn->executeQuery("
+            SELECT COALESCE(SUM(CAST(prix_total AS DECIMAL(10,2))), 0) +
+                   COALESCE(SUM(CAST(caution AS DECIMAL(10,2))), 0) as total
+            FROM locations WHERE statut = 'confirmee'
+        ")->fetchOne();
+
+        // Monthly revenue (last 6 months)
+        $monthlyRevenue = $conn->executeQuery("
+            SELECT DATE_FORMAT(date_commande, '%Y-%m') as mois,
+                   COUNT(*) as nb_commandes,
+                   SUM(CAST(montant_total AS DECIMAL(10,2))) as ca
+            FROM commandes
+            WHERE date_commande >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY DATE_FORMAT(date_commande, '%Y-%m')
+            ORDER BY mois
+        ")->fetchAllAssociative();
+
+        // Top clients
+        $topClients = $conn->executeQuery("
+            SELECT u.nom, u.prenom, u.email,
+                   COUNT(c.id) as nb_commandes,
+                   SUM(CAST(c.montant_total AS DECIMAL(10,2))) as total_depense
+            FROM commandes c
+            JOIN utilisateurs u ON u.id = c.id_utilisateur
+            GROUP BY u.id, u.nom, u.prenom, u.email
+            ORDER BY total_depense DESC LIMIT 5
+        ")->fetchAllAssociative();
+
+        // Active locations now
+        $activeLocations = $conn->executeQuery("
+            SELECT COUNT(*) as nb FROM locations
+            WHERE statut = 'confirmee' AND date_debut <= NOW() AND date_fin >= NOW()
+        ")->fetchOne();
+
+        // Stock value
+        $stockValue = $conn->executeQuery("
+            SELECT COALESCE(SUM(CAST(prix_vente AS DECIMAL(10,2)) * quantite_stock), 0) as valeur
+            FROM equipements WHERE disponible = 1
+        ")->fetchOne();
+
+        // Recent orders (last 5)
+        $recentOrders = $conn->executeQuery("
+            SELECT c.numero_commande, c.montant_total, c.statut_paiement, c.statut_livraison,
+                   c.date_commande, u.nom, u.prenom
+            FROM commandes c
+            JOIN utilisateurs u ON u.id = c.id_utilisateur
+            ORDER BY c.date_commande DESC LIMIT 5
+        ")->fetchAllAssociative();
+
+        return $this->render('admin/marketplace/analytics.html.twig', [
+            'revenueCurrent' => (float) $revenueCurrent,
+            'revenuePrevious' => (float) $revenuePrevious,
+            'ordersPerDay' => $ordersPerDay,
+            'locsPerDay' => $locsPerDay,
+            'topEquipements' => $topEquipements,
+            'paymentStats' => $paymentStats,
+            'locTypeStats' => $locTypeStats,
+            'lowStockItems' => $lowStockItems,
+            'deliveryStats' => $deliveryStats,
+            'totals' => $totals,
+            'avgOrder' => (float) $avgOrder,
+            'locRevenue' => (float) $locRevenue,
+            'monthlyRevenue' => $monthlyRevenue,
+            'topClients' => $topClients,
+            'activeLocations' => (int) $activeLocations,
+            'stockValue' => (float) $stockValue,
+            'recentOrders' => $recentOrders,
+        ]);
+    }
+
+    /* ================================================================
        CALENDRIER LOCATIONS  (FullCalendar)
        ================================================================ */
 
