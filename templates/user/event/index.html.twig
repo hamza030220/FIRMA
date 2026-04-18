@@ -132,6 +132,10 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 Calendrier
             </button>
+            <button type="button" id="viewMap" onclick="switchView('map')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Carte
+            </button>
         </div>
     </div>
 
@@ -157,11 +161,37 @@
                 } %}
             {% endfor %}
         </div>
+        {% include 'shared/_pagination.html.twig' with {
+            currentPage: currentPage,
+            totalPages: totalPages,
+            route: 'user_evenements',
+            routeParams: { q: search, sort: sort }
+        } %}
     {% endif %}
 
     {# ── Calendar view ── #}
     <div id="calendarWrapper">
         <div id="firmaCalendar"></div>
+    </div>
+
+    {# ── Map view ── #}
+    <div id="mapWrapper" style="display:none">
+        <div class="evt-map-toolbar">
+            <button type="button" class="evt-btn evt-btn--outline evt-btn--sm" id="mapLocateMe">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                Me localiser
+            </button>
+            <button type="button" class="evt-btn evt-btn--outline evt-btn--sm" id="mapSortProximity" style="display:none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Trier par proximité
+            </button>
+            <div class="evt-map-progress" id="mapProgress" style="display:none">
+                <span class="evt-weather-spinner"></span>
+                <span id="mapProgressText">Géocodage...</span>
+            </div>
+        </div>
+        <div id="firmaMap" style="height:550px;border-radius:12px;z-index:1"></div>
+        <div id="mapEventsList" class="evt-map-events-list"></div>
     </div>
 </div>
 
@@ -346,6 +376,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/fr.global.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -1045,18 +1076,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Track if calendar has been rendered
     var calendarRendered = false;
+    var mapInitialized = false;
 
     // View toggle
     window.switchView = function(view) {
         var listBtn = document.getElementById('viewList');
         var calBtn = document.getElementById('viewCal');
+        var mapBtn = document.getElementById('viewMap');
         var gridSection = document.querySelector('.evt-grid') || document.querySelector('.evt-empty');
         var calWrapper = document.getElementById('calendarWrapper');
+        var mapWrapper = document.getElementById('mapWrapper');
+
+        // Reset all
+        listBtn.classList.remove('active');
+        calBtn.classList.remove('active');
+        mapBtn.classList.remove('active');
+        if (gridSection) gridSection.style.display = 'none';
+        calWrapper.classList.remove('visible');
+        mapWrapper.style.display = 'none';
 
         if (view === 'calendar') {
-            listBtn.classList.remove('active');
             calBtn.classList.add('active');
-            if (gridSection) gridSection.style.display = 'none';
             calWrapper.classList.add('visible');
             if (!calendarRendered) {
                 calendar.render();
@@ -1064,13 +1104,282 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 calendar.updateSize();
             }
+        } else if (view === 'map') {
+            mapBtn.classList.add('active');
+            mapWrapper.style.display = 'block';
+            if (!mapInitialized) {
+                initFirmaMap();
+                mapInitialized = true;
+            } else {
+                firmaLeafletMap.invalidateSize();
+            }
         } else {
-            calBtn.classList.remove('active');
             listBtn.classList.add('active');
             if (gridSection) gridSection.style.display = '';
-            calWrapper.classList.remove('visible');
         }
     };
+
+    // ═══════════════════════════════════════════
+    // INTERACTIVE MAP (Leaflet + Nominatim)
+    // ═══════════════════════════════════════════
+    var firmaLeafletMap = null;
+    var mapMarkers = [];
+    var userMarker = null;
+    var userLatLng = null;
+    var GEOCODE_CACHE_KEY = 'firma_geocode_cache';
+
+    function getGeocodeCache() {
+        try {
+            return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY)) || {};
+        } catch(e) { return {}; }
+    }
+    function setGeocodeCache(cache) {
+        try { localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache)); } catch(e) {}
+    }
+
+    // Haversine distance in km
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        var R = 6371;
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function geocodeAddress(address) {
+        return new Promise(function(resolve) {
+            var cache = getGeocodeCache();
+            var key = address.trim().toLowerCase();
+            if (cache[key]) { resolve(cache[key]); return; }
+
+            fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tn&q=' + encodeURIComponent(address))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && data.length > 0) {
+                        var result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), name: data[0].display_name };
+                        cache[key] = result;
+                        setGeocodeCache(cache);
+                        resolve(result);
+                    } else {
+                        resolve(null);
+                    }
+                })
+                .catch(function() { resolve(null); });
+        });
+    }
+
+    // Delay helper (respect Nominatim 1req/s)
+    function delay(ms) {
+        return new Promise(function(resolve) { setTimeout(resolve, ms); });
+    }
+
+    function createEventPopup(evt, distance) {
+        var distHtml = distance !== null ? '<div class="evt-map-dist">' + distance.toFixed(1) + ' km</div>' : '';
+        var imgHtml = evt.imageUrl ? '<img src="' + evt.imageUrl + '" class="evt-map-popup-img">' : '';
+        var placesClass = evt.placesDisponibles <= 0 ? 'map-places-full' : (evt.placesDisponibles <= 5 ? 'map-places-low' : '');
+        return '<div class="evt-map-popup">'
+            + imgHtml
+            + '<div class="evt-map-popup-body">'
+            + '<strong class="evt-map-popup-title">' + evt.titre + '</strong>'
+            + '<div class="evt-map-popup-meta">'
+            + '<span>📅 ' + (evt.dateDebut || '') + '</span>'
+            + '<span>📍 ' + (evt.lieu || evt.adresse || '') + '</span>'
+            + (evt.type ? '<span>🏷️ ' + evt.type + '</span>' : '')
+            + '<span class="' + placesClass + '">🎟️ ' + evt.placesDisponibles + '/' + evt.capaciteMax + ' places</span>'
+            + '</div>'
+            + distHtml
+            + '<button class="evt-map-popup-btn" onclick="window.openEventDetail(' + evt.id + ')">Voir détails</button>'
+            + '</div></div>';
+    }
+
+    function updateMapEventsList(events) {
+        var container = document.getElementById('mapEventsList');
+        if (!events.length) { container.innerHTML = ''; return; }
+
+        var html = '<h4 class="evt-map-list-title">Événements sur la carte (' + events.length + ')</h4><div class="evt-map-list-grid">';
+        events.forEach(function(e) {
+            var distHtml = e._distance !== null && e._distance !== undefined ? '<span class="evt-map-list-dist">' + e._distance.toFixed(1) + ' km</span>' : '';
+            html += '<div class="evt-map-list-item" onclick="window.openEventDetail(' + e.id + ')" data-evtid="' + e.id + '">'
+                + '<div class="evt-map-list-info">'
+                + '<strong>' + e.titre + '</strong>'
+                + '<span>📅 ' + (e.dateDebut || '') + ' · 📍 ' + (e.lieu || e.adresse || '') + '</span>'
+                + '</div>'
+                + distHtml
+                + '</div>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function initFirmaMap() {
+        // Center on Tunisia
+        firmaLeafletMap = L.map('firmaMap').setView([34.0, 9.0], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap',
+            maxZoom: 18
+        }).addTo(firmaLeafletMap);
+
+        var progressEl = document.getElementById('mapProgress');
+        var progressText = document.getElementById('mapProgressText');
+        progressEl.style.display = 'flex';
+
+        // Fetch events
+        fetch('{{ path("user_map_events") }}')
+            .then(function(r) { return r.json(); })
+            .then(function(events) {
+                geocodeEvents(events, progressText).then(function(geocoded) {
+                    progressEl.style.display = 'none';
+
+                    var bounds = [];
+                    geocoded.forEach(function(item) {
+                        var marker = L.marker([item.lat, item.lng], {
+                            icon: L.divIcon({
+                                className: 'evt-map-marker',
+                                html: '<div class="evt-map-marker-pin"><svg width="24" height="24" viewBox="0 0 24 24" fill="#1a3a24"><path d="M12 0C7.03 0 3 4.03 3 9c0 7.5 9 15 9 15s9-7.5 9-15c0-4.97-4.03-9-9-9zm0 12.75c-2.07 0-3.75-1.68-3.75-3.75S9.93 5.25 12 5.25 15.75 6.93 15.75 9 14.07 12.75 12 12.75z"/></svg></div>',
+                                iconSize: [24, 36],
+                                iconAnchor: [12, 36],
+                                popupAnchor: [0, -36]
+                            })
+                        }).addTo(firmaLeafletMap);
+
+                        marker.bindPopup(createEventPopup(item.evt, item.evt._distance || null), {
+                            maxWidth: 300,
+                            className: 'evt-map-popup-wrapper'
+                        });
+
+                        marker._evtData = item.evt;
+                        mapMarkers.push(marker);
+                        bounds.push([item.lat, item.lng]);
+                    });
+
+                    if (bounds.length) {
+                        firmaLeafletMap.fitBounds(bounds, { padding: [40, 40] });
+                    }
+
+                    updateMapEventsList(geocoded.map(function(g) { return g.evt; }));
+
+                    // Show non-geocoded events
+                    var notFound = events.filter(function(e) { return !e._geocoded; });
+                    if (notFound.length) {
+                        var container = document.getElementById('mapEventsList');
+                        var warnHtml = '<div class="evt-map-notfound"><strong>⚠️ Événements non localisés (' + notFound.length + ') :</strong><ul>';
+                        notFound.forEach(function(e) {
+                            warnHtml += '<li><a href="#" onclick="event.preventDefault();window.openEventDetail(' + e.id + ')">' + e.titre + '</a> — ' + (e.adresse || e.lieu || 'Adresse inconnue') + '</li>';
+                        });
+                        warnHtml += '</ul></div>';
+                        container.insertAdjacentHTML('beforeend', warnHtml);
+                    }
+                });
+            })
+            .catch(function() {
+                progressEl.style.display = 'none';
+            });
+
+        // Locate me button
+        document.getElementById('mapLocateMe').addEventListener('click', function() {
+            if (!navigator.geolocation) { alert('La géolocalisation n\'est pas supportée par votre navigateur.'); return; }
+            var btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="evt-weather-spinner"></span> Localisation...';
+
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                userLatLng = [pos.coords.latitude, pos.coords.longitude];
+
+                if (userMarker) firmaLeafletMap.removeLayer(userMarker);
+                userMarker = L.marker(userLatLng, {
+                    icon: L.divIcon({
+                        className: 'evt-map-user-marker',
+                        html: '<div class="evt-map-user-pin"><div class="evt-map-user-pulse"></div><div class="evt-map-user-dot"></div></div>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                }).addTo(firmaLeafletMap).bindPopup('<strong>📍 Vous êtes ici</strong>').openPopup();
+
+                firmaLeafletMap.setView(userLatLng, 10);
+
+                // Calculate distances
+                mapMarkers.forEach(function(m) {
+                    var d = haversineKm(userLatLng[0], userLatLng[1], m.getLatLng().lat, m.getLatLng().lng);
+                    m._evtData._distance = d;
+                    m.setPopupContent(createEventPopup(m._evtData, d));
+                });
+
+                // Show sort button
+                document.getElementById('mapSortProximity').style.display = '';
+
+                // Update list with distances
+                var evts = mapMarkers.map(function(m) { return m._evtData; });
+                updateMapEventsList(evts);
+
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg> Me localiser';
+            }, function(err) {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg> Me localiser';
+                alert('Impossible d\'obtenir votre position : ' + (err.message || 'Erreur inconnue'));
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        });
+
+        // Sort by proximity
+        document.getElementById('mapSortProximity').addEventListener('click', function() {
+            if (!userLatLng) return;
+            var evts = mapMarkers.map(function(m) { return m._evtData; });
+            evts.sort(function(a, b) { return (a._distance || 9999) - (b._distance || 9999); });
+            updateMapEventsList(evts);
+
+            // Highlight closest
+            var closest = evts[0];
+            if (closest) {
+                mapMarkers.forEach(function(m) {
+                    if (m._evtData.id === closest.id) {
+                        m.openPopup();
+                        firmaLeafletMap.setView(m.getLatLng(), 12);
+                    }
+                });
+            }
+        });
+    }
+
+    async function geocodeEvents(events, progressText) {
+        var geocoded = [];
+        var total = events.length;
+
+        for (var i = 0; i < total; i++) {
+            var evt = events[i];
+            progressText.textContent = 'Géocodage... (' + (i + 1) + '/' + total + ')';
+
+            // Build address string: prefer adresse, fallback to lieu
+            var addr = evt.adresse || evt.lieu || '';
+            if (!addr) { continue; }
+
+            // Check cache first (no delay needed)
+            var cache = getGeocodeCache();
+            var key = addr.trim().toLowerCase();
+            var cached = cache[key];
+
+            var result;
+            if (cached) {
+                result = cached;
+            } else {
+                result = await geocodeAddress(addr);
+                // Respect Nominatim rate limit: only delay if we actually made a request
+                if (i < total - 1) {
+                    await delay(1100);
+                }
+            }
+
+            if (result) {
+                evt._geocoded = true;
+                evt._distance = null;
+                geocoded.push({ lat: result.lat, lng: result.lng, evt: evt });
+            }
+        }
+
+        return geocoded;
+    }
 
 });
 </script>

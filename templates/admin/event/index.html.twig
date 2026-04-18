@@ -138,6 +138,12 @@
                     </article>
                 {% endfor %}
             </div>
+            {% include 'shared/_pagination.html.twig' with {
+                currentPage: currentPage,
+                totalPages: totalPages,
+                route: 'admin_evenements',
+                routeParams: { q: search, sort: sort, tab: 'liste' }
+            } %}
         {% endif %}
     </div>
 

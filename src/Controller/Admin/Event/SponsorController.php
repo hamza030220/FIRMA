@@ -40,6 +40,14 @@ class SponsorController extends AbstractController
             });
         }
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $totalSponsors = count($sponsors);
+        $totalPages = max(1, (int) ceil($totalSponsors / $limit));
+        $page = min($page, $totalPages);
+        $sponsors = array_slice(array_values($sponsors), ($page - 1) * $limit, $limit);
+
         $editId      = $extra['editSponsor'] ?? ($request->query->getInt('edit', 0) ? $this->sponsorService->getById($request->query->getInt('edit')) : null);
         if ($editId instanceof Sponsor) {
             $editSponsor = $editId;
@@ -59,6 +67,8 @@ class SponsorController extends AbstractController
             'formErrors'      => [],
             'formData'        => [],
             'editFormErrors'  => [],
+            'currentPage'     => $page,
+            'totalPages'      => $totalPages,
         ], $extra);
     }
 

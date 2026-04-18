@@ -47,6 +47,14 @@ class EvenementController extends AbstractController
             default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
         });
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $total = count($evenements);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $evenements = array_slice($evenements, ($page - 1) * $limit, $limit);
+
         // Vérifier participations de l'user connecté
         $user = $this->getUser();
         $userParticipations = [];
@@ -73,6 +81,8 @@ class EvenementController extends AbstractController
             'sort'               => $sort,
             'userParticipations' => $userParticipations,
             'lanBaseUrl'         => $lanBaseUrl,
+            'currentPage'        => $page,
+            'totalPages'         => $totalPages,
         ]);
     }
 
@@ -298,6 +308,33 @@ class EvenementController extends AbstractController
                     'organisateur' => $evt->getOrganisateur(),
                     'imageUrl'     => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
                 ],
+            ];
+        }
+
+        return $this->json($events);
+    }
+
+    // ──────────────────────────────────────────
+    //  JSON — Map events (for Leaflet)
+    // ──────────────────────────────────────────
+    #[Route('/map-events', name: 'user_map_events', methods: ['GET'])]
+    public function mapEvents(): JsonResponse
+    {
+        $allEvents = $this->evenementService->getAll();
+
+        $events = [];
+        foreach ($allEvents as $evt) {
+            $events[] = [
+                'id'        => $evt->getIdEvenement(),
+                'titre'     => $evt->getTitre(),
+                'lieu'      => $evt->getLieu(),
+                'adresse'   => $evt->getAdresse(),
+                'dateDebut' => $evt->getDateDebut()?->format('d/m/Y'),
+                'type'      => $evt->getTypeEnum()?->label(),
+                'statut'    => $evt->getStatut(),
+                'imageUrl'  => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
+                'placesDisponibles' => $evt->getPlacesDisponibles(),
+                'capaciteMax'       => $evt->getCapaciteMax(),
             ];
         }
 

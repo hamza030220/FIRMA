@@ -173,6 +173,12 @@
         <span id="count-info"></span>
         <span style="font-size:12px">FIRMA Admin · Module Maladies</span>
     </div>
+    {% include 'shared/_pagination.html.twig' with {
+        currentPage: currentPage,
+        totalPages: totalPages,
+        route: 'admin_maladie_index',
+        routeParams: {}
+    } %}
 </div>
 
 <script>

@@ -56,8 +56,16 @@ class EvenementController extends AbstractController
             default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
         });
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $totalEvt = count($evenements);
+        $totalPages = max(1, (int) ceil($totalEvt / $limit));
+        $page = min($page, $totalPages);
+        $paginatedEvenements = array_slice($evenements, ($page - 1) * $limit, $limit);
+
         $participationCounts = [];
-        foreach ($evenements as $evt) {
+        foreach ($paginatedEvenements as $evt) {
             $participationCounts[$evt->getIdEvenement()] =
                 $this->participationRepo->countConfirmedByEvent($evt->getIdEvenement());
         }
@@ -94,7 +102,7 @@ class EvenementController extends AbstractController
         ];
 
         return [
-            'evenements'          => $evenements,
+            'evenements'          => $paginatedEvenements,
             'search'              => $search,
             'sort'                => $sort,
             'tab'                 => $tab,
@@ -108,6 +116,8 @@ class EvenementController extends AbstractController
             'formErrors'          => [],
             'formData'            => [],
             'editFormErrors'      => [],
+            'currentPage'         => $page,
+            'totalPages'          => $totalPages,
         ];
     }
 
