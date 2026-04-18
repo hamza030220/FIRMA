@@ -1,0 +1,521 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Gérer Sponsors{% endblock %}
+{% block admin_page_title %}Gérer Sponsors{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/admin/sponsors.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="sp-page">
+    {# ── Tabs ── #}
+    <nav class="sp-tabs">
+        <a href="#" class="sp-tab {% if tab == 'liste' %}sp-tab--active{% endif %}" data-tab="liste">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Liste
+        </a>
+        <a href="#" class="sp-tab {% if tab == 'creer' %}sp-tab--active{% endif %}" data-tab="creer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer
+        </a>
+        <a href="#" class="sp-tab {% if tab == 'modifier' %}sp-tab--active{% endif %}" data-tab="modifier">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+        </a>
+    </nav>
+
+    {# Flash messages handled by global _flash_toasts.html.twig + AJAX toasts #}
+
+    {# ════════════════════════════════════════════════
+       TAB 1 — LISTE
+       ════════════════════════════════════════════════ #}
+    <div class="sp-panel {% if tab == 'liste' %}sp-panel--active{% endif %}" id="panel-liste">
+        {# Toolbar #}
+        <div class="sp-toolbar">
+            <form class="sp-search" method="get" action="{{ path('admin_sponsors') }}">
+                <input type="text" name="q" value="{{ search }}" placeholder="Rechercher un sponsor…">
+                <button type="submit" class="sp-search__btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+            </form>
+            <span class="sp-count">{{ sponsors|length }} sponsor{{ sponsors|length > 1 ? 's' : '' }}</span>
+        </div>
+
+        {# Cards #}
+        {% if sponsors is empty %}
+            <div class="sp-empty">
+                <p>Aucun sponsor dans le catalogue.</p>
+            </div>
+        {% else %}
+            <div class="sp-grid">
+                {% for s in sponsors %}
+                    {% set secteurEnum = s.secteurEnum %}
+                    <div class="sp-card">
+                        <div class="sp-card__logo">
+                            {% if s.logoUrl %}
+                                <img src="{{ s.logoUrl }}" alt="{{ s.nom }}">
+                            {% else %}
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
+                            {% endif %}
+                        </div>
+                        <div class="sp-card__body">
+                            <h3 class="sp-card__name">{{ s.nom }}</h3>
+                            <div class="sp-card__meta">
+                                {% if secteurEnum %}
+                                    <span class="sp-badge sp-badge--secteur">{{ secteurEnum.label }}</span>
+                                {% endif %}
+                                {% if s.montantContribution > 0 %}
+                                    <span class="sp-badge sp-badge--montant">{{ s.montantContribution }} TND</span>
+                                {% endif %}
+                            </div>
+                            <div class="sp-card__info">
+                                {% if s.emailContact %}
+                                    <span class="sp-card__detail">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                        {{ s.emailContact }}
+                                    </span>
+                                {% endif %}
+                                {% if s.telephone %}
+                                    <span class="sp-card__detail">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>
+                                        {{ s.telephone }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="sp-card__actions">
+                            <button type="button" class="sp-btn sp-btn--primary js-detail-btn" data-id="{{ s.idSponsor }}">Détails</button>
+                            <a href="{{ path('admin_sponsors', {tab: 'modifier', edit: s.idSponsor}) }}" class="sp-btn sp-btn--neutral">Modifier</a>
+                            <form method="post" action="{{ path('admin_sponsor_delete', {id: s.idSponsor}) }}" data-firma-confirm="Êtes-vous sûr de vouloir supprimer ce sponsor ? Cette action est irréversible.">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.idSponsor) }}">
+                                <button type="submit" class="sp-btn sp-btn--danger-outline">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 2 — CRÉER
+       ════════════════════════════════════════════════ #}
+    <div class="sp-panel {% if tab == 'creer' %}sp-panel--active{% endif %}" id="panel-creer">
+        <form class="sp-form" method="post" action="{{ path('admin_sponsor_create') }}" novalidate>
+            <h3 class="sp-form__title">Nouveau sponsor</h3>
+
+            <div class="sp-form__grid2">
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Nom *</label>
+                    <input type="text" name="nom" id="spF_nom" class="sp-form__input {% if formErrors.nom is defined %}sp-form__input--error{% endif %}" placeholder="Nom du sponsor" value="{{ formData.nom ?? '' }}">
+                </div>
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Secteur d'activité</label>
+                    <select name="secteur_activite" id="spF_secteur" class="sp-form__input">
+                        {% for sec in secteurOptions %}
+                            <option value="{{ sec.value }}" {% if (formData.secteur_activite ?? '') == sec.value %}selected{% endif %}>{{ sec.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="sp-form__grid2">
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Email de contact *</label>
+                    <input type="text" name="email_contact" id="spF_email" class="sp-form__input {% if formErrors.email_contact is defined %}sp-form__input--error{% endif %}" placeholder="contact@example.com" value="{{ formData.email_contact ?? '' }}">
+                </div>
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Téléphone *</label>
+                    <input type="text" name="telephone" id="spF_tel" class="sp-form__input {% if formErrors.telephone is defined %}sp-form__input--error{% endif %}" placeholder="+216 XX XXX XXX" value="{{ formData.telephone ?? '' }}">
+                </div>
+            </div>
+
+            <div class="sp-form__grid2">
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Site web</label>
+                    <input type="text" name="site_web" id="spF_web" class="sp-form__input {% if formErrors.site_web is defined %}sp-form__input--error{% endif %}" placeholder="https://..." value="{{ formData.site_web ?? '' }}">
+                </div>
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Montant contribution (TND)</label>
+                    <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input {% if formErrors.montant_contribution is defined %}sp-form__input--error{% endif %}" value="{{ formData.montant_contribution ?? '0' }}">
+                </div>
+            </div>
+
+            <div class="sp-form__row">
+                <label class="sp-form__label">Description</label>
+                <textarea name="description" class="sp-form__input sp-form__textarea" rows="3" placeholder="Description du sponsor…">{{ formData.description ?? '' }}</textarea>
+            </div>
+
+            {# Logo #}
+            <div class="sp-form__row">
+                <label class="sp-form__label">Logo</label>
+                <div class="sp-form__img-group">
+                    <input type="text" name="logo_url" class="sp-form__input sp-form__img-input" placeholder="https://... ou parcourir" id="create_logo_url">
+                    <input type="file" accept="image/*" class="sp-form__file-hidden" id="create_logo_file" data-target="create_logo_url">
+                    <button type="button" class="sp-btn sp-btn--outline sp-btn--sm js-browse-btn" data-file="create_logo_file">Parcourir</button>
+                </div>
+                <div class="sp-form__img-preview" id="create_logo_preview" style="display:none">
+                    <img id="create_logo_preview_img" alt="Aperçu">
+                </div>
+            </div>
+
+            <div class="sp-form__actions">
+                <button type="submit" class="sp-btn sp-btn--primary">Créer le sponsor</button>
+                <button type="reset" class="sp-btn sp-btn--outline">Réinitialiser</button>
+            </div>
+        </form>
+    </div>
+
+    {# ════════════════════════════════════════════════
+       TAB 3 — MODIFIER
+       ════════════════════════════════════════════════ #}
+    <div class="sp-panel {% if tab == 'modifier' %}sp-panel--active{% endif %}" id="panel-modifier">
+        {% if editSponsor %}
+            <form class="sp-form" method="post" action="{{ path('admin_sponsor_update', {id: editSponsor.idSponsor}) }}" novalidate>
+                <h3 class="sp-form__title">Modifier — {{ editSponsor.nom }}</h3>
+
+                <div class="sp-form__grid2">
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Nom *</label>
+                        <input type="text" name="nom" id="spF_nom" class="sp-form__input {% if editFormErrors.nom is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.nom }}">
+                    </div>
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Secteur d'activité</label>
+                        <select name="secteur_activite" id="spF_secteur" class="sp-form__input">
+                            {% for sec in secteurOptions %}
+                                <option value="{{ sec.value }}" {% if editSponsor.secteurActivite == sec.value %}selected{% endif %}>{{ sec.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sp-form__grid2">
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Email de contact *</label>
+                        <input type="text" name="email_contact" id="spF_email" class="sp-form__input {% if editFormErrors.email_contact is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.emailContact }}">
+                    </div>
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Téléphone *</label>
+                        <input type="text" name="telephone" id="spF_tel" class="sp-form__input {% if editFormErrors.telephone is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.telephone }}">
+                    </div>
+                </div>
+
+                <div class="sp-form__grid2">
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Site web</label>
+                        <input type="text" name="site_web" id="spF_web" class="sp-form__input {% if editFormErrors.site_web is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.siteWeb }}">
+                    </div>
+                    <div class="sp-form__row">
+                        <label class="sp-form__label">Montant contribution (TND)</label>
+                        <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input {% if editFormErrors.montant_contribution is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.montantContribution }}">
+                    </div>
+                </div>
+
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Description</label>
+                    <textarea name="description" class="sp-form__input sp-form__textarea" rows="3">{{ editSponsor.description }}</textarea>
+                </div>
+
+                {# Logo #}
+                <div class="sp-form__row">
+                    <label class="sp-form__label">Logo</label>
+                    <div class="sp-form__img-group">
+                        <input type="text" name="logo_url" class="sp-form__input sp-form__img-input" value="{{ editSponsor.logoUrl }}" placeholder="https://... ou parcourir" id="edit_logo_url">
+                        <input type="file" accept="image/*" class="sp-form__file-hidden" id="edit_logo_file" data-target="edit_logo_url">
+                        <button type="button" class="sp-btn sp-btn--outline sp-btn--sm js-browse-btn" data-file="edit_logo_file">Parcourir</button>
+                    </div>
+                    <div class="sp-form__img-preview" id="edit_logo_preview" style="{% if not editSponsor.logoUrl %}display:none{% endif %}">
+                        {% if editSponsor.logoUrl %}
+                            <img id="edit_logo_preview_img" src="{{ editSponsor.logoUrl }}" alt="Aperçu">
+                        {% else %}
+                            <img id="edit_logo_preview_img" alt="Aperçu">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="sp-form__actions">
+                    <button type="submit" class="sp-btn sp-btn--primary">Enregistrer</button>
+                    <a href="{{ path('admin_sponsors') }}" class="sp-btn sp-btn--outline">Annuler</a>
+                </div>
+            </form>
+        {% else %}
+            {# Picker — select sponsor to edit #}
+            <div class="sp-form">
+                <h3 class="sp-form__title">Sélectionnez un sponsor à modifier</h3>
+                <div class="sp-form__picker-search-wrap">
+                    <svg class="sp-form__picker-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="sp-form__input sp-form__picker-search" id="spPickerSearch" placeholder="Rechercher…">
+                </div>
+                <div class="sp-form__picker" id="spPickerList">
+                    {% for s in sponsors %}
+                        <a href="{{ path('admin_sponsors', {tab: 'modifier', edit: s.idSponsor}) }}"
+                           class="sp-form__picker-item"
+                           data-search="{{ s.nom|lower }} {{ s.secteurActivite|lower }} {{ s.emailContact|lower }}">
+                            <div class="sp-form__picker-logo">
+                                {% if s.logoUrl %}
+                                    <img src="{{ s.logoUrl }}" alt="">
+                                {% else %}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
+                                {% endif %}
+                            </div>
+                            <div class="sp-form__picker-info">
+                                <strong>{{ s.nom }}</strong>
+                                <small>{{ s.secteurEnum ? s.secteurEnum.label : s.secteurActivite }}{% if s.emailContact %} · {{ s.emailContact }}{% endif %}</small>
+                            </div>
+                        </a>
+                    {% else %}
+                        <p class="sp-text-muted" style="padding:1rem">Aucun sponsor dans le catalogue.</p>
+                    {% endfor %}
+                </div>
+                <p id="spPickerEmpty" class="sp-text-muted" style="padding:1rem;display:none">Aucun sponsor trouvé.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ════════════════════════════════════════════════
+       MODAL — DETAIL POPUP
+       ════════════════════════════════════════════════ #}
+    <div class="sp-modal-overlay" id="detailModal" style="display:none">
+        <div class="sp-modal">
+            {# Header #}
+            <div class="sp-modal__header">
+                <div class="sp-modal__header-logo" id="modal-logo"></div>
+                <div class="sp-modal__header-info">
+                    <h2 id="modal-nom"></h2>
+                    <div class="sp-modal__header-badges">
+                        <span id="modal-secteur" class="sp-badge sp-badge--secteur"></span>
+                        <span id="modal-montant" class="sp-badge sp-badge--montant" style="display:none"></span>
+                    </div>
+                </div>
+                <button type="button" class="sp-modal__close" id="modal-close">&times;</button>
+            </div>
+
+            {# Body #}
+            <div class="sp-modal__body">
+                <div class="sp-modal__section" id="modal-desc-section" style="display:none">
+                    <h4>Description</h4>
+                    <div class="sp-modal__desc" id="modal-desc"></div>
+                </div>
+
+                <div class="sp-modal__fields">
+                    <div class="sp-modal__field"><span class="sp-modal__field-label">Email</span><span id="modal-email"></span></div>
+                    <div class="sp-modal__field"><span class="sp-modal__field-label">Téléphone</span><span id="modal-tel"></span></div>
+                    <div class="sp-modal__field"><span class="sp-modal__field-label">Site web</span><span id="modal-web"></span></div>
+                    <div class="sp-modal__field"><span class="sp-modal__field-label">Contribution</span><span id="modal-contrib"></span></div>
+                    <div class="sp-modal__field"><span class="sp-modal__field-label">Date d'ajout</span><span id="modal-date"></span></div>
+                </div>
+            </div>
+
+            {# Footer #}
+            <div class="sp-modal__footer">
+                <a href="#" id="modal-web-link" class="sp-btn sp-btn--outline" target="_blank" rel="noopener" style="display:none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Visiter le site
+                </a>
+                <button type="button" class="sp-btn sp-btn--primary" id="modal-close2">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ═══════════════════════════════
+    // Picker search
+    // ═══════════════════════════════
+    var pickerInput = document.getElementById('spPickerSearch');
+    if (pickerInput) {
+        pickerInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase().trim();
+            var items = document.querySelectorAll('#spPickerList .sp-form__picker-item');
+            var visible = 0;
+            items.forEach(function(item) {
+                var text = item.getAttribute('data-search') || '';
+                var show = !q || text.includes(q);
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            var empty = document.getElementById('spPickerEmpty');
+            if (empty) empty.style.display = visible === 0 ? '' : 'none';
+        });
+    }
+
+    // ═══════════════════════════════
+    // Tab switching
+    // ═══════════════════════════════
+    var tabs = document.querySelectorAll('.sp-tab[data-tab]');
+    var panels = document.querySelectorAll('.sp-panel');
+
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            var target = this.dataset.tab;
+            tabs.forEach(function(t) { t.classList.remove('sp-tab--active'); });
+            panels.forEach(function(p) { p.classList.remove('sp-panel--active'); });
+            this.classList.add('sp-tab--active');
+            var panel = document.getElementById('panel-' + target);
+            if (panel) panel.classList.add('sp-panel--active');
+        });
+    });
+
+    // ═══════════════════════════════
+    // Detail Modal
+    // ═══════════════════════════════
+    var modal = document.getElementById('detailModal');
+    var closeBtn = document.getElementById('modal-close');
+    var closeBtn2 = document.getElementById('modal-close2');
+
+    function openModal(id) {
+        fetch('{{ path('admin_sponsors') }}/' + id + '/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                // Logo
+                var logoEl = document.getElementById('modal-logo');
+                if (data.logoUrl) {
+                    logoEl.innerHTML = '<img src="' + data.logoUrl + '" alt="">';
+                } else {
+                    logoEl.innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>';
+                }
+
+                document.getElementById('modal-nom').textContent = data.nom;
+                document.getElementById('modal-secteur').textContent = data.secteur;
+
+                var montantBadge = document.getElementById('modal-montant');
+                if (data.montant && parseFloat(data.montant) > 0) {
+                    montantBadge.textContent = data.montant + ' TND';
+                    montantBadge.style.display = '';
+                } else {
+                    montantBadge.style.display = 'none';
+                }
+
+                // Description
+                var descSection = document.getElementById('modal-desc-section');
+                if (data.description) {
+                    descSection.style.display = '';
+                    document.getElementById('modal-desc').textContent = data.description;
+                } else {
+                    descSection.style.display = 'none';
+                }
+
+                // Fields
+                document.getElementById('modal-email').textContent = data.emailContact || '—';
+                document.getElementById('modal-tel').textContent = data.telephone || '—';
+                document.getElementById('modal-web').textContent = data.siteWeb || '—';
+                document.getElementById('modal-contrib').textContent = (data.montant && parseFloat(data.montant) > 0) ? data.montant + ' TND' : '—';
+                document.getElementById('modal-date').textContent = data.dateCreation || '—';
+
+                // Web link
+                var webLink = document.getElementById('modal-web-link');
+                if (data.siteWeb) {
+                    webLink.href = data.siteWeb;
+                    webLink.style.display = '';
+                } else {
+                    webLink.style.display = 'none';
+                }
+
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            })
+            .catch(function(err) {
+                console.error('Error loading sponsor detail:', err);
+                firmaToast('Impossible de charger les détails.', 'error');
+            });
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.js-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openModal(this.dataset.id);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    closeBtn2.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+    });
+
+    // ═══════════════════════════════
+    // Browse & Upload logo
+    // ═══════════════════════════════
+    document.querySelectorAll('.js-browse-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var fileInput = document.getElementById(this.dataset.file);
+            if (fileInput) fileInput.click();
+        });
+    });
+
+    document.querySelectorAll('.sp-form__file-hidden').forEach(function(fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (!this.files || !this.files[0]) return;
+            var file = this.files[0];
+            var targetId = this.dataset.target;
+            var targetInput = document.getElementById(targetId);
+            var previewWrap = document.getElementById(targetId.replace('_url', '_preview'));
+            var previewImg  = document.getElementById(targetId.replace('_url', '_preview_img'));
+
+            if (!file.type.startsWith('image/')) {
+                firmaToast('Veuillez sélectionner un fichier image.', 'error');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                firmaToast('Fichier trop volumineux (max 5 Mo).', 'error');
+                return;
+            }
+
+            if (previewWrap && previewImg) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewWrap.style.display = '';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            var formData = new FormData();
+            formData.append('image', file);
+            var btns = fileInput.parentElement.querySelectorAll('.js-browse-btn');
+            btns.forEach(function(b) { b.textContent = 'Envoi…'; b.disabled = true; });
+
+            fetch('{{ path('admin_sponsor_upload_logo') }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    firmaToast('Erreur : ' + data.error, 'error');
+                } else {
+                    targetInput.value = data.url;
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                firmaToast('Erreur réseau.', 'error');
+            })
+            .finally(function() {
+                btns.forEach(function(b) { b.textContent = 'Parcourir'; b.disabled = false; });
+            });
+        });
+    });
+
+    // ═══════════════════════════════
+    // Form validation handled server-side
+    // ═══════════════════════════════
+});
+</script>
+{% endblock %}

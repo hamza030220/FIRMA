@@ -1,0 +1,818 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Événements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/user/evenements.css') }}">
+    <style>
+    /* ── Ticket styles ── */
+    .tkt-page{padding:16px 0}
+    .tkt-card{background:#fff;border:2px dashed #1a3a24;border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+    .tkt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#1a3a24,#20452c,#2d6b3f)}
+    .tkt-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:16px}
+    .tkt-event-info{flex:1}
+    .tkt-event-name{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24;margin:0 0 4px}
+    .tkt-event-org{font-size:13px;color:#5a6e5f;margin:0}
+    .tkt-badge{background:#1a3a24;color:#fffade;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+    .tkt-body{display:flex;gap:24px;align-items:flex-start}
+    .tkt-details{flex:1}
+    .tkt-detail-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px;color:#2d2d2d}
+    .tkt-detail-row svg{flex-shrink:0;color:#5a6e5f}
+    .tkt-detail-label{color:#5a6e5f;min-width:50px}
+    .tkt-qr-box{text-align:center;flex-shrink:0}
+    .tkt-qr-box canvas{border:3px solid #1a3a24;border-radius:8px;padding:4px;background:#fff}
+    .tkt-code-box{margin-top:16px;background:#f4f8f5;border-radius:12px;padding:14px;text-align:center}
+    .tkt-code-label{font-size:12px;color:#5a6e5f;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px}
+    .tkt-code{font-family:'Courier New',monospace;font-size:24px;font-weight:700;color:#1a3a24;letter-spacing:3px;margin:0}
+    .tkt-person{font-size:14px;color:#2d2d2d;margin:0 0 2px}
+    .tkt-person-label{font-size:11px;color:#8a9a8e;text-transform:uppercase;letter-spacing:.5px;margin:0 0 4px}
+    .tkt-divider{border:none;border-top:1px dashed #c8d6cb;margin:16px 0}
+    .tkt-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8a9a8e}
+    .tkt-section-title{font-size:16px;font-weight:700;color:#1a3a24;margin:24px 0 12px;padding-bottom:8px;border-bottom:2px solid #e8ede9}
+    @media print{.tkt-card{break-inside:avoid;page-break-inside:avoid}}
+    </style>
+{% endblock %}
+
+{% block user_content %}
+<div class="evt-page">
+    {# ── Header + Search ── #}
+    <div class="evt-header">
+        <h2>Événements</h2>
+        <p>Découvrez les salons, foires et rencontres à venir.</p>
+    </div>
+
+    <div class="evt-toolbar">
+        <form class="evt-search" method="get" action="{{ path('user_evenements') }}">
+            <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par titre, lieu, organisateur…">
+            <button type="submit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+        </form>
+
+        <div class="evt-toolbar-right">
+            <button type="button" class="evt-btn evt-btn--outline" id="btnMesParticipations">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Mes participations
+            </button>
+            <div class="evt-sort">
+                <label>Trier :</label>
+                <select onchange="window.location.href='{{ path('user_evenements') }}?q={{ search }}&sort='+this.value">
+                    <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Date ↑</option>
+                    <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date ↓</option>
+                    <option value="titre_asc" {% if sort == 'titre_asc' %}selected{% endif %}>Titre A-Z</option>
+                    <option value="places" {% if sort == 'places' %}selected{% endif %}>Places disponibles</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {# ── Flash messages ── #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="evt-flash evt-flash--{{ type }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {# ── Event Cards Grid ── #}
+    {% if evenements is empty %}
+        <div class="evt-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <p>Aucun événement trouvé.</p>
+        </div>
+    {% else %}
+        <div class="evt-grid">
+            {% for evt in evenements %}
+                {% include 'user/event/_card.html.twig' with {
+                    evt: evt,
+                    isParticipating: userParticipations[evt.idEvenement] ?? false
+                } %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+{# ═══════════════════════════════════════════════
+   MODAL — EVENT DETAIL
+   ═══════════════════════════════════════════════ #}
+<div class="evt-modal-overlay" id="evtDetailModal" style="display:none">
+    <div class="evt-modal evt-modal--lg">
+        <button type="button" class="evt-modal__close" id="evtDetailClose">&times;</button>
+
+        {# Hero #}
+        <div class="evt-modal__hero">
+            <div class="evt-modal__hero-img" id="mdImg"></div>
+            <div class="evt-modal__hero-info">
+                <div class="evt-modal__badges">
+                    <span class="evt-badge" id="mdStatut"></span>
+                    <span class="evt-type" id="mdType"></span>
+                </div>
+                <h2 id="mdTitre"></h2>
+                <p class="evt-modal__org" id="mdOrg"></p>
+            </div>
+        </div>
+
+        {# Body #}
+        <div class="evt-modal__body">
+            <div class="evt-modal__grid">
+                {# Left — Description + Sponsors #}
+                <div class="evt-modal__main">
+                    <div class="evt-modal__section" id="mdDescWrap">
+                        <h3>Description</h3>
+                        <p id="mdDesc"></p>
+                    </div>
+                    <div class="evt-modal__section" id="mdSponsorsWrap" style="display:none">
+                        <h3>Sponsors</h3>
+                        <div class="evt-sponsors" id="mdSponsors"></div>
+                    </div>
+                </div>
+
+                {# Right — Info cards #}
+                <div class="evt-modal__sidebar">
+                    <div class="evt-info-card">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Date & Horaire
+                        </h4>
+                        <p id="mdDate"></p>
+                        <p id="mdHoraire"></p>
+                    </div>
+                    <div class="evt-info-card" id="mdLieuCard" style="display:none">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            Lieu
+                        </h4>
+                        <p id="mdLieu"></p>
+                        <p id="mdAdresse" class="evt-text-muted"></p>
+                        <a href="#" id="mdMapsLink" class="evt-link" target="_blank" rel="noopener" style="display:none">Voir sur Google Maps →</a>
+                    </div>
+                    <div class="evt-info-card">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            Places
+                        </h4>
+                        <div class="evt-gauge-bar" style="margin-bottom:.5rem">
+                            <div class="evt-gauge-fill" id="mdGauge" style="width:0%"></div>
+                        </div>
+                        <p id="mdPlaces"></p>
+                        <p class="evt-text-muted" id="mdConfirmed"></p>
+                    </div>
+                    <div class="evt-info-card" id="mdContactCard" style="display:none">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            Contact
+                        </h4>
+                        <p id="mdEmail"></p>
+                        <p id="mdTel"></p>
+                    </div>
+
+                    {# Participation status or participate button #}
+                    <div id="mdParticipWrap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   MODAL — PARTICIPER
+   ═══════════════════════════════════════════════ #}
+<div class="evt-modal-overlay" id="evtParticipModal" style="display:none">
+    <div class="evt-modal evt-modal--sm">
+        <button type="button" class="evt-modal__close" id="evtParticipClose">&times;</button>
+        <h2 class="evt-modal__title">Participer à l'événement</h2>
+        <p class="evt-modal__subtitle" id="participEvtTitre"></p>
+
+        <form id="participForm" class="evt-form" novalidate>
+            <input type="hidden" id="participEvtId">
+            <input type="hidden" id="participMode" value="create">
+            <input type="hidden" id="participId">
+            <div class="evt-form__row" style="display:flex;gap:12px">
+                <div class="evt-form__group" style="flex:1">
+                    <label>Prénom</label>
+                    <input type="text" id="participPrenom" class="evt-form__input" value="{{ app.user.prenom }}" readonly style="background:#f4f8f5;color:#5a6e5f">
+                </div>
+                <div class="evt-form__group" style="flex:1">
+                    <label>Nom</label>
+                    <input type="text" id="participNom" class="evt-form__input" value="{{ app.user.nom }}" readonly style="background:#f4f8f5;color:#5a6e5f">
+                </div>
+            </div>
+            <div class="evt-form__group">
+                <label>Nombre d'accompagnants</label>
+                <input type="text" id="participNbAccomp" value="0" class="evt-form__input">
+            </div>
+
+            {# Dynamic accompagnant name fields #}
+            <div id="accompFields" class="evt-accomp-fields"></div>
+
+            <div class="evt-form__group">
+                <label>Commentaire (optionnel)</label>
+                <textarea id="participComment" rows="3" class="evt-form__input" placeholder="Un message pour l'organisateur…"></textarea>
+            </div>
+            <div id="participMsg" class="evt-form__msg" style="display:none"></div>
+            <div class="evt-form__actions">
+                <button type="button" class="evt-btn evt-btn--outline" id="participCancel">Annuler</button>
+                <button type="submit" class="evt-btn evt-btn--success" id="participSubmit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Confirmer l'inscription
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   MODAL — MES PARTICIPATIONS
+   ═══════════════════════════════════════════════ #}
+<div class="evt-modal-overlay" id="evtMesParticipModal" style="display:none">
+    <div class="evt-modal evt-modal--lg">
+        <button type="button" class="evt-modal__close" id="mesParticipClose">&times;</button>
+        <h2 class="evt-modal__title">Mes participations</h2>
+        <div id="mesParticipContent" class="evt-particip-list">
+            <div class="evt-loading">Chargement…</div>
+        </div>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════
+   MODAL — TICKETS
+   ═══════════════════════════════════════════════ #}
+<div class="evt-modal-overlay" id="evtTicketModal" style="display:none">
+    <div class="evt-modal evt-modal--lg">
+        <button type="button" class="evt-modal__close" id="ticketModalClose">&times;</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <h2 class="evt-modal__title" style="margin:0">Mes tickets</h2>
+            <button type="button" class="evt-btn evt-btn--primary evt-btn--sm" id="ticketExportPdf" style="gap:6px;display:inline-flex;align-items:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exporter en PDF
+            </button>
+        </div>
+        <div id="ticketContent"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ═══════════════════════════════
+    // Helper: open / close modal
+    // ═══════════════════════════════
+    function openModal(el)  { el.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    function closeModal(el) { el.style.display = 'none'; document.body.style.overflow = ''; }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.evt-modal-overlay').forEach(function(ov) {
+        ov.addEventListener('click', function(e) {
+            if (e.target === ov) closeModal(ov);
+        });
+    });
+
+    // ═══════════════════════════════
+    // EVENT DETAIL MODAL
+    // ═══════════════════════════════
+    var detailModal = document.getElementById('evtDetailModal');
+    document.getElementById('evtDetailClose').addEventListener('click', function(){ closeModal(detailModal); });
+
+    var currentEvtData = null;
+
+    document.querySelectorAll('.evt-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            openModal(detailModal);
+            // reset
+            document.getElementById('mdImg').style.backgroundImage = '';
+            document.getElementById('mdTitre').textContent = 'Chargement…';
+            document.getElementById('mdDesc').textContent = '';
+            document.getElementById('mdParticipWrap').innerHTML = '';
+
+            fetch('{{ path("user_evenements") }}/' + id + '/json')
+                .then(function(r){ return r.json(); })
+                .then(function(d){
+                    currentEvtData = d;
+
+                    // Hero
+                    if (d.imageUrl) {
+                        document.getElementById('mdImg').style.backgroundImage = 'url(' + d.imageUrl + ')';
+                    } else {
+                        document.getElementById('mdImg').style.backgroundImage = '';
+                    }
+                    document.getElementById('mdTitre').textContent = d.titre;
+                    document.getElementById('mdOrg').textContent = 'Par ' + (d.organisateur || '—');
+
+                    var badgeEl = document.getElementById('mdStatut');
+                    badgeEl.textContent = d.statut || '';
+                    badgeEl.className = 'evt-badge ' + (d.statutBadge || '');
+
+                    var typeEl = document.getElementById('mdType');
+                    typeEl.textContent = d.type || '';
+                    typeEl.style.display = d.type ? '' : 'none';
+
+                    // Description
+                    var descWrap = document.getElementById('mdDescWrap');
+                    if (d.description) {
+                        document.getElementById('mdDesc').innerHTML = d.description.replace(/\n/g, '<br>');
+                        descWrap.style.display = '';
+                    } else {
+                        descWrap.style.display = 'none';
+                    }
+
+                    // Sponsors
+                    var spWrap = document.getElementById('mdSponsorsWrap');
+                    var spContainer = document.getElementById('mdSponsors');
+                    spContainer.innerHTML = '';
+                    if (d.sponsors && d.sponsors.length) {
+                        d.sponsors.forEach(function(s) {
+                            var div = document.createElement('div');
+                            div.className = 'evt-sponsor';
+                            var imgHtml = s.logoUrl
+                                ? '<img src="' + s.logoUrl + '" alt="' + s.nom + '">'
+                                : '<div class="evt-sponsor__icon">' + s.nom.charAt(0) + '</div>';
+                            div.innerHTML = imgHtml + '<div><strong>' + s.nom + '</strong>'
+                                + (s.secteur ? '<small>' + s.secteur + '</small>' : '') + '</div>';
+                            spContainer.appendChild(div);
+                        });
+                        spWrap.style.display = '';
+                    } else {
+                        spWrap.style.display = 'none';
+                    }
+
+                    // Date
+                    var dateText = d.dateDebut || '';
+                    if (d.dateFin && d.dateFin !== d.dateDebut) dateText += ' – ' + d.dateFin;
+                    document.getElementById('mdDate').textContent = dateText;
+                    document.getElementById('mdHoraire').textContent = (d.horaireDebut || '') + ' – ' + (d.horaireFin || '');
+
+                    // Lieu
+                    var lieuCard = document.getElementById('mdLieuCard');
+                    if (d.lieu || d.adresse) {
+                        document.getElementById('mdLieu').textContent = d.lieu || '';
+                        document.getElementById('mdAdresse').textContent = d.adresse || '';
+                        var mapsLink = document.getElementById('mdMapsLink');
+                        if (d.googleMapsUrl) { mapsLink.href = d.googleMapsUrl; mapsLink.style.display = ''; }
+                        else { mapsLink.style.display = 'none'; }
+                        lieuCard.style.display = '';
+                    } else {
+                        lieuCard.style.display = 'none';
+                    }
+
+                    // Places
+                    var gauge = document.getElementById('mdGauge');
+                    gauge.style.width = d.pctRemplissage + '%';
+                    gauge.className = 'evt-gauge-fill' +
+                        (d.pctRemplissage >= 90 ? ' gauge-danger' : d.pctRemplissage >= 70 ? ' gauge-warning' : '');
+                    document.getElementById('mdPlaces').textContent = d.placesDisponibles + ' places disponibles sur ' + d.capaciteMax;
+                    document.getElementById('mdConfirmed').textContent = d.confirmedCount + ' participant' + (d.confirmedCount > 1 ? 's' : '') + ' confirmé' + (d.confirmedCount > 1 ? 's' : '');
+
+                    // Contact
+                    var contactCard = document.getElementById('mdContactCard');
+                    if (d.contactEmail || d.contactTel) {
+                        document.getElementById('mdEmail').innerHTML = d.contactEmail ? '<a href="mailto:' + d.contactEmail + '">' + d.contactEmail + '</a>' : '';
+                        document.getElementById('mdTel').textContent = d.contactTel || '';
+                        contactCard.style.display = '';
+                    } else {
+                        contactCard.style.display = 'none';
+                    }
+
+                    // Participation status or button
+                    var pw = document.getElementById('mdParticipWrap');
+                    pw.innerHTML = '';
+                    if (d.participation) {
+                        var accHtml = '';
+                        if (d.participation.accompagnantsList && d.participation.accompagnantsList.length) {
+                            accHtml = '<div style="margin-top:.4rem"><p class="evt-text-muted" style="margin-bottom:.25rem"><strong>Accompagnants :</strong></p>';
+                            d.participation.accompagnantsList.forEach(function(a, i) {
+                                accHtml += '<p class="evt-text-muted" style="padding-left:.5rem">' + (i+1) + '. ' + a.prenom + ' ' + a.nom + '</p>';
+                            });
+                            accHtml += '</div>';
+                        } else {
+                            accHtml = '<p class="evt-text-muted">Accompagnants : ' + d.participation.accompagnants + '</p>';
+                        }
+
+                        var statutLabel = d.participation.statut === 'confirme'
+                            ? '<span class="evt-badge badge-success" style="font-size:13px">✅ Confirmé</span>'
+                            : '<span class="evt-badge badge-warning" style="font-size:13px">⏳ En attente de confirmation</span>';
+
+                        var codeHtml = d.participation.code
+                            ? '<p class="evt-text-muted">Code : <strong>' + d.participation.code + '</strong></p>'
+                            : '<p class="evt-text-muted" style="font-style:italic;color:#b58a00">📧 Vérifiez vos emails pour confirmer et recevoir votre code</p>';
+
+                        pw.innerHTML = '<div class="evt-info-card evt-info-card--enrolled">'
+                            + '<p><strong>Vous êtes inscrit(e)</strong></p>'
+                            + statutLabel
+                            + codeHtml
+                            + accHtml
+                            + '<button type="button" class="evt-btn evt-btn--danger evt-btn--sm" style="margin-top:.5rem" onclick="annulerParticipation(' + d.participation.id + ')">Annuler ma participation</button>'
+                            + '</div>';
+                    } else if (d.placesDisponibles > 0 && d.statutRaw === 'actif') {
+                        pw.innerHTML = '<button type="button" class="evt-btn evt-btn--success evt-btn--full" onclick="ouvrirParticipForm(' + d.id + ', \'' + d.titre.replace(/'/g, "\\'") + '\')">Participer</button>';
+                    } else if (d.placesDisponibles <= 0) {
+                        pw.innerHTML = '<div class="evt-info-card" style="text-align:center;color:#c0392b"><strong>Complet</strong></div>';
+                    }
+                });
+        });
+    });
+
+    // ═══════════════════════════════
+    // PARTICIPER MODAL
+    // ═══════════════════════════════
+    var participModal = document.getElementById('evtParticipModal');
+    document.getElementById('evtParticipClose').addEventListener('click', function(){ closeModal(participModal); });
+    document.getElementById('participCancel').addEventListener('click', function(){ closeModal(participModal); });
+
+    // Build accompagnant fields dynamically — preserves existing values
+    function renderAccompFields(n) {
+        var container = document.getElementById('accompFields');
+        var existing = container.querySelectorAll('.evt-accomp-row');
+
+        // Collect current values
+        var saved = [];
+        existing.forEach(function(row) {
+            var inputs = row.querySelectorAll('input');
+            saved.push({ prenom: inputs[0].value, nom: inputs[1].value });
+        });
+
+        // Remove extra rows if n < current count
+        while (existing.length > n) {
+            container.removeChild(existing[existing.length - 1]);
+            existing = container.querySelectorAll('.evt-accomp-row');
+        }
+
+        // Add missing rows if n > current count
+        for (var i = existing.length; i < n; i++) {
+            var row = document.createElement('div');
+            row.className = 'evt-accomp-row';
+            row.innerHTML =
+                '<span class="evt-accomp-label">Accompagnant ' + (i + 1) + '</span>' +
+                '<div class="evt-accomp-inputs">' +
+                    '<input type="text" name="accomp_prenom[]" placeholder="Prénom" class="evt-form__input">' +
+                    '<input type="text" name="accomp_nom[]" placeholder="Nom" class="evt-form__input">' +
+                '</div>';
+            // Restore saved value if it existed at this index
+            if (saved[i]) {
+                var inputs = row.querySelectorAll('input');
+                inputs[0].value = saved[i].prenom;
+                inputs[1].value = saved[i].nom;
+            }
+            container.appendChild(row);
+        }
+    }
+
+    document.getElementById('participNbAccomp').addEventListener('input', function() {
+        renderAccompFields(parseInt(this.value) || 0);
+    });
+
+    window.ouvrirParticipForm = function(evtId, titre) {
+        closeModal(detailModal);
+        document.getElementById('participEvtId').value = evtId;
+        document.getElementById('participEvtTitre').textContent = titre;
+        document.getElementById('participMode').value = 'create';
+        document.getElementById('participId').value = '';
+        document.getElementById('participNbAccomp').value = 0;
+        document.getElementById('participComment').value = '';
+        document.getElementById('participMsg').style.display = 'none';
+        document.getElementById('accompFields').innerHTML = '';
+        document.getElementById('participSubmit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Confirmer l\'inscription';
+        openModal(participModal);
+    };
+
+    window.ouvrirModifierForm = function(participId, titre, nbAccomp, accompListJson, commentaire) {
+        closeModal(mesParticipModal);
+        document.getElementById('participEvtId').value = '';
+        document.getElementById('participEvtTitre').textContent = titre;
+        document.getElementById('participMode').value = 'edit';
+        document.getElementById('participId').value = participId;
+        document.getElementById('participNbAccomp').value = nbAccomp;
+        document.getElementById('participComment').value = commentaire || '';
+        document.getElementById('participMsg').style.display = 'none';
+        document.getElementById('participSubmit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Enregistrer les modifications';
+        renderAccompFields(nbAccomp);
+        try {
+            var accompList = JSON.parse(accompListJson);
+            if (accompList && accompList.length) {
+                var rows = document.querySelectorAll('#accompFields .evt-accomp-row');
+                accompList.forEach(function(a, i) {
+                    if (rows[i]) {
+                        var inputs = rows[i].querySelectorAll('input');
+                        inputs[0].value = a.prenom || '';
+                        inputs[1].value = a.nom || '';
+                    }
+                });
+            }
+        } catch(e) {}
+        openModal(participModal);
+    };
+
+    // Also handle card "Participer" buttons
+    document.querySelectorAll('.evt-participer-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            var title = this.closest('.evt-card').querySelector('.evt-card__title').textContent;
+            window.ouvrirParticipForm(id, title);
+        });
+    });
+
+    document.getElementById('participForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var evtId = document.getElementById('participEvtId').value;
+        var btn = document.getElementById('participSubmit');
+        var msgDiv = document.getElementById('participMsg');
+        btn.disabled = true;
+        btn.textContent = '…';
+
+        var fd = new FormData();
+        fd.append('nb_accompagnants', document.getElementById('participNbAccomp').value);
+        fd.append('commentaire', document.getElementById('participComment').value);
+
+        // Accompagnant names
+        document.querySelectorAll('#accompFields .evt-accomp-row').forEach(function(row) {
+            var inputs = row.querySelectorAll('input');
+            fd.append('accomp_prenom[]', inputs[0].value);
+            fd.append('accomp_nom[]', inputs[1].value);
+        });
+
+        var mode = document.getElementById('participMode').value;
+        var url;
+        if (mode === 'edit') {
+            var participId = document.getElementById('participId').value;
+            url = '{{ path("user_evenements") }}/participation/' + participId + '/modifier';
+        } else {
+            url = '{{ path("user_evenements") }}/' + evtId + '/participer';
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: fd
+        })
+        .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+        .then(function(res) {
+            msgDiv.style.display = 'block';
+            if (res.ok) {
+                msgDiv.className = 'evt-form__msg evt-form__msg--success';
+                if (mode === 'edit') {
+                    msgDiv.innerHTML = '<div class="evt-email-alert">' +
+                        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#20452c" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
+                        '<div><strong>' + res.data.message + '</strong></div>' +
+                        '</div>';
+                } else {
+                    msgDiv.innerHTML = '<div class="evt-email-alert">' +
+                        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#20452c" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+                        '<div><strong>Email envoyé !</strong><br><span style="font-size:13px;color:#5a6e5f">' + res.data.message + '</span></div>' +
+                        '</div>';
+                }
+                setTimeout(function(){ location.reload(); }, 3000);
+            } else {
+                msgDiv.className = 'evt-form__msg evt-form__msg--error';
+                msgDiv.textContent = res.data.error || 'Erreur inconnue';
+                btn.disabled = false;
+                btn.textContent = 'Confirmer l\'inscription';
+            }
+        })
+        .catch(function() {
+            msgDiv.style.display = 'block';
+            msgDiv.className = 'evt-form__msg evt-form__msg--error';
+            msgDiv.textContent = 'Erreur réseau';
+            btn.disabled = false;
+            btn.textContent = 'Confirmer l\'inscription';
+        });
+    });
+
+    // ═══════════════════════════════
+    // ANNULER PARTICIPATION
+    // ═══════════════════════════════
+    window.annulerParticipation = function(participId) {
+        firmaConfirm(
+            'Annuler la participation',
+            'Êtes-vous sûr de vouloir annuler cette participation ?',
+            'Oui, annuler',
+            'danger'
+        ).then(function(ok) {
+            if (!ok) return;
+
+            fetch('{{ path("user_evenements") }}/participation/' + participId + '/annuler', {
+                method: 'POST'
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    location.reload();
+                } else {
+                    firmaToast(typeof d.error === 'string' ? d.error : 'Erreur lors de l\'annulation', 'error');
+                }
+            })
+            .catch(function() {
+                firmaToast('Erreur lors de l\'annulation', 'error');
+            });
+        });
+    };
+
+    // ═══════════════════════════════
+    // MES PARTICIPATIONS MODAL
+    // ═══════════════════════════════
+    var mesParticipModal = document.getElementById('evtMesParticipModal');
+    document.getElementById('mesParticipClose').addEventListener('click', function(){ closeModal(mesParticipModal); });
+
+    document.getElementById('btnMesParticipations').addEventListener('click', function() {
+        openModal(mesParticipModal);
+        var content = document.getElementById('mesParticipContent');
+        content.innerHTML = '<div class="evt-loading">Chargement…</div>';
+
+        fetch('{{ path("user_mes_participations") }}')
+            .then(function(r){ return r.json(); })
+            .then(function(d) {
+                content.innerHTML = '';
+                if (!d.participations || !d.participations.length) {
+                    content.innerHTML = '<div class="evt-empty"><p>Aucune participation pour le moment.</p></div>';
+                    return;
+                }
+                d.participations.forEach(function(p) {
+                    var statutClass = p.statut === 'confirme' ? 'badge-success' : (p.statut === 'en_attente' ? 'badge-warning' : 'badge-danger');
+
+                    // Build accompagnant names list
+                    var accNames = '';
+                    if (p.accompagnantsList && p.accompagnantsList.length) {
+                        accNames = '<div class="evt-particip-card__accomp">';
+                        p.accompagnantsList.forEach(function(a, i) {
+                            accNames += '<span class="evt-accomp-chip">' + a.prenom + ' ' + a.nom + '</span>';
+                        });
+                        accNames += '</div>';
+                    }
+
+                    var card = document.createElement('div');
+                    card.className = 'evt-particip-card';
+                    card.innerHTML =
+                        '<div class="evt-particip-card__img">' +
+                            (p.evenement.imageUrl ? '<img src="' + p.evenement.imageUrl + '" alt="">' : '<div class="evt-particip-card__placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>') +
+                        '</div>' +
+                        '<div class="evt-particip-card__body">' +
+                            '<h4>' + p.evenement.titre + '</h4>' +
+                            '<div class="evt-particip-card__meta">' +
+                                '<span>' + (p.evenement.dateDebut || '') + '</span>' +
+                                '<span>' + (p.evenement.lieu || '') + '</span>' +
+                            '</div>' +
+                            '<div class="evt-particip-card__info">' +
+                                '<span class="evt-badge ' + statutClass + '">' + p.statut + '</span>' +
+                                (p.code ? '<span class="evt-text-muted">Code : <strong>' + p.code + '</strong></span>' : '<span class="evt-text-muted" style="font-style:italic;color:#b58a00">📧 En attente de confirmation par email</span>') +
+                                '<span class="evt-text-muted">Accompagnants : ' + p.accompagnants + '</span>' +
+                                '<span class="evt-text-muted">Inscrit le ' + p.dateInscription + '</span>' +
+                            '</div>' +
+                            accNames +
+                        '</div>' +
+                        '<div class="evt-particip-card__actions">' +
+                            '<button type="button" class="evt-btn evt-btn--primary evt-btn--sm evt-voir-btn">Voir l\'événement</button>' +
+                            (p.statut === 'confirme' ? '<button type="button" class="evt-btn evt-btn--sm evt-ticket-btn" style="background:#1a3a24;color:#fffade;gap:4px;display:inline-flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg> Tickets</button>' : '') +
+                            '<button type="button" class="evt-btn evt-btn--outline evt-btn--sm evt-modifier-btn">Modifier</button>' +
+                            '<button type="button" class="evt-btn evt-btn--danger evt-btn--sm evt-annuler-btn">Annuler</button>' +
+                        '</div>';
+                    content.appendChild(card);
+
+                    // Attach event listeners (avoids inline onclick escaping issues)
+                    (function(part) {
+                        card.querySelector('.evt-voir-btn').addEventListener('click', function() {
+                            document.getElementById('evtMesParticipModal').style.display = 'none';
+                            document.querySelectorAll('.evt-detail-btn[data-id="' + part.evenement.id + '"]').forEach(function(b){ b.click(); });
+                        });
+                        var ticketBtn = card.querySelector('.evt-ticket-btn');
+                        if (ticketBtn) {
+                            ticketBtn.addEventListener('click', function() {
+                                window.showTickets(part);
+                            });
+                        }
+                        card.querySelector('.evt-modifier-btn').addEventListener('click', function() {
+                            window.ouvrirModifierForm(
+                                part.participationId,
+                                part.evenement.titre,
+                                part.accompagnants,
+                                JSON.stringify(part.accompagnantsList),
+                                part.commentaire || ''
+                            );
+                        });
+                        card.querySelector('.evt-annuler-btn').addEventListener('click', function() {
+                            window.annulerParticipation(part.participationId);
+                        });
+                    })(p);
+                });
+            });
+    });
+
+    // ═══════════════════════════════
+    // TICKET MODAL
+    // ═══════════════════════════════
+    var ticketModal = document.getElementById('evtTicketModal');
+    document.getElementById('ticketModalClose').addEventListener('click', function(){ closeModal(ticketModal); });
+
+    function generateQR(container, text, size) {
+        try {
+            new QRCode(container, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: '#1a3a24',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch(e) {
+            container.innerHTML = '<div style="width:'+size+'px;height:'+size+'px;background:#f4f8f5;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:11px;color:#8a9a8e;text-align:center">QR indisponible</div>';
+        }
+    }
+
+    function getTicketUrl(code) {
+        return '{{ lanBaseUrl }}' + '/ticket/' + encodeURIComponent(code);
+    }
+
+    function buildTicketCard(evt, personName, personLabel, code, ticketType) {
+        var card = document.createElement('div');
+        card.className = 'tkt-card';
+        card.innerHTML =
+            '<div class="tkt-header">' +
+                '<div class="tkt-event-info">' +
+                    '<h3 class="tkt-event-name">' + evt.titre + '</h3>' +
+                    (evt.organisateur ? '<p class="tkt-event-org">Par ' + evt.organisateur + '</p>' : '') +
+                '</div>' +
+                '<span class="tkt-badge">' + ticketType + '</span>' +
+            '</div>' +
+            '<div class="tkt-body">' +
+                '<div class="tkt-details">' +
+                    '<p class="tkt-person-label">' + personLabel + '</p>' +
+                    '<p class="tkt-person" style="font-size:18px;font-weight:600;margin-bottom:12px">' + personName + '</p>' +
+                    '<div class="tkt-detail-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' + (evt.dateDebut || '') + (evt.dateFin && evt.dateFin !== evt.dateDebut ? ' — ' + evt.dateFin : '') + '</div>' +
+                    '<div class="tkt-detail-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + (evt.horaireDebut || '') + ' — ' + (evt.horaireFin || '') + '</div>' +
+                    '<div class="tkt-detail-row"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + (evt.lieu || '') + (evt.adresse ? ' — ' + evt.adresse : '') + '</div>' +
+                '</div>' +
+                '<div class="tkt-qr-box" data-qr="' + getTicketUrl(code) + '"></div>' +
+            '</div>' +
+            '<div class="tkt-code-box">' +
+                '<p class="tkt-code-label">Code ' + ticketType + '</p>' +
+                '<p class="tkt-code">' + code + '</p>' +
+            '</div>' +
+            '<hr class="tkt-divider">' +
+            '<div class="tkt-footer">' +
+                '<span>FIRMA — Événements & Salons</span>' +
+                '<span>Présentez ce ticket à l\'entrée</span>' +
+            '</div>';
+
+        return card;
+    }
+
+    window.showTickets = function(part) {
+        var content = document.getElementById('ticketContent');
+        content.innerHTML = '';
+
+        var evt = part.evenement;
+
+        // Main participant ticket
+        var mainCard = buildTicketCard(evt, part.userName, 'Participant principal', part.code, 'Participant');
+        content.appendChild(mainCard);
+
+        // Accompagnant tickets
+        if (part.accompagnantsList && part.accompagnantsList.length) {
+            var title = document.createElement('h3');
+            title.className = 'tkt-section-title';
+            title.textContent = 'Tickets accompagnants (' + part.accompagnantsList.length + ')';
+            content.appendChild(title);
+
+            part.accompagnantsList.forEach(function(acc, i) {
+                var accCode = acc.code || ('ACC-' + part.code);
+                var accCard = buildTicketCard(evt, acc.prenom + ' ' + acc.nom, 'Accompagnant #' + (i + 1), accCode, 'Accompagnant');
+                content.appendChild(accCard);
+            });
+        }
+
+        // Generate QR codes
+        content.querySelectorAll('[data-qr]').forEach(function(el) {
+            generateQR(el, el.getAttribute('data-qr'), 120);
+        });
+
+        // Show modal
+        closeModal(document.getElementById('evtMesParticipModal'));
+        openModal(ticketModal);
+    };
+
+    // PDF Export
+    document.getElementById('ticketExportPdf').addEventListener('click', function() {
+        var content = document.getElementById('ticketContent');
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Génération…';
+
+        html2pdf().set({
+            margin: [10, 10, 10, 10],
+            filename: 'FIRMA_Tickets.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'], avoid: '.tkt-card' }
+        }).from(content).save().then(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exporter en PDF';
+        });
+    });
+
+});
+</script>
+{% endblock %}
