@@ -16,25 +16,34 @@ security:
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
         main:
+            switch_user: true
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\BannedUserChecker
             form_login:
                 login_path: app_login
                 check_path: app_login
                 success_handler: App\Service\User\LoginSuccessHandler
+                failure_handler: App\Service\User\LoginFailureHandler
                 enable_csrf: true
             logout:
                 path: app_logout
                 target: app_landing
+            
 
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
         - { path: ^/participation/.+/confirmer/, roles: PUBLIC_ACCESS }
+        - { path: ^/compte-suspendu, roles: PUBLIC_ACCESS }
         - { path: ^/ticket/, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/user, roles: ROLE_USER }
+         
+    
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
 
 when@test:
     security:

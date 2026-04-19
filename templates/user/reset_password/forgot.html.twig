@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mot de passe oublié — FIRMA{% endblock %}
+
+{% block body %}
+<div class="login-page">
+  <div class="login-bg-pattern"></div>
+  <div class="login-orb login-orb-1"></div>
+  <div class="login-orb login-orb-2"></div>
+  <div class="login-orb login-orb-3"></div>
+
+  {# ── LEFT PANEL ── #}
+  <div class="login-brand-panel">
+    <div class="brand-content">
+      <a href="{{ path('app_landing') }}" class="brand-logo">
+        <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="brand-logo-img">
+        <span class="brand-logo-text">FIRMA</span>
+      </a>
+      <div class="brand-hero">
+        <div class="brand-circle"></div>
+        <div class="brand-circle brand-circle-2"></div>
+        <h1 class="brand-title">
+          <span class="brand-word bw1">Mot de passe</span>
+          <em><span class="brand-word bw2">oublié ?</span></em>
+        </h1>
+        <p class="brand-tagline">Pas de panique — nous allons vous envoyer<br><strong>un lien de réinitialisation.</strong></p>
+      </div>
+      <div class="brand-features">
+        <div class="brand-feature"><div class="bf-icon">🔒</div><span>Sécurisé</span></div>
+        <div class="brand-feature"><div class="bf-icon">📧</div><span>Par email</span></div>
+        <div class="brand-feature"><div class="bf-icon">⏱</div><span>Valable 1h</span></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── RIGHT PANEL ── #}
+  <div class="login-form-panel">
+    <div class="login-form-wrapper">
+      <div class="login-mobile-logo">
+        <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="mobile-logo-img">
+      </div>
+
+      {% if sent %}
+        {# ── Success state ── #}
+        <div style="text-align:center;padding:1rem 0">
+          <div style="width:72px;height:72px;background:#f0fdf4;border-radius:50%;display:flex;
+                      align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+              <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/>
+            </svg>
+          </div>
+          <h2 class="login-title">Email envoyé !</h2>
+          <p class="login-subtitle" style="margin-bottom:2rem;">
+            Si un compte correspond à cet email, vous recevrez un lien de réinitialisation valable <strong>1 heure</strong>.
+            Pensez à vérifier vos spams.
+          </p>
+          <a href="{{ path('app_login') }}" class="login-btn" style="text-decoration:none;display:flex;
+             align-items:center;justify-content:center;gap:.5rem;">
+            ← Retour à la connexion
+          </a>
+        </div>
+
+      {% else %}
+        {# ── Form state ── #}
+        <div class="login-header">
+          <h2 class="login-title">Mot de passe oublié</h2>
+          <p class="login-subtitle">Entrez votre adresse email et nous vous enverrons un lien de réinitialisation.</p>
+        </div>
+
+        <form method="post" class="login-form" novalidate>
+          <div class="form-group">
+            <label for="input-email" class="form-label">Adresse email</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon">
+                <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              <input type="email" id="input-email" name="email"
+                     class="form-input" placeholder="votre@email.com" required autofocus autocomplete="email">
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn">
+            <span class="btn-text">Envoyer le lien</span>
+            <svg viewBox="0 0 20 20" fill="none" class="btn-arrow">
+              <path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="login-footer-text">
+          <span>Vous vous en souvenez ?</span>
+          <a href="{{ path('app_login') }}">Se connecter</a>
+        </div>
+      {% endif %}
+
+      <a href="{{ path('app_landing') }}" class="back-home">← Retour à l'accueil</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

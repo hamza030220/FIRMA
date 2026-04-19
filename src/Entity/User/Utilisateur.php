@@ -51,6 +51,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateCreation = null;
 
+    // ── Ban fields ──
+ 
+    #[ORM\Column(name: 'is_banned', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isBanned = false;
+ 
+    #[ORM\Column(name: 'ban_reason', length: 255, nullable: true)]
+    private ?string $banReason = null;
+ 
+    #[ORM\Column(name: 'banned_at', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $bannedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,6 +165,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->dateCreation = $dateCreation;
         return $this;
     }
+
+    // ── Ban getters/setters ──
+ 
+    public function isBanned(): bool { return $this->isBanned; }
+    public function setIsBanned(bool $isBanned): static { $this->isBanned = $isBanned; return $this; }
+ 
+    public function getBanReason(): ?string { return $this->banReason; }
+    public function setBanReason(?string $banReason): static { $this->banReason = $banReason; return $this; }
+ 
+    public function getBannedAt(): ?\DateTimeInterface { return $this->bannedAt; }
+    public function setBannedAt(?\DateTimeInterface $bannedAt): static { $this->bannedAt = $bannedAt; return $this; }
+ 
 
     // ── UserInterface ──
 

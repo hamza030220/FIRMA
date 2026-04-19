@@ -1,0 +1,75 @@
+{# templates/user/banned.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Compte suspendu — FIRMA{% endblock %}
+
+{% block body %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#f0fdf4 0%,#f8fafc 100%); padding:2rem;">
+
+  <div style="background:#fff; border-radius:20px; padding:3rem 2.5rem;
+              box-shadow:0 4px 32px rgba(0,0,0,.08); max-width:500px; width:100%; text-align:center;">
+
+    <div style="width:80px; height:80px; border-radius:50%; background:#fef2f2;
+                display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+      </svg>
+    </div>
+
+    <h1 style="font-size:1.6rem; font-weight:700; color:#1a1a1a; margin:0 0 .5rem;">
+      Compte suspendu
+    </h1>
+    <p style="color:#6b7280; font-size:.95rem; margin:0 0 2rem; line-height:1.6;">
+      Votre compte a été suspendu par un administrateur.<br>
+      Vous ne pouvez plus accéder à la plateforme FIRMA.
+    </p>
+
+    {% if utilisateur and utilisateur.banReason %}
+      <div style="background:#fef2f2; border:1.5px solid #fecaca; border-radius:12px;
+                  padding:1rem 1.25rem; text-align:left; margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span style="font-size:.8rem; font-weight:700; color:#dc2626; text-transform:uppercase; letter-spacing:.04em;">
+            Motif de suspension
+          </span>
+        </div>
+        <p style="margin:0; color:#7f1d1d; font-size:.93rem; line-height:1.5;">
+          {{ utilisateur.banReason }}
+        </p>
+      </div>
+    {% endif %}
+
+    {% if utilisateur and utilisateur.bannedAt %}
+      <p style="color:#9ca3af; font-size:.82rem; margin:0 0 2rem;">
+        Suspendu le {{ utilisateur.bannedAt|date('d/m/Y à H:i') }}
+      </p>
+    {% endif %}
+
+    <div style="border-top:1.5px solid #f0f0f0; margin-bottom:1.5rem;"></div>
+
+    <p style="color:#6b7280; font-size:.88rem; line-height:1.6; margin:0 0 1.5rem;">
+      Si vous pensez qu'il s'agit d'une erreur, contactez l'administration :
+      <a href="mailto:support@firma.tn" style="color:#2d7a3a; font-weight:600;">
+        support@firma.tn
+      </a>
+    </p>
+
+    <a href="{{ path('app_login') }}"
+       style="display:inline-flex; align-items:center; gap:.5rem; padding:.7rem 1.6rem;
+              background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px;
+              color:#374151; font-size:.9rem; font-weight:600; text-decoration:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Retour à la connexion
+    </a>
+
+  </div>
+</div>
+{% endblock %}

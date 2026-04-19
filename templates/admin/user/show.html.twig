@@ -30,6 +30,13 @@
           {% elseif utilisateur.typeUser == 'technicien' %}Technicien
           {% else %}Utilisateur{% endif %}
         </span>
+        {# ── ✅ ADDED: Banned badge next to role badge ── #}
+        {% if utilisateur.isBanned %}
+          <span style="display:inline-block;padding:.25rem .8rem;border-radius:20px;font-size:.82rem;
+                       font-weight:600;background:#fef2f2;color:#dc2626;margin-left:.4rem;">
+            Suspendu
+          </span>
+        {% endif %}
       </div>
     </div>
 
@@ -84,11 +91,52 @@
         </div>
         <div class="show-field-value">{{ utilisateur.dateCreation ? utilisateur.dateCreation|date('d/m/Y à H:i') : '—' }}</div>
       </div>
+
+      {# ── ✅ ADDED: Ban info fields (only visible when banned) ── #}
+      {% if utilisateur.isBanned %}
+        <div class="show-field show-field--full" style="background:#fef2f2;border:1.5px solid #fecaca;">
+          <div class="show-field-label" style="color:#dc2626;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Motif de suspension
+          </div>
+          <div class="show-field-value" style="color:#7f1d1d;">{{ utilisateur.banReason ?? 'Aucun motif précisé.' }}</div>
+        </div>
+        <div class="show-field">
+          <div class="show-field-label" style="color:#dc2626;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Suspendu le
+          </div>
+          <div class="show-field-value" style="color:#7f1d1d;">{{ utilisateur.bannedAt ? utilisateur.bannedAt|date('d/m/Y à H:i') : '—' }}</div>
+        </div>
+      {% endif %}
+
     </div>
 
     {# Actions #}
     <div class="admin-form-actions" style="margin-top:2rem">
       {% if utilisateur.id != app.user.id %}
+
+        {# ── ✅ ADDED: Ban button (shown when NOT banned, and not an admin) ── #}
+        {% if not utilisateur.isBanned and 'ROLE_ADMIN' not in utilisateur.roles %}
+          <button type="button" class="btn-ban-show" onclick="document.getElementById('banModal').style.display='flex'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Suspendre
+          </button>
+        {% endif %}
+
+        {# ── ✅ ADDED: Unban button (shown when banned) ── #}
+        {% if utilisateur.isBanned %}
+          <form method="post" action="{{ path('admin_utilisateur_unban', {id: utilisateur.id}) }}"
+                onsubmit="return confirm('Réactiver le compte de {{ utilisateur.fullName }} ?')">
+            <input type="hidden" name="_token" value="{{ csrf_token('unban_user_' ~ utilisateur.id) }}">
+            <button type="submit" class="btn-unban-show">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Réactiver
+            </button>
+          </form>
+        {% endif %}
+
+        {# Delete #}
         <form method="post" action="{{ path('admin_utilisateur_delete', {id: utilisateur.id}) }}" onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
           <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ utilisateur.id) }}">
           <button type="submit" class="btn-delete-show">
@@ -97,6 +145,26 @@
           </button>
         </form>
       {% endif %}
+
+      {% if utilisateur.id != app.user.id and 'ROLE_ADMIN' not in utilisateur.roles and not utilisateur.isBanned %}
+        <a href="{{ path('user_dashboard', {'_switch_user': utilisateur.email}) }}"
+          style="display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.3rem;
+                  background:#f5f3ff;color:#6d28d9;border:1.5px solid #ddd6fe;
+                  border-radius:9px;font-size:.9rem;font-weight:600;text-decoration:none;
+                  transition:background .15s;"
+          onmouseover="this.style.background='#ede9fe'"
+          onmouseout="this.style.background='#f5f3ff'"
+          onclick="return confirm('Vous allez vous connecter en tant que {{ utilisateur.fullName }}. Continuer ?')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Connecter
+        </a>
+      {% endif %}
+
       <a href="{{ path('admin_utilisateur_edit', {id: utilisateur.id}) }}" class="btn-save" style="text-decoration:none">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Modifier
@@ -104,6 +172,41 @@
     </div>
   </div>
 </div>
+
+{# ── ✅ ADDED: Ban modal ── #}
+{% if not utilisateur.isBanned and utilisateur.id != app.user.id and 'ROLE_ADMIN' not in utilisateur.roles %}
+<div id="banModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+     z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:2rem;max-width:440px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.15);">
+    <h3 style="margin:0 0 .5rem;font-size:1.1rem;font-weight:700;color:#1a1a1a;">
+      Suspendre {{ utilisateur.fullName }} ?
+    </h3>
+    <p style="color:#6b7280;font-size:.9rem;margin:0 0 1.2rem;">
+      L'utilisateur ne pourra plus se connecter à la plateforme.
+    </p>
+    <form method="post" action="{{ path('admin_utilisateur_ban', {id: utilisateur.id}) }}">
+      <input type="hidden" name="_token" value="{{ csrf_token('ban_user_' ~ utilisateur.id) }}">
+      <label style="display:block;font-weight:600;font-size:.875rem;color:#374151;margin-bottom:.4rem;">
+        Motif <span style="font-weight:400;color:#9ca3af;">(optionnel)</span>
+      </label>
+      <textarea name="ban_reason" rows="3" placeholder="Ex : comportement abusif, fraude…"
+                style="width:100%;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;
+                       font-size:.93rem;resize:vertical;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:.8rem;justify-content:flex-end;margin-top:1.2rem;">
+        <button type="button" onclick="document.getElementById('banModal').style.display='none'"
+                style="padding:.65rem 1.3rem;background:#f8fafc;border:1.5px solid #e2e8f0;
+                       border-radius:9px;font-size:.9rem;font-weight:600;cursor:pointer;color:#374151;">
+          Annuler
+        </button>
+        <button type="submit" class="btn-ban-show">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          Confirmer la suspension
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
 
 {% include 'admin/user/_form_styles.html.twig' %}
 <style>
@@ -131,5 +234,16 @@
   background:#fef2f2; color:#dc2626; border:1.5px solid #fecaca;
   border-radius:9px; font-size:.9rem; font-weight:600; cursor:pointer; }
 .btn-delete-show:hover { background:#fee2e2; }
+
+/* ── ✅ ADDED: Ban / Unban button styles ── */
+.btn-ban-show { display:inline-flex; align-items:center; gap:.4rem; padding:.65rem 1.3rem;
+  background:#fff7ed; color:#c2410c; border:1.5px solid #fed7aa;
+  border-radius:9px; font-size:.9rem; font-weight:600; cursor:pointer; }
+.btn-ban-show:hover { background:#ffedd5; }
+
+.btn-unban-show { display:inline-flex; align-items:center; gap:.4rem; padding:.65rem 1.3rem;
+  background:#f0fdf4; color:#166534; border:1.5px solid #bbf7d0;
+  border-radius:9px; font-size:.9rem; font-weight:600; cursor:pointer; }
+.btn-unban-show:hover { background:#dcfce7; }
 </style>
 {% endblock %}

@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\User\Utilisateur;
 use App\Form\User\AdminUserType;
 use App\Repository\User\UtilisateurRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class UtilisateurController extends AbstractController
 {
+    public function __construct(private LoggerInterface $logger) {}
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // LIST
+    // ─────────────────────────────────────────────────────────────────────────
+
     #[Route('', name: 'admin_utilisateurs')]
     public function index(Request $request, UtilisateurRepository $repo): Response
     {
@@ -26,12 +33,11 @@ class UtilisateurController extends AbstractController
         $utilisateurs = $repo->searchAndFilter($keyword, $role);
         $stats        = $repo->countByType();
 
-        // Pagination
-        $page  = max(1, $request->query->getInt('page', 1));
-        $limit = 10;
-        $total = count($utilisateurs);
+        $page       = max(1, $request->query->getInt('page', 1));
+        $limit      = 10;
+        $total      = count($utilisateurs);
         $totalPages = max(1, (int) ceil($total / $limit));
-        $page = min($page, $totalPages);
+        $page       = min($page, $totalPages);
         $utilisateurs = array_slice($utilisateurs, ($page - 1) * $limit, $limit);
 
         return $this->render('admin/user/index.html.twig', [
@@ -44,6 +50,10 @@ class UtilisateurController extends AbstractController
         ]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CREATE
+    // ─────────────────────────────────────────────────────────────────────────
+
     #[Route('/nouveau', name: 'admin_utilisateur_new')]
     public function new(
         Request $request,
@@ -55,20 +65,20 @@ class UtilisateurController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifier email unique
             if ($repo->findOneBy(['email' => $utilisateur->getEmail()])) {
                 $this->addFlash('error', 'Cet email est déjà utilisé.');
                 return $this->render('admin/user/new.html.twig', ['form' => $form]);
             }
 
-            $plainPassword = $form->get('plainPassword')->getData();
-            $hashed = $hasher->hashPassword($utilisateur, $plainPassword);
+            $hashed = $hasher->hashPassword($utilisateur, $form->get('plainPassword')->getData());
             $utilisateur->setMotDePasse($hashed);
             $utilisateur->setDateCreation(new \DateTime());
 
-            $repo->getEntityManager()->persist($utilisateur);
-            $repo->getEntityManager()->flush();
+            $em = $repo->getEntityManager();
+            $em->persist($utilisateur);
+            $em->flush();
 
+            $this->logAction('CREATE', $utilisateur);
             $this->addFlash('success', 'Utilisateur créé avec succès.');
             return $this->redirectToRoute('admin_utilisateurs');
         }
@@ -82,11 +92,19 @@ class UtilisateurController extends AbstractController
         return $this->render('admin/user/new.html.twig', ['form' => $form]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // SHOW
+    // ─────────────────────────────────────────────────────────────────────────
+
     #[Route('/{id}', name: 'admin_utilisateur_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Utilisateur $utilisateur): Response
     {
         return $this->render('admin/user/show.html.twig', ['utilisateur' => $utilisateur]);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // EDIT
+    // ─────────────────────────────────────────────────────────────────────────
 
     #[Route('/{id}/modifier', name: 'admin_utilisateur_edit', requirements: ['id' => '\d+'])]
     public function edit(
@@ -99,7 +117,6 @@ class UtilisateurController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Vérifier unicité email si modifié
             $emailExistant = $repo->findOneBy(['email' => $utilisateur->getEmail()]);
             if ($emailExistant && $emailExistant->getId() !== $utilisateur->getId()) {
                 $this->addFlash('error', 'Cet email est déjà utilisé par un autre compte.');
@@ -111,11 +128,11 @@ class UtilisateurController extends AbstractController
 
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
-                $hashed = $hasher->hashPassword($utilisateur, $plainPassword);
-                $utilisateur->setMotDePasse($hashed);
+                $utilisateur->setMotDePasse($hasher->hashPassword($utilisateur, $plainPassword));
             }
 
             $repo->getEntityManager()->flush();
+            $this->logAction('EDIT', $utilisateur);
             $this->addFlash('success', 'Utilisateur modifié avec succès.');
             return $this->redirectToRoute('admin_utilisateurs');
         }
@@ -132,6 +149,10 @@ class UtilisateurController extends AbstractController
         ]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELETE
+    // ─────────────────────────────────────────────────────────────────────────
+
     #[Route('/{id}/supprimer', name: 'admin_utilisateur_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(
         Request $request,
@@ -143,11 +164,12 @@ class UtilisateurController extends AbstractController
             return $this->redirectToRoute('admin_utilisateurs');
         }
 
-        // Empêcher la suppression de son propre compte
         if ($utilisateur->getId() === $this->getUser()?->getId()) {
             $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
             return $this->redirectToRoute('admin_utilisateurs');
         }
+
+        $this->logAction('DELETE', $utilisateur);
 
         $em = $repo->getEntityManager();
         $em->remove($utilisateur);
@@ -155,5 +177,86 @@ class UtilisateurController extends AbstractController
 
         $this->addFlash('success', 'Utilisateur supprimé.');
         return $this->redirectToRoute('admin_utilisateurs');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BAN / UNBAN
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[Route('/{id}/bannir', name: 'admin_utilisateur_ban', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function ban(
+        Request $request,
+        Utilisateur $utilisateur,
+        UtilisateurRepository $repo,
+    ): Response {
+        if (!$this->isCsrfTokenValid('ban_user_' . $utilisateur->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_utilisateurs');
+        }
+
+        // Cannot ban yourself
+        if ($utilisateur->getId() === $this->getUser()?->getId()) {
+            $this->addFlash('error', 'Vous ne pouvez pas bannir votre propre compte.');
+            return $this->redirectToRoute('admin_utilisateurs');
+        }
+
+        // Cannot ban another admin
+        if (in_array('ROLE_ADMIN', $utilisateur->getRoles(), true)) {
+            $this->addFlash('error', 'Vous ne pouvez pas bannir un autre administrateur.');
+            return $this->redirectToRoute('admin_utilisateurs');
+        }
+
+        $reason = trim($request->request->get('ban_reason', 'Aucune raison précisée.'));
+
+        $utilisateur->setIsBanned(true);
+        $utilisateur->setBanReason($reason);
+        $utilisateur->setBannedAt(new \DateTime());
+
+        $repo->getEntityManager()->flush();
+
+        $this->logAction('BAN', $utilisateur, $reason);
+        $this->addFlash('warning', sprintf('Le compte de %s a été suspendu.', $utilisateur->getFullName()));
+
+        return $this->redirectToRoute('admin_utilisateurs');
+    }
+
+    #[Route('/{id}/debannir', name: 'admin_utilisateur_unban', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function unban(
+        Request $request,
+        Utilisateur $utilisateur,
+        UtilisateurRepository $repo,
+    ): Response {
+        if (!$this->isCsrfTokenValid('unban_user_' . $utilisateur->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_utilisateurs');
+        }
+
+        $utilisateur->setIsBanned(false);
+        $utilisateur->setBanReason(null);
+        $utilisateur->setBannedAt(null);
+
+        $repo->getEntityManager()->flush();
+
+        $this->logAction('UNBAN', $utilisateur);
+        $this->addFlash('success', sprintf('Le compte de %s a été réactivé.', $utilisateur->getFullName()));
+
+        return $this->redirectToRoute('admin_utilisateurs');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private function logAction(string $action, Utilisateur $target, string $extra = ''): void
+    {
+        /** @var Utilisateur $admin */
+        $admin = $this->getUser();
+        $this->logger->info('[ADMIN_AUDIT] {action} | Admin: {admin} | Target: {target} (id={id}) | {extra}', [
+            'action' => $action,
+            'admin'  => $admin?->getFullName() . ' <' . $admin?->getEmail() . '>',
+            'target' => $target->getFullName(),
+            'id'     => $target->getId(),
+            'extra'  => $extra,
+        ]);
     }
 }
