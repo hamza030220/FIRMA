@@ -82,6 +82,30 @@
             </div>
             <a href="{{ path('admin_marketplace_locations') }}" class="mp-card-btn">Consulter</a>
         </div>
+
+        {# ── Calendrier Locations ── #}
+        <div class="mp-card">
+            <div class="mp-card-icon" style="background: linear-gradient(135deg, #e8f5e9, #fff3e0);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#20452c" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="15" r="1.5" fill="#27ae60" stroke="none"/><circle cx="16" cy="15" r="1.5" fill="#e67e22" stroke="none"/></svg>
+            </div>
+            <div class="mp-card-body">
+                <h3>Calendrier Locations</h3>
+                <p>Vue calendrier des terrains et véhicules</p>
+            </div>
+            <a href="{{ path('admin_marketplace_calendrier') }}" class="mp-card-btn">Voir le calendrier</a>
+        </div>
+
+        {# ── Analytics & Clarity ── #}
+        <div class="mp-card mp-card-analytics">
+            <div class="mp-card-icon" style="background: linear-gradient(135deg, #ede7f6, #e3f2fd);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5e35b1" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+            </div>
+            <div class="mp-card-body">
+                <h3>Analytics & Clarity</h3>
+                <p>Statistiques, heatmaps et comportement utilisateurs</p>
+            </div>
+            <a href="{{ path('admin_marketplace_analytics') }}" class="mp-card-btn" style="background: linear-gradient(135deg, #5e35b1, #3949ab);">Voir les analytics</a>
+        </div>
     </div>
 </div>
 {% endblock %}
