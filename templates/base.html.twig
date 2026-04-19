@@ -14,6 +14,18 @@
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
+        {# Microsoft Clarity — user-facing pages only #}
+        {% block clarity %}
+            {% if app.user and not is_granted('ROLE_ADMIN') %}
+            <script type="text/javascript">
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window,document,"clarity","script","wdmtsoch0x");
+            </script>
+            {% endif %}
+        {% endblock %}
     </head>
     <body data-turbo="false">
         {% include 'shared/components/_toast_confirm.html.twig' %}
