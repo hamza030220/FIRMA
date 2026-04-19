@@ -369,8 +369,8 @@ class MarketplaceController extends AbstractController
             if (!empty($lowStock)) {
                 $pdfMailer->sendStockAlert($lowStock, $commande);
             }
-        } catch (\Exception $e) {
-            // Don't block the user if stock alert email fails
+        } catch (\Throwable $e) {
+            error_log('FIRMA Stock Alert FAILED: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
         }
 
         $this->saveCart([]);
@@ -461,8 +461,8 @@ class MarketplaceController extends AbstractController
             if (!empty($lowStock)) {
                 $pdfMailer->sendStockAlert($lowStock, $commande);
             }
-        } catch (\Exception $e) {
-            // Don't block the user if stock alert email fails
+        } catch (\Throwable $e) {
+            error_log('FIRMA Stock Alert FAILED: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
         }
 
         $this->saveCart([]);

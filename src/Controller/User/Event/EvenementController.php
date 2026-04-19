@@ -69,9 +69,16 @@ class EvenementController extends AbstractController
         $lanBaseUrl = $request->getSchemeAndHttpHost();
         $host = $request->getHost();
         if (in_array($host, ['127.0.0.1', 'localhost', '::1'])) {
+            // Parse ipconfig for a real private IPv4 (skip VMware/VirtualBox/autoconfiguration)
             $ipOutput = shell_exec('ipconfig');
-            if ($ipOutput && preg_match('/Wi-Fi[\s\S]*?IPv4[^:]+:\s*([\d.]+)/', $ipOutput, $m)) {
-                $lanBaseUrl = $request->getScheme() . '://' . $m[1] . ':' . $request->getPort();
+            if ($ipOutput && preg_match_all('/IPv4[^:]*:\s*([\d.]+)/', $ipOutput, $matches)) {
+                foreach ($matches[1] as $ip) {
+                    if (str_starts_with($ip, '127.') || str_starts_with($ip, '169.254.')) continue;
+                    if (str_starts_with($ip, '192.168.56.')) continue; // VirtualBox
+                    if (preg_match('/^192\.168\.(1[3-9]\d|2\d\d)\./', $ip)) continue; // VMware
+                    $lanBaseUrl = $request->getScheme() . '://' . $ip . ':' . $request->getPort();
+                    break;
+                }
             }
         }
 

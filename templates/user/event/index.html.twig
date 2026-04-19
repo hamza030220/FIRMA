@@ -637,26 +637,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('evtParticipClose').addEventListener('click', function(){ closeModal(participModal); });
     document.getElementById('participCancel').addEventListener('click', function(){ closeModal(participModal); });
 
+    // Stored accompagnant data (originals from server + user edits)
+    var accompData = [];
+
     // Build accompagnant fields dynamically — preserves existing values
     function renderAccompFields(n) {
         var container = document.getElementById('accompFields');
         var existing = container.querySelectorAll('.evt-accomp-row');
 
-        // Collect current values
-        var saved = [];
-        existing.forEach(function(row) {
+        // Save current field values into accompData before rebuilding
+        existing.forEach(function(row, idx) {
             var inputs = row.querySelectorAll('input');
-            saved.push({ prenom: inputs[0].value, nom: inputs[1].value });
+            accompData[idx] = { prenom: inputs[0].value, nom: inputs[1].value };
         });
 
-        // Remove extra rows if n < current count
-        while (existing.length > n) {
-            container.removeChild(existing[existing.length - 1]);
-            existing = container.querySelectorAll('.evt-accomp-row');
-        }
-
-        // Add missing rows if n > current count
-        for (var i = existing.length; i < n; i++) {
+        // Clear and rebuild all rows
+        container.innerHTML = '';
+        for (var i = 0; i < n; i++) {
             var row = document.createElement('div');
             row.className = 'evt-accomp-row';
             row.innerHTML =
@@ -665,11 +662,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<input type="text" name="accomp_prenom[]" placeholder="Prénom" class="evt-form__input">' +
                     '<input type="text" name="accomp_nom[]" placeholder="Nom" class="evt-form__input">' +
                 '</div>';
-            // Restore saved value if it existed at this index
-            if (saved[i]) {
+            // Restore saved value if available
+            if (accompData[i]) {
                 var inputs = row.querySelectorAll('input');
-                inputs[0].value = saved[i].prenom;
-                inputs[1].value = saved[i].nom;
+                inputs[0].value = accompData[i].prenom;
+                inputs[1].value = accompData[i].nom;
             }
             container.appendChild(row);
         }
@@ -681,6 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.ouvrirParticipForm = function(evtId, titre) {
         closeModal(detailModal);
+        accompData = []; // Reset stored data for new inscription
         document.getElementById('participEvtId').value = evtId;
         document.getElementById('participEvtTitre').textContent = titre;
         document.getElementById('participMode').value = 'create';
@@ -695,6 +693,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.ouvrirModifierForm = function(participId, titre, nbAccomp, accompListJson, commentaire) {
         closeModal(mesParticipModal);
+
+        // Pre-load accompData from server data so removing/re-adding preserves values
+        accompData = [];
+        try {
+            var accompList = JSON.parse(accompListJson);
+            if (accompList && accompList.length) {
+                accompList.forEach(function(a) {
+                    accompData.push({ prenom: a.prenom || '', nom: a.nom || '' });
+                });
+            }
+        } catch(e) {}
+
         document.getElementById('participEvtId').value = '';
         document.getElementById('participEvtTitre').textContent = titre;
         document.getElementById('participMode').value = 'edit';
@@ -704,19 +714,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('participMsg').style.display = 'none';
         document.getElementById('participSubmit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Enregistrer les modifications';
         renderAccompFields(nbAccomp);
-        try {
-            var accompList = JSON.parse(accompListJson);
-            if (accompList && accompList.length) {
-                var rows = document.querySelectorAll('#accompFields .evt-accomp-row');
-                accompList.forEach(function(a, i) {
-                    if (rows[i]) {
-                        var inputs = rows[i].querySelectorAll('input');
-                        inputs[0].value = a.prenom || '';
-                        inputs[1].value = a.nom || '';
-                    }
-                });
-            }
-        } catch(e) {}
         openModal(participModal);
     };
 
@@ -886,8 +883,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Attach event listeners (avoids inline onclick escaping issues)
                     (function(part) {
                         card.querySelector('.evt-voir-btn').addEventListener('click', function() {
-                            document.getElementById('evtMesParticipModal').style.display = 'none';
-                            document.querySelectorAll('.evt-detail-btn[data-id="' + part.evenement.id + '"]').forEach(function(b){ b.click(); });
+                            closeModal(mesParticipModal);
+                            window.openEventDetail(part.evenement.id);
                         });
                         var ticketBtn = card.querySelector('.evt-ticket-btn');
                         if (ticketBtn) {
@@ -1086,12 +1083,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var gridSection = document.querySelector('.evt-grid') || document.querySelector('.evt-empty');
         var calWrapper = document.getElementById('calendarWrapper');
         var mapWrapper = document.getElementById('mapWrapper');
+        var pagination = document.querySelector('.firma-pagination');
 
         // Reset all
         listBtn.classList.remove('active');
         calBtn.classList.remove('active');
         mapBtn.classList.remove('active');
         if (gridSection) gridSection.style.display = 'none';
+        if (pagination) pagination.style.display = 'none';
         calWrapper.classList.remove('visible');
         mapWrapper.style.display = 'none';
 
@@ -1116,6 +1115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             listBtn.classList.add('active');
             if (gridSection) gridSection.style.display = '';
+            if (pagination) pagination.style.display = '';
         }
     };
 
