@@ -301,8 +301,14 @@ class ParticipationService
 
         if (PHP_OS_FAMILY === 'Windows' && $request && in_array($request->getHost(), ['127.0.0.1', 'localhost', '::1'])) {
             $ipOutput = shell_exec('ipconfig');
-            if ($ipOutput && preg_match('/Wi-Fi[\s\S]*?IPv4[^:]+:\s*([\d.]+)/', $ipOutput, $m)) {
-                $base = $request->getScheme() . '://' . $m[1] . ':' . $request->getPort();
+            if ($ipOutput && preg_match_all('/IPv4[^:]*:\s*([\d.]+)/', $ipOutput, $matches)) {
+                foreach ($matches[1] as $ip) {
+                    if (str_starts_with($ip, '127.') || str_starts_with($ip, '169.254.')) continue;
+                    if (str_starts_with($ip, '192.168.56.')) continue;
+                    if (preg_match('/^192\.168\.(1[3-9]\d|2\d\d)\./', $ip)) continue;
+                    $base = $request->getScheme() . '://' . $ip . ':' . $request->getPort();
+                    break;
+                }
             }
         }
 
@@ -458,6 +464,89 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
     }
 
     // ═══════════════════════════════════════════
+    //  EMAIL 3 — Participation modifiée + nouveaux tickets
+    // ═══════════════════════════════════════════
+    private function sendModificationEmail(Participation $participation): void
+    {
+        $user = $participation->getUtilisateur();
+        $evt  = $participation->getEvenement();
+
+        $accompHtml = '';
+        foreach ($participation->getAccompagnants() as $i => $acc) {
+            $accompHtml .= '<tr><td style="padding:6px 12px;border-bottom:1px solid #e8ede9;color:#5a6e5f;font-size:14px">'
+                . ($i + 1) . '. ' . htmlspecialchars($acc->getPrenom() . ' ' . $acc->getNom()) . '</td></tr>';
+        }
+
+        $html = $this->buildEmailLayout(
+            'Participation modifiée',
+            '
+            <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre participation a été <strong style="color:#2980b9">modifiée</strong> avec succès. Vous trouverez vos nouveaux tickets en pièce jointe.</p>
+
+            <!-- Code card -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a3a24;border-radius:12px;margin-bottom:24px">
+                <tr><td style="padding:24px;text-align:center;background:#1a3a24;border-radius:12px">
+                    <p style="margin:0 0 6px;color:#fffade;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600">Votre code de participation</p>
+                    <p style="margin:0;font-family:\'Courier New\',monospace;font-size:32px;font-weight:700;color:#fffade;letter-spacing:4px">' . htmlspecialchars($participation->getCodeParticipation()) . '</p>
+                </td></tr>
+            </table>
+
+            <!-- Modified badge -->
+            <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
+                <tr><td style="background:#d1ecf1;color:#0c5460;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
+                    ✏️ Modification effectuée
+                </td></tr>
+            </table>
+
+            <!-- Event details -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f8f5;border-radius:12px;margin-bottom:24px">
+                <tr><td style="padding:20px">
+                    <p style="margin:0 0 4px;font-family:\'Playfair Display\',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24">' . htmlspecialchars($evt->getTitre()) . '</p>
+                    <table cellpadding="0" cellspacing="0" style="margin-top:12px">
+                        <tr>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">⏰</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' – ' . $evt->getHoraireFin()?->format('H:i') . '</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . '</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">👥</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $participation->getTotalPersonnes() . ' personne(s) (vous + ' . $participation->getNombreAccompagnants() . ' accompagnant(s))</td>
+                        </tr>
+                    </table>
+                </td></tr>
+            </table>
+
+            ' . ($accompHtml ? '
+            <p style="font-size:14px;font-weight:600;color:#1a3a24;margin:0 0 8px">Accompagnants :</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background:#fafcfa;border-radius:8px;overflow:hidden">
+                ' . $accompHtml . '
+            </table>' : '') . '
+
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Vos nouveaux tickets sont en pièce jointe de cet email.</p>
+            '
+        );
+
+        // Generate updated PDF tickets
+        $pdfContent = $this->generateTicketsPdf($participation);
+
+        $email = (new Email())
+            ->from('FIRMA <firmaagritech@gmail.com>')
+            ->to($user->getEmail())
+            ->subject('FIRMA — Participation modifiée : ' . $evt->getTitre())
+            ->html($html)
+            ->attach($pdfContent, 'Tickets_FIRMA_' . $participation->getCodeParticipation() . '.pdf', 'application/pdf');
+
+        $this->mailer->send($email);
+    }
+
+    // ═══════════════════════════════════════════
     //  HTML email layout wrapper
     // ═══════════════════════════════════════════
     private function buildEmailLayout(string $title, string $bodyContent): string
@@ -529,6 +618,10 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         }
         foreach ($newAccompagnants as $acc) {
             $acc->setParticipation($participation);
+            // Generate code for new accompagnants (needed for tickets)
+            if (!$acc->getCodeAccompagnant()) {
+                $acc->setCodeAccompagnant(Accompagnant::genererCode());
+            }
             $participation->addAccompagnant($acc);
         }
 
@@ -536,6 +629,15 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         $participation->setCommentaire($commentaire);
 
         $this->em->flush();
+
+        // Send modification confirmation email with new tickets (only if confirmed)
+        if ($participation->getStatut() === 'confirme') {
+            try {
+                $this->sendModificationEmail($participation);
+            } catch (\Throwable $e) {
+                error_log('FIRMA Modification Email FAILED: ' . $e->getMessage());
+            }
+        }
 
         return $participation;
     }
