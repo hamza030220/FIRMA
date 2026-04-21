@@ -321,6 +321,8 @@
                     </div>
                 {% endfor %}
             </div>
+            {% set currentPage = currentPage|default(1) %}
+            {% set totalPages = totalPages|default(1) %}
             {% include 'shared/_pagination.html.twig' with {
                 currentPage: currentPage,
                 totalPages: totalPages,
