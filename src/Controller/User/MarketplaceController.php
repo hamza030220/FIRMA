@@ -141,8 +141,30 @@ class MarketplaceController extends AbstractController
        LOCATIONS SESSION (Véhicules + Terrains)
        ================================================================ */
 
+    #[Route('/locations/disponibilite', name: 'user_marketplace_loc_disponibilite', methods: ['GET'])]
+    public function locDisponibilite(Request $request, LocationRepository $locRepo): JsonResponse
+    {
+        $type = $request->query->get('type');
+        $id = (int) $request->query->get('id');
+
+        if (!in_array($type, ['vehicule', 'terrain'], true) || $id < 1) {
+            return $this->json(['error' => 'Paramètres invalides'], 400);
+        }
+
+        $ranges = $locRepo->findBookedRanges($type, $id);
+        $booked = [];
+        foreach ($ranges as $r) {
+            $booked[] = [
+                'start' => $r['dateDebut']->format('Y-m-d'),
+                'end' => $r['dateFin']->format('Y-m-d'),
+            ];
+        }
+
+        return $this->json(['booked' => $booked]);
+    }
+
     #[Route('/locations/ajouter', name: 'user_marketplace_loc_add', methods: ['POST'])]
-    public function locAdd(Request $request, VehiculeRepository $vehicRepo, TerrainRepository $terrainRepo): JsonResponse
+    public function locAdd(Request $request, VehiculeRepository $vehicRepo, TerrainRepository $terrainRepo, LocationRepository $locRepo): JsonResponse
     {
         $type = $request->request->get('type'); // 'vehicule' or 'terrain'
         $id = (int) $request->request->get('id');
@@ -158,6 +180,21 @@ class MarketplaceController extends AbstractController
 
         if (!$start || !$end || $end <= $start) {
             return $this->json(['error' => 'Dates invalides (la date fin doit être après la date début)'], 400);
+        }
+
+        // Check for overlapping reservations
+        $conflicts = $locRepo->findOverlapping($type, $id, $start, $end);
+        if (!empty($conflicts)) {
+            $booked = $locRepo->findBookedRanges($type, $id);
+            $periods = [];
+            foreach ($booked as $r) {
+                $periods[] = $r['dateDebut']->format('d/m/Y') . ' → ' . $r['dateFin']->format('d/m/Y');
+            }
+            $label = $type === 'vehicule' ? 'Ce véhicule' : 'Ce terrain';
+            return $this->json([
+                'error' => $label . ' est déjà réservé pour les dates : ' . implode(', ', $periods) . '. Veuillez choisir d\'autres dates.',
+                'booked' => array_map(fn($r) => ['start' => $r['dateDebut']->format('Y-m-d'), 'end' => $r['dateFin']->format('Y-m-d')], $booked),
+            ], 409);
         }
 
         $days = (int) $start->diff($end)->days;
@@ -332,8 +369,8 @@ class MarketplaceController extends AbstractController
             if (!empty($lowStock)) {
                 $pdfMailer->sendStockAlert($lowStock, $commande);
             }
-        } catch (\Exception $e) {
-            // Don't block the user if stock alert email fails
+        } catch (\Throwable $e) {
+            error_log('FIRMA Stock Alert FAILED: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
         }
 
         $this->saveCart([]);
@@ -424,8 +461,8 @@ class MarketplaceController extends AbstractController
             if (!empty($lowStock)) {
                 $pdfMailer->sendStockAlert($lowStock, $commande);
             }
-        } catch (\Exception $e) {
-            // Don't block the user if stock alert email fails
+        } catch (\Throwable $e) {
+            error_log('FIRMA Stock Alert FAILED: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
         }
 
         $this->saveCart([]);
@@ -481,6 +518,7 @@ class MarketplaceController extends AbstractController
         Request $request,
         VehiculeRepository $vehicRepo,
         TerrainRepository $terrainRepo,
+        LocationRepository $locRepo,
         EntityManagerInterface $em,
         PdfMailerService $pdfMailer,
     ): Response {
@@ -505,6 +543,15 @@ class MarketplaceController extends AbstractController
         if ($intent->status !== 'succeeded') {
             $this->addFlash('danger', 'Le paiement n\'a pas été confirmé. Veuillez réessayer.');
             return $this->redirectToRoute('user_marketplace_paiement_locations');
+        }
+
+        // Final overlap check before persisting (prevent race conditions)
+        foreach ($locs as $loc) {
+            $conflicts = $locRepo->findOverlapping($loc['type'], $loc['id'], new \DateTime($loc['dateDebut']), new \DateTime($loc['dateFin']));
+            if (!empty($conflicts)) {
+                $this->addFlash('danger', 'Le ' . ($loc['type'] === 'vehicule' ? 'véhicule' : 'terrain') . ' "' . $loc['nom'] . '" a été réservé entre-temps pour ces dates. Veuillez modifier vos locations.');
+                return $this->redirectToRoute('user_marketplace');
+            }
         }
 
         $user = $this->getUser();

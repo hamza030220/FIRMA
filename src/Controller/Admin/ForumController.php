@@ -35,8 +35,18 @@ class ForumController extends AbstractController
         $categories = $categorieForumRepository->findAllOrdered();
         $mostUsedCategory = $postRepository->findMostUsedCategory();
 
+        $allPosts = $postRepository->findForumFeed($activeSearch);
+
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $totalPosts = count($allPosts);
+        $totalPages = max(1, (int) ceil($totalPosts / $limit));
+        $page = min($page, $totalPages);
+        $posts = array_slice($allPosts, ($page - 1) * $limit, $limit);
+
         return $this->render('admin/forum/index.html.twig', [
-            'posts' => $postRepository->findForumFeed($activeSearch),
+            'posts' => $posts,
             'total_posts' => $postRepository->countAllPosts(),
             'total_commentaires' => $commentaireRepository->countAllCommentaires(),
             'recent_commentaires' => $commentaireRepository->findRecentCommentaires(),
@@ -52,6 +62,8 @@ class ForumController extends AbstractController
             ],
             'category_errors' => [],
             'editing_category_id' => $editingCategory?->getId(),
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

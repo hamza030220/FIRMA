@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E65100"/>
+      <stop offset="100%" stop-color="#BF360C"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <!-- Abstract wheat pattern -->
+  <g opacity="0.15" fill="none" stroke="#FFE0B2" stroke-width="2">
+    <path d="M100,500 Q150,300 200,200 Q220,150 200,100"/>
+    <path d="M200,500 Q250,320 280,220 Q300,170 280,120"/>
+    <path d="M300,500 Q340,340 360,250 Q375,200 360,150"/>
+    <path d="M500,500 Q460,340 440,250 Q425,200 440,150"/>
+    <path d="M600,500 Q570,320 550,220 Q530,170 550,120"/>
+    <path d="M700,500 Q670,300 650,200 Q630,150 650,100"/>
+  </g>
+  <!-- Shield / security icon -->
+  <g transform="translate(400,200)">
+    <path d="M0,-80 L60,-55 L60,20 C60,55 35,80 0,95 C-35,80 -60,55 -60,20 L-60,-55Z" fill="none" stroke="#FFCC80" stroke-width="3" opacity="0.7"/>
+    <path d="M0,-60 L45,-40 L45,15 C45,42 27,62 0,73 C-27,62 -45,42 -45,15 L-45,-40Z" fill="#FF8F00" opacity="0.3"/>
+    <!-- Wheat inside shield -->
+    <line x1="0" y1="40" x2="0" y2="-30" stroke="#FFE082" stroke-width="2"/>
+    <ellipse cx="0" cy="-35" rx="5" ry="12" fill="#FFD54F"/>
+    <line x1="-8" y1="10" x2="-20" y2="-10" stroke="#FFE082" stroke-width="1.5"/>
+    <ellipse cx="-22" cy="-14" rx="4" ry="10" fill="#FFD54F" transform="rotate(-20,-22,-14)"/>
+    <line x1="8" y1="10" x2="20" y2="-10" stroke="#FFE082" stroke-width="1.5"/>
+    <ellipse cx="22" cy="-14" rx="4" ry="10" fill="#FFD54F" transform="rotate(20,22,-14)"/>
+    <!-- Check mark -->
+    <polyline points="-15,25 -5,35 20,10" stroke="#4CAF50" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Stats bars -->
+  <g fill="#FFCC80" opacity="0.3">
+    <rect x="100" y="350" width="40" height="80" rx="3"/>
+    <rect x="160" y="380" width="40" height="50" rx="3"/>
+    <rect x="220" y="340" width="40" height="90" rx="3"/>
+    <rect x="540" y="360" width="40" height="70" rx="3"/>
+    <rect x="600" y="345" width="40" height="85" rx="3"/>
+    <rect x="660" y="375" width="40" height="55" rx="3"/>
+  </g>
+  <!-- Banner -->
+  <rect x="120" y="390" width="560" height="75" rx="12" fill="rgba(0,0,0,0.4)"/>
+  <text x="400" y="422" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Conférence Sécurité Alimentaire</text>
+  <text x="400" y="448" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Souveraineté agricole - Tunis</text>
+</svg>

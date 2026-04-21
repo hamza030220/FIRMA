@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0D47A1"/>
+      <stop offset="100%" stop-color="#1976D2"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <!-- Grid pattern -->
+  <g stroke="#1E88E5" stroke-width="0.5" opacity="0.3">
+    <line x1="0" y1="50" x2="800" y2="50"/><line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="150" x2="800" y2="150"/><line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="250" x2="800" y2="250"/><line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="350" x2="800" y2="350"/><line x1="0" y1="400" x2="800" y2="400"/>
+    <line x1="100" y1="0" x2="100" y2="500"/><line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="300" y1="0" x2="300" y2="500"/><line x1="400" y1="0" x2="400" y2="500"/>
+    <line x1="500" y1="0" x2="500" y2="500"/><line x1="600" y1="0" x2="600" y2="500"/>
+    <line x1="700" y1="0" x2="700" y2="500"/>
+  </g>
+  <!-- Water drop -->
+  <g transform="translate(400,180)">
+    <path d="M0,-70 C25,-35 50,10 50,40 C50,68 28,90 0,90 C-28,90 -50,68 -50,40 C-50,10 -25,-35 0,-70Z" fill="#42A5F5" opacity="0.7"/>
+    <path d="M-15,-30 C-5,-15 10,10 15,30 C15,15 5,0 -5,-15Z" fill="#90CAF9" opacity="0.5"/>
+  </g>
+  <!-- Sprinkler lines -->
+  <g stroke="#64B5F6" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,4">
+    <line x1="200" y1="300" x2="150" y2="350"/>
+    <line x1="200" y1="300" x2="200" y2="360"/>
+    <line x1="200" y1="300" x2="250" y2="350"/>
+    <line x1="600" y1="300" x2="550" y2="350"/>
+    <line x1="600" y1="300" x2="600" y2="360"/>
+    <line x1="600" y1="300" x2="650" y2="350"/>
+  </g>
+  <!-- Pipe -->
+  <rect x="180" y="295" width="440" height="8" fill="#546E7A" rx="4"/>
+  <circle cx="200" cy="299" r="8" fill="#78909C"/>
+  <circle cx="600" cy="299" r="8" fill="#78909C"/>
+  <!-- Plant rows -->
+  <g fill="#4CAF50" opacity="0.6">
+    <rect x="160" y="360" width="15" height="25" rx="6"/><rect x="190" y="355" width="15" height="30" rx="6"/><rect x="220" y="358" width="15" height="27" rx="6"/>
+    <rect x="560" y="360" width="15" height="25" rx="6"/><rect x="590" y="355" width="15" height="30" rx="6"/><rect x="620" y="358" width="15" height="27" rx="6"/>
+  </g>
+  <!-- Tech icons -->
+  <g fill="none" stroke="#90CAF9" stroke-width="2" opacity="0.5">
+    <rect x="100" y="100" width="40" height="30" rx="3"/><line x1="120" y1="130" x2="120" y2="145"/>
+    <rect x="660" y="100" width="40" height="30" rx="3"/><line x1="680" y1="130" x2="680" y2="145"/>
+  </g>
+  <!-- Banner -->
+  <rect x="130" y="390" width="540" height="75" rx="12" fill="rgba(255,255,255,0.12)"/>
+  <text x="400" y="422" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="24" font-weight="bold">Formation Irrigation Intelligente</text>
+  <text x="400" y="448" text-anchor="middle" fill="#90CAF9" font-family="Arial,sans-serif" font-size="18">Goutte-à-goutte connecté - Kairouan</text>
+</svg>

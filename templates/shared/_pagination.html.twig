@@ -1,67 +1,72 @@
-{% if totalPages is defined and totalPages > 1 %}
+{# Shared Pagination Component
+   Required variables:
+     currentPage  : int (current page number, 1-based)
+     totalPages   : int (total number of pages)
+     route        : string (route name)
+     routeParams  : array (extra route params: search, sort, etc.)
+     pageParam    : string (default 'page', the query param name for page)
+#}
+{% set pageParam = pageParam|default('page') %}
+{% set currentPage = currentPage|default(1) %}
+{% set totalPages = totalPages|default(1) %}
+{% set routeParams = routeParams|default({}) %}
+{% if totalPages > 1 %}
+<style>
+.firma-pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin:1.5rem 0;flex-wrap:wrap}
+.firma-pagination__btn,.firma-pagination__num{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border-radius:8px;font-size:.875rem;font-weight:600;text-decoration:none;transition:all .15s;border:1px solid #d1d9d3;background:#fff;color:#1a3a24;cursor:pointer}
+.firma-pagination__btn:hover,.firma-pagination__num:hover{background:#f4f8f5;border-color:#1a3a24}
+.firma-pagination__num--active{background:#1a3a24!important;color:#fff!important;border-color:#1a3a24!important;cursor:default}
+.firma-pagination__btn--disabled{opacity:.4;cursor:default;pointer-events:none}
+.firma-pagination__dots{color:#8a9a8e;font-size:.875rem;padding:0 2px}
+.firma-pagination__info{margin-left:12px;font-size:.8rem;color:#8a9a8e}
+@media(max-width:640px){.firma-pagination__info{display:none}}
+</style>
 <nav class="firma-pagination" aria-label="Pagination">
-    {% set current = currentPage|default(1) %}
-    {% set params = routeParams|default({}) %}
-
-    {% if current > 1 %}
-        <a href="{{ path(route, params|merge({ page: current - 1 })) }}" class="firma-pagination-link">
-            Prec
+    {% if currentPage > 1 %}
+        <a href="{{ path(route, routeParams|merge({(pageParam): currentPage - 1})) }}" class="firma-pagination__btn" aria-label="Page precedente">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </a>
+    {% else %}
+        <span class="firma-pagination__btn firma-pagination__btn--disabled" aria-disabled="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </span>
     {% endif %}
 
-    {% for pageNumber in 1..totalPages %}
-        {% if pageNumber == current %}
-            <span class="firma-pagination-link is-active">{{ pageNumber }}</span>
+    {% set startPage = max(1, currentPage - 2) %}
+    {% set endPage = min(totalPages, currentPage + 2) %}
+
+    {% if startPage > 1 %}
+        <a href="{{ path(route, routeParams|merge({(pageParam): 1})) }}" class="firma-pagination__num">1</a>
+        {% if startPage > 2 %}
+            <span class="firma-pagination__dots">...</span>
+        {% endif %}
+    {% endif %}
+
+    {% for p in startPage..endPage %}
+        {% if p == currentPage %}
+            <span class="firma-pagination__num firma-pagination__num--active" aria-current="page">{{ p }}</span>
         {% else %}
-            <a href="{{ path(route, params|merge({ page: pageNumber })) }}" class="firma-pagination-link">
-                {{ pageNumber }}
-            </a>
+            <a href="{{ path(route, routeParams|merge({(pageParam): p})) }}" class="firma-pagination__num">{{ p }}</a>
         {% endif %}
     {% endfor %}
 
-    {% if current < totalPages %}
-        <a href="{{ path(route, params|merge({ page: current + 1 })) }}" class="firma-pagination-link">
-            Suiv
-        </a>
+    {% if endPage < totalPages %}
+        {% if endPage < totalPages - 1 %}
+            <span class="firma-pagination__dots">...</span>
+        {% endif %}
+        <a href="{{ path(route, routeParams|merge({(pageParam): totalPages})) }}" class="firma-pagination__num">{{ totalPages }}</a>
     {% endif %}
+
+    {% if currentPage < totalPages %}
+        <a href="{{ path(route, routeParams|merge({(pageParam): currentPage + 1})) }}" class="firma-pagination__btn" aria-label="Page suivante">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+    {% else %}
+        <span class="firma-pagination__btn firma-pagination__btn--disabled" aria-disabled="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+    {% endif %}
+
+    <span class="firma-pagination__info">Page {{ currentPage }} / {{ totalPages }}</span>
 </nav>
-
-<style>
-.firma-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-}
-
-.firma-pagination-link {
-    min-width: 40px;
-    height: 40px;
-    padding: 0 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    border: 1px solid rgba(15, 92, 47, 0.18);
-    background: #fff;
-    color: #0f5c2f;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.firma-pagination-link:hover {
-    background: #edf7ef;
-    color: #0c4a26;
-    text-decoration: none;
-}
-
-.firma-pagination-link.is-active {
-    background: #0f5c2f;
-    color: #fff;
-    border-color: #0f5c2f;
-}
-</style>
 {% endif %}

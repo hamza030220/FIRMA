@@ -96,6 +96,13 @@
                     </div>
                 {% endfor %}
             </div>
+
+            {% include 'shared/_pagination.html.twig' with {
+                currentPage: currentPage,
+                totalPages: totalPages,
+                route: 'admin_sponsors',
+                routeParams: { search: search, tab: 'liste' }
+            } %}
         {% endif %}
     </div>
 
@@ -109,13 +116,13 @@
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Nom *</label>
-                    <input type="text" name="nom" id="spF_nom" class="sp-form__input" placeholder="Nom du sponsor">
+                    <input type="text" name="nom" id="spF_nom" class="sp-form__input {% if formErrors.nom is defined %}sp-form__input--error{% endif %}" placeholder="Nom du sponsor" value="{{ formData.nom ?? '' }}">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Secteur d'activité</label>
                     <select name="secteur_activite" id="spF_secteur" class="sp-form__input">
                         {% for sec in secteurOptions %}
-                            <option value="{{ sec.value }}">{{ sec.label }}</option>
+                            <option value="{{ sec.value }}" {% if (formData.secteur_activite ?? '') == sec.value %}selected{% endif %}>{{ sec.label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -124,28 +131,28 @@
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Email de contact *</label>
-                    <input type="text" name="email_contact" id="spF_email" class="sp-form__input" placeholder="contact@example.com">
+                    <input type="text" name="email_contact" id="spF_email" class="sp-form__input {% if formErrors.email_contact is defined %}sp-form__input--error{% endif %}" placeholder="contact@example.com" value="{{ formData.email_contact ?? '' }}">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Téléphone *</label>
-                    <input type="text" name="telephone" id="spF_tel" class="sp-form__input" placeholder="+216 XX XXX XXX">
+                    <input type="text" name="telephone" id="spF_tel" class="sp-form__input {% if formErrors.telephone is defined %}sp-form__input--error{% endif %}" placeholder="+216 XX XXX XXX" value="{{ formData.telephone ?? '' }}">
                 </div>
             </div>
 
             <div class="sp-form__grid2">
                 <div class="sp-form__row">
                     <label class="sp-form__label">Site web</label>
-                    <input type="text" name="site_web" id="spF_web" class="sp-form__input" placeholder="https://...">
+                    <input type="text" name="site_web" id="spF_web" class="sp-form__input {% if formErrors.site_web is defined %}sp-form__input--error{% endif %}" placeholder="https://..." value="{{ formData.site_web ?? '' }}">
                 </div>
                 <div class="sp-form__row">
                     <label class="sp-form__label">Montant contribution (TND)</label>
-                    <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" value="0">
+                    <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input {% if formErrors.montant_contribution is defined %}sp-form__input--error{% endif %}" value="{{ formData.montant_contribution ?? '0' }}">
                 </div>
             </div>
 
             <div class="sp-form__row">
                 <label class="sp-form__label">Description</label>
-                <textarea name="description" class="sp-form__input sp-form__textarea" rows="3" placeholder="Description du sponsor…"></textarea>
+                <textarea name="description" class="sp-form__input sp-form__textarea" rows="3" placeholder="Description du sponsor…">{{ formData.description ?? '' }}</textarea>
             </div>
 
             {# Logo #}
@@ -179,7 +186,7 @@
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Nom *</label>
-                        <input type="text" name="nom" id="spF_nom" class="sp-form__input" value="{{ editSponsor.nom }}">
+                        <input type="text" name="nom" id="spF_nom" class="sp-form__input {% if editFormErrors.nom is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.nom }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Secteur d'activité</label>
@@ -194,22 +201,22 @@
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Email de contact *</label>
-                        <input type="text" name="email_contact" id="spF_email" class="sp-form__input" value="{{ editSponsor.emailContact }}">
+                        <input type="text" name="email_contact" id="spF_email" class="sp-form__input {% if editFormErrors.email_contact is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.emailContact }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Téléphone *</label>
-                        <input type="text" name="telephone" id="spF_tel" class="sp-form__input" value="{{ editSponsor.telephone }}">
+                        <input type="text" name="telephone" id="spF_tel" class="sp-form__input {% if editFormErrors.telephone is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.telephone }}">
                     </div>
                 </div>
 
                 <div class="sp-form__grid2">
                     <div class="sp-form__row">
                         <label class="sp-form__label">Site web</label>
-                        <input type="text" name="site_web" id="spF_web" class="sp-form__input" value="{{ editSponsor.siteWeb }}">
+                        <input type="text" name="site_web" id="spF_web" class="sp-form__input {% if editFormErrors.site_web is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.siteWeb }}">
                     </div>
                     <div class="sp-form__row">
                         <label class="sp-form__label">Montant contribution (TND)</label>
-                        <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input" value="{{ editSponsor.montantContribution }}">
+                        <input type="text" name="montant_contribution" id="spF_montant" class="sp-form__input {% if editFormErrors.montant_contribution is defined %}sp-form__input--error{% endif %}" value="{{ editSponsor.montantContribution }}">
                     </div>
                 </div>
 

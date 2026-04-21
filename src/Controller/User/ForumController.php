@@ -52,8 +52,18 @@ class ForumController extends AbstractController
         $search = trim((string) $request->query->get('q', ''));
         $sort = $this->resolveSort((string) $request->query->get('sort', 'recent'));
 
+        $allPosts = $postRepository->findForumFeed($search, $sort);
+
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $totalPosts = count($allPosts);
+        $totalPages = max(1, (int) ceil($totalPosts / $limit));
+        $page = min($page, $totalPages);
+        $posts = array_slice($allPosts, ($page - 1) * $limit, $limit);
+
         return $this->render('user/forum/index.html.twig', [
-            'posts' => $postRepository->findForumFeed($search, $sort),
+            'posts' => $posts,
             'search' => $search,
             'sort' => $sort,
             'categories' => $categorieForumRepository->findCategoryNames(),
@@ -63,6 +73,8 @@ class ForumController extends AbstractController
                 'categorie' => '',
             ],
             'form_errors' => [],
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
