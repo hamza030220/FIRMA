@@ -195,3 +195,92 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('photo');
+    const previewWrapper = document.getElementById('photoPreviewWrapper');
+    const previewImage = document.getElementById('photoPreview');
+
+    if (!input || !previewWrapper || !previewImage) {
+        return;
+    }
+
+    let currentUrl = null;
+
+    input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+        if (currentUrl) {
+            URL.revokeObjectURL(currentUrl);
+            currentUrl = null;
+        }
+
+        if (!file) {
+            previewWrapper.classList.remove('is-visible');
+            previewWrapper.setAttribute('aria-hidden', 'true');
+            previewImage.removeAttribute('src');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            previewWrapper.classList.remove('is-visible');
+            previewWrapper.setAttribute('aria-hidden', 'true');
+            previewImage.removeAttribute('src');
+            return;
+        }
+
+        currentUrl = URL.createObjectURL(file);
+        previewImage.src = currentUrl;
+        previewWrapper.classList.add('is-visible');
+        previewWrapper.setAttribute('aria-hidden', 'false');
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('casePhotos');
+    const previewWrapper = document.getElementById('casePhotosPreview');
+    const previewGrid = document.getElementById('casePhotosPreviewGrid');
+
+    if (!input || !previewWrapper || !previewGrid) {
+        return;
+    }
+
+    let currentUrls = [];
+
+    function clearPreviews() {
+        currentUrls.forEach((url) => URL.revokeObjectURL(url));
+        currentUrls = [];
+        previewGrid.innerHTML = '';
+    }
+
+    input.addEventListener('change', () => {
+        clearPreviews();
+        const files = input.files ? Array.from(input.files) : [];
+
+        if (files.length === 0) {
+            previewWrapper.classList.remove('is-visible');
+            previewWrapper.setAttribute('aria-hidden', 'true');
+            return;
+        }
+
+        files.forEach((file) => {
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+
+            const url = URL.createObjectURL(file);
+            currentUrls.push(url);
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Apercu photo';
+            previewGrid.appendChild(img);
+        });
+
+        if (previewGrid.children.length > 0) {
+            previewWrapper.classList.add('is-visible');
+            previewWrapper.setAttribute('aria-hidden', 'false');
+        } else {
+            previewWrapper.classList.remove('is-visible');
+            previewWrapper.setAttribute('aria-hidden', 'true');
+        }
+    });
+});

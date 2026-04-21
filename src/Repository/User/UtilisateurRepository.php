@@ -48,4 +48,23 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
             $rows
         ))));
     }
+
+    /**
+     * @return string[]
+     */
+    public function findClientEmails(): array
+    {
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.email')
+            ->andWhere('u.typeUser = :type')
+            ->andWhere('u.email IS NOT NULL')
+            ->setParameter('type', 'client')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn (array $row): ?string => isset($row['email']) && $row['email'] !== '' ? (string) $row['email'] : null,
+            $rows
+        ))));
+    }
 }
