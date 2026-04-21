@@ -172,11 +172,7 @@
             </div>
             <div class="evt-form__group">
                 <label>Nombre d'accompagnants</label>
-<<<<<<< HEAD
-                <input type="text" id="participNbAccomp" data-validate="integer|min:0|max:10" value="0" class="evt-form__input">
-=======
                 <input type="text" id="participNbAccomp" value="0" class="evt-form__input">
->>>>>>> origin/main
             </div>
 
             {# Dynamic accompagnant name fields #}
@@ -408,13 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
             row.innerHTML =
                 '<span class="evt-accomp-label">Accompagnant ' + (i + 1) + '</span>' +
                 '<div class="evt-accomp-inputs">' +
-<<<<<<< HEAD
-                    '<input type="text" name="accomp_prenom[]" placeholder="Prénom" class="evt-form__input" data-validate="required|minlen:2">' +
-                    '<input type="text" name="accomp_nom[]" placeholder="Nom" class="evt-form__input" data-validate="required|minlen:2">' +
-=======
                     '<input type="text" name="accomp_prenom[]" placeholder="Prénom" class="evt-form__input">' +
                     '<input type="text" name="accomp_nom[]" placeholder="Nom" class="evt-form__input">' +
->>>>>>> origin/main
                 '</div>';
             // Restore saved value if it existed at this index
             if (saved[i]) {
@@ -482,10 +473,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('participForm').addEventListener('submit', function(e) {
         e.preventDefault();
-<<<<<<< HEAD
-        if (!firmaValidateForm(this)) return;
-=======
->>>>>>> origin/main
         var evtId = document.getElementById('participEvtId').value;
         var btn = document.getElementById('participSubmit');
         var msgDiv = document.getElementById('participMsg');

@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}FIRMA — Votre Plateforme Agricole{% endblock %}</title>
-        <meta name="description" content="{% block meta_description %}FIRMA — Marketplace, événements, maladies, communauté agricole. Tout ce dont vous avez besoin, au même endroit.{% endblock %}">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🌿</text></svg>">
+        <title>{% block title %}FIRMA - Votre Plateforme Agricole{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}FIRMA - Marketplace, événements, maladies, communauté agricole. Tout ce dont vous avez besoin, au même endroit.{% endblock %}">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>F</text></svg>">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,13 +17,9 @@
     </head>
     <body data-turbo="false">
         {% include 'shared/components/_toast_confirm.html.twig' %}
-<<<<<<< HEAD
-        {% block body %}{% endblock %}
-=======
         {% include 'shared/_flash_toasts.html.twig' %}
         {% block body %}{% endblock %}
         {% block footer %}{% include 'shared/_footer.html.twig' %}{% endblock %}
->>>>>>> origin/main
 
         <div class="app-confirm-modal" id="appConfirmModal" hidden>
             <div class="app-confirm-backdrop" data-confirm-cancel></div>
@@ -90,6 +86,16 @@
                             window.firmaCloseConfirmModal();
 
                             if (form) {
+                                const toastMessage = form.getAttribute('data-forum-success-toast-message');
+                                const toastType = form.getAttribute('data-forum-success-toast-type') || 'success';
+                                const toastDuration = Number.parseInt(form.getAttribute('data-forum-success-toast-duration') || '10000', 10);
+                                if (toastMessage) {
+                                    sessionStorage.setItem('forumActionToast', JSON.stringify({
+                                        message: toastMessage,
+                                        type: toastType,
+                                        duration: Number.isFinite(toastDuration) ? toastDuration : 10000
+                                    }));
+                                }
                                 form.submit();
                             }
                         });
@@ -106,3 +112,4 @@
         </script>
     </body>
 </html>
+

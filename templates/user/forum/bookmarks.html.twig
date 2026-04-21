@@ -1,0 +1,237 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}{{ forum_page_title|default('Forum') }}{% endblock %}
+
+{% block user_content %}
+<section class="forum-shell">
+    {% include 'shared/forum/_language_switcher.html.twig' %}
+    {% set forumUnreadNotifications = user_notifications_count() %}
+    {% if forumUnreadNotifications > 0 %}
+        <div class="forum-warning-banner" role="alert" aria-live="polite">
+            <div class="forum-warning-banner-copy">
+                <span class="forum-warning-banner-icon" aria-hidden="true">?</span>
+                <div>
+                    <strong>Avertissement forum</strong>
+                    <p>Notre application interdit les propos insultants. Consultez vos avertissements internes.</p>
+                </div>
+            </div>
+            <div class="forum-warning-banner-actions">
+                <span class="forum-warning-banner-count" aria-label="{{ forumUnreadNotifications }} notifications">{{ forumUnreadNotifications }}</span>
+                <a href="{{ path('user_notifications') }}" class="forum-warning-banner-link">Voir l'avertissement</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <nav class="forum-bookmark-tabs" aria-label="Bibliotheque du forum">
+        <a href="{{ path('user_forum') }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'feed' %} is-active{% endif %}">Toutes les discussions</a>
+        <a href="{{ forum_favorites_link|default(path('user_forum_favorites')) }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'favorites' %} is-active{% endif %}">Mes favoris</a>
+        <a href="{{ forum_saved_link|default(path('user_forum_saved')) }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'saved' %} is-active{% endif %}">A lire plus tard</a>
+    </nav>
+
+    <div class="forum-hero forum-bookmark-hero">
+        <div>
+            <p class="forum-kicker">Forum FIRMA</p>
+            <h1>{{ forum_page_title|default('Mes favoris') }}</h1>
+            <p class="forum-lead">{{ forum_page_lead|default('Retrouvez ici vos publications sauvegardees.') }}</p>
+        </div>
+        <div class="forum-stats">
+            <div>
+                <strong>{{ bookmark_total|default(posts|length) }}</strong>
+                <span>publications</span>
+            </div>
+            <div>
+                <strong>{{ app.user.fullName }}</strong>
+                <span>connecte</span>
+            </div>
+        </div>
+    </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label in ['error', 'danger'] ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="{{ forum_back_to_feed|default(path('user_forum')) }}" class="forum-back-link">Retour aux discussions</a>
+
+    <div class="forum-list">
+        {% for post in posts %}
+            {% set translatedPost = translated_posts[post.id] ?? null %}
+            {% include 'shared/forum/_post_card.html.twig' with {
+                post: post,
+                translatedPost: translatedPost,
+                translated_categories: translated_categories,
+                favorite_bookmarked_ids: favorite_bookmarked_ids|default({}),
+                saved_bookmarked_ids: saved_bookmarked_ids|default({}),
+                forum_return_to: app.request.requestUri
+            } only %}
+        {% else %}
+            <div class="forum-empty">
+                <h3>{{ bookmark_type == 'saved' ? 'Aucune publication enregistre' : 'Aucun favori pour le moment' }}</h3>
+                <p>{{ bookmark_type == 'saved' ? 'Ajoutez des posts pour les retrouver plus tard.' : 'Ajoutez un post en favori pour le retrouver ici.' }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const successToast = {{ forum_success_toast is defined and forum_success_toast ? {
+                message: forum_success_toast.message|default(''),
+                type: forum_success_toast.type|default('success'),
+                duration: forum_success_toast.duration|default(10000)
+            }|json_encode|raw : 'null' }};
+            if (successToast && successToast.message && typeof window.firmaToast === 'function') {
+                window.firmaToast(successToast.message, successToast.type || 'success', Number.parseInt(successToast.duration || 10000, 10));
+            }
+
+            const storedScroll = sessionStorage.getItem('forumRestoreScrollY');
+            if (storedScroll !== null) {
+                const y = Number.parseInt(storedScroll, 10);
+                if (Number.isFinite(y) && y >= 0) {
+                    window.scrollTo({ top: y, behavior: 'auto' });
+                }
+                sessionStorage.removeItem('forumRestoreScrollY');
+            }
+
+            document.querySelectorAll('form[data-forum-preserve-scroll="true"]').forEach((scrollForm) => {
+                if (!(scrollForm instanceof HTMLFormElement) || scrollForm.dataset.forumScrollBound === 'true') {
+                    return;
+                }
+
+                scrollForm.dataset.forumScrollBound = 'true';
+                scrollForm.addEventListener('submit', () => {
+                    sessionStorage.setItem('forumRestoreScrollY', String(window.scrollY));
+                });
+            });
+
+            document.querySelectorAll('a[data-firma-confirm-link="true"]').forEach((link) => {
+                if (!(link instanceof HTMLAnchorElement) || link.dataset.forumConfirmBound === 'true') {
+                    return;
+                }
+
+                link.dataset.forumConfirmBound = 'true';
+                link.addEventListener('click', (event) => {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '#') {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const title = link.getAttribute('data-firma-confirm-title') || 'Modifier';
+                    const message = link.getAttribute('data-firma-confirm-message') || 'Voulez-vous confirmer cette action ?';
+                    const submitLabel = link.getAttribute('data-firma-confirm-submit') || 'Modifier';
+
+                    if (typeof window.firmaConfirm === 'function') {
+                        window.firmaConfirm(title, message, submitLabel, 'primary').then((ok) => {
+                            if (!ok) {
+                                return;
+                            }
+
+                            window.location.href = href;
+                        });
+                        return;
+                    }
+
+                    window.location.href = href;
+                });
+            });
+
+            const moodWidgets = document.querySelectorAll('[data-forum-mood-widget]');
+
+            const getLocalizedMoodLabel = (mood) => {
+                const labels = {
+                    positif: 'Positif',
+                    negatif: 'Negatif',
+                    neutre: 'Neutre',
+                };
+
+                return labels[(mood || '').toLowerCase()] || labels.neutre;
+            };
+
+            const getMoodEmoji = (mood) => {
+                switch ((mood || '').toLowerCase()) {
+                    case 'positif':
+                        return '😊';
+                    case 'negatif':
+                        return '😞';
+                    default:
+                        return '😐';
+                }
+            };
+
+            const getMoodClass = (mood) => {
+                switch ((mood || '').toLowerCase()) {
+                    case 'positif':
+                        return 'is-positive';
+                    case 'negatif':
+                        return 'is-negative';
+                    default:
+                        return 'is-neutral';
+                }
+            };
+
+            const analyzeMood = async (widget) => {
+                if (!(widget instanceof HTMLElement) || widget.dataset.forumMoodLoaded === 'true' || widget.dataset.forumMoodLoaded === 'loading') {
+                    return;
+                }
+
+                const result = widget.querySelector('[data-forum-mood-result]');
+                const postId = Number.parseInt(widget.dataset.postId || '0', 10);
+                const moodUrl = widget.dataset.moodUrl || '';
+
+                if (!Number.isFinite(postId) || postId <= 0 || !moodUrl || !(result instanceof HTMLElement)) {
+                    return;
+                }
+
+                widget.dataset.forumMoodLoaded = 'loading';
+                result.textContent = '...';
+                widget.classList.add('is-loading');
+
+                try {
+                    const response = await fetch(moodUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ postId }),
+                    });
+
+                    const payload = await response.json();
+                    if (!response.ok || !payload || payload.ok !== true || !payload.data) {
+                        throw new Error((payload && payload.error) ? payload.error : 'Analyse indisponible.');
+                    }
+
+                    const mood = payload.data.mood || 'neutre';
+                    const score = typeof payload.data.score === 'number' ? Math.round(payload.data.score * 100) : null;
+
+                    widget.classList.remove('is-loading', 'is-positive', 'is-negative', 'is-neutral', 'is-error');
+                    widget.classList.add(getMoodClass(mood));
+                    result.textContent = score !== null ? `${getMoodEmoji(mood)} ${getLocalizedMoodLabel(mood)} · ${score}%` : `${getMoodEmoji(mood)} ${getLocalizedMoodLabel(mood)}`;
+                    widget.dataset.forumMoodLoaded = 'true';
+                } catch (error) {
+                    widget.classList.remove('is-loading', 'is-positive', 'is-negative', 'is-neutral');
+                    widget.classList.add('is-error');
+                    result.textContent = 'Erreur';
+                    widget.dataset.forumMoodLoaded = '';
+                    if (window.console && typeof window.console.warn === 'function') {
+                        window.console.warn(error);
+                    }
+                }
+            };
+
+            moodWidgets.forEach((widget) => {
+                if (!(widget instanceof HTMLElement)) {
+                    return;
+                }
+
+                analyzeMood(widget);
+            });
+        });
+    </script>
+{% endblock %}

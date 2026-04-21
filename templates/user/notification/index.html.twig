@@ -1,0 +1,93 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block user_content %}
+<section class="notif-page">
+    <div class="notif-hero">
+        <div>
+            <p class="notif-kicker">Centre de notifications</p>
+            <h1>Vos alertes internes</h1>
+            <p>{{ unread_count }} notification{{ unread_count > 1 ? 's' : '' }} non lue{{ unread_count > 1 ? 's' : '' }}.</p>
+        </div>
+        <form method="post" action="{{ path('user_notifications_mark_all_read') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('user_notifications_mark_all_read') }}">
+            <button type="submit" class="notif-btn notif-btn-secondary">Tout marquer comme lu</button>
+        </form>
+    </div>
+
+    <div class="notif-list">
+        {% for notification in notifications %}
+            <article class="notif-card{% if not notification.read %} is-unread{% endif %}{% if notification.type == 'forum_warning' %} is-warning{% endif %}">
+                <div class="notif-card-head">
+                    <div class="notif-card-title">
+                        {% if notification.type == 'forum_warning' %}
+                            <span class="notif-card-icon" aria-hidden="true">?</span>
+                        {% endif %}
+                        <div>
+                            <strong>{{ notification.title }}</strong>
+                        <span>{{ notification.createdAt|date('d/m/Y H:i', 'Africa/Lagos') }}</span>
+                        </div>
+                    </div>
+                    <span class="notif-pill{% if notification.read %} is-read{% endif %}">{{ notification.read ? 'Lue' : 'Non lue' }}</span>
+                </div>
+
+                <p>{{ notification.message }}</p>
+
+                <div class="notif-card-actions">
+                    {% if notification.linkUrl %}
+                        <form method="post" action="{{ path('user_notifications_open', {id: notification.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('user_notifications_open_' ~ notification.id) }}">
+                            <button type="submit" class="notif-btn notif-btn-arrow">
+                                <span aria-hidden="true" class="notif-btn-icon">→</span>
+                                <span>{{ notification.type == 'forum_warning' ? 'Retour au forum' : 'Ouvrir' }}</span>
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ path('user_notifications_open', {id: notification.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('user_notifications_open_' ~ notification.id) }}">
+                            <button type="submit" class="notif-btn">Marquer comme lue</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </article>
+        {% else %}
+            <div class="notif-empty">
+                <h2>Aucune notification</h2>
+                <p>Vos avertissements internes apparaîtront ici.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+.notif-page { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+.notif-hero { display:flex; justify-content:space-between; gap:1rem; align-items:flex-end; margin-bottom:1.5rem; padding:1.5rem; border-radius:18px; background:linear-gradient(135deg,#f7fbf4,#eef6f0); border:1px solid #dbe9de; }
+.notif-kicker { margin:0 0 .35rem; text-transform:uppercase; letter-spacing:.14em; color:#3f7c3a; font-weight:700; font-size:.78rem; }
+.notif-hero h1 { margin:0 0 .25rem; font-size:2rem; color:#17311c; }
+.notif-hero p { margin:0; color:#5f6f61; }
+.notif-list { display:grid; gap:1rem; }
+.notif-card { background:#fff; border:1px solid #e5ece6; border-radius:16px; padding:1.1rem 1.2rem; box-shadow:0 8px 24px rgba(12,42,18,.05); }
+.notif-card.is-unread { border-color:#cde4cf; box-shadow:0 10px 28px rgba(45,122,58,.10); }
+.notif-card.is-warning { border-color:#f1c3c3; }
+.notif-card-head { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; margin-bottom:.8rem; }
+.notif-card-title { display:flex; align-items:flex-start; gap:.7rem; min-width:0; }
+.notif-card-title div { min-width:0; }
+.notif-card-head strong { display:block; font-size:1rem; color:#17311c; margin-bottom:.15rem; }
+.notif-card-head span { color:#6b7280; font-size:.9rem; }
+.notif-card-icon { display:inline-flex; align-items:center; justify-content:center; width:1.8rem; height:1.8rem; border-radius:999px; background:#fff1f1; color:#b91c1c; border:1px solid #f3c6c6; font-weight:900; flex:0 0 auto; }
+.notif-pill { padding:.3rem .65rem; border-radius:999px; background:#eef6f0; color:#2d7a3a; font-size:.78rem; font-weight:700; }
+.notif-pill.is-read { background:#f1f5f1; color:#6b7280; }
+.notif-card p { margin:0; color:#324036; line-height:1.55; }
+.notif-card-actions { display:flex; justify-content:flex-end; margin-top:1rem; }
+.notif-btn { border:none; border-radius:10px; background:#2d7a3a; color:#fff; padding:.65rem 1rem; font-weight:700; cursor:pointer; }
+.notif-btn-secondary { background:#fff; color:#2d7a3a; border:1px solid #cfe1d3; }
+.notif-btn-arrow { display:inline-flex; align-items:center; gap:.45rem; }
+.notif-btn-icon { display:inline-flex; align-items:center; justify-content:center; width:1.25rem; height:1.25rem; border-radius:999px; background:rgba(255,255,255,.16); font-size:.95rem; line-height:1; }
+.notif-empty { background:#fff; border:1px dashed #d8e4db; border-radius:16px; padding:2rem; text-align:center; color:#627064; }
+@media (max-width: 700px) {
+    .notif-hero { flex-direction:column; align-items:flex-start; }
+    .notif-card-head { flex-direction:column; }
+}
+</style>
+{% endblock %}

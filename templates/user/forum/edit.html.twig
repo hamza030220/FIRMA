@@ -1,52 +1,53 @@
 {% extends 'user/base.html.twig' %}
 
-{% block page_title %}Modifier {{ post.titre }}{% endblock %}
+{% block page_title %}{{ 'forum.edit.title'|trans({}, 'forum') }}{% endblock %}
 
 {% block user_content %}
 <section class="forum-shell">
+    {% include 'shared/forum/_language_switcher.html.twig' %}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</div>
+            <div class="forum-flash forum-flash-{{ label in ['error', 'danger'] ? 'error' : 'success' }}">{{ message }}</div>
         {% endfor %}
     {% endfor %}
 
-    <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-back-link">Retour au post</a>
+    <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-back-link">{{ 'forum.edit.back_to_post'|trans({}, 'forum') }}</a>
 
     <section class="forum-panel">
         <div class="forum-toolbar">
-            <h1>Modifier le post</h1>
+            <h1>{{ 'forum.edit.title'|trans({}, 'forum') }}</h1>
             <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
         </div>
 
         <form id="edit-post-form" method="post" action="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token('forum_edit_' ~ post.id) }}">
 
-            <label for="titre">Titre</label>
+            <label for="titre">{{ 'forum.index.title_label'|trans({}, 'forum') }}</label>
             <input id="titre" name="titre" type="text" value="{{ form_data.titre }}">
             {% if form_errors.titre is defined %}
                 <div class="forum-flash forum-flash-error">{{ form_errors.titre }}</div>
             {% endif %}
 
-            <label for="categorie">Categorie</label>
+            <label for="categorie">{{ 'forum.index.category_label'|trans({}, 'forum') }}</label>
             <select id="categorie" name="categorie" required>
-                <option value="">Choisir une categorie</option>
+                <option value="">{{ 'forum.edit.category_placeholder'|trans({}, 'forum') }}</option>
                 {% for categorie in categories %}
-                    <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ categorie }}</option>
+                    <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ translated_categories[categorie]|default(categorie) }}</option>
                 {% endfor %}
             </select>
             {% if form_errors.categorie is defined %}
                 <div class="forum-flash forum-flash-error">{{ form_errors.categorie }}</div>
             {% endif %}
 
-            <label for="contenu">Contenu</label>
+            <label for="contenu">{{ 'forum.index.content_label'|trans({}, 'forum') }}</label>
             <textarea id="contenu" name="contenu" rows="8">{{ form_data.contenu }}</textarea>
             {% if form_errors.contenu is defined %}
                 <div class="forum-flash forum-flash-error">{{ form_errors.contenu }}</div>
             {% endif %}
 
             <div class="forum-actions">
-                <button type="submit" class="forum-button">Enregistrer</button>
-                <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-button forum-button-secondary">Annuler</a>
+                <button type="submit" class="forum-button">{{ 'forum.edit.save'|trans({}, 'forum') }}</button>
+                <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-button forum-button-secondary">{{ 'forum.edit.cancel'|trans({}, 'forum') }}</a>
             </div>
         </form>
     </section>
@@ -65,20 +66,9 @@
             let isConfirmed = false;
             let pendingSubmit = false;
 
-            const setEditSuccessToast = () => {
-                sessionStorage.setItem('forumPostEditedToast', JSON.stringify({
-                    message: 'Votre post a ete modifie avec succes.',
-                    type: 'success',
-                    duration: 10000
-                }));
-            };
-
-            const modal = document.getElementById('appConfirmModal');
-            const modalTitle = document.getElementById('appConfirmTitle');
-            const modalMessage = document.getElementById('appConfirmMessage');
             const modalSubmit = document.getElementById('appConfirmSubmit');
 
-            if (modal && modalTitle && modalMessage && modalSubmit && !modalSubmit.dataset.editPostBound) {
+            if (modalSubmit && !modalSubmit.dataset.editPostBound) {
                 modalSubmit.dataset.editPostBound = 'true';
                 modalSubmit.addEventListener('click', () => {
                     if (!pendingSubmit) {
@@ -87,7 +77,6 @@
 
                     pendingSubmit = false;
                     isConfirmed = true;
-                    setEditSuccessToast();
                     form.submit();
                 });
             }
@@ -99,17 +88,19 @@
 
                 event.preventDefault();
 
-                const title = 'Enregistrer les modifications';
-                const message = 'Voulez-vous vraiment enregistrer les modifications de ce post ?';
-
                 if (typeof window.firmaOpenConfirmModal === 'function') {
                     pendingSubmit = true;
-                    window.firmaOpenConfirmModal('edit-post-form', title, message, 'Enregistrer', 'primary');
+                    window.firmaOpenConfirmModal(
+                        'edit-post-form',
+                        '{{ 'forum.edit.title'|trans({}, 'forum')|e('js') }}',
+                        '{{ 'forum.index.edit_message'|trans({}, 'forum')|e('js') }}',
+                        '{{ 'forum.edit.save'|trans({}, 'forum')|e('js') }}',
+                        'primary'
+                    );
                     return;
                 }
 
                 isConfirmed = true;
-                setEditSuccessToast();
                 form.submit();
             });
         });

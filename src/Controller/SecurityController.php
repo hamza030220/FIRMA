@@ -2,12 +2,9 @@
 
 namespace App\Controller;
 
-<<<<<<< HEAD
-=======
 use App\Entity\User\Utilisateur;
 use App\Form\User\InscriptionType;
 use App\Repository\User\UtilisateurRepository;
->>>>>>> origin/main
 use App\Service\Event\ParticipationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,8 +44,6 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-<<<<<<< HEAD
-=======
     #[Route('/inscription', name: 'app_inscription')]
     public function inscription(
         Request $request,
@@ -102,7 +97,6 @@ class SecurityController extends AbstractController
         return $this->render('security/signup.html.twig', ['form' => $form]);
     }
 
->>>>>>> origin/main
     #[Route('/participation/{id}/confirmer/{token}', name: 'public_participation_confirm', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function confirmParticipation(int $id, string $token): Response
     {

@@ -1,0 +1,93 @@
+{% set forumLanguages = [
+    { locale: 'fr', label: 'forum.language_fr'|trans({}, 'forum') },
+    { locale: 'en', label: 'forum.language_en'|trans({}, 'forum') },
+    { locale: 'de', label: 'forum.language_de'|trans({}, 'forum') },
+    { locale: 'es', label: 'forum.language_es'|trans({}, 'forum') },
+    { locale: 'it', label: 'forum.language_it'|trans({}, 'forum') },
+    { locale: 'nl', label: 'forum.language_nl'|trans({}, 'forum') },
+    { locale: 'pt', label: 'forum.language_pt_pt'|trans({}, 'forum') },
+    { locale: 'pl', label: 'forum.language_pl'|trans({}, 'forum') },
+] %}
+
+{% macro flag(locale) %}
+    {% if locale == 'fr' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="1" height="2" fill="#0055A4"/>
+            <rect x="1" width="1" height="2" fill="#FFFFFF"/>
+            <rect x="2" width="1" height="2" fill="#EF4135"/>
+        </svg>
+    {% elseif locale == 'en' %}
+        <svg viewBox="0 0 60 36" role="presentation" aria-hidden="true">
+            <rect width="60" height="36" fill="#012169"/>
+            <path d="M0 0L60 36M60 0L0 36" stroke="#FFFFFF" stroke-width="9"/>
+            <path d="M0 0L60 36M60 0L0 36" stroke="#C8102E" stroke-width="5"/>
+            <path d="M30 0v36M0 18h60" stroke="#FFFFFF" stroke-width="11"/>
+            <path d="M30 0v36M0 18h60" stroke="#C8102E" stroke-width="7"/>
+        </svg>
+    {% elseif locale == 'de' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="3" height="0.6667" y="0" fill="#000000"/>
+            <rect width="3" height="0.6667" y="0.6667" fill="#DD0000"/>
+            <rect width="3" height="0.6667" y="1.3333" fill="#FFCE00"/>
+        </svg>
+    {% elseif locale == 'es' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="3" height="2" fill="#AA151B"/>
+            <rect y="0.5" width="3" height="1" fill="#F1BF00"/>
+        </svg>
+    {% elseif locale == 'it' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="1" height="2" fill="#009246"/>
+            <rect x="1" width="1" height="2" fill="#FFFFFF"/>
+            <rect x="2" width="1" height="2" fill="#CE2B37"/>
+        </svg>
+    {% elseif locale == 'nl' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="3" height="0.6667" y="0" fill="#AE1C28"/>
+            <rect width="3" height="0.6667" y="0.6667" fill="#FFFFFF"/>
+            <rect width="3" height="0.6667" y="1.3333" fill="#21468B"/>
+        </svg>
+    {% elseif locale == 'pt' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="1.2" height="2" fill="#006600"/>
+            <rect x="1.2" width="1.8" height="2" fill="#FF0000"/>
+            <circle cx="1.2" cy="1" r="0.38" fill="#FEDD00"/>
+        </svg>
+    {% elseif locale == 'pl' %}
+        <svg viewBox="0 0 3 2" role="presentation" aria-hidden="true">
+            <rect width="3" height="1" y="0" fill="#FFFFFF"/>
+            <rect width="3" height="1" y="1" fill="#D4213D"/>
+        </svg>
+    {% endif %}
+{% endmacro %}
+
+<details class="forum-language-switcher">
+    <summary class="forum-language-switcher-toggle" aria-label="{{ 'forum.switch'|trans({}, 'forum') }}">
+        <span class="forum-language-switcher-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="presentation">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18"></path>
+                <path d="M12 3c2.8 2.7 4.4 6.2 4.4 9s-1.6 6.3-4.4 9c-2.8-2.7-4.4-6.2-4.4-9S9.2 5.7 12 3Z"></path>
+            </svg>
+        </span>
+        <span class="forum-sr-only">{{ 'forum.switch'|trans({}, 'forum') }}</span>
+    </summary>
+    {% if user_notifications_count() > 0 %}
+        <a href="{{ path('user_notifications') }}" class="forum-forum-alert-link" title="{{ 'forum.mood.warning'|trans({}, 'forum') }}" aria-label="{{ 'forum.mood.warning'|trans({}, 'forum') }}">
+            <span class="forum-forum-alert-icon" aria-hidden="true">?</span>
+        </a>
+    {% endif %}
+    <div class="forum-language-switcher-options" aria-label="{{ 'forum.switch'|trans({}, 'forum') }}">
+        {% for language in forumLanguages %}
+            <a
+                href="{{ path('user_forum_locale', {locale: language.locale}) }}"
+                class="forum-language-chip{% if app.request.locale starts with language.locale %} is-active{% endif %}"
+                title="{{ language.label }}"
+                aria-label="{{ language.label }}"
+            >
+                <span class="forum-language-flag" aria-hidden="true">{{ _self.flag(language.locale) }}</span>
+                <span class="forum-sr-only">{{ language.label }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</details>
