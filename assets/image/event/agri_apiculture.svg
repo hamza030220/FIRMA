@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#66BB6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#meadow)"/>
+  <!-- Flowers -->
+  <g>
+    <line x1="150" y1="300" x2="150" y2="260" stroke="#4CAF50" stroke-width="2"/>
+    <circle cx="150" cy="255" r="8" fill="#E91E63" opacity="0.7"/>
+    <circle cx="142" cy="250" r="6" fill="#F48FB1"/><circle cx="158" cy="250" r="6" fill="#F48FB1"/>
+    <circle cx="150" cy="243" r="6" fill="#F48FB1"/><circle cx="150" cy="258" r="6" fill="#F48FB1"/>
+    <circle cx="150" cy="251" r="4" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="350" y1="300" x2="348" y2="250" stroke="#4CAF50" stroke-width="2"/>
+    <circle cx="348" cy="245" r="8" fill="#9C27B0" opacity="0.7"/>
+    <circle cx="340" cy="240" r="6" fill="#CE93D8"/><circle cx="356" cy="240" r="6" fill="#CE93D8"/>
+    <circle cx="348" cy="233" r="6" fill="#CE93D8"/><circle cx="348" cy="248" r="6" fill="#CE93D8"/>
+    <circle cx="348" cy="241" r="4" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="550" y1="300" x2="552" y2="255" stroke="#4CAF50" stroke-width="2"/>
+    <circle cx="552" cy="250" r="8" fill="#FF9800" opacity="0.7"/>
+    <circle cx="544" cy="245" r="6" fill="#FFCC80"/><circle cx="560" cy="245" r="6" fill="#FFCC80"/>
+    <circle cx="552" cy="238" r="6" fill="#FFCC80"/><circle cx="552" cy="253" r="6" fill="#FFCC80"/>
+    <circle cx="552" cy="246" r="4" fill="#FFF176"/>
+  </g>
+  <!-- Beehive -->
+  <g transform="translate(400,220)">
+    <ellipse cx="0" cy="0" rx="45" ry="35" fill="#FFB300"/>
+    <ellipse cx="0" cy="-25" rx="38" ry="28" fill="#FFC107"/>
+    <ellipse cx="0" cy="-48" rx="28" ry="20" fill="#FFD54F"/>
+    <ellipse cx="0" cy="-65" rx="15" ry="12" fill="#FFE082"/>
+    <rect x="-8" y="30" width="16" height="12" fill="#5D4037" rx="3"/>
+    <!-- Entrance -->
+    <ellipse cx="0" cy="33" rx="5" ry="3" fill="#3E2723"/>
+  </g>
+  <!-- Bees -->
+  <g>
+    <ellipse cx="300" cy="180" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="296" y="176" width="3" height="3" fill="#212121" rx="1"/><rect x="302" y="176" width="3" height="3" fill="#212121" rx="1"/>
+    <line x1="295" y1="173" x2="285" y2="168" stroke="#90A4AE" stroke-width="1"/>
+    <line x1="305" y1="173" x2="315" y2="168" stroke="#90A4AE" stroke-width="1"/>
+  </g>
+  <g>
+    <ellipse cx="480" cy="160" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="476" y="156" width="3" height="3" fill="#212121" rx="1"/><rect x="482" y="156" width="3" height="3" fill="#212121" rx="1"/>
+    <line x1="475" y1="153" x2="465" y2="148" stroke="#90A4AE" stroke-width="1"/>
+    <line x1="485" y1="153" x2="495" y2="148" stroke="#90A4AE" stroke-width="1"/>
+  </g>
+  <g>
+    <ellipse cx="520" cy="200" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="516" y="196" width="3" height="3" fill="#212121" rx="1"/><rect x="522" y="196" width="3" height="3" fill="#212121" rx="1"/>
+    <line x1="515" y1="193" x2="505" y2="188" stroke="#90A4AE" stroke-width="1"/>
+    <line x1="525" y1="193" x2="535" y2="188" stroke="#90A4AE" stroke-width="1"/>
+  </g>
+  <!-- Honey jar -->
+  <g transform="translate(200,310)">
+    <rect x="-15" y="0" width="30" height="35" fill="#FF8F00" rx="5"/>
+    <rect x="-18" y="-3" width="36" height="8" fill="#8D6E63" rx="3"/>
+    <text x="0" y="23" text-anchor="middle" fill="white" font-size="10" font-family="Arial">🍯</text>
+  </g>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Atelier Apiculture Traditionnelle</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Miel de thym - Béja, Tunisie</text>
+</svg>

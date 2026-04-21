@@ -321,6 +321,12 @@
                     </div>
                 {% endfor %}
             </div>
+            {% include 'shared/_pagination.html.twig' with {
+                currentPage: currentPage,
+                totalPages: totalPages,
+                route: 'admin_forum',
+                routeParams: { q: search }
+            } %}
         </section>
     </div>
 </section>

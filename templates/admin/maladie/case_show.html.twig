@@ -1,0 +1,118 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Cas #{{ case.id }}{% endblock %}
+{% block admin_page_title %}Cas #{{ case.id }}{% endblock %}
+
+{% block admin_content %}
+<style>
+.case-detail{display:flex;flex-direction:column;gap:1.2rem}
+.case-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.case-top h2{margin:0;font-size:20px;font-weight:600;color:var(--color-text-primary)}
+.case-top a{color:#0f5c2f;text-decoration:none;font-weight:600;font-size:13px}
+.case-top a:hover{text-decoration:underline}
+.case-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.2rem}
+.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.case-label{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em}
+.case-value{font-size:14px;font-weight:600;color:var(--color-text-primary);margin-top:0.2rem}
+.case-badge{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:600}
+.case-badge.public{background:#e6f1fb;color:#0c447c}
+.case-badge.private{background:#fcebeb;color:#791f1f}
+.case-updates{display:flex;flex-direction:column;gap:0.8rem}
+.case-update{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.9rem 1rem}
+.case-update-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:0.5rem}
+.case-update-title{font-weight:600;color:var(--color-text-primary)}
+.case-update-meta{font-size:12px;color:var(--color-text-secondary)}
+.case-photos{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.6rem}
+.case-photos img{width:140px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--color-border-tertiary)}
+.case-empty{color:var(--color-text-secondary);font-size:13px}
+@media (max-width: 980px){
+  .case-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width: 680px){
+  .case-grid{grid-template-columns:1fr}
+}
+</style>
+
+<div class="case-detail">
+    <div class="case-top">
+        <h2>Cas #{{ case.id }} - {{ case.maladie.nom }}</h2>
+        <a href="{{ path('admin_maladie_case_index') }}">Retour aux cas</a>
+    </div>
+
+    <div class="case-card">
+        <div class="case-grid">
+            <div>
+                <div class="case-label">Utilisateur</div>
+                <div class="case-value">{{ case.utilisateur.fullName|default(case.utilisateur.email|default('Utilisateur')) }}</div>
+            </div>
+            <div>
+                <div class="case-label">Statut</div>
+                <div class="case-value">{{ case.statut|capitalize }}</div>
+            </div>
+            <div>
+                <div class="case-label">Visibilite</div>
+                <div class="case-value">
+                    {% if case.isPublic %}
+                        <span class="case-badge public">Public</span>
+                    {% else %}
+                        <span class="case-badge private">Prive</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="case-label">Culture</div>
+                <div class="case-value">{{ case.culture|default('—') }}</div>
+            </div>
+            <div>
+                <div class="case-label">Parcelle</div>
+                <div class="case-value">{{ case.parcelle|default('—') }}</div>
+            </div>
+            <div>
+                <div class="case-label">Cree le</div>
+                <div class="case-value">{{ case.createdAt ? case.createdAt|date('d/m/Y H:i') : '—' }}</div>
+            </div>
+            <div>
+                <div class="case-label">Symptomes</div>
+                <div class="case-value">{{ case.symptomes }}</div>
+            </div>
+            <div>
+                <div class="case-label">Suivis</div>
+                <div class="case-value">{{ updateCount }}</div>
+            </div>
+            <div>
+                <div class="case-label">Photos</div>
+                <div class="case-value">{{ photoCount }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="case-updates">
+        <div class="case-label">Historique</div>
+        {% if case.updates is empty %}
+            <div class="case-empty">Aucun suivi enregistre pour ce cas.</div>
+        {% else %}
+            {% for u in case.updates %}
+                <div class="case-update">
+                    <div class="case-update-head">
+                        <div class="case-update-title">Resultat: {{ u.resultat }}</div>
+                        <div class="case-update-meta">{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '' }}</div>
+                    </div>
+                    {% if u.solutionTraitement %}
+                        <div><strong>Traitement:</strong> {{ u.solutionTraitement.titre }}</div>
+                    {% endif %}
+                    {% if u.commentaire %}
+                        <div>{{ u.commentaire }}</div>
+                    {% endif %}
+                    {% if u.photos is not empty %}
+                        <div class="case-photos">
+                            {% for p in u.photos %}
+                                <img src="{{ asset('uploads/maladies/cases/' ~ p.filename) }}" alt="Photo cas">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

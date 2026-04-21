@@ -32,6 +32,7 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
         - { path: ^/participation/.+/confirmer/, roles: PUBLIC_ACCESS }
+        - { path: ^/ticket/, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/user, roles: ROLE_USER }
 

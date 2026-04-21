@@ -27,15 +27,51 @@ class ParticipationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Participations actives (non annulées) d'un utilisateur. */
+    /** Participations actives (confirmées ou en attente) d'un événement. */
+    public function findActiveByEvent(int $evenementId): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.utilisateur', 'u')
+            ->addSelect('u')
+            ->join('p.evenement', 'e')
+            ->addSelect('e')
+            ->andWhere('p.evenement = :eid')
+            ->andWhere('p.statut IN (:statuts)')
+            ->setParameter('eid', $evenementId)
+            ->setParameter('statuts', ['confirme', 'en_attente'])
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** Annule toutes les participations actives d'un événement. */
+    public function cancelAllByEvent(int $evenementId): int
+    {
+        return $this->createQueryBuilder('p')
+            ->update()
+            ->set('p.statut', ':newStatut')
+            ->andWhere('p.evenement = :eid')
+            ->andWhere('p.statut IN (:statuts)')
+            ->setParameter('newStatut', 'annule')
+            ->setParameter('eid', $evenementId)
+            ->setParameter('statuts', ['confirme', 'en_attente'])
+            ->getQuery()
+            ->execute();
+    }
+
+    /** Participations actives d'un utilisateur (exclut événements annulés ou passés). */
     public function findActiveByUser(int $userId): array
     {
         return $this->createQueryBuilder('p')
             ->join('p.utilisateur', 'u')
+            ->join('p.evenement', 'e')
             ->andWhere('u.id = :uid')
             ->andWhere('p.statut IN (:statuts)')
+            ->andWhere('e.statut != :annule')
+            ->andWhere('e.dateFin >= :today')
             ->setParameter('uid', $userId)
             ->setParameter('statuts', ['confirme', 'en_attente'])
+            ->setParameter('annule', 'annule')
+            ->setParameter('today', new \DateTime('today'))
             ->orderBy('p.dateInscription', 'DESC')
             ->getQuery()
             ->getResult();

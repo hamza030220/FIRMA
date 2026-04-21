@@ -154,6 +154,12 @@
         </tbody>
       </table>
     </div>
+    {% include 'shared/_pagination.html.twig' with {
+        currentPage: currentPage,
+        totalPages: totalPages,
+        route: 'admin_utilisateurs',
+        routeParams: { q: keyword, role: role }
+    } %}
   {% endif %}
 </div>
 

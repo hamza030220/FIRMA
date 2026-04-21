@@ -953,3 +953,77 @@
   display:inline-flex;align-items:center;justify-content:center;
   min-width:28px;height:36px;color:#8b9a8e;font-size:.9rem;
 }
+
+/* ═══════════════════════════════════════════════
+   AVAILABILITY MINI-CALENDAR – User Detail Modal
+   ═══════════════════════════════════════════════ */
+.um-avail-section {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #f8faf8;
+    border-radius: 12px;
+    border: 1px solid rgba(32,69,44,.08);
+}
+.um-avail-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #20452c;
+    margin: 0 0 12px;
+}
+.um-avail-calendar {
+    margin-bottom: 10px;
+    min-height: 250px;
+}
+.um-avail-calendar .fc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.8rem;
+}
+.um-avail-calendar .fc-toolbar-title {
+    font-size: 0.95rem !important;
+    color: #20452c;
+    font-weight: 600;
+}
+.um-avail-calendar .fc-button {
+    background: #20452c !important;
+    border-color: #20452c !important;
+    font-size: 0.75rem !important;
+    border-radius: 5px !important;
+    padding: 3px 8px !important;
+}
+.um-avail-calendar .fc-button:hover {
+    background: #2d5f3e !important;
+}
+.um-avail-calendar .fc-day-today {
+    background: rgba(32,69,44,.06) !important;
+}
+.um-avail-calendar .fc-daygrid-bg-event {
+    opacity: 0.3;
+}
+.um-avail-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    color: #666;
+}
+.um-avail-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.um-avail-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.um-avail-dot-free { background: #27ae60; }
+.um-avail-dot-booked { background: #e74c3c; }
+.um-avail-status {
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+    min-height: 20px;
+}

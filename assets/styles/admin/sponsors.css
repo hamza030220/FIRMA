@@ -287,6 +287,18 @@
 
 .sp-text-muted{ color:#888; font-size:.85rem; font-style:italic }
 
+/* ═══════════════════════════
+   Form validation errors
+   ═══════════════════════════ */
+.sp-form__input--error{
+  border-color:#c62828 !important;
+  box-shadow:0 0 0 3px rgba(198,40,40,.12) !important;
+}
+.sp-form__error{
+  display:block; color:#c62828; font-size:.82rem;
+  margin-top:4px; font-weight:500;
+}
+
 /* ═══════════════════════════════════════════════
    MODAL — Detail popup
    ═══════════════════════════════════════════════ */
