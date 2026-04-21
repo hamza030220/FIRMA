@@ -313,5 +313,12 @@ document.addEventListener('submit', (event) => {
 }, true);
 </script>
 
+{% include 'shared/_pagination.html.twig' with {
+    currentPage: currentPage|default(1),
+    totalPages: totalPages|default(1),
+    route: 'admin_maladie_index',
+    routeParams: {}
+} %}
+
 {% endblock %}
 
