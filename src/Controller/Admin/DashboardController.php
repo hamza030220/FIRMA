@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\User\Utilisateur;
 use App\Repository\Event\EvenementRepository;
 use App\Repository\Event\ParticipationRepository;
 use App\Repository\Event\SponsorRepository;
@@ -11,6 +12,7 @@ use App\Repository\Marketplace\FournisseurRepository;
 use App\Repository\Marketplace\LocationRepository;
 use App\Repository\Marketplace\TerrainRepository;
 use App\Repository\Marketplace\VehiculeRepository;
+use App\Service\Maladie\Weather\MaladieWeatherAutoAlertService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,7 +33,10 @@ class DashboardController extends AbstractController
         EvenementRepository $evtRepo,
         ParticipationRepository $partRepo,
         SponsorRepository $sponsorRepo,
+        MaladieWeatherAutoAlertService $autoAlertService,
     ): Response {
+        $this->triggerAutoAlert($autoAlertService);
+
         $totalProducts = $equipRepo->count([]) + $vehicRepo->count([]) + $terrainRepo->count([]);
         $pendingOrders = $cmdRepo->count(['statutPaiement' => 'en_attente']);
         $activeLocations = $locRepo->count(['statut' => 'en_cours']);
@@ -79,5 +84,20 @@ class DashboardController extends AbstractController
     public function maladies(): Response
     {
         return $this->redirectToRoute('admin_maladie_index');
+    }
+
+    private function triggerAutoAlert(MaladieWeatherAutoAlertService $autoAlertService): void
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            return;
+        }
+
+        $result = $autoAlertService->checkAndSendForUser($user);
+        if ($result['sent']) {
+            $this->addFlash('success', 'Alerte meteo envoyee automatiquement pour ' . ($result['city'] ?? 'votre ville') . '.');
+        } elseif ($result['error']) {
+            $this->addFlash('error', 'Echec de l alerte meteo automatique: ' . $result['error']);
+        }
     }
 }
