@@ -29,6 +29,9 @@ class Accompagnant
     #[Assert\Length(min: 2, max: 255, minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères')]
     private ?string $prenom = null;
 
+    #[ORM\Column(name: 'code_accompagnant', length: 20, nullable: true)]
+    private ?string $codeAccompagnant = null;
+
     // ── Getters / Setters ──
 
     public function getIdAccompagnant(): ?int { return $this->idAccompagnant; }
@@ -41,6 +44,19 @@ class Accompagnant
 
     public function getPrenom(): ?string { return $this->prenom; }
     public function setPrenom(string $prenom): static { $this->prenom = $prenom; return $this; }
+
+    public function getCodeAccompagnant(): ?string { return $this->codeAccompagnant; }
+    public function setCodeAccompagnant(?string $code): static { $this->codeAccompagnant = $code; return $this; }
+
+    public static function genererCode(): string
+    {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $code  = '';
+        for ($i = 0; $i < 5; $i++) {
+            $code .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        return 'ACC-' . $code;
+    }
 
     public function getFullName(): string
     {

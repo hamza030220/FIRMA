@@ -26,11 +26,21 @@ class UtilisateurController extends AbstractController
         $utilisateurs = $repo->searchAndFilter($keyword, $role);
         $stats        = $repo->countByType();
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $total = count($utilisateurs);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $utilisateurs = array_slice($utilisateurs, ($page - 1) * $limit, $limit);
+
         return $this->render('admin/user/index.html.twig', [
             'utilisateurs' => $utilisateurs,
             'keyword'      => $keyword,
             'role'         => $role,
             'stats'        => $stats,
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
         ]);
     }
 

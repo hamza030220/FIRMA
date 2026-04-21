@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#66BB6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#ground)"/>
+  <!-- Olive trees with pruning marks -->
+  <g transform="translate(250,180)">
+    <rect x="-10" y="50" width="20" height="70" fill="#795548"/>
+    <!-- Trunk fork -->
+    <line x1="0" y1="50" x2="-30" y2="10" stroke="#795548" stroke-width="8"/>
+    <line x1="0" y1="50" x2="30" y2="5" stroke="#795548" stroke-width="8"/>
+    <!-- Canopy -->
+    <ellipse cx="-30" cy="-10" rx="40" ry="30" fill="#689F38"/>
+    <ellipse cx="30" cy="-15" rx="40" ry="30" fill="#7CB342"/>
+    <ellipse cx="0" cy="-5" rx="35" ry="25" fill="#8BC34A"/>
+    <!-- Pruning cut marks -->
+    <line x1="-50" y1="30" x2="-40" y2="25" stroke="#F44336" stroke-width="3"/>
+    <line x1="55" y1="25" x2="45" y2="20" stroke="#F44336" stroke-width="3"/>
+  </g>
+  <g transform="translate(550,190)">
+    <rect x="-10" y="45" width="20" height="65" fill="#795548"/>
+    <line x1="0" y1="45" x2="-25" y2="10" stroke="#795548" stroke-width="7"/>
+    <line x1="0" y1="45" x2="25" y2="8" stroke="#795548" stroke-width="7"/>
+    <ellipse cx="-25" cy="-8" rx="35" ry="28" fill="#689F38"/>
+    <ellipse cx="25" cy="-12" rx="35" ry="28" fill="#7CB342"/>
+    <ellipse cx="0" cy="-2" rx="30" ry="22" fill="#8BC34A"/>
+  </g>
+  <!-- Pruning shears -->
+  <g transform="translate(400,310)">
+    <rect x="-3" y="0" width="6" height="30" fill="#F44336" rx="2"/>
+    <rect x="-3" y="30" width="6" height="15" fill="#424242" rx="1"/>
+    <ellipse cx="0" cy="-5" rx="12" ry="6" fill="#B0BEC5"/>
+  </g>
+  <!-- Cut branches on ground -->
+  <line x1="300" y1="340" x2="350" y2="330" stroke="#795548" stroke-width="3"/>
+  <ellipse cx="345" cy="327" rx="6" ry="4" fill="#8BC34A"/>
+  <line x1="450" y1="335" x2="500" y2="345" stroke="#795548" stroke-width="3"/>
+  <ellipse cx="495" cy="342" rx="6" ry="4" fill="#8BC34A"/>
+  <!-- Sun -->
+  <circle cx="680" cy="70" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Formation Taille des Oliviers</text>
+  <text x="400" y="445" text-anchor="middle" fill="#C5E1A5" font-family="Arial,sans-serif" font-size="18">Techniques de taille - Sfax</text>
+</svg>

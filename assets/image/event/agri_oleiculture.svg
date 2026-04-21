@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1565C0"/>
+      <stop offset="100%" stop-color="#42A5F5"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6D8B3A"/>
+      <stop offset="100%" stop-color="#33691E"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <!-- Hills -->
+  <ellipse cx="200" cy="400" rx="300" ry="150" fill="#7CB342"/>
+  <ellipse cx="600" cy="420" rx="350" ry="140" fill="#689F38"/>
+  <rect y="380" width="800" height="120" fill="#558B2F"/>
+  <!-- Olive trees -->
+  <g>
+    <rect x="180" y="280" width="12" height="80" fill="#795548" rx="3"/>
+    <circle cx="186" cy="260" r="40" fill="#4CAF50" opacity="0.85"/>
+    <circle cx="170" cy="270" r="25" fill="#66BB6A" opacity="0.7"/>
+    <circle cx="205" cy="268" r="28" fill="#43A047" opacity="0.7"/>
+  </g>
+  <g>
+    <rect x="380" y="290" width="12" height="70" fill="#795548" rx="3"/>
+    <circle cx="386" cy="272" r="38" fill="#4CAF50" opacity="0.85"/>
+    <circle cx="368" cy="280" r="24" fill="#66BB6A" opacity="0.7"/>
+    <circle cx="405" cy="278" r="26" fill="#43A047" opacity="0.7"/>
+  </g>
+  <g>
+    <rect x="570" y="285" width="12" height="75" fill="#795548" rx="3"/>
+    <circle cx="576" cy="265" r="42" fill="#4CAF50" opacity="0.85"/>
+    <circle cx="558" cy="275" r="26" fill="#66BB6A" opacity="0.7"/>
+    <circle cx="596" cy="272" r="28" fill="#43A047" opacity="0.7"/>
+  </g>
+  <!-- Olives -->
+  <ellipse cx="175" cy="250" rx="5" ry="7" fill="#1B5E20"/>
+  <ellipse cx="198" cy="255" rx="5" ry="7" fill="#1B5E20"/>
+  <ellipse cx="372" cy="268" rx="5" ry="7" fill="#1B5E20"/>
+  <ellipse cx="400" cy="262" rx="5" ry="7" fill="#1B5E20"/>
+  <ellipse cx="562" cy="258" rx="5" ry="7" fill="#1B5E20"/>
+  <ellipse cx="590" cy="260" rx="5" ry="7" fill="#1B5E20"/>
+  <!-- Sun -->
+  <circle cx="680" cy="80" r="50" fill="#FFF176" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="120" y="390" width="560" height="70" rx="10" fill="rgba(0,0,0,0.65)"/>
+  <text x="400" y="422" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Formation en Oléiculture</text>
+  <text x="400" y="447" text-anchor="middle" fill="#C5E1A5" font-family="Arial,sans-serif" font-size="18">Techniques modernes - Sfax, Tunisie</text>
+</svg>

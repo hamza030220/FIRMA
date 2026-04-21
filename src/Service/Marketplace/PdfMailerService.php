@@ -33,7 +33,7 @@ class PdfMailerService
         $filename = 'Recu_FIRMA_' . $commande->getNumeroCommande() . '.pdf';
 
         $email = (new Email())
-            ->from('FIRMA Marketplace <zusslimani001122@gmail.com>')
+            ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
             ->to($commande->getUtilisateur()->getEmail())
             ->subject('FIRMA — Reçu de paiement N° ' . $commande->getNumeroCommande())
             ->html($this->getEmailBody(
@@ -63,7 +63,7 @@ class PdfMailerService
         $filename = 'Recu_Location_FIRMA_' . date('Ymd_His') . '.pdf';
 
         $email = (new Email())
-            ->from('FIRMA Marketplace <zusslimani001122@gmail.com>')
+            ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
             ->to($user->getEmail())
             ->subject('FIRMA — Reçu de location(s) ' . implode(', ', $nums))
             ->html($this->getEmailBody(
@@ -94,7 +94,7 @@ class PdfMailerService
 
         $count = count($lowStockEquipements);
         $email = (new Email())
-            ->from('FIRMA Marketplace <zusslimani001122@gmail.com>')
+            ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
             ->to('hamza.slimani@esprit.tn')
             ->subject('⚠ FIRMA — Alerte stock critique (' . $count . ' équipement' . ($count > 1 ? 's' : '') . ')')
             ->html($this->getAdminEmailBody(
@@ -139,7 +139,7 @@ class PdfMailerService
 
         $count = count($lowStockEquipements);
         $email = (new Email())
-            ->from('FIRMA Marketplace <zusslimani001122@gmail.com>')
+            ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
             ->to('hamza.slimani@esprit.tn')
             ->subject('📊 FIRMA — Rapport d\'analyse de stock (' . $count . ' en alerte)')
             ->html($this->getAdminEmailBody(
@@ -168,7 +168,7 @@ class PdfMailerService
         $filename = 'CompteRendu_FIRMA_' . $commande->getNumeroCommande() . '.pdf';
 
         $email = (new Email())
-            ->from('FIRMA Marketplace <zusslimani001122@gmail.com>')
+            ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
             ->to($commande->getUtilisateur()->getEmail())
             ->subject('FIRMA — Compte-rendu de livraison N° ' . $commande->getNumeroCommande())
             ->html($this->getEmailBody(
@@ -275,7 +275,7 @@ class PdfMailerService
                 <strong style="color:#20452c">L'équipe FIRMA</strong>
             </p>
             <div style="border-top:1px solid #eee;margin-top:24px;padding-top:12px;text-align:center">
-                <p style="font-size:10px;color:#bbb">FIRMA Marketplace — zusslimani001122@gmail.com</p>
+                <p style="font-size:10px;color:#bbb">FIRMA Marketplace — firmaagritech@gmail.com</p>
             </div>
         </div>
         HTML;

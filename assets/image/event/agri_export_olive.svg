@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#64B5F6"/>
+      <stop offset="100%" stop-color="#E3F2FD"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#66BB6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="320" width="800" height="180" fill="url(#ground)"/>
+  <!-- Ship/cargo -->
+  <g transform="translate(550,200)">
+    <path d="M-60,20 L-50,-10 L50,-10 L60,20 Z" fill="#546E7A"/>
+    <rect x="-30" y="-35" width="60" height="25" fill="#78909C"/>
+    <rect x="-20" y="-25" width="15" height="10" fill="#FFD54F"/>
+    <rect x="5" y="-25" width="15" height="10" fill="#FFD54F"/>
+    <line x1="0" y1="-35" x2="0" y2="-55" stroke="#424242" stroke-width="2"/>
+    <rect x="-2" y="-58" width="20" height="12" fill="#F44336"/>
+  </g>
+  <!-- Sea -->
+  <path d="M0,240 Q100,230 200,240 Q300,250 400,240 Q500,230 600,240 Q700,250 800,240 L800,320 L0,320 Z" fill="#42A5F5" opacity="0.5"/>
+  <!-- Olive oil bottles -->
+  <g transform="translate(200,280)">
+    <rect x="-12" y="0" width="24" height="40" fill="#689F38" rx="4"/>
+    <rect x="-6" y="-10" width="12" height="15" fill="#689F38" rx="2"/>
+    <rect x="-3" y="-15" width="6" height="8" fill="#795548" rx="1"/>
+    <text x="0" y="25" text-anchor="middle" fill="white" font-size="8" font-family="Arial">EVOO</text>
+  </g>
+  <g transform="translate(250,285)">
+    <rect x="-10" y="0" width="20" height="35" fill="#7CB342" rx="3"/>
+    <rect x="-5" y="-8" width="10" height="12" fill="#7CB342" rx="2"/>
+    <rect x="-2" y="-12" width="4" height="6" fill="#795548" rx="1"/>
+  </g>
+  <g transform="translate(300,282)">
+    <rect x="-12" y="0" width="24" height="38" fill="#558B2F" rx="4"/>
+    <rect x="-6" y="-9" width="12" height="14" fill="#558B2F" rx="2"/>
+    <rect x="-3" y="-14" width="6" height="7" fill="#795548" rx="1"/>
+    <text x="0" y="24" text-anchor="middle" fill="white" font-size="7" font-family="Arial">BIO</text>
+  </g>
+  <!-- Olive branch -->
+  <g transform="translate(400,100)">
+    <path d="M-60,0 Q0,-20 60,0" stroke="#689F38" stroke-width="3" fill="none"/>
+    <ellipse cx="-40" cy="-5" rx="8" ry="4" fill="#8BC34A" transform="rotate(-20 -40 -5)"/>
+    <ellipse cx="-15" cy="-12" rx="8" ry="4" fill="#8BC34A" transform="rotate(-10 -15 -12)"/>
+    <ellipse cx="15" cy="-12" rx="8" ry="4" fill="#8BC34A" transform="rotate(10 15 -12)"/>
+    <ellipse cx="40" cy="-5" rx="8" ry="4" fill="#8BC34A" transform="rotate(20 40 -5)"/>
+    <circle cx="-25" cy="2" r="5" fill="#1B5E20"/><circle cx="5" cy="-3" r="5" fill="#2E7D32"/>
+    <circle cx="30" cy="2" r="5" fill="#1B5E20"/>
+  </g>
+  <!-- Globe/export arrow -->
+  <g transform="translate(680,100)">
+    <circle cx="0" cy="0" r="25" fill="none" stroke="#1565C0" stroke-width="2"/>
+    <ellipse cx="0" cy="0" rx="12" ry="25" fill="none" stroke="#1565C0" stroke-width="1"/>
+    <line x1="-25" y1="0" x2="25" y2="0" stroke="#1565C0" stroke-width="1"/>
+    <polygon points="30,0 20,-8 20,8" fill="#1565C0"/>
+  </g>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Conférence Export Huile d'Olive</text>
+  <text x="400" y="445" text-anchor="middle" fill="#C5E1A5" font-family="Arial,sans-serif" font-size="18">Commerce international - Sfax</text>
+</svg>

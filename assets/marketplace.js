@@ -290,6 +290,9 @@ function initCatalogue() {
     const dateError = document.getElementById('umDateError');
     const dateSummary = document.getElementById('umDateSummary');
 
+    let availCalendar = null;
+    let bookedRanges = [];
+
     /* ── Open modal ── */
     document.querySelectorAll('.um-card-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -374,10 +377,96 @@ function initCatalogue() {
             dateError.style.display = 'none';
             dateSummary.style.display = 'none';
 
+            /* Load availability mini-calendar for vehicule/terrain */
+            const availSection = document.getElementById('umAvailSection');
+            const availCalEl = document.getElementById('umAvailCalendar');
+            const availStatus = document.getElementById('umAvailStatus');
+            if (availSection && (modalType === 'vehicule' || modalType === 'terrain')) {
+                availSection.style.display = '';
+                bookedRanges = [];
+                if (availCalendar) { availCalendar.destroy(); availCalendar = null; }
+                availStatus.textContent = 'Chargement…';
+                availCalEl.innerHTML = '';
+
+                fetch(ROUTES.locDisponibilite + '?type=' + modalType + '&id=' + modalId)
+                    .then(r => r.json())
+                    .then(data => {
+                        bookedRanges = data.booked || [];
+                        if (bookedRanges.length === 0) {
+                            availStatus.innerHTML = '<span style="color:#27ae60;font-weight:600;">✓ Entièrement disponible — aucune réservation en cours</span>';
+                        } else {
+                            const parts = bookedRanges.map(b => {
+                                const s = new Date(b.start); const e = new Date(b.end);
+                                return s.toLocaleDateString('fr-FR') + ' → ' + e.toLocaleDateString('fr-FR');
+                            });
+                            availStatus.innerHTML = '<span style="color:#c0392b;">Réservé : ' + parts.join(' &nbsp;|&nbsp; ') + '</span>';
+                        }
+
+                        // Build FullCalendar mini view
+                        if (typeof FullCalendar !== 'undefined') {
+                            availCalendar = new FullCalendar.Calendar(availCalEl, {
+                                initialView: 'dayGridMonth',
+                                locale: 'fr',
+                                firstDay: 1,
+                                headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+                                height: 280,
+                                events: bookedRanges.map(b => ({
+                                    start: b.start,
+                                    end: addDay(b.end),
+                                    display: 'background',
+                                    color: '#e74c3c',
+                                })),
+                                dateClick: function(info) {
+                                    // Check if date is booked
+                                    const clickedDate = info.dateStr;
+                                    const isBooked = bookedRanges.some(b => clickedDate >= b.start && clickedDate < addDay(b.end).slice(0,10));
+                                    if (isBooked) return;
+
+                                    if (!dateDebut.value || (dateDebut.value && dateFin.value)) {
+                                        dateDebut.value = clickedDate;
+                                        dateFin.value = '';
+                                        dateFin.min = clickedDate;
+                                    } else {
+                                        if (clickedDate > dateDebut.value) {
+                                            dateFin.value = clickedDate;
+                                        } else {
+                                            dateDebut.value = clickedDate;
+                                            dateFin.value = '';
+                                        }
+                                    }
+                                    checkDates();
+                                },
+                                dayCellDidMount: function(info) {
+                                    const d = info.date.toISOString().split('T')[0];
+                                    const isBooked = bookedRanges.some(b => d >= b.start && d < addDay(b.end).slice(0,10));
+                                    if (isBooked) {
+                                        info.el.style.opacity = '0.5';
+                                        info.el.style.cursor = 'not-allowed';
+                                    }
+                                },
+                                displayEventTime: false,
+                            });
+                            availCalendar.render();
+                        }
+                    })
+                    .catch(() => {
+                        availStatus.textContent = 'Erreur de chargement.';
+                    });
+            } else if (availSection) {
+                availSection.style.display = 'none';
+            }
+
             overlay.classList.add('open');
             document.body.style.overflow = 'hidden';
         });
     });
+
+    /* ── Helper: add 1 day to a date string ── */
+    function addDay(dateStr) {
+        const d = new Date(dateStr);
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().split('T')[0];
+    }
 
     /* ── Close modal ── */
     function closeModal() {

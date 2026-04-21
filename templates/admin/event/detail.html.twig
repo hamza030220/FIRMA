@@ -40,7 +40,7 @@
                 Participants ({{ confirmedCount }})
             </a>
             {% if evenement.isModifiable %}
-                <form method="post" action="{{ path('admin_evenement_cancel', {id: evenement.idEvenement}) }}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?">
+                <form method="post" action="{{ path('admin_evenement_cancel', {id: evenement.idEvenement}) }}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?" data-firma-confirm-title="Confirmer l'annulation" data-firma-confirm-btn="Annuler l'événement" data-firma-confirm-icon="warning">
                     <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ evenement.idEvenement) }}">
                     <button class="aevt-btn aevt-btn--warn">Annuler l'événement</button>
                 </form>

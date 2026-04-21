@@ -47,6 +47,14 @@ class EvenementController extends AbstractController
             default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
         });
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $total = count($evenements);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $evenements = array_slice($evenements, ($page - 1) * $limit, $limit);
+
         // Vérifier participations de l'user connecté
         $user = $this->getUser();
         $userParticipations = [];
@@ -57,11 +65,31 @@ class EvenementController extends AbstractController
             }
         }
 
+        // Detect LAN IP for QR codes (so phones on same WiFi can scan)
+        $lanBaseUrl = $request->getSchemeAndHttpHost();
+        $host = $request->getHost();
+        if (in_array($host, ['127.0.0.1', 'localhost', '::1'])) {
+            // Parse ipconfig for a real private IPv4 (skip VMware/VirtualBox/autoconfiguration)
+            $ipOutput = shell_exec('ipconfig');
+            if ($ipOutput && preg_match_all('/IPv4[^:]*:\s*([\d.]+)/', $ipOutput, $matches)) {
+                foreach ($matches[1] as $ip) {
+                    if (str_starts_with($ip, '127.') || str_starts_with($ip, '169.254.')) continue;
+                    if (str_starts_with($ip, '192.168.56.')) continue; // VirtualBox
+                    if (preg_match('/^192\.168\.(1[3-9]\d|2\d\d)\./', $ip)) continue; // VMware
+                    $lanBaseUrl = $request->getScheme() . '://' . $ip . ':' . $request->getPort();
+                    break;
+                }
+            }
+        }
+
         return $this->render('user/event/index.html.twig', [
             'evenements'         => $evenements,
             'search'             => $search,
             'sort'               => $sort,
             'userParticipations' => $userParticipations,
+            'lanBaseUrl'         => $lanBaseUrl,
+            'currentPage'        => $page,
+            'totalPages'         => $totalPages,
         ]);
     }
 
@@ -105,6 +133,7 @@ class EvenementController extends AbstractController
             'statutBadge'      => $evt->getStatutEnum()?->badgeClass(),
             'statutRaw'        => $evt->getStatut(),
             'dateDebut'        => $evt->getDateDebut()?->format('d/m/Y'),
+            'dateDebutRaw'     => $evt->getDateDebut()?->format('Y-m-d'),
             'dateFin'          => $evt->getDateFin()?->format('d/m/Y'),
             'horaireDebut'     => $evt->getHoraireDebut()?->format('H:i'),
             'horaireFin'       => $evt->getHoraireFin()?->format('H:i'),
@@ -254,6 +283,72 @@ class EvenementController extends AbstractController
     }
 
     // ──────────────────────────────────────────
+    //  JSON — Calendar events (FullCalendar)
+    // ──────────────────────────────────────────
+    #[Route('/calendar-events', name: 'user_calendar_events', methods: ['GET'])]
+    public function calendarEvents(): JsonResponse
+    {
+        $allEvents = $this->evenementService->getAll();
+
+        $events = [];
+        foreach ($allEvents as $evt) {
+            $start = $evt->getDateDebut();
+            $end   = $evt->getDateFin() ?? $start;
+
+            if ($evt->getHoraireDebut()) {
+                $start = new \DateTime($start->format('Y-m-d') . ' ' . $evt->getHoraireDebut()->format('H:i'));
+            }
+            if ($evt->getHoraireFin()) {
+                $end = new \DateTime($end->format('Y-m-d') . ' ' . $evt->getHoraireFin()->format('H:i'));
+            } else {
+                $end = (clone $end)->modify('+1 day');
+            }
+
+            $events[] = [
+                'id'              => $evt->getIdEvenement(),
+                'title'           => $evt->getTitre(),
+                'start'           => $start->format('c'),
+                'end'             => $end->format('c'),
+                'extendedProps'   => [
+                    'lieu'         => $evt->getLieu(),
+                    'adresse'      => $evt->getAdresse(),
+                    'organisateur' => $evt->getOrganisateur(),
+                    'imageUrl'     => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
+                ],
+            ];
+        }
+
+        return $this->json($events);
+    }
+
+    // ──────────────────────────────────────────
+    //  JSON — Map events (for Leaflet)
+    // ──────────────────────────────────────────
+    #[Route('/map-events', name: 'user_map_events', methods: ['GET'])]
+    public function mapEvents(): JsonResponse
+    {
+        $allEvents = $this->evenementService->getAll();
+
+        $events = [];
+        foreach ($allEvents as $evt) {
+            $events[] = [
+                'id'        => $evt->getIdEvenement(),
+                'titre'     => $evt->getTitre(),
+                'lieu'      => $evt->getLieu(),
+                'adresse'   => $evt->getAdresse(),
+                'dateDebut' => $evt->getDateDebut()?->format('d/m/Y'),
+                'type'      => $evt->getTypeEnum()?->label(),
+                'statut'    => $evt->getStatut(),
+                'imageUrl'  => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
+                'placesDisponibles' => $evt->getPlacesDisponibles(),
+                'capaciteMax'       => $evt->getCapaciteMax(),
+            ];
+        }
+
+        return $this->json($events);
+    }
+
+    // ──────────────────────────────────────────
     //  JSON — Mes participations (for modal)
     // ──────────────────────────────────────────
     #[Route('/mes-participations', name: 'user_mes_participations', methods: ['GET'])]
@@ -267,7 +362,11 @@ class EvenementController extends AbstractController
             $evt = $p->getEvenement();
             $accompList = [];
             foreach ($p->getAccompagnants() as $acc) {
-                $accompList[] = ['nom' => $acc->getNom(), 'prenom' => $acc->getPrenom()];
+                $accompList[] = [
+                    'nom' => $acc->getNom(),
+                    'prenom' => $acc->getPrenom(),
+                    'code' => $acc->getCodeAccompagnant(),
+                ];
             }
             $rows[] = [
                 'participationId' => $p->getIdParticipation(),
@@ -277,11 +376,17 @@ class EvenementController extends AbstractController
                 'accompagnants'   => $p->getNombreAccompagnants(),
                 'accompagnantsList' => $accompList,
                 'commentaire'     => $p->getCommentaire(),
+                'userName'        => $user->getPrenom() . ' ' . $user->getNom(),
                 'evenement'       => [
                     'id'        => $evt->getIdEvenement(),
                     'titre'     => $evt->getTitre(),
                     'dateDebut' => $evt->getDateDebut()?->format('d/m/Y'),
+                    'dateFin'   => $evt->getDateFin()?->format('d/m/Y'),
+                    'horaireDebut' => $evt->getHoraireDebut()?->format('H:i'),
+                    'horaireFin'   => $evt->getHoraireFin()?->format('H:i'),
                     'lieu'      => $evt->getLieu(),
+                    'adresse'   => $evt->getAdresse(),
+                    'organisateur' => $evt->getOrganisateur(),
                     'imageUrl'  => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
                 ],
             ];

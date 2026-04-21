@@ -250,6 +250,20 @@
 .aevt-form__textarea{ resize:vertical; min-height:90px }
 .aevt-form__select{ cursor:pointer }
 
+/* Validation errors */
+.aevt-form__input--error,
+.aevt-form__input--error:focus{
+  border-color:#c62828;
+  box-shadow:0 0 0 3px rgba(198,40,40,.12);
+}
+.aevt-form__error{
+  display:block;
+  font-size:.82rem;
+  color:#c62828;
+  margin-top:4px;
+  padding-left:2px;
+}
+
 .aevt-form__grid2{
   display:grid; grid-template-columns:1fr 1fr; gap:18px 24px;
 }
@@ -868,3 +882,35 @@
 @media(max-width:480px){
   .dash-kpi-row{ grid-template-columns:1fr }
 }
+
+/* ═══════════════════════════
+   FullCalendar — Admin
+   ═══════════════════════════ */
+.fc{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.fc .fc-toolbar-title{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#20452c}
+.fc .fc-button-primary{background:#20452c;border-color:#20452c;font-size:13px;font-weight:600;border-radius:8px;padding:6px 14px;text-transform:capitalize}
+.fc .fc-button-primary:hover{background:#2d5a3a;border-color:#2d5a3a}
+.fc .fc-button-primary:disabled{background:#c8d6cb;border-color:#c8d6cb}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active{background:#0d1f14;border-color:#0d1f14;box-shadow:none}
+.fc .fc-daygrid-day.fc-day-today{background:rgba(32,69,44,.06)}
+.fc .fc-daygrid-day-number{color:#2d2d2d;font-weight:500;padding:8px}
+.fc .fc-col-header-cell{background:#f4f8f5;border-color:#e8ede9}
+.fc .fc-col-header-cell-cushion{color:#20452c;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:10px 4px}
+.fc .fc-scrollgrid{border-color:#e8ede9;border-radius:12px;overflow:hidden}
+.fc td,.fc th{border-color:#e8ede9}
+.fc .fc-daygrid-event{border-radius:6px;padding:2px 6px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.fc .fc-daygrid-event:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(32,69,44,.2)}
+.fc .fc-event{background:linear-gradient(135deg,#20452c,#2d6b3f);color:#fff;border:none}
+.fc .fc-daygrid-dot-event .fc-event-title{font-weight:600}
+.fc .fc-popover{border-radius:12px;box-shadow:0 8px 30px rgba(32,69,44,.15);border:1px solid #e8ede9}
+.fc .fc-popover-header{background:#20452c;color:#fff;border-radius:12px 12px 0 0;padding:10px 14px;font-weight:700}
+.fc .fc-more-link{color:#20452c;font-weight:700;font-size:12px}
+.fc .fc-daygrid-more-link:hover{background:#f4f8f5;border-radius:4px}
+
+/* Calendar tooltip */
+.aevt-cal-tooltip{position:absolute;z-index:3000;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(32,69,44,.18);padding:16px;min-width:240px;pointer-events:none;animation:aevtTipIn .15s ease}
+.aevt-cal-tooltip__title{font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:700;color:#20452c;margin:0 0 8px}
+.aevt-cal-tooltip__row{display:flex;align-items:center;gap:6px;font-size:13px;color:#5a6e5f;padding:3px 0}
+.aevt-cal-tooltip__row svg{flex-shrink:0;width:14px;height:14px}
+@keyframes aevtTipIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
