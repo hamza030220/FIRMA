@@ -1,0 +1,169 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Calendrier Locations{% endblock %}
+{% block admin_page_title %}Calendrier des Locations{% endblock %}
+
+{% block admin_content %}
+<div class="mp-page">
+    <a href="{{ path('admin_marketplace') }}" class="mp-back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour au Marketplace
+    </a>
+
+    <div class="cal-header">
+        <h2>Calendrier des Locations</h2>
+        <p>Vue d'ensemble des locations de véhicules <span class="cal-legend-dot cal-dot-vehicule"></span> et terrains <span class="cal-legend-dot cal-dot-terrain"></span></p>
+    </div>
+
+    {# ── Filters ── #}
+    <div class="cal-filters">
+        <div class="cal-filter-group">
+            <label for="calFilterType">Type</label>
+            <select id="calFilterType">
+                <option value="all">Tous</option>
+                <option value="vehicule">Véhicules uniquement</option>
+                <option value="terrain">Terrains uniquement</option>
+            </select>
+        </div>
+        <div class="cal-filter-group" id="calFilterItemGroup" style="display:none;">
+            <label for="calFilterItem">Élément</label>
+            <select id="calFilterItem">
+                <option value="0">Tous</option>
+            </select>
+        </div>
+    </div>
+
+    {# ── Calendar container ── #}
+    <div id="calendarAdmin" class="cal-container"></div>
+
+    {# ── Tooltip (hidden, positioned via JS) ── #}
+    <div id="calTooltip" class="cal-tooltip" style="display:none;">
+        <div class="cal-tooltip-arrow"></div>
+        <div class="cal-tooltip-body">
+            <p class="cal-tooltip-title" id="calTooltipTitle"></p>
+            <p id="calTooltipUser"></p>
+            <p id="calTooltipDates"></p>
+            <p id="calTooltipPrix"></p>
+        </div>
+    </div>
+</div>
+
+{# FullCalendar CDN #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+{# Data for JS filters #}
+<script>
+    const CAL_DATA = {
+        eventsUrl: '{{ path("admin_marketplace_calendrier_events") }}',
+        vehicules: [
+            {% for v in vehicules %}
+            { id: {{ v.id }}, name: '{{ v.nom|e('js') }}' }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ],
+        terrains: [
+            {% for t in terrains %}
+            { id: {{ t.id }}, name: '{{ t.titre|e('js') }}' }{{ not loop.last ? ',' : '' }}
+            {% endfor %}
+        ],
+    };
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calEl = document.getElementById('calendarAdmin');
+    const tooltip = document.getElementById('calTooltip');
+    const tooltipTitle = document.getElementById('calTooltipTitle');
+    const tooltipUser = document.getElementById('calTooltipUser');
+    const tooltipDates = document.getElementById('calTooltipDates');
+    const tooltipPrix = document.getElementById('calTooltipPrix');
+    const filterType = document.getElementById('calFilterType');
+    const filterItemGroup = document.getElementById('calFilterItemGroup');
+    const filterItem = document.getElementById('calFilterItem');
+
+    const calendar = new FullCalendar.Calendar(calEl, {
+        initialView: 'multiMonthThreeMonth',
+        views: {
+            multiMonthThreeMonth: {
+                type: 'multiMonth',
+                duration: { months: 3 },
+            }
+        },
+        locale: 'fr',
+        firstDay: 1,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'multiMonthThreeMonth,dayGridMonth',
+        },
+        buttonText: {
+            today: 'Aujourd\'hui',
+            month: '1 Mois',
+            multiMonthThreeMonth: '3 Mois',
+        },
+        events: function(info, successCallback, failureCallback) {
+            const params = new URLSearchParams({
+                filterType: filterType.value,
+                filterId: filterItem.value || '0',
+            });
+            fetch(CAL_DATA.eventsUrl + '?' + params.toString())
+                .then(r => r.json())
+                .then(data => successCallback(data))
+                .catch(err => failureCallback(err));
+        },
+        eventMouseEnter: function(info) {
+            const props = info.event.extendedProps;
+            const typeLabel = props.type === 'terrain' ? '🌿 Terrain' : '🚗 Véhicule';
+            tooltipTitle.textContent = typeLabel + ' : ' + props.itemName;
+            tooltipUser.innerHTML = '<strong>Locataire :</strong> ' + escHtmlCal(props.userName);
+            tooltipDates.innerHTML = '<strong>Période :</strong> ' + props.dateDebut + ' → ' + props.dateFin;
+            tooltipPrix.innerHTML = '<strong>Prix total :</strong> ' + props.prixTotal;
+
+            const rect = info.el.getBoundingClientRect();
+            tooltip.style.display = 'block';
+            tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10 + window.scrollY) + 'px';
+        },
+        eventMouseLeave: function() {
+            tooltip.style.display = 'none';
+        },
+        eventDisplay: 'block',
+        displayEventTime: false,
+        height: 'auto',
+    });
+
+    calendar.render();
+
+    // Populate item filter based on type
+    function updateItemFilter() {
+        const type = filterType.value;
+        filterItem.innerHTML = '<option value="0">Tous</option>';
+
+        if (type === 'vehicule') {
+            CAL_DATA.vehicules.forEach(v => {
+                filterItem.innerHTML += '<option value="' + v.id + '">' + escHtmlCal(v.name) + '</option>';
+            });
+            filterItemGroup.style.display = '';
+        } else if (type === 'terrain') {
+            CAL_DATA.terrains.forEach(t => {
+                filterItem.innerHTML += '<option value="' + t.id + '">' + escHtmlCal(t.name) + '</option>';
+            });
+            filterItemGroup.style.display = '';
+        } else {
+            filterItemGroup.style.display = 'none';
+        }
+
+        calendar.refetchEvents();
+    }
+
+    filterType.addEventListener('change', updateItemFilter);
+    filterItem.addEventListener('change', () => calendar.refetchEvents());
+
+    function escHtmlCal(str) {
+        const d = document.createElement('div');
+        d.textContent = str || '';
+        return d.innerHTML;
+    }
+});
+</script>
+{% endblock %}

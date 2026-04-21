@@ -165,6 +165,12 @@
         </a>
         {% endfor %}
     </div>
+    {% include 'shared/_pagination.html.twig' with {
+        currentPage: currentPage,
+        totalPages: totalPages,
+        route: 'user_maladie_index',
+        routeParams: {}
+    } %}
 
     {% else %}
     <div class="mal-empty">

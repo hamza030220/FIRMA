@@ -173,7 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = form.dataset.firmaConfirm || 'Supprimer cet élément ?';
-            firmaConfirm('Confirmer la suppression', msg, 'Supprimer', 'danger').then(ok => {
+            const title = form.dataset.firmaConfirmTitle || 'Confirmer la suppression';
+            const btnText = form.dataset.firmaConfirmBtn || 'Supprimer';
+            const iconType = form.dataset.firmaConfirmIcon || 'danger';
+            firmaConfirm(title, msg, btnText, iconType).then(ok => {
                 if (ok) form.submit();
             });
         });

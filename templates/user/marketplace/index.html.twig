@@ -221,6 +221,19 @@
 
             {# Location: dates + add to locations #}
             <div class="um-modal-actions" id="umModalActionsLoc" style="display:none;">
+                {# Mini-calendar showing availability #}
+                <div class="um-avail-section" id="umAvailSection">
+                    <h4 class="um-avail-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Disponibilité
+                    </h4>
+                    <div id="umAvailCalendar" class="um-avail-calendar"></div>
+                    <div class="um-avail-legend">
+                        <span class="um-avail-legend-item"><span class="um-avail-dot um-avail-dot-free"></span> Disponible</span>
+                        <span class="um-avail-legend-item"><span class="um-avail-dot um-avail-dot-booked"></span> Réservé</span>
+                    </div>
+                    <p class="um-avail-status" id="umAvailStatus"></p>
+                </div>
                 <div class="um-date-row">
                     <div class="um-date-field">
                         <label for="umDateDebut">Date début</label>
@@ -356,6 +369,10 @@
     {% endfor %}
 {% endfor %}
 
+{# FullCalendar CDN for availability mini-calendar #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
 {# Routes for JS #}
 <script>
     window.UM_ROUTES = {
@@ -365,6 +382,7 @@
         cartGet: '{{ path("user_marketplace_cart_get") }}',
         locAdd: '{{ path("user_marketplace_loc_add") }}',
         locRemove: '{{ path("user_marketplace_loc_remove") }}',
+        locDisponibilite: '{{ path("user_marketplace_loc_disponibilite") }}',
         paiement: '{{ path("user_marketplace_paiement") }}',
         paiementLoc: '{{ path("user_marketplace_paiement_locations") }}',
         histCommandes: '{{ path("user_marketplace_historique_commandes") }}',

@@ -40,7 +40,9 @@ class MaladieController extends AbstractController
     public function index(Request $request): Response
     {
         $allMaladies = $this->maladieRepo->findAll();
-        $page = max(1, $request->query->getInt('page', 1));
+
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
         $limit = 10;
         $total = count($allMaladies);
         $totalPages = max(1, (int) ceil($total / $limit));
@@ -48,10 +50,10 @@ class MaladieController extends AbstractController
         $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
 
         return $this->render('admin/maladie/index.html.twig', [
-            'maladies' => $maladies,
+            'maladies'      => $maladies,
             'totalMaladies' => $total,
-            'currentPage' => $page,
-            'totalPages' => $totalPages,
+            'currentPage'   => $page,
+            'totalPages'    => $totalPages,
         ]);
     }
 

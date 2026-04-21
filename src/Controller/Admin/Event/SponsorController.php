@@ -22,17 +22,15 @@ class SponsorController extends AbstractController
     ) {}
 
     // ──────────────────────────────────────────
-    //  INDEX (tabs: liste, créer, modifier)
+    //  Shared template data
     // ──────────────────────────────────────────
-    #[Route('', name: 'admin_sponsors')]
-    public function index(Request $request): Response
+    private function getIndexData(Request $request, array $extra = []): array
     {
-        $tab    = $request->query->get('tab', 'liste');
+        $tab    = $extra['tab'] ?? $request->query->get('tab', 'liste');
         $search = $request->query->get('q', '');
 
         $sponsors = $this->sponsorService->getCatalog();
 
-        // Search filter
         if ($search) {
             $q = mb_strtolower($search);
             $sponsors = array_filter($sponsors, function (Sponsor $s) use ($q) {
@@ -42,20 +40,55 @@ class SponsorController extends AbstractController
             });
         }
 
-        // If editing, load the sponsor
-        $editId      = $request->query->getInt('edit', 0);
-        $editSponsor = $editId ? $this->sponsorService->getById($editId) : null;
-        if ($editSponsor) {
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $totalSponsors = count($sponsors);
+        $totalPages = max(1, (int) ceil($totalSponsors / $limit));
+        $page = min($page, $totalPages);
+        $sponsors = array_slice(array_values($sponsors), ($page - 1) * $limit, $limit);
+
+        $editId      = $extra['editSponsor'] ?? ($request->query->getInt('edit', 0) ? $this->sponsorService->getById($request->query->getInt('edit')) : null);
+        if ($editId instanceof Sponsor) {
+            $editSponsor = $editId;
+        } else {
+            $editSponsor = null;
+        }
+        if ($editSponsor && !isset($extra['tab'])) {
             $tab = 'modifier';
         }
 
-        return $this->render('admin/event/sponsors.html.twig', [
-            'sponsors'       => $sponsors,
-            'search'         => $search,
-            'tab'            => $tab,
-            'secteurOptions' => SecteurActivite::cases(),
-            'editSponsor'    => $editSponsor,
-        ]);
+        return array_merge([
+            'sponsors'        => $sponsors,
+            'search'          => $search,
+            'tab'             => $tab,
+            'secteurOptions'  => SecteurActivite::cases(),
+            'editSponsor'     => $editSponsor,
+            'formErrors'      => [],
+            'formData'        => [],
+            'editFormErrors'  => [],
+            'currentPage'     => $page,
+            'totalPages'      => $totalPages,
+        ], $extra);
+    }
+
+    private function extractFormErrors($form): array
+    {
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()?->getName() ?? 'global';
+            $errors[$field] = $error->getMessage();
+        }
+        return $errors;
+    }
+
+    // ──────────────────────────────────────────
+    //  INDEX (tabs: liste, créer, modifier)
+    // ──────────────────────────────────────────
+    #[Route('', name: 'admin_sponsors')]
+    public function index(Request $request): Response
+    {
+        return $this->render('admin/event/sponsors.html.twig', $this->getIndexData($request));
     }
 
     // ──────────────────────────────────────────
@@ -87,74 +120,87 @@ class SponsorController extends AbstractController
     //  CREATE
     // ──────────────────────────────────────────
     #[Route('/create', name: 'admin_sponsor_create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    public function create(Request $request): Response
     {
+        $fromEvents = $request->request->get('_from') === 'events';
+
         $sponsor = new Sponsor();
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $errors = [];
-            $errorFields = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $error->getMessage();
-                if ($field !== 'global') {
-                    $errorFields[] = $field;
-                }
+            $errors = $this->extractFormErrors($form);
+
+            if ($fromEvents) {
+                return $this->json([
+                    'success'     => false,
+                    'errors'      => array_values($errors),
+                    'errorFields' => array_keys($errors),
+                ], 422);
             }
-            return $this->json([
-                'success'     => false,
-                'errors'      => $errors,
-                'errorFields' => array_values(array_unique($errorFields)),
-            ], 422);
+
+            return $this->render('admin/event/sponsors.html.twig', $this->getIndexData($request, [
+                'tab'        => 'creer',
+                'formErrors' => $errors,
+                'formData'   => $request->request->all(),
+            ]));
         }
 
         $this->sponsorService->addToCatalog($sponsor);
 
-        return $this->json([
-            'success' => true,
-            'message' => 'Sponsor ajouté au catalogue.',
-        ]);
+        if ($fromEvents) {
+            return $this->json(['success' => true, 'message' => 'Sponsor ajouté au catalogue.']);
+        }
+
+        $this->addFlash('success', 'Sponsor ajouté au catalogue.');
+        return $this->redirectToRoute('admin_sponsors');
     }
 
     // ──────────────────────────────────────────
     //  UPDATE
     // ──────────────────────────────────────────
     #[Route('/{id}/update', name: 'admin_sponsor_update', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, Request $request): Response
     {
+        $fromEvents = $request->request->get('_from') === 'events';
+
         $sponsor = $this->sponsorService->getById($id);
         if (!$sponsor) {
-            return $this->json(['success' => false, 'errors' => ['Sponsor introuvable.']], 404);
+            if ($fromEvents) {
+                return $this->json(['success' => false, 'errors' => ['Sponsor introuvable.']], 404);
+            }
+            throw $this->createNotFoundException();
         }
 
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
-            $errors = [];
-            $errorFields = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $error->getMessage();
-                if ($field !== 'global') {
-                    $errorFields[] = $field;
-                }
+            $errors = $this->extractFormErrors($form);
+
+            if ($fromEvents) {
+                return $this->json([
+                    'success'     => false,
+                    'errors'      => array_values($errors),
+                    'errorFields' => array_keys($errors),
+                ], 422);
             }
-            return $this->json([
-                'success'     => false,
-                'errors'      => $errors,
-                'errorFields' => array_values(array_unique($errorFields)),
-            ], 422);
+
+            return $this->render('admin/event/sponsors.html.twig', $this->getIndexData($request, [
+                'tab'            => 'modifier',
+                'editSponsor'    => $sponsor,
+                'editFormErrors' => $errors,
+            ]));
         }
 
         $this->sponsorService->update($sponsor);
 
-        return $this->json([
-            'success' => true,
-            'message' => 'Sponsor modifié avec succès.',
-        ]);
+        if ($fromEvents) {
+            return $this->json(['success' => true, 'message' => 'Sponsor modifié avec succès.']);
+        }
+
+        $this->addFlash('success', 'Sponsor modifié avec succès.');
+        return $this->redirectToRoute('admin_sponsors');
     }
 
     // ──────────────────────────────────────────

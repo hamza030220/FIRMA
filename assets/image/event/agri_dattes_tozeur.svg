@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="desert" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF8F00"/>
+      <stop offset="60%" stop-color="#FFB74D"/>
+      <stop offset="100%" stop-color="#FFE0B2"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E6A84C"/>
+      <stop offset="100%" stop-color="#D4943A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#desert)"/>
+  <!-- Sand dunes -->
+  <ellipse cx="200" cy="340" rx="250" ry="60" fill="#DEB068"/>
+  <ellipse cx="600" cy="350" rx="300" ry="50" fill="#D4A556"/>
+  <rect y="340" width="800" height="160" fill="url(#sand)"/>
+  <!-- Palm trees -->
+  <g>
+    <rect x="148" y="180" width="10" height="150" fill="#6D4C41" rx="3"/>
+    <g fill="#2E7D32">
+      <ellipse cx="153" cy="175" rx="50" ry="15" transform="rotate(-20,153,175)"/>
+      <ellipse cx="153" cy="175" rx="50" ry="15" transform="rotate(15,153,175)"/>
+      <ellipse cx="153" cy="175" rx="50" ry="15" transform="rotate(-50,153,175)"/>
+      <ellipse cx="153" cy="175" rx="50" ry="15" transform="rotate(50,153,175)"/>
+    </g>
+    <!-- Dates cluster -->
+    <g fill="#8D6E63">
+      <circle cx="145" cy="195" r="4"/><circle cx="153" cy="192" r="4"/><circle cx="161" cy="195" r="4"/>
+      <circle cx="149" cy="200" r="4"/><circle cx="157" cy="200" r="4"/>
+    </g>
+  </g>
+  <g>
+    <rect x="608" y="190" width="10" height="140" fill="#6D4C41" rx="3"/>
+    <g fill="#388E3C">
+      <ellipse cx="613" cy="185" rx="48" ry="14" transform="rotate(-25,613,185)"/>
+      <ellipse cx="613" cy="185" rx="48" ry="14" transform="rotate(20,613,185)"/>
+      <ellipse cx="613" cy="185" rx="48" ry="14" transform="rotate(-55,613,185)"/>
+      <ellipse cx="613" cy="185" rx="48" ry="14" transform="rotate(55,613,185)"/>
+    </g>
+    <g fill="#8D6E63">
+      <circle cx="605" cy="205" r="4"/><circle cx="613" cy="202" r="4"/><circle cx="621" cy="205" r="4"/>
+      <circle cx="609" cy="210" r="4"/><circle cx="617" cy="210" r="4"/>
+    </g>
+  </g>
+  <!-- Date boxes/baskets -->
+  <rect x="300" y="310" width="80" height="40" fill="#795548" rx="4"/>
+  <g fill="#A1887F"><circle cx="315" cy="305" r="7"/><circle cx="330" cy="303" r="7"/><circle cx="345" cy="305" r="7"/><circle cx="360" cy="303" r="7"/></g>
+  <rect x="420" y="310" width="80" height="40" fill="#795548" rx="4"/>
+  <g fill="#A1887F"><circle cx="435" cy="305" r="7"/><circle cx="450" cy="303" r="7"/><circle cx="465" cy="305" r="7"/><circle cx="480" cy="303" r="7"/></g>
+  <!-- Sun -->
+  <circle cx="400" cy="70" r="55" fill="#FFF176" opacity="0.8"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.55)"/>
+  <text x="400" y="418" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="24" font-weight="bold">Salon des Dattes de Tozeur</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Deglet Nour - Oasis du Djérid</text>
+</svg>

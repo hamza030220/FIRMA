@@ -1,0 +1,412 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Analytics Marketplace{% endblock %}
+{% block admin_page_title %}Analytics & Statistiques{% endblock %}
+
+{% block clarity %}
+{# No Clarity tracking on admin pages #}
+{% endblock %}
+
+{% block admin_content %}
+<div class="analytics-dashboard">
+
+    {# ── Breadcrumb ── #}
+    <div class="analytics-breadcrumb">
+        <a href="{{ path('admin_marketplace') }}">← Retour au Marketplace</a>
+    </div>
+
+    {# ══════════════════════════════════════════
+       KPI Summary Cards — Row 1
+       ══════════════════════════════════════════ #}
+    <div class="analytics-kpi-grid">
+        {% set revenueChange = revenuePrevious > 0 ? ((revenueCurrent - revenuePrevious) / revenuePrevious * 100)|round(1) : 0 %}
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-revenue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">CA Commandes (30j)</span>
+                <span class="analytics-kpi-value">{{ revenueCurrent|number_format(2, ',', ' ') }} TND</span>
+                <span class="analytics-kpi-change {{ revenueChange >= 0 ? 'positive' : 'negative' }}">
+                    {{ revenueChange >= 0 ? '▲' : '▼' }} {{ revenueChange|abs }}% vs mois précédent
+                </span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-orders">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">Total commandes</span>
+                <span class="analytics-kpi-value">{{ totals.commandes }}</span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-locations">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">Total locations</span>
+                <span class="analytics-kpi-value">{{ totals.locations }}</span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-pending">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">En préparation</span>
+                <span class="analytics-kpi-value">{{ totals.en_preparation }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       KPI Summary Cards — Row 2 (NEW)
+       ══════════════════════════════════════════ #}
+    <div class="analytics-kpi-grid">
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-avg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">Panier moyen</span>
+                <span class="analytics-kpi-value">{{ avgOrder|number_format(2, ',', ' ') }} TND</span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-loc-revenue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">CA Locations (confirmées)</span>
+                <span class="analytics-kpi-value">{{ locRevenue|number_format(2, ',', ' ') }} TND</span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-active-loc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">Locations en cours</span>
+                <span class="analytics-kpi-value">{{ activeLocations }}</span>
+            </div>
+        </div>
+
+        <div class="analytics-kpi">
+            <div class="analytics-kpi-icon kpi-stock-val">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div class="analytics-kpi-info">
+                <span class="analytics-kpi-label">Valeur du stock</span>
+                <span class="analytics-kpi-value">{{ stockValue|number_format(2, ',', ' ') }} TND</span>
+            </div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       CA Total payé
+       ══════════════════════════════════════════ #}
+    <div class="analytics-ca-total">
+        <span class="analytics-ca-total-label">CA Total payé (toutes périodes)</span>
+        <span class="analytics-ca-total-value">{{ totals.ca_total|number_format(2, ',', ' ') }} TND</span>
+    </div>
+
+    {# ══════════════════════════════════════════
+       Charts Row 1 — Orders + Revenue (14 days) + Monthly Revenue
+       ══════════════════════════════════════════ #}
+    <div class="analytics-charts-row">
+        <div class="analytics-chart-card analytics-chart-wide">
+            <h3>Commandes & Revenus (14 derniers jours)</h3>
+            <div class="analytics-chart-wrap"><canvas id="ordersRevenueChart"></canvas></div>
+        </div>
+
+        <div class="analytics-chart-card">
+            <h3>Revenus mensuels (6 derniers mois)</h3>
+            <div class="analytics-chart-wrap"><canvas id="monthlyRevenueChart"></canvas></div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       Charts Row 2 — Payment + Delivery + Location type
+       ══════════════════════════════════════════ #}
+    <div class="analytics-charts-row analytics-charts-row-3">
+        <div class="analytics-chart-card">
+            <h3>Répartition paiements</h3>
+            <div class="analytics-chart-wrap"><canvas id="paymentChart"></canvas></div>
+        </div>
+
+        <div class="analytics-chart-card">
+            <h3>Locations par type</h3>
+            <div class="analytics-chart-wrap"><canvas id="locTypeChart"></canvas></div>
+        </div>
+
+        <div class="analytics-chart-card">
+            <h3>Statut livraisons</h3>
+            <div class="analytics-chart-wrap"><canvas id="deliveryChart"></canvas></div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       Tables Row 1 — Top Products + Low Stock
+       ══════════════════════════════════════════ #}
+    <div class="analytics-tables-row">
+        <div class="analytics-table-card">
+            <h3>🏆 Top 5 — Produits les plus vendus</h3>
+            <table class="analytics-table">
+                <thead>
+                    <tr><th>Produit</th><th>Vendus</th><th>CA</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in topEquipements %}
+                    <tr>
+                        <td>{{ item.nom }}</td>
+                        <td><span class="analytics-badge badge-success">{{ item.total_vendu }}</span></td>
+                        <td>{{ item.ca|number_format(2, ',', ' ') }} TND</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="analytics-empty">Aucune vente enregistrée</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analytics-table-card">
+            <h3>⚠️ Alertes stock bas</h3>
+            <table class="analytics-table">
+                <thead>
+                    <tr><th>Produit</th><th>Stock</th><th>Seuil</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in lowStockItems %}
+                    <tr>
+                        <td>{{ item.nom }}</td>
+                        <td><span class="analytics-badge badge-danger">{{ item.quantite_stock }}</span></td>
+                        <td>{{ item.seuil_alerte }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="analytics-empty">Tous les stocks sont OK ✅</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       Tables Row 2 — Top Clients + Recent Orders
+       ══════════════════════════════════════════ #}
+    <div class="analytics-tables-row">
+        <div class="analytics-table-card">
+            <h3>👥 Top 5 — Meilleurs clients</h3>
+            <table class="analytics-table">
+                <thead>
+                    <tr><th>Client</th><th>Email</th><th>Commandes</th><th>Total dépensé</th></tr>
+                </thead>
+                <tbody>
+                    {% for client in topClients %}
+                    <tr>
+                        <td><strong>{{ client.prenom }} {{ client.nom }}</strong></td>
+                        <td>{{ client.email }}</td>
+                        <td><span class="analytics-badge badge-info">{{ client.nb_commandes }}</span></td>
+                        <td><strong>{{ client.total_depense|number_format(2, ',', ' ') }} TND</strong></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="analytics-empty">Aucun client trouvé</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analytics-table-card">
+            <h3>🕐 Dernières commandes</h3>
+            <table class="analytics-table">
+                <thead>
+                    <tr><th>N°</th><th>Client</th><th>Montant</th><th>Paiement</th><th>Livraison</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for order in recentOrders %}
+                    <tr>
+                        <td><code>{{ order.numero_commande }}</code></td>
+                        <td>{{ order.prenom }} {{ order.nom }}</td>
+                        <td>{{ order.montant_total|number_format(2, ',', ' ') }} TND</td>
+                        <td>
+                            {% if order.statut_paiement == 'paye' %}
+                                <span class="analytics-badge badge-success">Payé</span>
+                            {% else %}
+                                <span class="analytics-badge badge-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.statut_livraison == 'livree' %}
+                                <span class="analytics-badge badge-success">Livrée</span>
+                            {% elseif order.statut_livraison == 'expediee' %}
+                                <span class="analytics-badge badge-info">Expédiée</span>
+                            {% elseif order.statut_livraison == 'annulee' %}
+                                <span class="analytics-badge badge-danger">Annulée</span>
+                            {% else %}
+                                <span class="analytics-badge badge-warning">En prépa.</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.date_commande|date('d/m/Y H:i') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="analytics-empty">Aucune commande récente</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════
+       Clarity — Small note (script still active)
+       ══════════════════════════════════════════ #}
+    <div class="analytics-clarity-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5e35b1" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <strong>Microsoft Clarity</strong> est actif sur les pages utilisateur (projet <code>wdmtsoch0x</code>).
+        <a href="https://clarity.microsoft.com/projects/view/wdmtsoch0x/dashboard" target="_blank" rel="noopener">Ouvrir Clarity →</a>
+    </div>
+</div>
+
+{# ══════════════════════════════════════════
+   Chart.js CDN + Chart Initialization
+   ══════════════════════════════════════════ #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const COLORS = {
+        green: '#27ae60', greenLight: 'rgba(39,174,96,.15)',
+        blue: '#3498db', blueLight: 'rgba(52,152,219,.15)',
+        orange: '#e67e22', orangeLight: 'rgba(230,126,34,.15)',
+        purple: '#8e44ad', purpleLight: 'rgba(142,68,173,.15)',
+        red: '#e74c3c', yellow: '#f1c40f', grey: '#95a5a6',
+    };
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        resizeDelay: 100,
+        plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { family: 'Plus Jakarta Sans' } } } },
+    };
+
+    /* ── Orders & Revenue Chart (14 days) ── */
+    const ordersData = {{ ordersPerDay|json_encode|raw }};
+    new Chart(document.getElementById('ordersRevenueChart'), {
+        type: 'bar',
+        data: {
+            labels: ordersData.map(d => d.jour),
+            datasets: [
+                {
+                    label: 'Commandes',
+                    data: ordersData.map(d => d.nb),
+                    backgroundColor: COLORS.blueLight,
+                    borderColor: COLORS.blue,
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Revenus (TND)',
+                    data: ordersData.map(d => parseFloat(d.montant || 0)),
+                    type: 'line',
+                    borderColor: COLORS.green,
+                    backgroundColor: COLORS.greenLight,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Commandes' }, grid: { display: false } },
+                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'TND' }, grid: { drawOnChartArea: false } },
+            }
+        }
+    });
+
+    /* ── Monthly Revenue Chart (6 months) ── */
+    const monthlyData = {{ monthlyRevenue|json_encode|raw }};
+    const monthNames = { '01':'Jan','02':'Fév','03':'Mar','04':'Avr','05':'Mai','06':'Jun','07':'Jul','08':'Aoû','09':'Sep','10':'Oct','11':'Nov','12':'Déc' };
+    new Chart(document.getElementById('monthlyRevenueChart'), {
+        type: 'bar',
+        data: {
+            labels: monthlyData.map(d => { const p = d.mois.split('-'); return (monthNames[p[1]] || p[1]) + ' ' + p[0]; }),
+            datasets: [
+                {
+                    label: 'CA (TND)',
+                    data: monthlyData.map(d => parseFloat(d.ca || 0)),
+                    backgroundColor: COLORS.greenLight,
+                    borderColor: COLORS.green,
+                    borderWidth: 2,
+                    borderRadius: 6,
+                },
+                {
+                    label: 'Commandes',
+                    data: monthlyData.map(d => d.nb_commandes),
+                    type: 'line',
+                    borderColor: COLORS.purple,
+                    backgroundColor: COLORS.purpleLight,
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'CA (TND)' }, grid: { display: false } },
+                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Commandes' }, grid: { drawOnChartArea: false } },
+            }
+        }
+    });
+
+    /* ── Payment Distribution ── */
+    const paymentData = {{ paymentStats|json_encode|raw }};
+    const paymentLabels = { paye: 'Payé', en_attente: 'En attente' };
+    const paymentColors = { paye: COLORS.green, en_attente: COLORS.orange };
+    new Chart(document.getElementById('paymentChart'), {
+        type: 'doughnut',
+        data: {
+            labels: paymentData.map(d => paymentLabels[d.statut_paiement] || d.statut_paiement),
+            datasets: [{ data: paymentData.map(d => d.nb), backgroundColor: paymentData.map(d => paymentColors[d.statut_paiement] || COLORS.grey), borderWidth: 0, spacing: 4 }]
+        },
+        options: { ...commonOptions, cutout: '60%' }
+    });
+
+    /* ── Location Type ── */
+    const locData = {{ locTypeStats|json_encode|raw }};
+    const locLabels = { vehicule: 'Véhicules', terrain: 'Terrains' };
+    const locColors = { vehicule: COLORS.orange, terrain: COLORS.green };
+    new Chart(document.getElementById('locTypeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: locData.map(d => locLabels[d.type_location] || d.type_location),
+            datasets: [{ data: locData.map(d => parseFloat(d.ca || 0)), backgroundColor: locData.map(d => locColors[d.type_location] || COLORS.grey), borderWidth: 0, spacing: 4 }]
+        },
+        options: { ...commonOptions, cutout: '60%' }
+    });
+
+    /* ── Delivery Status ── */
+    const deliveryData = {{ deliveryStats|json_encode|raw }};
+    const deliveryLabels = { en_preparation: 'En préparation', expediee: 'Expédiée', livree: 'Livrée', annulee: 'Annulée' };
+    const deliveryColors = { en_preparation: COLORS.orange, expediee: COLORS.blue, livree: COLORS.green, annulee: COLORS.red };
+    new Chart(document.getElementById('deliveryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: deliveryData.map(d => deliveryLabels[d.statut_livraison] || d.statut_livraison),
+            datasets: [{ data: deliveryData.map(d => d.nb), backgroundColor: deliveryData.map(d => deliveryColors[d.statut_livraison] || COLORS.grey), borderWidth: 0, spacing: 4 }]
+        },
+        options: { ...commonOptions, cutout: '60%' }
+    });
+});
+</script>
+{% endblock %}

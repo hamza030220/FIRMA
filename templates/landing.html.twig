@@ -11,9 +11,19 @@
     <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="logo-img">
     <span class="logo-text">FIRMA</span>
   </a>
+  <div class="nav-links">
+    <a href="{{ path('app_landing') }}" class="nav-link nav-link--active">Accueil</a>
+    <a href="#services" class="nav-link">Services</a>
+    <a href="#roles" class="nav-link">Qui sommes-nous</a>
+  </div>
   <div class="nav-actions">
-    <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
-    <a href="{{ path('app_login') }}" class="btn-register">Commencer <span>→</span></a>
+    {% if app.user %}
+      <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="btn-login">Mon espace</a>
+      <a href="{{ path('app_logout') }}" class="btn-register">Déconnexion <span>→</span></a>
+    {% else %}
+      <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
+      <a href="{{ path('app_inscription') }}" class="btn-register">Commencer <span>→</span></a>
+    {% endif %}
   </div>
 </nav>
 
@@ -38,7 +48,11 @@
   </p>
 
   <div class="hero-cta">
-    <a href="#" class="cta-main">Rejoindre FIRMA →</a>
+    {% if app.user %}
+      <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="cta-main">Mon tableau de bord →</a>
+    {% else %}
+      <a href="{{ path('app_inscription') }}" class="cta-main">Rejoindre FIRMA →</a>
+    {% endif %}
     <a href="#services" class="cta-secondary">Voir nos services</a>
   </div>
 
@@ -86,7 +100,7 @@
             Location courte &amp; longue durée disponible
           </div>
         </div>
-        <a href="#" class="service-cta">Explorer la marketplace →</a>
+        <a href="{% if app.user %}{{ path('user_marketplace') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Explorer la marketplace →</a>
       </div>
     </div>
 
@@ -118,7 +132,7 @@
             Rappels &amp; suivi de vos inscriptions
           </div>
         </div>
-        <a href="#" class="service-cta">Voir les événements →</a>
+        <a href="{% if app.user %}{{ path('user_evenements') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Voir les événements →</a>
       </div>
     </div>
 
@@ -150,7 +164,7 @@
             Prévention et bonnes pratiques pour vos cultures
           </div>
         </div>
-        <a href="#" class="service-cta">Explorer le module maladies →</a>
+        <a href="{% if app.user %}{{ path('user_maladie') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Explorer le module maladies →</a>
       </div>
     </div>
 
@@ -182,7 +196,7 @@
             Communauté modérée &amp; bienveillante
           </div>
         </div>
-        <a href="#" class="service-cta">Rejoindre le forum →</a>
+        <a href="{% if app.user %}{{ path('user_forum') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Rejoindre le forum →</a>
       </div>
     </div>
 
@@ -198,8 +212,12 @@
       <p class="banner-sub">Rejoignez les agriculteurs qui ont choisi FIRMA pour simplifier<br>leur quotidien et développer leur activité.</p>
     </div>
     <div class="banner-actions">
-      <a href="#" class="btn-banner-main">Créer mon compte →</a>
-      <a href="#" class="btn-banner-ghost">J'ai déjà un compte</a>
+      {% if app.user %}
+        <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="btn-banner-main">Accéder à mon espace →</a>
+      {% else %}
+        <a href="{{ path('app_inscription') }}" class="btn-banner-main">Créer mon compte →</a>
+        <a href="{{ path('app_login') }}" class="btn-banner-ghost">J'ai déjà un compte</a>
+      {% endif %}
     </div>
   </div>
 </section>
