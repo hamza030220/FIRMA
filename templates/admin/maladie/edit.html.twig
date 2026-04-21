@@ -823,6 +823,7 @@
                     {% else %}
                         {% for t in traitements %}
                         {% set rate = t.usageCount > 0 ? (t.feedbackPositive * 100 / t.usageCount)|round : 0 %}
+                        {% set effScore = (t.feedbackPositive * 3) + t.usageCount - (t.feedbackNegative * 2) %}
                         <div class="edt-sol-item"
                              data-id="{{ t.id }}"
                              data-titre="{{ t.titre|e('html_attr') }}"
@@ -918,6 +919,10 @@
                                     <div class="edt-sol-stat-card">
                                         <span class="edt-sol-stat-num {% if rate >= 70 %}green{% elseif rate >= 40 %}blue{% else %}red{% endif %}">{{ rate }}%</span>
                                         <span class="edt-sol-stat-lbl">Taux succès</span>
+                                    </div>
+                                    <div class="edt-sol-stat-card">
+                                        <span class="edt-sol-stat-num blue">{{ effScore }}</span>
+                                        <span class="edt-sol-stat-lbl">Score efficacité</span>
                                     </div>
                                 </div>
                                 <div class="edt-progress-wrap">

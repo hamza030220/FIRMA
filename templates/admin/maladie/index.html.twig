@@ -13,6 +13,8 @@
 .btn-new{display:inline-flex;align-items:center;gap:7px;background:#2d7a3a;color:#fff;border:none;padding:10px 20px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none}
 .btn-new:hover{background:#245f2d;color:#fff;text-decoration:none}
 .top-actions{display:flex;gap:0.75rem;flex-wrap:wrap}
+.btn-case{display:inline-flex;align-items:center;gap:7px;background:#eff7f1;color:#0f5c2f;border:1px solid rgba(15,92,47,0.18);padding:10px 18px;border-radius:var(--border-radius-md);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn-case:hover{background:#e5f1e7;color:#0c4a26;text-decoration:none}
 .btn-weather{display:inline-flex;align-items:center;gap:7px;background:#e6f1fb;color:#185fa5;border:1px solid #b9d8f6;padding:10px 18px;border-radius:var(--border-radius-md);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
 .btn-weather:hover{background:#d6e9fb;color:#0f4e8a;text-decoration:none}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
@@ -103,6 +105,10 @@
         <p>Gérez, filtrez et surveillez toutes les pathologies</p>
     </div>
     <div class="top-actions">
+        <a href="{{ path('admin_maladie_case_index') }}" class="btn-case">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18"/><path d="M3 12h18"/><path d="M3 17h18"/><path d="M7 7v10"/></svg>
+            Carnet maladies
+        </a>
         <a href="{{ path('admin_maladie_weather') }}" class="btn-weather">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19a4 4 0 1 1 .88-7.903A5 5 0 0 1 21 12a4 4 0 0 1-1 7.874"/><path d="M8 19l2-3h2l-2 3h2l-3 4 1-3z"/></svg>
             Meteo maladies

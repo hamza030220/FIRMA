@@ -27,12 +27,9 @@ class MaladieWeatherAlertMailer
             return;
         }
 
-        $recipients = $this->utilisateurRepository->findAdminEmails();
-        if ($this->weatherAlertAdminFallback !== '') {
+        $recipients = $this->utilisateurRepository->findClientEmails();
+        if ($recipients === [] && $this->weatherAlertAdminFallback !== '') {
             $recipients[] = $this->weatherAlertAdminFallback;
-        }
-        if ($user->getEmail()) {
-            $recipients[] = $user->getEmail();
         }
 
         $recipients = array_values(array_unique(array_filter($recipients)));
@@ -71,7 +68,7 @@ class MaladieWeatherAlertMailer
 
         $temperature = isset($weather['main']['temp']) ? (float) $weather['main']['temp'] : null;
         $humidity = isset($weather['main']['humidity']) ? (int) $weather['main']['humidity'] : null;
-        $sender = $this->weatherAlertSender !== '' ? $this->weatherAlertSender : 'noreply@firma.local';
+        $sender = $this->weatherAlertSender !== '' ? $this->weatherAlertSender : 'noreply@firma.tn';
 
         $html = sprintf(
             '<!DOCTYPE html>'
@@ -91,12 +88,7 @@ class MaladieWeatherAlertMailer
             . '<td style="padding:22px 20px 8px;">'
             . '<table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0 10px;">'
             . '<tr>'
-            . '<td style="width:50%%;padding:14px 16px;background:#f8fbf9;border-radius:16px;">'
-            . '<div style="font-size:12px;text-transform:uppercase;color:#6b8076;font-weight:700;">Utilisateur</div>'
-            . '<div style="margin-top:6px;font-size:15px;font-weight:700;color:#173d2e;">%s</div>'
-            . '<div style="margin-top:4px;font-size:13px;color:#5d746a;word-break:break-word;">%s</div>'
-            . '</td>'
-            . '<td style="width:50%%;padding:14px 16px;background:#f8fbf9;border-radius:16px;">'
+            . '<td style="width:100%%;padding:14px 16px;background:#f8fbf9;border-radius:16px;">'
             . '<div style="font-size:12px;text-transform:uppercase;color:#6b8076;font-weight:700;">Conditions</div>'
             . '<div style="margin-top:6px;font-size:14px;color:#173d2e;"><strong>Temperature:</strong> %s</div>'
             . '<div style="margin-top:4px;font-size:14px;color:#173d2e;"><strong>Humidite:</strong> %s</div>'
@@ -116,7 +108,7 @@ class MaladieWeatherAlertMailer
             . '<tr>'
             . '<td style="padding:0 20px 24px;">'
             . '<div style="font-size:13px;line-height:1.7;color:#6a7d74;background:#f8fbf9;border-radius:16px;padding:14px 16px;">'
-            . 'Email automatique envoye par FIRMA depuis <strong>%s</strong>.'
+            . 'Email automatique envoye par FIRMA depuis <strong>Firmaagritech@gmail.com</strong>.'
             . '</div>'
             . '</td>'
             . '</tr>'
@@ -124,19 +116,15 @@ class MaladieWeatherAlertMailer
             . '</td></tr></table>'
             . '</body></html>',
             htmlspecialchars($city, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($user->getFullName(), ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars((string) $user->getEmail(), ENT_QUOTES, 'UTF-8'),
             $temperature !== null ? round($temperature, 1) . ' C' : 'N/A',
             $humidity !== null ? $humidity . '%' : 'N/A',
-            $rows,
-            htmlspecialchars($sender, ENT_QUOTES, 'UTF-8')
+            $rows
         );
 
         $text = implode("\n", [
             'FIRMA - Alerte meteo maladie',
             '',
             'Ville : ' . $city,
-            'Utilisateur : ' . $user->getFullName() . ' (' . (string) $user->getEmail() . ')',
             'Temperature : ' . ($temperature !== null ? round($temperature, 1) . ' C' : 'N/A'),
             'Humidite : ' . ($humidity !== null ? $humidity . '%' : 'N/A'),
             '',
@@ -146,7 +134,8 @@ class MaladieWeatherAlertMailer
 
         $email = (new Email())
             ->from($sender)
-            ->to(...$recipients)
+            ->to($sender)
+            ->bcc(...$recipients)
             ->subject('FIRMA - Alerte meteo maladie pour ' . $city)
             ->text($text)
             ->html($html);

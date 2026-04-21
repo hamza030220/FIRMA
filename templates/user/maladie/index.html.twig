@@ -12,6 +12,14 @@
         <h1 class="mal-hero-title">Maladies des plantes</h1>
         <p class="mal-hero-sub">Identifiez, comprenez et traitez les maladies qui menacent vos cultures.</p>
         <div class="mal-hero-actions">
+            <a href="{{ path('user_maladie_diagnostic') }}" class="mal-hero-btn secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                Lancer un diagnostic
+            </a>
+            <a href="{{ path('user_maladie_case_index') }}" class="mal-hero-btn secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18"/><path d="M3 12h18"/><path d="M3 17h18"/><path d="M7 7v10"/></svg>
+                Carnet maladies
+            </a>
             <a href="{{ path('user_maladie_weather') }}" class="mal-hero-btn primary">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19a4 4 0 1 1 .88-7.903A5 5 0 0 1 21 12a4 4 0 0 1-1 7.874"/><path d="M8 19l2-3h2l-2 3h2l-3 4 1-3z"/></svg>
                 Consulter la meteo
@@ -41,6 +49,7 @@
             </div>
         </div>
     </div>
+
 
     {# ===== BARRE RECHERCHE + FILTRES ===== #}
     <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form" data-auto-search data-auto-search-min="2">
@@ -93,6 +102,7 @@
         <span class="mal-results-tri">Trié par {{ tri }}</span>
         {% endif %}
     </div>
+
 
     {# ===== GRILLE DES MALADIES ===== #}
     {% if maladies is not empty %}
@@ -261,6 +271,8 @@
     padding: 0.8rem 1.5rem;
     box-shadow: 0 2px 12px rgba(15,92,47,0.06);
 }
+
+
 .mal-stat {
     display: flex;
     flex-direction: column;
@@ -554,6 +566,7 @@
     .mal-btn-search { width: 100%; }
 }
 </style>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
