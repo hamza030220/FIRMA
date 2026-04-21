@@ -27,7 +27,11 @@ class PostRepository extends ServiceEntityRepository
             ->leftJoin('p.commentaires', 'c')
             ->addSelect('c')
             ->leftJoin('c.utilisateur', 'cu')
-            ->addSelect('cu');
+            ->addSelect('cu')
+            ->leftJoin('p.reactions', 'r')
+            ->addSelect('r')
+            ->leftJoin('r.utilisateur', 'ru')
+            ->addSelect('ru');
 
         if ($search !== null && $search !== '') {
             $qb
@@ -39,21 +43,27 @@ class PostRepository extends ServiceEntityRepository
 
         switch ($sort) {
             case 'oldest':
-                $qb->orderBy('p.dateCreation', 'ASC');
+                $qb
+                    ->orderBy('p.isPinned', 'DESC')
+                    ->addOrderBy('p.dateCreation', 'ASC');
                 break;
             case 'title_asc':
                 $qb
-                    ->orderBy('p.titre', 'ASC')
+                    ->orderBy('p.isPinned', 'DESC')
+                    ->addOrderBy('p.titre', 'ASC')
                     ->addOrderBy('p.dateCreation', 'DESC');
                 break;
             case 'title_desc':
                 $qb
-                    ->orderBy('p.titre', 'DESC')
+                    ->orderBy('p.isPinned', 'DESC')
+                    ->addOrderBy('p.titre', 'DESC')
                     ->addOrderBy('p.dateCreation', 'DESC');
                 break;
             case 'recent':
             default:
-                $qb->orderBy('p.dateCreation', 'DESC');
+                $qb
+                    ->orderBy('p.isPinned', 'DESC')
+                    ->addOrderBy('p.dateCreation', 'DESC');
                 break;
         }
 
@@ -72,6 +82,10 @@ class PostRepository extends ServiceEntityRepository
             ->addSelect('c')
             ->leftJoin('c.utilisateur', 'cu')
             ->addSelect('cu')
+            ->leftJoin('p.reactions', 'r')
+            ->addSelect('r')
+            ->leftJoin('r.utilisateur', 'ru')
+            ->addSelect('ru')
             ->andWhere('p.id = :id')
             ->setParameter('id', $id)
             ->getQuery()

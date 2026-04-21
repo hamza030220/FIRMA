@@ -1,12 +1,6 @@
 <?php
-<<<<<<< HEAD
-// src/Service/PdfGeneratorService.php
-
-namespace App\Service;
-=======
 
 namespace App\Service\User;
->>>>>>> origin/main
 
 use Dompdf\Dompdf;
 use Dompdf\Options;

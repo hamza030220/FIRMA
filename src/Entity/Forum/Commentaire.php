@@ -4,12 +4,11 @@ namespace App\Entity\Forum;
 
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\CommentaireRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
-=======
 use Symfony\Component\Validator\Constraints as Assert;
->>>>>>> origin/main
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
 #[ORM\Table(name: 'commentaire')]
@@ -29,11 +28,8 @@ class Commentaire
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: Types::TEXT)]
-<<<<<<< HEAD
-=======
     #[Assert\NotBlank(message: 'Le commentaire est obligatoire.')]
     #[Assert\Length(min: 2, minMessage: 'Le commentaire doit contenir au moins 2 caractères.', max: 1000, maxMessage: 'Le commentaire ne peut pas dépasser 1000 caractères.')]
->>>>>>> origin/main
     private ?string $contenu = null;
 
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE)]
@@ -41,6 +37,17 @@ class Commentaire
 
     #[ORM\Column(name: 'image_path', length: 255, nullable: true)]
     private ?string $imagePath = null;
+
+    /**
+     * @var Collection<int, ForumModerationAlert>
+     */
+    #[ORM\OneToMany(mappedBy: 'commentaire', targetEntity: ForumModerationAlert::class, orphanRemoval: true)]
+    private Collection $moderationAlerts;
+
+    public function __construct()
+    {
+        $this->moderationAlerts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,5 +112,13 @@ class Commentaire
         $this->imagePath = $imagePath;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumModerationAlert>
+     */
+    public function getModerationAlerts(): Collection
+    {
+        return $this->moderationAlerts;
     }
 }

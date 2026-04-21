@@ -12,11 +12,7 @@
         "doctrine/orm": "^3.6",
         "dompdf/dompdf": "^3.1",
         "endroid/qr-code": "^6.0",
-<<<<<<< HEAD
-        "phpdocumentor/reflection-docblock": "^6.0",
-=======
         "phpdocumentor/reflection-docblock": "^5.6.7",
->>>>>>> origin/main
         "phpstan/phpdoc-parser": "^2.3",
         "stripe/stripe-php": "^20.0",
         "symfony/asset": "6.4.*",

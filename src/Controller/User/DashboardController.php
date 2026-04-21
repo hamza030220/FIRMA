@@ -2,13 +2,9 @@
 
 namespace App\Controller\User;
 
-<<<<<<< HEAD
-use App\Repository\Maladie\MaladieRepository;
-=======
 use App\Form\User\ProfilType;
 use App\Repository\Maladie\MaladieRepository;
 use App\Repository\User\UtilisateurRepository;
->>>>>>> origin/main
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -1,0 +1,151 @@
+forum:
+  language: Taal
+  language_fr: Frans
+  language_en: Engels
+  language_en_gb: Engels (VK)
+  language_en_us: Engels (VS)
+  language_de: Duits
+  language_es: Spaans
+  language_it: Italiaans
+  language_nl: Nederlands
+  language_pt_br: Portugees (Brazilië)
+  language_pt_pt: Portugees (Portugal)
+  language_pl: Pools
+  switch: Forumtaal wijzigen
+
+  common:
+    back_to_discussions: Terug naar discussies
+    back_to_post: Terug naar bericht
+    cancel: Annuleren
+    save: Opslaan
+    publish: Publiceren
+    publish_comment: Reactie publiceren
+    loading: Laden
+    reactions: reacties
+    comments: reacties
+    comment: reactie
+    comment_total: in totaal
+    characters: tekens
+    author: Auteur
+    by: Door
+    connected: verbonden
+    search: Zoeken
+    search_reset: Reset
+    sort: Sorteren
+    no_category: Geen categorie
+
+  index:
+    kicker: FIRMA-community
+    title: Wissel uit met de FIRMA-community
+    lead: Deel je vragen, tips en ervaringen in een duidelijke en professionele ruimte.
+    posts_visible: zichtbare berichten
+    new_post: Nieuw bericht
+    title_label: Titel
+    title_placeholder: "Voorbeeld: advies over irrigatie"
+    category_label: Categorie
+    category_placeholder: Kies een categorie
+    content_label: Inhoud
+    content_placeholder: Beschrijf je behoefte of deel je ervaring...
+    publish_title: Dit bericht publiceren
+    publish_message: Wil je dit bericht echt publiceren?
+    discussions: Discussies
+    search_placeholder: Zoek een bericht op titel
+    search_button: Zoeken
+    sort_aria: Discussies sorteren
+    open_post: Bericht openen
+    sort_recent: Nieuwste
+    sort_oldest: Oudste
+    sort_title_asc: Titel A-Z
+    sort_title_desc: Titel Z-A
+    search_info: resultaat voor
+    results_for: resultaten voor
+    view_post: Volledig bericht bekijken
+    edit_post: Bericht bewerken
+    edit_title: Dit bericht bewerken
+    edit_message: Wil je dit bericht echt bewerken?
+    delete_post: Bericht verwijderen
+    delete_message: Wil je dit bericht echt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+    empty_title: Geen discussie gevonden
+    empty_search: Geen resultaat komt overeen met je zoekopdracht. Probeer een ander trefwoord.
+    empty_default: Begin met het eerste forumonderwerp in de Symfony-versie.
+    flash_form_error: Het formulier bevat fouten. Controleer de velden hieronder.
+
+  show:
+    comments: Reacties
+    add_comment: Reactie toevoegen
+    comment_placeholder: Reageer op deze discussie...
+    comment_counter: '%current% / %max% tekens'
+    image_label: Afbeelding van reactie
+    image_preview: Voorbeeld vóór publicatie
+    image_preview_alt: Voorbeeld van de reactieafbeelding
+    image_format_error: Ongeldig formaat. Gebruik JPG, PNG, WEBP of GIF.
+    image_edit_label: Afbeelding vervangen
+    remove_current_image: Huidige afbeelding verwijderen
+    no_comments_title: Nog geen reacties
+    no_comments_text: Wees de eerste om op dit onderwerp te reageren.
+    save: Opslaan
+    cancel: Annuleren
+    edit_comment: Reactie bewerken
+    edit_comment_title: Deze reactie bewerken
+    edit_comment_message: Wil je deze reactie echt bewerken?
+    delete_comment: Reactie verwijderen
+    delete_comment_title: Deze reactie verwijderen
+    delete_comment_message: Wil je deze reactie echt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+
+  edit:
+    title: Bericht bewerken
+    save: Opslaan
+    cancel: Annuleren
+    category_placeholder: Kies een categorie
+    back_to_post: Terug naar bericht
+
+  reaction:
+    choose: Klik om je stemming te kiezen
+
+  mood:
+    analyze: Analyseer stemming
+    pending: In afwachting
+    positive: Positief
+    negative: Negatief
+    neutral: Neutraal
+    relaunch: Opnieuw analyseren
+    warning: Interne waarschuwing
+
+  warning:
+    title: Forumwaarschuwing
+    message: Onze app staat geen beledigende taal toe. Controleer je interne waarschuwingen.
+    cta: Waarschuwing bekijken
+
+  flash:
+    post_created: Bericht succesvol gepubliceerd
+    post_updated: Bericht succesvol bijgewerkt
+    post_deleted: Bericht succesvol verwijderd
+    comment_created: Reactie succesvol toegevoegd
+    comment_updated: Reactie succesvol bijgewerkt
+    comment_deleted: Reactie succesvol verwijderd
+    invalid_reaction: Ongeldige reactie.
+    invalid_csrf: Ongeldige CSRF-token.
+    invalid_user: Gebruiker niet ingelogd.
+    invalid_post: Bericht niet gevonden.
+    invalid_comment: Reactie niet gevonden.
+    invalid_image_file: Het geüploade afbeeldingsbestand is ongeldig.
+    image_upload_failed: De afbeelding kon niet worden opgeslagen. Probeer het opnieuw.
+    validation:
+      title_required: Titel is verplicht.
+      title_length: Titel mag niet langer zijn dan 255 tekens.
+      content_required: Inhoud is verplicht.
+      content_length: Inhoud moet minstens 10 tekens bevatten.
+      category_required: Categorie is verplicht.
+      category_invalid: De geselecteerde categorie is ongeldig.
+      comment_required: Reactie is verplicht.
+      comment_min: Reactie moet minstens %min% tekens bevatten.
+      comment_max: Reactie mag niet langer zijn dan %max% tekens.
+      image_format: "Toegestane formaten: JPG, PNG, WEBP of GIF."
+      image_extension: "Ongeldige extensie. Gebruik JPG, PNG, WEBP of GIF."
+      image_size: "De afbeelding mag niet groter zijn dan 5 MB."
+      image_too_small: "Afbeelding te klein: %width%x%height% px. Minimale grootte: %min_width%x%min_height% px."
+      image_too_large: "Afbeelding te groot: %width%x%height% px. Maximale grootte: %max_width%x%max_height% px."
+      image_read: Kan de afbeeldingsafmetingen niet lezen.
+      image_invalid: Kan het afbeeldingsbestand niet lezen.
+      self_edit_post: Je kunt dit bericht niet bewerken.
+      self_edit_comment: Je kunt deze reactie niet bewerken.

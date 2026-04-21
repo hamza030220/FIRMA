@@ -8,6 +8,39 @@
 {% if _all_flashes|length > 0 %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    function showFallbackToast(message, type, duration) {
+        if (!message) {
+            return;
+        }
+
+        if (!document.getElementById('flash-toast-fallback-style')) {
+            var style = document.createElement('style');
+            style.id = 'flash-toast-fallback-style';
+            style.textContent = '@keyframes flashToastFallbackProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}';
+            document.head.appendChild(style);
+        }
+
+        var isDanger = type === 'danger' || type === 'error';
+        var toast = document.createElement('div');
+        toast.style.cssText =
+            'position:fixed;top:18px;right:18px;z-index:99999;min-width:260px;max-width:420px;padding:12px 14px;border-radius:12px;font:600 14px/1.35 system-ui,sans-serif;' +
+            (isDanger
+                ? 'background:#fdeaea;color:#a32d2d;border:1px solid #f5c5c0;'
+                : 'background:#eaf3de;color:#27500a;border:1px solid #c0dd97;') +
+            'box-shadow:0 14px 30px rgba(0,0,0,.14);overflow:hidden;';
+
+        toast.innerHTML =
+            '<div style="position:absolute;top:0;left:0;height:3px;width:100%;background:' +
+            (isDanger ? '#dc2626' : '#2f7d55') +
+            ';transform-origin:left;animation:flashToastFallbackProgress ' + duration + 'ms linear forwards"></div>' +
+            '<div>' + String(message) + '</div>';
+
+        document.body.appendChild(toast);
+        window.setTimeout(function() {
+            toast.remove();
+        }, duration + 350);
+    }
+
     {% for type, messages in _all_flashes %}
         {% if type == 'error_fields' %}
             {% for message in messages %}
@@ -27,7 +60,15 @@ document.addEventListener('DOMContentLoaded', function() {
         {% else %}
             {% set toast_type = type == 'error' ? 'danger' : type %}
             {% for message in messages %}
-    window.firmaToast("{{ message|e('js') }}", "{{ toast_type|e('js') }}");
+    (function() {
+        var msg = "{{ message|e('js') }}";
+        var t = "{{ toast_type|e('js') }}";
+        if (typeof window.firmaToast === 'function') {
+            window.firmaToast(msg, t, 10000);
+        } else {
+            showFallbackToast(msg, t, 10000);
+        }
+    })();
             {% endfor %}
         {% endif %}
     {% endfor %}

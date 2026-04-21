@@ -111,6 +111,15 @@
   transition:all .2s ease;
   white-space:nowrap;
 }
+.user-navbar-notifications{
+  position:relative;
+}
+.user-navbar-badge{
+  min-width:20px;height:20px;padding:0 .35rem;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:999px;background:#d7263d;color:#fff;
+  font-size:.72rem;font-weight:700;line-height:1;
+}
 .user-navbar-profile svg{
   flex-shrink:0;opacity:.7;transition:opacity .2s ease;
 }
