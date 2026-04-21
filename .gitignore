@@ -23,4 +23,5 @@
 ###> custom ###
 *.sql
 temp_*.sql
+/public/uploads/maladies/cases/
 ###< custom ###
