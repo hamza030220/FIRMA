@@ -37,11 +37,21 @@ class MaladieController extends AbstractController
     }
 
     #[Route('/', name: 'admin_maladie_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $allMaladies = $this->maladieRepo->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $total = count($allMaladies);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
+
         return $this->render('admin/maladie/index.html.twig', [
-            'maladies' => $this->maladieRepo->findAll(),
-            'totalMaladies' => $this->maladieRepo->countAll(),
+            'maladies' => $maladies,
+            'totalMaladies' => $total,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
