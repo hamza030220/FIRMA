@@ -51,13 +51,27 @@ class DashboardController extends AbstractController
         $tri     = $request->query->get('tri', 'nom');
         $gravite = $request->query->get('gravite', '');
 
-        $maladies = $maladieRepository->searchAndFilter($keyword, $tri, $gravite);
+        $allMaladies = $maladieRepository->searchAndFilter($keyword, $tri, $gravite);
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 9;
+        $total = count($allMaladies);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
 
         return $this->render('user/maladie/index.html.twig', [
             'maladies' => $maladies,
             'keyword'  => $keyword,
             'tri'      => $tri,
             'gravite'  => $gravite,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'listRoute' => 'user_maladie',
+            'paginationRouteParams' => array_filter([
+                'q' => $keyword !== '' ? $keyword : null,
+                'tri' => $tri !== '' ? $tri : null,
+                'gravite' => $gravite !== '' ? $gravite : null,
+            ], static fn ($value) => $value !== null),
         ]);
     }
 

@@ -1,0 +1,67 @@
+{% if totalPages is defined and totalPages > 1 %}
+<nav class="firma-pagination" aria-label="Pagination">
+    {% set current = currentPage|default(1) %}
+    {% set params = routeParams|default({}) %}
+
+    {% if current > 1 %}
+        <a href="{{ path(route, params|merge({ page: current - 1 })) }}" class="firma-pagination-link">
+            Prec
+        </a>
+    {% endif %}
+
+    {% for pageNumber in 1..totalPages %}
+        {% if pageNumber == current %}
+            <span class="firma-pagination-link is-active">{{ pageNumber }}</span>
+        {% else %}
+            <a href="{{ path(route, params|merge({ page: pageNumber })) }}" class="firma-pagination-link">
+                {{ pageNumber }}
+            </a>
+        {% endif %}
+    {% endfor %}
+
+    {% if current < totalPages %}
+        <a href="{{ path(route, params|merge({ page: current + 1 })) }}" class="firma-pagination-link">
+            Suiv
+        </a>
+    {% endif %}
+</nav>
+
+<style>
+.firma-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.firma-pagination-link {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 92, 47, 0.18);
+    background: #fff;
+    color: #0f5c2f;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.firma-pagination-link:hover {
+    background: #edf7ef;
+    color: #0c4a26;
+    text-decoration: none;
+}
+
+.firma-pagination-link.is-active {
+    background: #0f5c2f;
+    color: #fff;
+    border-color: #0f5c2f;
+}
+</style>
+{% endif %}

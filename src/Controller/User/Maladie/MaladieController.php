@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -15,10 +16,25 @@ use Symfony\Component\Routing\Annotation\Route;
 class MaladieController extends AbstractController
 {
     #[Route('/maladies', name: 'user_maladie_index')]
-    public function index(MaladieRepository $maladieRepository): Response
+    public function index(MaladieRepository $maladieRepository, Request $request): Response
     {
+        $allMaladies = $maladieRepository->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 9;
+        $total = count($allMaladies);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
+        $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
+
         return $this->render('user/maladie/index.html.twig', [
-            'maladies' => $maladieRepository->findAll(),
+            'maladies' => $maladies,
+            'keyword' => '',
+            'tri' => 'nom',
+            'gravite' => '',
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'listRoute' => 'user_maladie_index',
+            'paginationRouteParams' => [],
         ]);
     }
 
@@ -28,7 +44,7 @@ class MaladieController extends AbstractController
         $maladie = $maladieRepository->find($id);
 
         if (!$maladie) {
-            throw $this->createNotFoundException('Maladie non trouvée.');
+            throw $this->createNotFoundException('Maladie non trouvÃ©e.');
         }
 
         return $this->render('user/maladie/show.html.twig', [
@@ -46,7 +62,7 @@ class MaladieController extends AbstractController
         $solution = $solutionRepo->find($id);
 
         if (!$solution) {
-            throw $this->createNotFoundException('Solution non trouvée.');
+            throw $this->createNotFoundException('Solution non trouvÃ©e.');
         }
 
         if ($type === 'positif') {
@@ -76,10 +92,10 @@ class MaladieController extends AbstractController
         $maladie = $maladieRepository->find($id);
 
         if (!$maladie) {
-            throw $this->createNotFoundException('Maladie non trouvée.');
+            throw $this->createNotFoundException('Maladie non trouvÃ©e.');
         }
 
-        // Helper: encoder proprement pour éviter l'erreur iconv/dompdf
+        // Helper: encoder proprement pour Ã©viter l'erreur iconv/dompdf
         $e = function (?string $str): string {
             if ($str === null) return '';
 
@@ -169,7 +185,7 @@ class MaladieController extends AbstractController
     <table style="width:100%;border-collapse:collapse;">
         <tr>
             <td>
-                <div class="header-brand">FIRMA — Plateforme Agricole</div>
+                <div class="header-brand">FIRMA â€” Plateforme Agricole</div>
                 <div class="header-title">' . $e($maladie->getNom()) . '</div>
                 ' . ($maladie->getNomScientifique() ? '<div class="header-sci">' . $e($maladie->getNomScientifique()) . '</div>' : '') . '
                 <div class="header-badge">Fiche maladie complete</div>
@@ -276,7 +292,7 @@ class MaladieController extends AbstractController
 
         $html .= '
     <div class="footer">
-        FIRMA — Plateforme Agricole | Fiche generee le ' . $date . ' | ' . $e($maladie->getNom()) . '
+        FIRMA â€” Plateforme Agricole | Fiche generee le ' . $date . ' | ' . $e($maladie->getNom()) . '
     </div>
 
 </div>
