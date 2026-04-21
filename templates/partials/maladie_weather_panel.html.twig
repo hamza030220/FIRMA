@@ -1,0 +1,240 @@
+<style>
+.mwx-wrap { max-width: 1100px; margin: 0 auto; }
+.mwx-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 2rem; background: linear-gradient(135deg, #123b2c 0%, #1f6a50 48%, #dcefe5 145%); color: #fff; box-shadow: 0 22px 48px rgba(16, 53, 35, 0.18); margin-bottom: 1.4rem; }
+.mwx-hero::after { content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; top: -110px; right: -70px; background: rgba(255,255,255,0.08); }
+.mwx-kicker { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.mwx-hero h2 { margin: 0.9rem 0 0.5rem; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.05; }
+.mwx-hero p { margin: 0; max-width: 60ch; color: rgba(255,255,255,0.86); line-height: 1.7; font-size: 0.94rem; }
+.mwx-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.2rem; }
+.mwx-btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.15rem; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+.mwx-btn-primary { background: #fff; color: #134637; }
+.mwx-btn-secondary { background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
+.mwx-grid { display: grid; grid-template-columns: 320px 1fr; gap: 1.2rem; }
+.mwx-card { background: #fff; border: 1px solid #d8e5dc; border-radius: 22px; box-shadow: 0 18px 38px rgba(14,38,27,0.08); overflow: hidden; }
+.mwx-card-head { padding: 1rem 1.25rem; border-bottom: 1px solid #e8efeb; background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 100%); }
+.mwx-card-head h3 { margin: 0; font-size: 0.96rem; color: #234236; }
+.mwx-card-body { padding: 1.2rem 1.25rem 1.3rem; }
+.mwx-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6f8378; margin-bottom: 0.35rem; font-weight: 700; }
+.mwx-input { width: 100%; padding: 0.82rem 0.95rem; border-radius: 14px; border: 1px solid #d5e0d8; outline: none; font-size: 0.9rem; background: #f8fbf9; }
+.mwx-hint { margin-top: 0.7rem; font-size: 0.76rem; color: #6f8378; line-height: 1.55; }
+.mwx-error { display: none; margin-top: 0.9rem; padding: 0.8rem 0.95rem; border-radius: 14px; border: 1px solid #f4c6c2; background: #fdeaea; color: #a32d2d; }
+.mwx-error.show { display: block; }
+.mwx-state { margin-bottom: 1rem; font-size: 0.82rem; color: #6f8378; }
+.mwx-summary { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1rem; align-items: stretch; }
+.mwx-main { border-radius: 22px; padding: 1.2rem; background: linear-gradient(135deg, #123b2c 0%, #1d664d 56%, #87c8b4 145%); color: #fff; min-height: 220px; }
+.mwx-main-top { display: flex; justify-content: space-between; gap: 1rem; }
+.mwx-temp { font-size: 3rem; font-weight: 800; line-height: 1; }
+.mwx-desc { margin-top: 0.45rem; font-size: 0.95rem; color: rgba(255,255,255,0.88); }
+.mwx-place { margin-top: 0.25rem; font-size: 0.8rem; color: rgba(255,255,255,0.72); }
+.mwx-icon { width: 62px; height: 62px; border-radius: 18px; background: rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+.mwx-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin-top: 1rem; }
+.mwx-metric { padding: 0.72rem 0.65rem; border-radius: 16px; background: rgba(255,255,255,0.12); }
+.mwx-metric span { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.74); }
+.mwx-metric strong { display: block; margin-top: 0.2rem; font-size: 0.92rem; }
+.mwx-risk { border: 1px solid #dce7df; border-radius: 22px; padding: 1rem; background: #f8fbf9; }
+.mwx-risk-badge { display: inline-flex; padding: 0.26rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; margin-bottom: 0.75rem; }
+.mwx-risk-badge.faible { background: #eaf7ef; color: #2d7a3a; }
+.mwx-risk-badge.moyen { background: #e8f1fb; color: #165b99; }
+.mwx-risk-badge.eleve { background: #fff3e6; color: #b86a00; }
+.mwx-risk-badge.critique { background: #fdeaea; color: #b42318; }
+.mwx-risk h4 { margin: 0 0 0.45rem; font-size: 1rem; color: #20382e; }
+.mwx-risk p { margin: 0; color: #5f7468; line-height: 1.6; font-size: 0.86rem; }
+.mwx-alerts { margin-top: 1rem; }
+.mwx-alert-item { border: 1px solid #d8e5dc; border-radius: 16px; padding: 0.85rem; background: #fff; margin-bottom: 0.75rem; }
+.mwx-alert-item:last-child { margin-bottom: 0; }
+.mwx-alert-item strong { display: block; color: #134637; margin-bottom: 0.25rem; }
+.mwx-alert-meta { font-size: 0.78rem; color: #6b7f74; margin-top: 0.35rem; }
+.mwx-mail-status { margin-top: 1rem; padding: 0.85rem 0.95rem; border-radius: 16px; border: 1px solid #d8e5dc; background: #fff; color: #365447; font-size: 0.84rem; line-height: 1.6; }
+.mwx-mail-status.is-success { border-color: #cfe8d5; background: #f3fbf5; color: #1d5d2f; }
+.mwx-mail-status.is-error { border-color: #f4c6c2; background: #fdeaea; color: #a32d2d; }
+.mwx-mail-status.is-idle { border-color: #d8e5dc; background: #f8fbf9; color: #5f7468; }
+@media (max-width: 900px) { .mwx-grid, .mwx-summary { grid-template-columns: 1fr; } }
+</style>
+
+<div class="mwx-wrap">
+    <section class="mwx-hero">
+        <span class="mwx-kicker">Meteo et prevention</span>
+        <h2>Surveillance meteo des maladies</h2>
+        <p>La meteo est chargee a partir de la ville du compte connecte dans la table utilisateurs. Si un risque eleve ou critique est detecte, une alerte email est preparee pour l admin et pour vous.</p>
+        <div class="mwx-actions">
+            <button type="button" class="mwx-btn mwx-btn-primary" id="mwxRefreshBtn">Actualiser la meteo</button>
+            <a href="{{ back_url }}" class="mwx-btn mwx-btn-secondary">Retour a la gestion maladie</a>
+        </div>
+    </section>
+
+    <div class="mwx-grid">
+        <div class="mwx-card">
+            <div class="mwx-card-head">
+                <h3>Source</h3>
+            </div>
+            <div class="mwx-card-body">
+                <label class="mwx-label">Ville du compte connecte</label>
+                <input type="text" class="mwx-input" id="mwxCity" value="{{ app.user and app.user.ville ? app.user.ville : '' }}" placeholder="Ville non renseignee" readonly>
+                <div class="mwx-hint">Le backend interroge OpenWeatherMap avec cette ville, puis compare la temperature et l humidite avec les seuils definis dans chaque maladie.</div>
+                <div class="mwx-error" id="mwxError"></div>
+            </div>
+        </div>
+
+        <div class="mwx-card">
+            <div class="mwx-card-head">
+                <h3>Analyse meteo</h3>
+            </div>
+            <div class="mwx-card-body">
+                <div class="mwx-state" id="mwxState">Cliquez sur Actualiser la meteo pour charger les donnees de votre ville.</div>
+
+                <div class="mwx-summary">
+                    <div class="mwx-main">
+                        <div class="mwx-main-top">
+                            <div>
+                                <div class="mwx-temp" id="mwxTemp">-- C</div>
+                                <div class="mwx-desc" id="mwxDesc">En attente de donnees</div>
+                                <div class="mwx-place" id="mwxPlace">Ville utilisateur</div>
+                            </div>
+                            <div class="mwx-icon" id="mwxIcon">M</div>
+                        </div>
+
+                        <div class="mwx-metrics">
+                            <div class="mwx-metric">
+                                <span>Humidite</span>
+                                <strong id="mwxHumidity">--%</strong>
+                            </div>
+                            <div class="mwx-metric">
+                                <span>Pluie</span>
+                                <strong id="mwxRain">-- mm</strong>
+                            </div>
+                            <div class="mwx-metric">
+                                <span>Vent</span>
+                                <strong id="mwxWind">-- m/s</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mwx-risk">
+                        <span class="mwx-risk-badge faible" id="mwxRiskBadge">Aucune alerte</span>
+                        <h4 id="mwxRiskTitle">Etat des maladies</h4>
+                        <p id="mwxRiskText">Aucune analyse n a encore ete lancee.</p>
+                        <div class="mwx-alerts" id="mwxAdvice"></div>
+                        <div class="mwx-mail-status is-idle" id="mwxMailStatus">Aucun envoi d email n a encore ete tente.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const icons = { ciel: 'S', nuage: 'N', pluie: 'P', orage: 'O', brume: 'B' };
+
+    function setState(message) {
+        const state = document.getElementById('mwxState');
+        if (state) state.textContent = message;
+    }
+
+    function setError(message = '') {
+        const el = document.getElementById('mwxError');
+        if (!el) return;
+        el.textContent = message;
+        el.classList.toggle('show', Boolean(message));
+    }
+
+    function getIcon(condition) {
+        const value = (condition || '').toLowerCase();
+        if (value.includes('pluie')) return icons.pluie;
+        if (value.includes('orage')) return icons.orage;
+        if (value.includes('nuage')) return icons.nuage;
+        if (value.includes('brume') || value.includes('brouillard')) return icons.brume;
+        return icons.ciel;
+    }
+
+    function render(payload) {
+        const weather = payload.weather || {};
+        const alerts = Array.isArray(payload.alerts) ? payload.alerts : [];
+        const hasRisk = alerts.length > 0;
+        const topRisk = hasRisk ? (alerts[0].risk || {}) : {};
+        const mail = payload.mail || {};
+
+        document.getElementById('mwxTemp').textContent = weather.temperature !== null && weather.temperature !== undefined ? `${Math.round(Number(weather.temperature))} C` : '-- C';
+        document.getElementById('mwxDesc').textContent = weather.condition || 'Condition indisponible';
+        document.getElementById('mwxPlace').textContent = payload.city || document.getElementById('mwxCity').value || 'Ville utilisateur';
+        document.getElementById('mwxIcon').textContent = getIcon(weather.condition);
+        document.getElementById('mwxHumidity').textContent = weather.humidity !== null && weather.humidity !== undefined ? `${weather.humidity}%` : '--%';
+        document.getElementById('mwxRain').textContent = `${weather.rain ?? 0} mm`;
+        document.getElementById('mwxWind').textContent = weather.wind !== null && weather.wind !== undefined ? `${weather.wind} m/s` : '-- m/s';
+
+        const badge = document.getElementById('mwxRiskBadge');
+        badge.textContent = hasRisk ? `Alerte ${topRisk.label || 'risque'}` : 'Aucune alerte';
+        badge.className = `mwx-risk-badge ${hasRisk ? (topRisk.level || 'eleve') : 'faible'}`;
+
+        document.getElementById('mwxRiskTitle').textContent = hasRisk ? 'Maladies en risque' : 'Etat des maladies';
+        document.getElementById('mwxRiskText').textContent = hasRisk
+            ? 'Des maladies correspondent aux seuils de risque definis. Un email d alerte est prepare pour l admin et pour votre compte.'
+            : 'Aucune maladie n est actuellement en risque eleve ou critique avec la meteo de votre ville.';
+
+        document.getElementById('mwxAdvice').innerHTML = alerts.length
+            ? alerts.map((item) => {
+                const risk = item.risk || {};
+                const thresholds = item.thresholds || {};
+                return `
+                    <div class="mwx-alert-item">
+                        <strong>${item.maladie || 'Maladie'}</strong>
+                        <div>${risk.message || ''}</div>
+                        <div class="mwx-alert-meta">Seuils: temp min ${thresholds.tempMin ?? '--'} / temp max ${thresholds.tempMax ?? '--'} / humidite min ${thresholds.humiditeMin ?? '--'}</div>
+                    </div>
+                `;
+            }).join('')
+            : '';
+
+        const mailStatusEl = document.getElementById('mwxMailStatus');
+        if (mailStatusEl) {
+            if (mail.sent) {
+                mailStatusEl.className = 'mwx-mail-status is-success';
+                mailStatusEl.textContent = 'Email d alerte envoye avec succes aux destinataires configures.';
+            } else if (mail.attempted && mail.error) {
+                mailStatusEl.className = 'mwx-mail-status is-error';
+                mailStatusEl.textContent = `Erreur SMTP: ${mail.error}`;
+            } else if (mail.attempted) {
+                mailStatusEl.className = 'mwx-mail-status is-error';
+                mailStatusEl.textContent = 'Une tentative d envoi a eu lieu, mais aucun detail de succes n a ete confirme.';
+            } else {
+                mailStatusEl.className = 'mwx-mail-status is-idle';
+                mailStatusEl.textContent = hasRisk
+                    ? 'Aucun email n a ete tente pour cette analyse.'
+                    : 'Aucun email envoye car aucun risque eleve ou critique n a ete detecte.';
+            }
+        }
+    }
+
+    async function loadWeather() {
+        const city = document.getElementById('mwxCity')?.value?.trim() || '';
+        if (!city) {
+            setError('La ville du compte connecte est vide.');
+            setState('Mettez a jour la ville dans la table utilisateurs.');
+            return;
+        }
+
+        setError('');
+        setState('Chargement de la meteo en cours...');
+
+        try {
+            const response = await fetch('{{ path('user_maladie_weather_data') }}', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const payload = await response.json();
+
+            if (!response.ok || !payload.success) {
+                throw new Error(payload.error || 'Impossible de charger la meteo.');
+            }
+
+            render(payload);
+            setState(`Analyse terminee pour ${payload.city || city}.`);
+        } catch (error) {
+            setError(error.message || 'Erreur lors du chargement meteo.');
+            setState('Aucune analyse disponible.');
+        }
+    }
+
+    document.getElementById('mwxRefreshBtn')?.addEventListener('click', loadWeather);
+    loadWeather();
+})();
+</script>

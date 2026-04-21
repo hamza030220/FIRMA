@@ -240,6 +240,34 @@
                     {% endif %}
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Temp min risque <span class="hint">optionnel</span></label>
+                    <input type="number" step="0.1" name="tempMin" class="form-input {% if errors.tempMin is defined or errors.tempRange is defined %}is-error{% endif %}" value="{{ old.tempMin|default('') }}" placeholder="Ex: 15">
+                    {% if errors.tempMin is defined %}
+                    <span class="error-msg">{{ errors.tempMin }}</span>
+                    {% elseif errors.tempRange is defined %}
+                    <span class="error-msg">{{ errors.tempRange }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Temp max risque <span class="hint">optionnel</span></label>
+                    <input type="number" step="0.1" name="tempMax" class="form-input {% if errors.tempMax is defined or errors.tempRange is defined %}is-error{% endif %}" value="{{ old.tempMax|default('') }}" placeholder="Ex: 25">
+                    {% if errors.tempMax is defined %}
+                    <span class="error-msg">{{ errors.tempMax }}</span>
+                    {% elseif errors.tempRange is defined %}
+                    <span class="error-msg">{{ errors.tempRange }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Humidite min risque <span class="hint">optionnel</span></label>
+                    <input type="number" min="0" max="100" name="humiditeMin" class="form-input {% if errors.humiditeMin is defined %}is-error{% endif %}" value="{{ old.humiditeMin|default('') }}" placeholder="Ex: 80">
+                    {% if errors.humiditeMin is defined %}
+                    <span class="error-msg">{{ errors.humiditeMin }}</span>
+                    {% endif %}
+                </div>
+
                 {# IMAGE #}
                 <div class="form-group full">
                     <label class="form-label">Photo <span class="hint">JPG, PNG, WEBP · max 2MB</span></label>
@@ -324,39 +352,18 @@ zone.addEventListener('drop', e => {
 document.querySelectorAll('[oninput]').forEach(el => el.dispatchEvent(new Event('input')));
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.notifyMaladieNew = (message, type = 'success') => {
-        if (window.firmaToast) {
-            window.firmaToast(message, type);
-            return;
-        }
-
-        const el = document.createElement('div');
-        el.textContent = message;
-        el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:' + (type === 'danger' ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97');
-        document.body.appendChild(el);
-        window.setTimeout(() => el.remove(), 4200);
-    };
-
     if (window.firmaToast) {
         serverFlashMessages.forEach(({ message, type }) => {
-            window.notifyMaladieNew(message, type === 'error' ? 'danger' : type);
+            window.firmaToast(message, type === 'error' ? 'danger' : type);
         });
 
         serverValidationErrors.forEach((message) => {
-            window.notifyMaladieNew(message, 'danger');
+            window.firmaToast(message, 'danger');
         });
-    } else {
-        serverFlashMessages.forEach(({ message, type }) => window.notifyMaladieNew(message, type === 'error' ? 'danger' : type));
-        serverValidationErrors.forEach((message) => window.notifyMaladieNew(message, 'danger'));
     }
 });
 
 document.getElementById('newMaladieForm')?.addEventListener('submit', function(e) {
-    if (this.dataset.confirmed === 'true') {
-        this.dataset.confirmed = '';
-        return;
-    }
-
     const nom = document.getElementById('nom');
     const description = document.getElementById('desc');
     const symptomes = document.getElementById('symp');
@@ -379,24 +386,10 @@ document.getElementById('newMaladieForm')?.addEventListener('submit', function(e
 
     if (!isValid) {
         e.preventDefault();
-        (window.notifyMaladieNew || window.firmaToast) && (window.notifyMaladieNew ? window.notifyMaladieNew('Veuillez corriger les champs obligatoires avant de continuer.', 'danger') : window.firmaToast('Veuillez corriger les champs obligatoires avant de continuer.', 'danger'));
+        if (window.firmaToast) {
+            window.firmaToast('Veuillez corriger les champs obligatoires avant de continuer.', 'danger');
+        }
         (nom.value.trim().length < 3 ? nom : (!description.value.trim() || description.value.trim().length < 10 ? description : symptomes)).focus();
-        return;
-    }
-
-    e.preventDefault();
-    if (window.firmaOpenConfirmModal) {
-        window.firmaOpenConfirmModal(
-            this.id || 'newMaladieForm',
-            'Confirmer l ajout',
-            'Voulez-vous vraiment ajouter cette maladie ?',
-            'Ajouter',
-            'primary'
-        );
-    } else if (window.firmaToast) {
-        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
-    } else if (window.notifyMaladieNew) {
-        window.notifyMaladieNew('La fenetre de confirmation est indisponible.', 'danger');
     }
 });
 </script>

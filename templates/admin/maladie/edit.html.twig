@@ -224,8 +224,6 @@
 }
 .edt-input.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
 .edt-input.valid { border-color: var(--success); }
-.edt-select.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
-.edt-select.valid { border-color: var(--success); }
 .edt-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
 .edt-err { font-size: 0.72rem; color: var(--danger); margin-top: 0.3rem; display: none; }
 .edt-err.show { display: block; }
@@ -291,6 +289,117 @@
 .edt-upload-hint { font-size: 0.72rem; color: var(--gray-400); margin-top: 0.25rem; }
 .edt-preview { display: none; margin-top: 0.75rem; }
 .edt-preview img { max-height: 90px; border-radius: var(--radius-sm); border: 1px solid var(--gray-200); }
+
+/* ===== WEATHER ===== */
+.edt-weather-panel {
+    margin-top: 1.35rem;
+    padding: 1rem;
+    border: 1px solid #dbe9df;
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 100%);
+}
+.edt-weather-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.9rem;
+}
+.edt-weather-head h3 {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--gray-800);
+}
+.edt-weather-state {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+.edt-weather-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+.edt-weather-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+}
+.edt-weather-result {
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border-radius: 14px;
+    border: 1px solid #d7e2da;
+    background: #fff;
+    display: none;
+}
+.edt-weather-result.show { display: block; }
+.edt-weather-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+}
+.edt-weather-badge.faible { background: var(--success-light); color: var(--success); }
+.edt-weather-badge.moyen { background: var(--secondary-light); color: var(--secondary); }
+.edt-weather-badge.eleve { background: var(--warning-light); color: var(--warning); }
+.edt-weather-badge.critique { background: var(--danger-light); color: var(--danger); }
+.edt-weather-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.55rem;
+    margin-top: 0.85rem;
+}
+.edt-weather-metric {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 0.65rem 0.5rem;
+    background: var(--gray-50);
+    text-align: center;
+}
+.edt-weather-metric strong {
+    display: block;
+    color: var(--gray-800);
+    font-size: 0.92rem;
+}
+.edt-weather-metric span {
+    display: block;
+    color: var(--gray-600);
+    font-size: 0.68rem;
+    margin-top: 0.15rem;
+}
+.edt-weather-treatment {
+    margin-top: 0.9rem;
+    padding: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid #cfe1d4;
+    background: #f9fdf8;
+}
+.edt-weather-treatment strong {
+    display: block;
+    color: var(--primary-dark);
+    margin-bottom: 0.25rem;
+}
+.edt-weather-list {
+    margin: 0.6rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--gray-700);
+    font-size: 0.8rem;
+}
+.edt-weather-error {
+    margin-top: 1rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid #f5c5c0;
+    background: #fdeaea;
+    color: #a32d2d;
+    display: none;
+}
+.edt-weather-error.show { display: block; }
 
 /* ===== SOLUTIONS HEADER ===== */
 .edt-sol-toprow {
@@ -486,6 +595,8 @@
     .edt-gravite-group { grid-template-columns: repeat(2, 1fr); }
     .edt-sol-stats { display: none; }
     .edt-sol-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .edt-weather-grid { grid-template-columns: 1fr; }
+    .edt-weather-metrics { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 
@@ -609,6 +720,25 @@
                         </div>
                     </div>
 
+                    <div class="edt-form-row">
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temp min risque</label>
+                            <input type="number" step="0.1" name="tempMin" class="edt-input" value="{{ maladie.tempMin }}" placeholder="Ex: 15">
+                            <div class="edt-inline-help">Temperature minimale pour declencher une vigilance.</div>
+                        </div>
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temp max risque</label>
+                            <input type="number" step="0.1" name="tempMax" class="edt-input" value="{{ maladie.tempMax }}" placeholder="Ex: 25">
+                            <div class="edt-inline-help">Temperature maximale de la plage de risque.</div>
+                        </div>
+                    </div>
+
+                    <div class="edt-form-group">
+                        <label class="edt-label">Humidite min risque</label>
+                        <input type="number" min="0" max="100" name="humiditeMin" class="edt-input" value="{{ maladie.humiditeMin }}" placeholder="Ex: 80">
+                        <div class="edt-inline-help">Pourcentage minimal d humidite avant alerte.</div>
+                    </div>
+
                     <div class="edt-form-group">
                         <label class="edt-label">Photo</label>
                         {% if maladie.imageUrl %}
@@ -626,6 +756,29 @@
                         <div class="edt-preview" id="previewWrap">
                             <img id="previewImg" src="" alt="Aperçu">
                         </div>
+                    </div>
+
+                    <div class="edt-weather-panel" data-weather-url="{{ path('admin_maladie_weather_risk', {'id': maladie.id}) }}">
+                        <div class="edt-weather-head">
+                            <div>
+                                <h3>Surveillance meteo et alerte maladie</h3>
+                                <div class="edt-weather-state" id="weatherStatus">Analyse basee sur la ville du compte connecte.</div>
+                            </div>
+                        </div>
+
+                        <div class="edt-form-group" style="margin-bottom: 0;">
+                            <label class="edt-label">Ville du compte</label>
+                            <input type="text" id="weatherCity" class="edt-input" value="{{ app.user and app.user.ville ? app.user.ville : '' }}" placeholder="Ville non renseignee" readonly>
+                        </div>
+
+                        <div class="edt-inline-help">Le moteur utilise la ville de l utilisateur connecte dans la table utilisateurs, puis compare la meteo aux seuils de cette maladie.</div>
+
+                        <div class="edt-weather-actions">
+                            <button type="button" class="edt-btn edt-btn-add" id="weatherCheckBtn">Analyser le risque</button>
+                        </div>
+
+                        <div class="edt-weather-error" id="weatherError"></div>
+                        <div class="edt-weather-result" id="weatherResult"></div>
                     </div>
 
                 </div>
@@ -670,6 +823,7 @@
                     {% else %}
                         {% for t in traitements %}
                         {% set rate = t.usageCount > 0 ? (t.feedbackPositive * 100 / t.usageCount)|round : 0 %}
+                        {% set effScore = (t.feedbackPositive * 3) + t.usageCount - (t.feedbackNegative * 2) %}
                         <div class="edt-sol-item"
                              data-id="{{ t.id }}"
                              data-titre="{{ t.titre|e('html_attr') }}"
@@ -766,6 +920,10 @@
                                         <span class="edt-sol-stat-num {% if rate >= 70 %}green{% elseif rate >= 40 %}blue{% else %}red{% endif %}">{{ rate }}%</span>
                                         <span class="edt-sol-stat-lbl">Taux succès</span>
                                     </div>
+                                    <div class="edt-sol-stat-card">
+                                        <span class="edt-sol-stat-num blue">{{ effScore }}</span>
+                                        <span class="edt-sol-stat-lbl">Score efficacité</span>
+                                    </div>
                                 </div>
                                 <div class="edt-progress-wrap">
                                     <div class="edt-progress-label"><span>Satisfaction</span><span>{{ rate }}%</span></div>
@@ -824,17 +982,8 @@
                 </div>
                 <div class="edt-form-group">
                     <label class="edt-label">Durée du traitement</label>
-                    <select id="solDuree" class="edt-select">
-                        <option value="">Choisir une duree</option>
-                        <option value="4 jours">4 jours</option>
-                        <option value="7 jours">7 jours</option>
-                        <option value="10 jours">10 jours</option>
-                        <option value="14 jours (2 semaines)">14 jours (2 semaines)</option>
-                        <option value="21 jours (3 semaines)">21 jours (3 semaines)</option>
-                        <option value="30 jours (1 mois)">30 jours (1 mois)</option>
-                    </select>
-                    <div class="edt-inline-help">Selectionnez une duree type du traitement.</div>
-                    <div class="edt-err" id="dureeErr">Veuillez choisir une duree de traitement.</div>
+                    <input type="text" id="solDuree" class="edt-input" placeholder="Ex: 4 jours, 5 jours, 2 semaines">
+                    <div class="edt-inline-help">Vous choisissez librement la duree.</div>
                 </div>
             </div>
         </div>
@@ -908,11 +1057,6 @@ document.getElementById('maladieSymptomes')?.addEventListener('input', function(
 });
 
 document.getElementById('maladieForm')?.addEventListener('submit', function(e) {
-    if (this.dataset.confirmed === 'true') {
-        this.dataset.confirmed = '';
-        return;
-    }
-
     const nom = document.getElementById('maladieNom');
     const description = document.getElementById('maladieDescription');
     const symptomes = document.getElementById('maladieSymptomes');
@@ -942,28 +1086,8 @@ document.getElementById('maladieForm')?.addEventListener('submit', function(e) {
     if (!isValid) {
         if (window.firmaToast) {
             window.firmaToast('Veuillez corriger les champs du formulaire avant de continuer.', 'danger');
-        } else {
-            const el = document.createElement('div');
-            el.textContent = 'Veuillez corriger les champs du formulaire avant de continuer.';
-            el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:#fdeaea;color:#a32d2d;border:1px solid #f5c5c0';
-            document.body.appendChild(el);
-            window.setTimeout(() => el.remove(), 4200);
         }
         (nom.value.trim().length < 3 ? nom : (!description.value.trim() || description.value.trim().length < 10 ? description : symptomes)).focus();
-        return;
-    }
-
-    e.preventDefault();
-    if (window.firmaOpenConfirmModal) {
-        window.firmaOpenConfirmModal(
-            this.id || 'maladieForm',
-            'Confirmer la modification',
-            'Voulez-vous vraiment enregistrer ces modifications ?',
-            'Enregistrer',
-            'primary'
-        );
-    } else if (window.firmaToast) {
-        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
     }
 });
 
@@ -997,18 +1121,7 @@ function openEditModal(id) {
     document.getElementById('solEtapes').value = row.dataset.etapes || '';
     document.getElementById('solProduits').value = row.dataset.produits || '';
     document.getElementById('solPrevention').value = row.dataset.prevention || '';
-    const dureeSelect = document.getElementById('solDuree');
-    const dureeValue = row.dataset.duree || '';
-    if (dureeSelect) {
-        const hasOption = Array.from(dureeSelect.options).some((opt) => opt.value === dureeValue);
-        if (dureeValue && !hasOption) {
-            const option = document.createElement('option');
-            option.value = dureeValue;
-            option.textContent = dureeValue;
-            dureeSelect.appendChild(option);
-        }
-        dureeSelect.value = dureeValue;
-    }
+    document.getElementById('solDuree').value = row.dataset.duree || '';
     document.getElementById('solModal').classList.add('open');
 }
 
@@ -1016,73 +1129,28 @@ function closeModal() {
     document.getElementById('solModal').classList.remove('open');
 }
 
-function maladieNotify(message, type = 'success', duration = 10000) {
-    if (window.firmaToast) {
-        window.firmaToast(message, type, duration);
-        return;
-    }
-
-    if (!document.getElementById('maladie-toast-fallback-style')) {
-        const style = document.createElement('style');
-        style.id = 'maladie-toast-fallback-style';
-        style.textContent = '@keyframes maladieToastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}';
-        document.head.appendChild(style);
-    }
-
-    const el = document.createElement('div');
-    const isDanger = type === 'danger' || type === 'error';
-    el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;min-width:260px;max-width:420px;padding:12px 14px;border-radius:12px;background:' + (isDanger ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97') + ';box-shadow:0 14px 30px rgba(0,0,0,.14);overflow:hidden;';
-    el.innerHTML = '<div style="position:absolute;top:0;left:0;height:3px;width:100%;background:' + (isDanger ? '#dc2626' : '#2f7d55') + ';transform-origin:left;animation:maladieToastProgress ' + duration + 'ms linear forwards"></div><div>' + String(message) + '</div>';
-    document.body.appendChild(el);
-    window.setTimeout(() => el.remove(), duration + 350);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    const notify = maladieNotify;
-
-    document.addEventListener('submit', (event) => {
-        const form = event.target.closest('form[data-firma-confirm]');
-        if (!(form instanceof HTMLFormElement)) {
-            return;
-        }
-
-        if (form.dataset.confirmed === 'true') {
-            form.dataset.confirmed = '';
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-        const formId = form.id || `maladie-confirm-${Math.random().toString(36).slice(2, 9)}`;
-        form.id = formId;
-        const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
-
-        if (window.firmaOpenConfirmModal) {
-            window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
-        } else {
-            notify('La fenetre de confirmation est indisponible.', 'danger');
-        }
-    }, true);
-
     const flash = sessionStorage.getItem('adminMaladieToast');
     if (flash) {
         try {
             const data = JSON.parse(flash);
-            if (data.message) {
-                notify(data.message, data.type || 'success', 10000);
+            if (window.firmaToast && data.message) {
+                window.firmaToast(data.message, data.type || 'success');
             }
         } catch (e) {}
         sessionStorage.removeItem('adminMaladieToast');
     }
 
-    serverFlashMessages.forEach(({ message, type }) => {
-        notify(message, type === 'error' ? 'danger' : type, 10000);
-    });
-
-    if (!serverFlashMessages.length) {
-        serverValidationErrors.forEach((message) => {
-            notify(message, 'danger', 10000);
+    if (window.firmaToast) {
+        serverFlashMessages.forEach(({ message, type }) => {
+            window.firmaToast(message, type === 'error' ? 'danger' : type);
         });
+
+        if (!serverFlashMessages.length) {
+            serverValidationErrors.forEach((message) => {
+                window.firmaToast(message, 'danger');
+            });
+        }
     }
 });
 
@@ -1090,7 +1158,6 @@ function validateModal() {
     let valid = true;
     const titre = document.getElementById('solTitre');
     const sol = document.getElementById('solSolution');
-    const duree = document.getElementById('solDuree');
     if (!titre.value.trim() || titre.value.trim().length < 3) {
         titre.classList.add('invalid');
         document.getElementById('titreErr').classList.add('show');
@@ -1101,29 +1168,11 @@ function validateModal() {
         document.getElementById('solutionErr').classList.add('show');
         valid = false;
     } else { sol.classList.remove('invalid'); document.getElementById('solutionErr').classList.remove('show'); }
-
-    if (!duree.value.trim()) {
-        duree.classList.add('invalid');
-        document.getElementById('dureeErr').classList.add('show');
-        valid = false;
-    } else {
-        duree.classList.remove('invalid');
-        duree.classList.add('valid');
-        document.getElementById('dureeErr').classList.remove('show');
-    }
-
     return valid;
 }
 
 async function saveSolution() {
-    if (!validateModal()) {
-        maladieNotify('Veuillez remplir correctement les champs obligatoires avant d\'enregistrer.', 'danger', 10000);
-        const firstInvalid = document.querySelector('#solModal .invalid');
-        if (firstInvalid && typeof firstInvalid.focus === 'function') {
-            firstInvalid.focus();
-        }
-        return;
-    }
+    if (!validateModal()) return;
     const data = {
         titre: document.getElementById('solTitre').value.trim(),
         solution: document.getElementById('solSolution').value.trim(),
@@ -1135,10 +1184,6 @@ async function saveSolution() {
     const url = currentEditId
         ? `/admin/solution-traitement/edit/${currentEditId}`
         : `/admin/solution-traitement/new/{{ maladie.id }}`;
-    const saveBtn = document.querySelector('#solModal .edt-btn-save');
-    if (saveBtn) {
-        saveBtn.disabled = true;
-    }
     try {
         const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const result = await res.json();
@@ -1148,14 +1193,12 @@ async function saveSolution() {
                 type: 'success'
             }));
             location.reload();
-        } else {
-            maladieNotify('Erreur : ' + (result.error || 'Operation impossible.'), 'danger', 10000);
+        } else if (window.firmaToast) {
+            window.firmaToast('Erreur : ' + (result.error || 'Operation impossible.'), 'danger');
         }
     } catch(e) {
-        maladieNotify('Erreur reseau lors de l\'enregistrement.', 'danger', 10000);
-    } finally {
-        if (saveBtn) {
-            saveBtn.disabled = false;
+        if (window.firmaToast) {
+            window.firmaToast('Erreur reseau lors de l\'enregistrement.', 'danger');
         }
     }
 }
@@ -1163,6 +1206,114 @@ async function saveSolution() {
 document.getElementById('solModal')?.addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
+
+function setWeatherStatus(message) {
+    const el = document.getElementById('weatherStatus');
+    if (el) {
+        el.textContent = message;
+    }
+}
+
+function setWeatherError(message = '') {
+    const el = document.getElementById('weatherError');
+    if (!el) {
+        return;
+    }
+
+    el.textContent = message;
+    el.classList.toggle('show', Boolean(message));
+}
+
+function renderWeatherRisk(payload) {
+    const resultEl = document.getElementById('weatherResult');
+    if (!resultEl) {
+        return;
+    }
+
+    const data = payload.data || {};
+    const risk = data.risk || {};
+    const weather = data.weather || {};
+    const treatment = data.suggestedTreatment;
+    const reasons = Array.isArray(risk.reasons) ? risk.reasons : [];
+
+    let html = '';
+    html += `<span class="edt-weather-badge ${risk.level || 'faible'}">Alerte ${risk.label || 'Faible'}</span>`;
+    html += `<div class="edt-sol-val">${risk.message || 'Analyse indisponible.'}</div>`;
+
+    if (reasons.length) {
+        html += '<ul class="edt-weather-list">' + reasons.map((reason) => `<li>${reason}</li>`).join('') + '</ul>';
+    }
+
+    html += '<div class="edt-weather-metrics">';
+    html += `<div class="edt-weather-metric"><strong>${weather.temperature ?? '--'}${weather.temperature !== null && weather.temperature !== undefined ? '°C' : ''}</strong><span>Temperature</span></div>`;
+    html += `<div class="edt-weather-metric"><strong>${weather.humidity ?? '--'}${weather.humidity !== null && weather.humidity !== undefined ? '%' : ''}</strong><span>Humidite</span></div>`;
+    html += `<div class="edt-weather-metric"><strong>${weather.rain ?? 0} mm</strong><span>Pluie</span></div>`;
+    html += `<div class="edt-weather-metric"><strong>${weather.wind ?? '--'}${weather.wind !== null && weather.wind !== undefined ? ' m/s' : ''}</strong><span>Vent</span></div>`;
+    html += '</div>';
+
+    if (treatment) {
+        html += '<div class="edt-weather-treatment">';
+        html += `<strong>Traitement recommande : ${treatment.titre}</strong>`;
+        html += `<div>${treatment.solution || ''}</div>`;
+        if (treatment.dureeTraitement) {
+            html += `<div class="edt-inline-help">Duree estimee : ${treatment.dureeTraitement}</div>`;
+        }
+        html += '</div>';
+    }
+
+    resultEl.innerHTML = html;
+    resultEl.classList.add('show');
+}
+
+async function loadWeatherRisk() {
+    const panel = document.querySelector('.edt-weather-panel');
+    const cityInput = document.getElementById('weatherCity');
+    const resultEl = document.getElementById('weatherResult');
+    const checkBtn = document.getElementById('weatherCheckBtn');
+
+    if (!panel || !cityInput) {
+        return;
+    }
+
+    const city = cityInput.value.trim();
+
+    if (!city) {
+        setWeatherError('La ville de l utilisateur connecte est vide.');
+        resultEl?.classList.remove('show');
+        return;
+    }
+
+    setWeatherError('');
+    setWeatherStatus('Analyse meteo en cours...');
+
+    if (checkBtn) {
+        checkBtn.disabled = true;
+    }
+
+    try {
+        const url = `${panel.dataset.weatherUrl}?city=${encodeURIComponent(city)}`;
+        const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.success) {
+            throw new Error(payload.error || 'Analyse meteo indisponible.');
+        }
+
+        renderWeatherRisk(payload);
+        const city = payload.data?.weather?.city ? ` (${payload.data.weather.city})` : '';
+        setWeatherStatus(`Analyse terminee${city}.`);
+    } catch (error) {
+        resultEl?.classList.remove('show');
+        setWeatherError(error.message || 'Impossible de charger le risque meteo.');
+        setWeatherStatus('Aucune analyse disponible pour le moment.');
+    } finally {
+        if (checkBtn) {
+            checkBtn.disabled = false;
+        }
+    }
+}
+
+document.getElementById('weatherCheckBtn')?.addEventListener('click', loadWeatherRisk);
 </script>
 {% endblock %}
 

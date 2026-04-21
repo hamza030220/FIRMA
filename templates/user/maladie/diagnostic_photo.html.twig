@@ -1,0 +1,99 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Diagnostic photo{% endblock %}
+
+{% block user_content %}
+<div class="photo-diag">
+    <div class="photo-diag-hero">
+        <div class="photo-diag-badge">Diagnostic par photo</div>
+        <h1>Scanner une photo de plante</h1>
+        <p>Importez une photo claire de la feuille ou du symptome. L'API externe propose des resultats probables.</p>
+        <a href="{{ path('user_maladie_diagnostic') }}" class="photo-diag-link">Diagnostic par symptomes</a>
+    </div>
+
+    {% if errors is not empty %}
+        <div class="photo-diag-errors">
+            {% for error in errors %}
+                <div class="photo-diag-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="photo-diag-form">
+        <label class="photo-diag-label" for="photo">Photo de la plante (JPG, PNG, WEBP)</label>
+        <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <div class="photo-diag-preview" id="photoPreviewWrapper" aria-hidden="true">
+            <div class="photo-diag-preview-label">Apercu</div>
+            <img id="photoPreview" alt="Apercu de la photo selectionnee">
+        </div>
+        <button type="submit" class="photo-diag-submit">Lancer l'analyse</button>
+        <p class="photo-diag-hint">Astuce: photo nette, bonne lumiere, symptomes visibles.</p>
+    </form>
+
+    {% if plantName is not empty %}
+        <div class="photo-diag-plant">
+            <span>Plante detectee:</span> <strong>{{ plantName }}</strong>
+        </div>
+    {% endif %}
+
+    {% if imageUrl is not empty %}
+        <div class="photo-diag-image">
+            <img src="{{ imageUrl }}" alt="Photo analysee">
+        </div>
+    {% endif %}
+
+    {% if diagnosis is not empty %}
+        <div class="photo-diag-results">
+            <h2>Resultats proposes</h2>
+            {% for item in diagnosis %}
+                <div class="photo-diag-card">
+                    <div class="photo-diag-name">Maladie: {{ item.name }}</div>
+                    {% if item.score is not null %}
+                        <div class="photo-diag-score">Confiance: {{ (item.score * 100)|round }}%</div>
+                    {% endif %}
+                    {% if item.treatment is not empty %}
+                        <div class="photo-diag-details">Traitement: {{ item.treatment }}</div>
+                    {% else %}
+                        <div class="photo-diag-details">Traitement: non disponible</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+
+<style>
+.photo-diag { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; font-family: 'Plus Jakarta Sans', sans-serif; color: #1f2d24; }
+.photo-diag-hero { text-align: center; margin-bottom: 2rem; }
+.photo-diag-badge { display: inline-block; background: #e8f5e9; color: #0f5c2f; padding: 0.3rem 0.9rem; border-radius: 20px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid rgba(15,92,47,0.15); margin-bottom: 0.8rem; }
+.photo-diag-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.1rem; margin: 0 0 0.6rem; }
+.photo-diag-hero p { color: #5a7a5a; margin: 0 0 1rem; }
+.photo-diag-link { color: #0f5c2f; text-decoration: none; font-weight: 600; }
+
+.photo-diag-errors { margin-bottom: 1.2rem; }
+.photo-diag-error { background: #fdeaea; border: 1px solid #f2b8b8; color: #b42318; padding: 0.65rem 0.85rem; border-radius: 10px; margin-bottom: 0.4rem; }
+
+.photo-diag-form { background: #ffffff; border: 1px solid #e1ece1; border-radius: 18px; padding: 1.6rem; box-shadow: 0 12px 26px rgba(15,92,47,0.08); }
+.photo-diag-label { display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.6rem; color: #2f4635; }
+.photo-diag-form input[type="file"] { width: 100%; padding: 0.6rem; border: 1px dashed #cfe0d2; border-radius: 12px; background: #f8fbf8; }
+.photo-diag-preview { margin-top: 0.9rem; border-radius: 14px; padding: 0.8rem; border: 1px solid #e1ece1; background: #f8fbf8; display: none; }
+.photo-diag-preview.is-visible { display: block; }
+.photo-diag-preview-label { font-size: 0.75rem; color: #5a7a5a; margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.photo-diag-preview img { display: block; width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; border: 1px solid #d9eadc; background: #fff; }
+.photo-diag-submit { margin-top: 1rem; background: #0f5c2f; color: #fff; border: none; border-radius: 12px; padding: 0.75rem 1.4rem; font-weight: 700; cursor: pointer; }
+.photo-diag-hint { margin-top: 0.6rem; font-size: 0.82rem; color: #5f7468; }
+
+.photo-diag-results { margin-top: 2.2rem; }
+.photo-diag-plant { margin: 1.6rem 0 0.6rem; background: #ffffff; border: 1px solid #e1ece1; border-radius: 14px; padding: 0.8rem 1rem; font-size: 0.95rem; box-shadow: 0 8px 18px rgba(15,92,47,0.07); }
+.photo-diag-image { margin: 0.8rem 0 0.6rem; background: #ffffff; border: 1px solid #e1ece1; border-radius: 14px; padding: 0.8rem; box-shadow: 0 8px 18px rgba(15,92,47,0.07); }
+.photo-diag-image img { width: 100%; max-height: 360px; object-fit: contain; border-radius: 10px; border: 1px solid #d9eadc; background: #f8fbf8; display: block; }
+.photo-diag-card { background: #fff; border: 1px solid #e1ece1; border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 10px 22px rgba(15,92,47,0.08); }
+.photo-diag-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
+.photo-diag-score { background: #eff7f1; color: #0f5c2f; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 999px; display: inline-flex; font-size: 0.82rem; }
+.photo-diag-details { margin-top: 0.6rem; background: #f6fbf7; border: 1px solid #d9eadc; border-radius: 12px; padding: 0.8rem; font-size: 0.78rem; color: #3e5b45; }
+
+.photo-diag-raw { margin-top: 2.2rem; background: #f6fbf7; border: 1px dashed #cfe0d2; border-radius: 16px; padding: 1.4rem; }
+.photo-diag-raw pre { white-space: pre-wrap; margin: 0; font-size: 0.8rem; }
+</style>
+{% endblock %}
