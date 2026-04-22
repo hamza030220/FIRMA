@@ -5,6 +5,7 @@ use App\Entity\Maladie\Maladie;
 use App\Entity\Maladie\SolutionTraitement;
 use App\Repository\Maladie\MaladieRepository;
 use App\Repository\Maladie\SolutionTraitementRepository;
+use App\Entity\User\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +15,8 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\Maladie\Weather\MaladieWeatherRiskService;
+use App\Service\Maladie\Weather\MaladieWeatherAlertMailer;
 
 #[Route('/admin/maladie')]
 #[IsGranted('ROLE_ADMIN')]
@@ -43,6 +46,93 @@ class MaladieController extends AbstractController
         ]);
     }
 
+    #[Route('/weather', name: 'admin_maladie_weather', methods: ['GET'])]
+    public function weather(): Response
+    {
+        return $this->render('admin/maladie/weather.html.twig');
+    }
+
+    #[Route('/weather/data', name: 'admin_maladie_weather_data', methods: ['GET'])]
+    public function weatherData(
+        MaladieRepository $maladieRepository,
+        MaladieWeatherRiskService $weatherRiskService,
+        MaladieWeatherAlertMailer $alertMailer
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Utilisateur non authentifie.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $city = trim((string) $user->getVille());
+        if ($city === '') {
+            return $this->json([
+                'success' => false,
+                'error' => 'La ville du compte connecte est vide. Mettez a jour le profil admin.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$weatherRiskService->isConfigured()) {
+            return $this->json([
+                'success' => false,
+                'error' => 'La cle API OpenWeatherMap n est pas configuree.',
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            $weather = $weatherRiskService->getWeatherByCity($city);
+            $riskAnalyses = [];
+            $mailStatus = [
+                'attempted' => false,
+                'sent' => false,
+                'error' => null,
+            ];
+
+            foreach ($maladieRepository->findAll() as $maladie) {
+                $analysis = $weatherRiskService->evaluateFromApiPayload($maladie, $weather);
+                if ($weatherRiskService->isAlertRiskLevel((string) ($analysis['risk']['level'] ?? 'faible'))) {
+                    $riskAnalyses[] = $analysis;
+                }
+            }
+
+            usort($riskAnalyses, static function (array $left, array $right): int {
+                $rank = ['critique' => 3, 'eleve' => 2, 'moyen' => 1, 'faible' => 0];
+                return ($rank[$right['risk']['level'] ?? 'faible'] ?? 0) <=> ($rank[$left['risk']['level'] ?? 'faible'] ?? 0);
+            });
+
+            if ($riskAnalyses !== []) {
+                $mailStatus['attempted'] = true;
+                try {
+                    $alertMailer->sendRiskAlert($user, $city, $weather, $riskAnalyses);
+                    $mailStatus['sent'] = true;
+                } catch (\Throwable $e) {
+                    $mailStatus['error'] = $e->getMessage();
+                }
+            }
+
+            return $this->json([
+                'success' => true,
+                'city' => $weather['name'] ?? $city,
+                'weather' => [
+                    'temperature' => $weather['main']['temp'] ?? null,
+                    'humidity' => $weather['main']['humidity'] ?? null,
+                    'rain' => $weather['rain']['1h'] ?? ($weather['rain']['3h'] ?? 0),
+                    'wind' => $weather['wind']['speed'] ?? null,
+                    'condition' => $weather['weather'][0]['description'] ?? null,
+                ],
+                'alerts' => $riskAnalyses,
+                'mail' => $mailStatus,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], Response::HTTP_BAD_GATEWAY);
+        }
+    }
+
     // ==================== AJOUTER MALADIE ====================
     #[Route('/new', name: 'admin_maladie_new', methods: ['GET', 'POST'])]
     public function new(Request $request, SluggerInterface $slugger): Response
@@ -57,8 +147,24 @@ class MaladieController extends AbstractController
             $symptomes       = trim($request->request->get('symptomes', ''));
             $niveauGravite   = $request->request->get('niveauGravite', 'moyen');
             $saisonFrequente = $request->request->get('saisonFrequente', '');
+            $tempMinRaw      = trim((string) $request->request->get('tempMin', ''));
+            $tempMaxRaw      = trim((string) $request->request->get('tempMax', ''));
+            $humiditeMinRaw  = trim((string) $request->request->get('humiditeMin', ''));
+            $tempMin         = $tempMinRaw === '' ? null : str_replace(',', '.', $tempMinRaw);
+            $tempMax         = $tempMaxRaw === '' ? null : str_replace(',', '.', $tempMaxRaw);
+            $humiditeMin     = $humiditeMinRaw === '' ? null : $humiditeMinRaw;
 
-            $old = compact('nom', 'nomScientifique', 'description', 'symptomes', 'niveauGravite', 'saisonFrequente');
+            $maladie->setNom($nom);
+            $maladie->setNomScientifique($nomScientifique ?: null);
+            $maladie->setDescription($description);
+            $maladie->setSymptomes($symptomes);
+            $maladie->setNiveauGravite($niveauGravite);
+            $maladie->setSaisonFrequente($saisonFrequente ?: null);
+            $maladie->setTempMin($tempMin === null ? null : (float) $tempMin);
+            $maladie->setTempMax($tempMax === null ? null : (float) $tempMax);
+            $maladie->setHumiditeMin($humiditeMin === null ? null : (int) $humiditeMin);
+
+            $old = compact('nom', 'nomScientifique', 'description', 'symptomes', 'niveauGravite', 'saisonFrequente', 'tempMinRaw', 'tempMaxRaw', 'humiditeMinRaw');
 
             // Validations
             if (empty($nom)) {
@@ -105,6 +211,20 @@ class MaladieController extends AbstractController
                 $errors['saisonFrequente'] = 'Saison invalide.';
             }
 
+            if ($tempMin !== null && !is_numeric($tempMin)) {
+                $errors['tempMin'] = 'La temperature minimale doit etre un nombre valide.';
+            }
+            if ($tempMax !== null && !is_numeric($tempMax)) {
+                $errors['tempMax'] = 'La temperature maximale doit etre un nombre valide.';
+            }
+            if ($humiditeMin !== null && (!ctype_digit($humiditeMin) || (int) $humiditeMin < 0 || (int) $humiditeMin > 100)) {
+                $errors['humiditeMin'] = 'L humidite minimale doit etre comprise entre 0 et 100.';
+            }
+
+            if ($tempMin !== null && $tempMax !== null && is_numeric($tempMin) && is_numeric($tempMax) && (float) $tempMin > (float) $tempMax) {
+                $errors['tempMin'] = 'La temperature minimale doit etre inferieure ou egale a la temperature maximale.';
+            }
+
             $imageFile = $request->files->get('imageFile');
             if ($imageFile) {
                 $extension = strtolower($imageFile->getClientOriginalExtension());
@@ -123,6 +243,9 @@ class MaladieController extends AbstractController
                 $maladie->setSymptomes($symptomes);
                 $maladie->setNiveauGravite($niveauGravite);
                 $maladie->setSaisonFrequente($saisonFrequente ?: null);
+                $maladie->setTempMin($tempMin === null ? null : (float) $tempMin);
+                $maladie->setTempMax($tempMax === null ? null : (float) $tempMax);
+                $maladie->setHumiditeMin($humiditeMin === null ? null : (int) $humiditeMin);
                 $maladie->setCreatedBy($this->getUser()->getId());
 
                 if ($imageFile) {
@@ -168,6 +291,9 @@ class MaladieController extends AbstractController
             $symptomes       = trim($request->request->get('symptomes', ''));
             $niveauGravite   = $request->request->get('niveauGravite', 'moyen');
             $saisonFrequente = $request->request->get('saisonFrequente', '');
+            $tempMinRaw      = trim((string) $request->request->get('tempMin', ''));
+            $tempMaxRaw      = trim((string) $request->request->get('tempMax', ''));
+            $humiditeMinRaw  = trim((string) $request->request->get('humiditeMin', ''));
 
             if (empty($nom)) {
                 $errors['nom'] = 'Le nom est obligatoire.';
@@ -213,6 +339,24 @@ class MaladieController extends AbstractController
                 $errors['saisonFrequente'] = 'Saison invalide.';
             }
 
+            $tempMin = $tempMinRaw === '' ? null : str_replace(',', '.', $tempMinRaw);
+            $tempMax = $tempMaxRaw === '' ? null : str_replace(',', '.', $tempMaxRaw);
+            $humiditeMin = $humiditeMinRaw === '' ? null : $humiditeMinRaw;
+
+            if ($tempMin !== null && !is_numeric($tempMin)) {
+                $errors['tempMin'] = 'La temperature minimale doit etre un nombre valide.';
+            }
+            if ($tempMax !== null && !is_numeric($tempMax)) {
+                $errors['tempMax'] = 'La temperature maximale doit etre un nombre valide.';
+            }
+            if ($humiditeMin !== null && (!ctype_digit($humiditeMin) || (int) $humiditeMin < 0 || (int) $humiditeMin > 100)) {
+                $errors['humiditeMin'] = 'L humidite minimale doit etre comprise entre 0 et 100.';
+            }
+
+            if ($tempMin !== null && $tempMax !== null && is_numeric($tempMin) && is_numeric($tempMax) && (float) $tempMin > (float) $tempMax) {
+                $errors['tempMin'] = 'La temperature minimale doit etre inferieure ou egale a la temperature maximale.';
+            }
+
             $imageFile = $request->files->get('imageFile');
             if ($imageFile) {
                 $extension = strtolower($imageFile->getClientOriginalExtension());
@@ -230,6 +374,9 @@ class MaladieController extends AbstractController
                 $maladie->setSymptomes($symptomes);
                 $maladie->setNiveauGravite($niveauGravite);
                 $maladie->setSaisonFrequente($saisonFrequente ?: null);
+                $maladie->setTempMin($tempMin === null ? null : (float) $tempMin);
+                $maladie->setTempMax($tempMax === null ? null : (float) $tempMax);
+                $maladie->setHumiditeMin($humiditeMin === null ? null : (int) $humiditeMin);
 
                 if ($imageFile) {
                     $extension   = strtolower($imageFile->getClientOriginalExtension());

@@ -61,8 +61,8 @@ class ForumPostBookmarkRepository extends ServiceEntityRepository
      */
     public function findPostsByUserAndType(Utilisateur $user, string $bookmarkType): array
     {
-        return $this->createQueryBuilder('b')
-            ->select('p', 'u', 'c', 'cu', 'r', 'ru')
+        $bookmarks = $this->createQueryBuilder('b')
+            ->select('b, p, u, c, cu, r, ru')
             ->innerJoin('b.post', 'p')
             ->leftJoin('p.utilisateur', 'u')
             ->addSelect('u')
@@ -84,5 +84,27 @@ class ForumPostBookmarkRepository extends ServiceEntityRepository
             ->distinct()
             ->getQuery()
             ->getResult();
+
+        $posts = [];
+
+        foreach ($bookmarks as $bookmark) {
+            if (!$bookmark instanceof ForumPostBookmark) {
+                continue;
+            }
+
+            $post = $bookmark->getPost();
+            if (!$post instanceof Post) {
+                continue;
+            }
+
+            $postId = $post->getId();
+            if ($postId === null) {
+                continue;
+            }
+
+            $posts[$postId] = $post;
+        }
+
+        return array_values($posts);
     }
 }

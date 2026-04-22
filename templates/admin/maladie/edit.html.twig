@@ -492,27 +492,17 @@
 <div class="edt-wrap">
 
     <section class="edt-hero">
-        <div class="edt-hero-grid">
-            <div>
-                <span class="edt-hero-kicker">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg>
-                    Gestion Maladie
-                </span>
-                <h1>Modifier la fiche de {{ maladie.nom }}</h1>
-                <p>Mettez a jour les informations de la maladie et ses traitements dans une interface plus claire, sans changer les autres ecrans du projet.</p>
-            </div>
-            <div class="edt-hero-stats">
-                <div class="edt-hero-stat">
-                    <strong>{{ traitements|length }}</strong>
-                    <span>traitement{% if traitements|length > 1 %}s{% endif %} associe{% if traitements|length > 1 %}s{% endif %}</span>
-                </div>
-                <div class="edt-hero-stat">
-                    <strong>{{ maladie.niveauGravite|default('moyen')|capitalize }}</strong>
-                    <span>niveau de gravite actuel</span>
+            <div class="edt-hero-grid">
+                <div>
+                    <span class="edt-hero-kicker">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+                        Gestion Maladie
+                    </span>
+                    <h1>Modifier la fiche de {{ maladie.nom }}</h1>
+                    <p>Gardez l’ecran simple: infos essentielles de la maladie, image et traitements associes.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
     {# ===== TOPBAR ===== #}
     <div class="edt-topbar">
@@ -607,6 +597,38 @@
                                 {% endfor %}
                             </select>
                         </div>
+                    </div>
+
+                    <div class="edt-form-row">
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temperature min</label>
+                            <input type="number" step="0.1" name="tempMin" class="edt-input" value="{{ maladie.tempMin|default('') }}" placeholder="Ex: 15.5">
+                        </div>
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temperature max</label>
+                            <input type="number" step="0.1" name="tempMax" class="edt-input" value="{{ maladie.tempMax|default('') }}" placeholder="Ex: 28">
+                        </div>
+                    </div>
+
+                    <div class="edt-form-group">
+                        <label class="edt-label">Humidite min (%)</label>
+                        <input type="number" min="0" max="100" name="humiditeMin" class="edt-input" value="{{ maladie.humiditeMin|default('') }}" placeholder="Ex: 75">
+                    </div>
+
+                    <div class="edt-form-row">
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temperature min</label>
+                            <input type="number" step="0.1" name="tempMin" class="edt-input" value="{{ maladie.tempMin|default('') }}" placeholder="Ex: 15.5">
+                        </div>
+                        <div class="edt-form-group">
+                            <label class="edt-label">Temperature max</label>
+                            <input type="number" step="0.1" name="tempMax" class="edt-input" value="{{ maladie.tempMax|default('') }}" placeholder="Ex: 28">
+                        </div>
+                    </div>
+
+                    <div class="edt-form-group">
+                        <label class="edt-label">Humidite min (%)</label>
+                        <input type="number" min="0" max="100" name="humiditeMin" class="edt-input" value="{{ maladie.humiditeMin|default('') }}" placeholder="Ex: 75">
                     </div>
 
                     <div class="edt-form-group">

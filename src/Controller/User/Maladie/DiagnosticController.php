@@ -78,6 +78,7 @@ class DiagnosticController extends AbstractController
         $rawResponse = null;
         $plantName = null;
         $imageUrl = null;
+        $analysisImage = null;
 
         if ($request->isMethod('POST')) {
             $uploaded = $request->files->get('photo');
@@ -109,6 +110,8 @@ class DiagnosticController extends AbstractController
                     if ($imageContents === false) {
                         throw new \RuntimeException('Image read failed');
                     }
+
+                    $analysisImage = 'data:' . (string) $uploaded->getMimeType() . ';base64,' . base64_encode($imageContents);
 
                     $requestOptions = [
                         'headers' => [
@@ -212,6 +215,7 @@ class DiagnosticController extends AbstractController
             'rawResponse' => $rawResponse,
             'plantName' => $plantName,
             'imageUrl' => $imageUrl,
+            'analysisImage' => $analysisImage,
         ]);
     }
 
