@@ -32,6 +32,10 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a>
+        <a href="#" class="aevt-tab {% if tab == 'calendrier' %}aevt-tab--active{% endif %}" data-tab="calendrier">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendrier
+        </a>
     </nav>
 
     {# ── Flash messages ── #}
@@ -52,7 +56,6 @@
                 <button type="submit" class="aevt-search__btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
-                <button type="button" class="aevt-search__more">⋯</button>
             </form>
             <div class="aevt-sort">
                 <label>Trier par :</label>
@@ -122,7 +125,7 @@
                             <button type="button" class="aevt-btn aevt-btn--outline js-participants-btn" data-id="{{ evt.idEvenement }}">Participants</button>
                             <a href="{{ path('admin_evenements', {tab: 'modifier', edit: evt.idEvenement}) }}" class="aevt-btn aevt-btn--neutral">Modif…</a>
                             {% if evt.isModifiable %}
-                                <form method="post" action="{{ path('admin_evenement_cancel', {id: evt.idEvenement}) }}" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?">
+                                <form method="post" action="{{ path('admin_evenement_cancel', {id: evt.idEvenement}) }}" data-firma-confirm="Êtes-vous sûr de vouloir annuler cet événement ?" data-firma-confirm-title="Confirmer l'annulation" data-firma-confirm-btn="Annuler l'événement" data-firma-confirm-icon="warning">
                                     <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ evt.idEvenement) }}">
                                     <button type="submit" class="aevt-btn aevt-btn--warn">Annuler</button>
                                 </form>
@@ -135,6 +138,12 @@
                     </article>
                 {% endfor %}
             </div>
+            {% include 'shared/_pagination.html.twig' with {
+                currentPage: currentPage,
+                totalPages: totalPages,
+                route: 'admin_evenements',
+                routeParams: { q: search, sort: sort, tab: 'liste' }
+            } %}
         {% endif %}
     </div>
 
@@ -147,59 +156,59 @@
             Créer un nouvel événement
         </h2>
 
-        <form method="post" action="{{ path('admin_evenement_create') }}" class="aevt-form" novalidate>
+        <form method="post" action="{{ path('admin_evenement_create') }}" class="aevt-form" id="evtCreateForm" novalidate>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Titre *</label>
-                <input type="text" name="titre" id="evt_titre" class="aevt-form__input" placeholder="Titre de l'événement">
+                <input type="text" name="titre" id="evt_titre" class="aevt-form__input" placeholder="Titre de l'événement" value="{{ formData.titre ?? '' }}">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Description</label>
-                <textarea name="description" id="evt_description" class="aevt-form__textarea" rows="4" placeholder="Description de l'événement"></textarea>
+                <textarea name="description" id="evt_description" class="aevt-form__textarea" rows="4" placeholder="Description de l'événement">{{ formData.description ?? '' }}</textarea>
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Organisateur *</label>
-                <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" placeholder="Nom de l'organisateur">
+                <input type="text" name="organisateur" id="evt_organisateur" class="aevt-form__input" placeholder="Nom de l'organisateur" value="{{ formData.organisateur ?? app.user.prenom ~ ' ' ~ app.user.nom }}">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Type *</label>
                 <select name="type_evenement" id="evt_type" class="aevt-form__select">
                     <option value="">— Choisir —</option>
                     {% for t in typeOptions %}
-                        <option value="{{ t.value }}">{{ t.label }}</option>
+                        <option value="{{ t.value }}" {% if (formData.type_evenement ?? '') == t.value %}selected{% endif %}>{{ t.label }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date début *</label>
-                    <input type="date" name="date_debut" id="evt_date_debut" class="aevt-form__input">
+                    <input type="date" name="date_debut" id="evt_date_debut" class="aevt-form__input" value="{{ formData.date_debut ?? '' }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Date fin *</label>
-                    <input type="date" name="date_fin" id="evt_date_fin" class="aevt-form__input">
+                    <input type="date" name="date_fin" id="evt_date_fin" class="aevt-form__input" value="{{ formData.date_fin ?? '' }}">
                 </div>
             </div>
             <div class="aevt-form__grid2">
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Horaire début *</label>
-                    <input type="time" name="horaire_debut" id="evt_horaire_debut" class="aevt-form__input">
+                    <input type="time" name="horaire_debut" id="evt_horaire_debut" class="aevt-form__input" value="{{ formData.horaire_debut ?? '' }}">
                 </div>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Horaire fin *</label>
-                    <input type="time" name="horaire_fin" id="evt_horaire_fin" class="aevt-form__input">
+                    <input type="time" name="horaire_fin" id="evt_horaire_fin" class="aevt-form__input" value="{{ formData.horaire_fin ?? '' }}">
                 </div>
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Capacité max *</label>
-                <input type="text" name="capacite_max" id="evt_capacite_max" class="aevt-form__input" value="50" placeholder="50">
+                <input type="text" name="capacite_max" id="evt_capacite_max" class="aevt-form__input" value="{{ formData.capacite_max ?? '50' }}" placeholder="50">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Lieu</label>
-                <input type="text" name="lieu" id="evt_lieu" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel">
+                <input type="text" name="lieu" id="evt_lieu" class="aevt-form__input" placeholder="Ex: Tunis, Centre culturel" value="{{ formData.lieu ?? '' }}">
             </div>
             <div class="aevt-form__row">
                 <label class="aevt-form__label">Adresse</label>
-                <input type="text" name="adresse" id="evt_adresse" class="aevt-form__input" placeholder="Adresse complète">
+                <input type="text" name="adresse" id="evt_adresse" class="aevt-form__input" placeholder="Adresse complète" value="{{ formData.adresse ?? '' }}">
             </div>
 
             {# Image #}
@@ -251,7 +260,7 @@
                 Modifier : {{ editEvent.titre }}
             </h2>
 
-            <form method="post" action="{{ path('admin_evenement_update', {id: editEvent.idEvenement}) }}" class="aevt-form" novalidate>
+            <form method="post" action="{{ path('admin_evenement_update', {id: editEvent.idEvenement}) }}" class="aevt-form" id="evtEditForm" novalidate>
                 <div class="aevt-form__row">
                     <label class="aevt-form__label">Titre *</label>
                     <input type="text" name="titre" id="evt_titre" class="aevt-form__input" value="{{ editEvent.titre }}">
@@ -480,6 +489,7 @@
                 <button type="button" class="aevt-modal__close" id="spFormClose">&times;</button>
             </div>
             <form id="spForm" method="post" action="{{ path('admin_sponsor_create') }}" novalidate>
+                <input type="hidden" name="_from" value="events">
                 <div class="aevt-modal__body">
                     <div class="aevt-form__grid2">
                         <div class="aevt-form__row">
@@ -726,6 +736,15 @@
     </div>
 
     {# ════════════════════════════════════════════════
+       TAB 6 — CALENDRIER
+       ════════════════════════════════════════════════ #}
+    <div class="aevt-panel {% if tab == 'calendrier' %}aevt-panel--active{% endif %}" id="panel-calendrier">
+        <div style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(26,58,36,.08);padding:24px">
+            <div id="adminCalendar"></div>
+        </div>
+    </div>
+
+    {# ════════════════════════════════════════════════
        MODAL — DETAIL POPUP
        ════════════════════════════════════════════════ #}
     <div class="aevt-modal-overlay" id="detailModal" style="display:none">
@@ -772,7 +791,7 @@
 
                 {# Weather #}
                 <div class="aevt-modal__section" id="modal-weather-section">
-                    <h4>Météo prévue</h4>
+                    <h4>Météo de l'événement</h4>
                     <div class="aevt-modal__weather" id="modal-weather">
                         <div class="aevt-weather-loading">
                             <span class="aevt-spinner"></span> Chargement de la météo…
@@ -840,6 +859,8 @@
 
 {% block javascripts %}
 {{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/fr.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // ═══════════════════════════════
@@ -959,7 +980,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.getElementById('modal-close');
     const closeBtn2 = document.getElementById('modal-close2');
 
-    function openModal(id) {
+    window.openModal = function openModal(id) {
         fetch('{{ path('admin_evenements') }}/' + id + '/json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -1086,6 +1107,94 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'Prévision à long terme — peu fiable';
     }
 
+    function buildWeatherCard(code, tMin, tMax, label, cityName) {
+        var tAvg   = Math.round((tMax + tMin) / 2);
+        var desc   = WMO_DESC[code] || 'Inconnu';
+        var emoji  = WMO_EMOJI[code] || '🌡️';
+        return '<div class="aevt-weather-card">'
+            + '<div class="aevt-weather-emoji">' + emoji + '</div>'
+            + '<div class="aevt-weather-info">'
+            + '<p class="aevt-weather-temp">' + tAvg + '°C</p>'
+            + '<p class="aevt-weather-desc">' + desc + '</p>'
+            + '<p class="aevt-weather-range">↓ ' + Math.round(tMin) + '°C  ↑ ' + Math.round(tMax) + '°C</p>'
+            + '<p class="aevt-weather-reliability">' + label + ' — ' + cityName + '</p>'
+            + '</div></div>';
+    }
+
+    function loadWeatherForecast(lat, lon, cityName, dateDebutRaw, weatherEl) {
+        var forecastUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat
+            + '&longitude=' + lon
+            + '&daily=temperature_2m_max,temperature_2m_min,weather_code'
+            + '&timezone=auto&forecast_days=16';
+        return fetch(forecastUrl)
+            .then(function(r) { return r.json(); })
+            .then(function(wx) {
+                if (wx.daily && wx.daily.time) {
+                    var idx = wx.daily.time.indexOf(dateDebutRaw);
+                    if (idx !== -1) {
+                        var today = new Date().toISOString().slice(0, 10);
+                        var daysAhead = Math.round((new Date(dateDebutRaw) - new Date(today)) / 86400000);
+                        var label = getReliabilityText(daysAhead);
+                        weatherEl.innerHTML = buildWeatherCard(
+                            wx.daily.weather_code[idx],
+                            wx.daily.temperature_2m_min[idx],
+                            wx.daily.temperature_2m_max[idx],
+                            label, cityName
+                        );
+                        return true;
+                    }
+                }
+                return false;
+            });
+    }
+
+    function loadWeatherArchive(lat, lon, cityName, dateDebutRaw, weatherEl) {
+        var archiveUrl = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + lat
+            + '&longitude=' + lon
+            + '&start_date=' + dateDebutRaw + '&end_date=' + dateDebutRaw
+            + '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto';
+        return fetch(archiveUrl)
+            .then(function(r) { return r.json(); })
+            .then(function(wx) {
+                if (wx.daily && wx.daily.time && wx.daily.time.length > 0) {
+                    weatherEl.innerHTML = buildWeatherCard(
+                        wx.daily.weather_code[0],
+                        wx.daily.temperature_2m_min[0],
+                        wx.daily.temperature_2m_max[0],
+                        'Météo enregistrée le ' + dateDebutRaw, cityName
+                    );
+                    return true;
+                }
+                return false;
+            });
+    }
+
+    function loadWeatherHistoricalAvg(lat, lon, cityName, dateDebutRaw, weatherEl) {
+        // Use same date from previous year as estimate
+        var eventDate = new Date(dateDebutRaw);
+        var lastYear = new Date(dateDebutRaw);
+        lastYear.setFullYear(lastYear.getFullYear() - 1);
+        var ly = lastYear.toISOString().slice(0, 10);
+        var archiveUrl = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + lat
+            + '&longitude=' + lon
+            + '&start_date=' + ly + '&end_date=' + ly
+            + '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto';
+        return fetch(archiveUrl)
+            .then(function(r) { return r.json(); })
+            .then(function(wx) {
+                if (wx.daily && wx.daily.time && wx.daily.time.length > 0) {
+                    weatherEl.innerHTML = buildWeatherCard(
+                        wx.daily.weather_code[0],
+                        wx.daily.temperature_2m_min[0],
+                        wx.daily.temperature_2m_max[0],
+                        'Estimation basée sur la même date en ' + lastYear.getFullYear(), cityName
+                    );
+                    return true;
+                }
+                return false;
+            });
+    }
+
     function loadWeather(lieu, adresse, dateDebutRaw) {
         var weatherEl = document.getElementById('modal-weather');
         weatherEl.innerHTML = '<div class="aevt-weather-loading"><span class="aevt-spinner"></span> Chargement de la météo…</div>';
@@ -1093,6 +1202,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var city = extractCity(lieu, adresse);
         if (!city) {
             weatherEl.innerHTML = '<span class="aevt-weather-error">Lieu non défini — impossible de charger la météo.</span>';
+            return;
+        }
+        if (!dateDebutRaw) {
+            weatherEl.innerHTML = '<span class="aevt-weather-error">Date de l\'événement non définie.</span>';
             return;
         }
 
@@ -1108,68 +1221,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 var lat = geo.results[0].latitude;
                 var lon = geo.results[0].longitude;
                 var cityName = geo.results[0].name;
+                var today = new Date().toISOString().slice(0, 10);
+                var daysAhead = Math.round((new Date(dateDebutRaw) - new Date(today)) / 86400000);
 
-                // Step 2: Get forecast
-                var forecastUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat
-                    + '&longitude=' + lon
-                    + '&daily=temperature_2m_max,temperature_2m_min,weather_code'
-                    + '&current_weather=true&timezone=auto&forecast_days=16';
-
-                return fetch(forecastUrl)
-                    .then(function(r) { return r.json(); })
-                    .then(function(wx) {
-                        var html = '';
-                        var today = new Date().toISOString().slice(0, 10);
-
-                        if (dateDebutRaw && wx.daily && wx.daily.time) {
-                            var idx = wx.daily.time.indexOf(dateDebutRaw);
-                            if (idx !== -1) {
-                                // Forecast for event date
-                                var code   = wx.daily.weather_code[idx];
-                                var tMax   = wx.daily.temperature_2m_max[idx];
-                                var tMin   = wx.daily.temperature_2m_min[idx];
-                                var tAvg   = Math.round((tMax + tMin) / 2);
-                                var desc   = WMO_DESC[code] || 'Inconnu';
-                                var emoji  = WMO_EMOJI[code] || '🌡️';
-
-                                var eventDate = new Date(dateDebutRaw);
-                                var nowDate   = new Date(today);
-                                var daysAhead = Math.round((eventDate - nowDate) / (1000 * 60 * 60 * 24));
-                                var reliability = getReliabilityText(daysAhead);
-
-                                html = '<div class="aevt-weather-card">'
-                                    + '<div class="aevt-weather-emoji">' + emoji + '</div>'
-                                    + '<div class="aevt-weather-info">'
-                                    + '<p class="aevt-weather-temp">' + tAvg + '°C</p>'
-                                    + '<p class="aevt-weather-desc">' + desc + '</p>'
-                                    + '<p class="aevt-weather-range">↓ ' + Math.round(tMin) + '°C  ↑ ' + Math.round(tMax) + '°C</p>'
-                                    + '<p class="aevt-weather-reliability">' + reliability + ' — ' + cityName + '</p>'
-                                    + '</div></div>';
+                if (daysAhead < 0) {
+                    // Past event → use archive API for actual weather on that date
+                    loadWeatherArchive(lat, lon, cityName, dateDebutRaw, weatherEl)
+                        .then(function(ok) {
+                            if (!ok) {
+                                weatherEl.innerHTML = '<span class="aevt-weather-error">Données météo non disponibles pour le ' + dateDebutRaw + '.</span>';
                             }
-                        }
-
-                        // Fallback to current weather
-                        if (!html && wx.current_weather) {
-                            var cw     = wx.current_weather;
-                            var code2  = cw.weathercode;
-                            var desc2  = WMO_DESC[code2] || 'Inconnu';
-                            var emoji2 = WMO_EMOJI[code2] || '🌡️';
-
-                            html = '<div class="aevt-weather-card">'
-                                + '<div class="aevt-weather-emoji">' + emoji2 + '</div>'
-                                + '<div class="aevt-weather-info">'
-                                + '<p class="aevt-weather-temp">' + Math.round(cw.temperature) + '°C</p>'
-                                + '<p class="aevt-weather-desc">' + desc2 + ' (météo actuelle)</p>'
-                                + '<p class="aevt-weather-reliability">L\'événement est trop éloigné pour une prévision fiable — ' + cityName + '</p>'
-                                + '</div></div>';
-                        }
-
-                        if (!html) {
-                            html = '<span class="aevt-weather-error">Prévision non disponible pour cette date.</span>';
-                        }
-
-                        weatherEl.innerHTML = html;
-                    });
+                        })
+                        .catch(function() {
+                            weatherEl.innerHTML = '<span class="aevt-weather-error">Impossible de charger la météo.</span>';
+                        });
+                } else if (daysAhead <= 15) {
+                    // Within forecast range → use forecast API
+                    loadWeatherForecast(lat, lon, cityName, dateDebutRaw, weatherEl)
+                        .then(function(ok) {
+                            if (!ok) {
+                                weatherEl.innerHTML = '<span class="aevt-weather-error">Prévision non disponible pour le ' + dateDebutRaw + '.</span>';
+                            }
+                        })
+                        .catch(function() {
+                            weatherEl.innerHTML = '<span class="aevt-weather-error">Impossible de charger la météo.</span>';
+                        });
+                } else {
+                    // Far future → use historical average (same date last year)
+                    loadWeatherHistoricalAvg(lat, lon, cityName, dateDebutRaw, weatherEl)
+                        .then(function(ok) {
+                            if (!ok) {
+                                weatherEl.innerHTML = '<span class="aevt-weather-error">Aucune estimation météo disponible pour cette date.</span>';
+                            }
+                        })
+                        .catch(function() {
+                            weatherEl.innerHTML = '<span class="aevt-weather-error">Impossible de charger la météo.</span>';
+                        });
+                }
             })
             .catch(function(err) {
                 console.error('Weather error:', err);
@@ -1455,19 +1543,19 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() { spOpenFormEdit(this.dataset.id); });
     });
 
-    // AJAX submit for sponsor form (no page redirect)
+    // AJAX submit for sponsor form (PHP validates, JSON response)
     spForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Clear previous highlights
-        spForm.querySelectorAll('.firma-input-invalid').forEach(function(el) {
-            el.classList.remove('firma-input-invalid');
+        // Clear previous error highlights
+        spForm.querySelectorAll('.aevt-form__input--error').forEach(function(el) {
+            el.classList.remove('aevt-form__input--error');
         });
 
         var formData = new URLSearchParams(new FormData(spForm));
         var originalText = spFormSubmit.textContent;
         spFormSubmit.disabled = true;
-        spFormSubmit.textContent = 'Envoi…';
+        spFormSubmit.textContent = 'Envoi\u2026';
 
         fetch(spForm.action, {
             method: 'POST',
@@ -1477,26 +1565,28 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(function(resp) { return resp.json(); })
         .then(function(data) {
             if (data.success) {
-                window.firmaToast(data.message, 'success');
+                firmaToast(data.message, 'success');
                 spCloseFormModal();
                 setTimeout(function() { window.location.reload(); }, 600);
             } else {
                 if (data.errors && data.errors.length) {
                     data.errors.forEach(function(msg) {
-                        window.firmaToast(msg, 'danger');
+                        firmaToast(msg, 'danger');
                     });
                 }
                 if (data.errorFields && data.errorFields.length) {
                     data.errorFields.forEach(function(name) {
                         var el = spForm.querySelector('[name="' + name + '"]');
-                        if (el) el.classList.add('firma-input-invalid');
+                        if (el) {
+                            el.classList.add('aevt-form__input--error');
+                        }
                     });
                 }
             }
         })
         .catch(function(err) {
             console.error('Sponsor form error:', err);
-            window.firmaToast('Erreur réseau, veuillez réessayer.', 'danger');
+            firmaToast('Erreur r\u00e9seau, veuillez r\u00e9essayer.', 'danger');
         })
         .finally(function() {
             spFormSubmit.disabled = false;
@@ -1504,9 +1594,109 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ═══════════════════════════════
+    // Event Create Form — AJAX + Toast
+    var evtCreateForm = document.getElementById('evtCreateForm');
+    if (evtCreateForm) {
+        evtCreateForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            evtCreateForm.querySelectorAll('.aevt-form__input--error').forEach(function(el) {
+                el.classList.remove('aevt-form__input--error');
+            });
+
+            var submitBtn = evtCreateForm.querySelector('button[type="submit"]');
+            var originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi\u2026';
+
+            var formData = new URLSearchParams(new FormData(evtCreateForm));
+
+            fetch(evtCreateForm.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    firmaToast(data.message, 'success');
+                    setTimeout(function() { window.location.href = '{{ path("admin_evenements") }}'; }, 600);
+                } else {
+                    if (data.errors && data.errors.length) {
+                        data.errors.forEach(function(msg) {
+                            firmaToast(msg, 'danger');
+                        });
+                    }
+                    if (data.errorFields && data.errorFields.length) {
+                        data.errorFields.forEach(function(name) {
+                            var el = evtCreateForm.querySelector('[name="' + name + '"]');
+                            if (el) el.classList.add('aevt-form__input--error');
+                        });
+                    }
+                }
+            })
+            .catch(function() {
+                firmaToast('Erreur r\u00e9seau, veuillez r\u00e9essayer.', 'danger');
+            })
+            .finally(function() {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+    }
+
+    // Event Edit Form — AJAX + Toast
+    var evtEditForm = document.getElementById('evtEditForm');
+    if (evtEditForm) {
+        evtEditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            evtEditForm.querySelectorAll('.aevt-form__input--error').forEach(function(el) {
+                el.classList.remove('aevt-form__input--error');
+            });
+
+            var submitBtn = evtEditForm.querySelector('button[type="submit"]');
+            var originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi\u2026';
+
+            var formData = new URLSearchParams(new FormData(evtEditForm));
+
+            fetch(evtEditForm.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    firmaToast(data.message, 'success');
+                    setTimeout(function() { window.location.href = '{{ path("admin_evenements") }}'; }, 600);
+                } else {
+                    if (data.errors && data.errors.length) {
+                        data.errors.forEach(function(msg) {
+                            firmaToast(msg, 'danger');
+                        });
+                    }
+                    if (data.errorFields && data.errorFields.length) {
+                        data.errorFields.forEach(function(name) {
+                            var el = evtEditForm.querySelector('[name="' + name + '"]');
+                            if (el) el.classList.add('aevt-form__input--error');
+                        });
+                    }
+                }
+            })
+            .catch(function() {
+                firmaToast('Erreur r\u00e9seau, veuillez r\u00e9essayer.', 'danger');
+            })
+            .finally(function() {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+    }
+
     // Sponsor Detail Modal
-    // ═══════════════════════════════
     var spDetailModal = document.getElementById('spDetailModal');
 
     function spOpenDetail(id) {
@@ -1884,18 +2074,83 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(function(err){ console.error('Dashboard data error:', err); });
     }
 
-    /* Trigger when dashboard tab is selected */
-    var dashPanel = document.getElementById('panel-dashboard');
-    if (dashPanel && dashPanel.classList.contains('aevt-panel--active')) {
-        initDashboard();
-    }
+    /* ── DOM-dependent init (runs after page load) ── */
+    document.addEventListener('DOMContentLoaded', function() {
+        /* Trigger when dashboard tab is already selected */
+        var dashPanel = document.getElementById('panel-dashboard');
+        if (dashPanel && dashPanel.classList.contains('aevt-panel--active')) {
+            initDashboard();
+        }
 
-    /* Listen for tab clicks */
-    document.querySelectorAll('[data-tab]').forEach(function(btn){
-        btn.addEventListener('click', function(){
-            if (this.getAttribute('data-tab') === 'dashboard') {
-                setTimeout(initDashboard, 50);
-            }
+        // ═══════════════════════════════
+        // FullCalendar — Admin
+        // ═══════════════════════════════
+        var adminCalRendered = false;
+        var adminTooltip = null;
+        var adminCalendar = null;
+
+        function initAdminCalendar() {
+            var adminCalEl = document.getElementById('adminCalendar');
+            if (!adminCalEl || adminCalendar) return;
+            adminCalendar = new FullCalendar.Calendar(adminCalEl, {
+                locale: 'fr',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
+                height: 'auto',
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: 3,
+                eventSources: [{
+                    url: '{{ path("admin_calendar_events") }}',
+                    failure: function() { console.warn('Erreur chargement calendrier admin'); }
+                }],
+                eventMouseEnter: function(info) {
+                    var p = info.event.extendedProps;
+                    adminTooltip = document.createElement('div');
+                    adminTooltip.className = 'aevt-cal-tooltip';
+                    adminTooltip.innerHTML =
+                        '<div class="aevt-cal-tooltip__title">' + info.event.title + '</div>' +
+                        (p.organisateur ? '<div class="aevt-cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' + p.organisateur + '</div>' : '') +
+                        (p.lieu ? '<div class="aevt-cal-tooltip__row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + p.lieu + '</div>' : '');
+                    document.body.appendChild(adminTooltip);
+                    var rect = info.el.getBoundingClientRect();
+                    adminTooltip.style.left = rect.left + (rect.width / 2) - (adminTooltip.offsetWidth / 2) + 'px';
+                    adminTooltip.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+                },
+                eventMouseLeave: function() {
+                    if (adminTooltip) { adminTooltip.remove(); adminTooltip = null; }
+                },
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    if (adminTooltip) { adminTooltip.remove(); adminTooltip = null; }
+                    openModal(info.event.id);
+                }
+            });
+            adminCalendar.render();
+            adminCalRendered = true;
+        }
+
+        /* Listen for tab clicks — dashboard & calendar triggers */
+        document.querySelectorAll('[data-tab]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                if (this.getAttribute('data-tab') === 'dashboard') {
+                    setTimeout(initDashboard, 50);
+                }
+                if (this.getAttribute('data-tab') === 'calendrier') {
+                    setTimeout(function() {
+                        if (!adminCalRendered) {
+                            initAdminCalendar();
+                        } else if (adminCalendar) {
+                            adminCalendar.updateSize();
+                        }
+                    }, 50);
+                }
+            });
         });
     });
 })();
