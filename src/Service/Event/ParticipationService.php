@@ -14,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\Writer\SvgWriter;
+use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Color\Color;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\MailerInterface;
@@ -296,18 +296,41 @@ class ParticipationService
 
     private function getTicketBaseUrl(): string
     {
+        // 1) Priorité à la config explicite (recommandé pour scan mobile)
+        //    Définir TICKET_BASE_URL dans .env.local, ex: TICKET_BASE_URL=http://192.168.1.42:8000
+        $envBase = $_ENV['TICKET_BASE_URL'] ?? $_SERVER['TICKET_BASE_URL'] ?? getenv('TICKET_BASE_URL');
+        if (is_string($envBase) && $envBase !== '') {
+            return rtrim($envBase, '/') . '/ticket/';
+        }
+
         $request = $this->requestStack->getCurrentRequest();
         $base = $request ? $request->getSchemeAndHttpHost() : 'http://127.0.0.1:8000';
 
+        // 2) Auto-détection d'une IP LAN uniquement si on est sur localhost
         if (PHP_OS_FAMILY === 'Windows' && $request && in_array($request->getHost(), ['127.0.0.1', 'localhost', '::1'])) {
             $ipOutput = shell_exec('ipconfig');
             if ($ipOutput && preg_match_all('/IPv4[^:]*:\s*([\d.]+)/', $ipOutput, $matches)) {
+                $candidates = [];
                 foreach ($matches[1] as $ip) {
-                    if (str_starts_with($ip, '127.') || str_starts_with($ip, '169.254.')) continue;
-                    if (str_starts_with($ip, '192.168.56.')) continue;
-                    if (preg_match('/^192\.168\.(1[3-9]\d|2\d\d)\./', $ip)) continue;
-                    $base = $request->getScheme() . '://' . $ip . ':' . $request->getPort();
-                    break;
+                    if (str_starts_with($ip, '127.') || str_starts_with($ip, '169.254.')) continue; // loopback / APIPA
+                    if (str_starts_with($ip, '192.168.56.')) continue;                               // VirtualBox host-only
+                    if (preg_match('/^192\.168\.(1[3-9]\d|2\d\d)\./', $ip)) continue;               // sous-réseaux virtuels courants
+                    $candidates[] = $ip;
+                }
+
+                // Préférer les plages Wi-Fi domestiques les plus courantes (192.168.x.x)
+                usort($candidates, static function (string $a, string $b): int {
+                    $score = static function (string $ip): int {
+                        if (str_starts_with($ip, '192.168.')) return 0; // home Wi-Fi
+                        if (preg_match('/^172\.(1[6-9]|2\d|3[01])\./', $ip)) return 1; // private class B
+                        if (str_starts_with($ip, '10.')) return 2; // corporate/VPN, souvent non routable vers le tel
+                        return 3;
+                    };
+                    return $score($a) <=> $score($b);
+                });
+
+                if (!empty($candidates)) {
+                    $base = $request->getScheme() . '://' . $candidates[0] . ':' . $request->getPort();
                 }
             }
         }
@@ -318,17 +341,17 @@ class ParticipationService
     private function generateQrSvg(string $data): string
     {
         $builder = new Builder(
-            writer: new SvgWriter(),
+            writer: new PngWriter(),
             data: $data,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::Medium,
-            size: 120,
-            margin: 6,
+            size: 240,
+            margin: 8,
             foregroundColor: new Color(26, 58, 36),
             backgroundColor: new Color(255, 255, 255),
         );
 
-        return 'data:image/svg+xml;base64,' . base64_encode($builder->build()->getString());
+        return 'data:image/png;base64,' . base64_encode($builder->build()->getString());
     }
 
     // ═══════════════════════════════════════════
