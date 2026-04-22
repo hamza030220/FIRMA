@@ -67,4 +67,55 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
             $rows
         ))));
     }
+
+    /**
+     * Recherche et filtre les utilisateurs par mot-cle et role.
+     *
+     * @return Utilisateur[]
+     */
+    public function searchAndFilter(string $keyword = '', string $role = ''): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->orderBy('u.dateCreation', 'DESC');
+
+        if ($keyword !== '') {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('u.nom', ':kw'),
+                    $qb->expr()->like('u.prenom', ':kw'),
+                    $qb->expr()->like('u.email', ':kw'),
+                    $qb->expr()->like('u.telephone', ':kw'),
+                    $qb->expr()->like('u.ville', ':kw'),
+                )
+            )->setParameter('kw', '%' . $keyword . '%');
+        }
+
+        if ($role !== '') {
+            $qb->andWhere('u.typeUser = :role')
+               ->setParameter('role', $role);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Compte les utilisateurs par type.
+     *
+     * @return array<string, int>
+     */
+    public function countByType(): array
+    {
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.typeUser AS type, COUNT(u.id) AS total')
+            ->groupBy('u.typeUser')
+            ->getQuery()
+            ->getArrayResult();
+
+        $result = ['client' => 0, 'technicien' => 0, 'admin' => 0];
+        foreach ($rows as $row) {
+            $result[$row['type']] = (int) $row['total'];
+        }
+
+        return $result;
+    }
 }

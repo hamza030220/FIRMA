@@ -23,7 +23,9 @@ class MaladieRepository extends ServiceEntityRepository
 
     public function searchAndFilter(string $keyword = '', string $tri = 'nom', string $gravite = ''): array
     {
-        $qb = $this->createQueryBuilder('m');
+        $qb = $this->createQueryBuilder('m')
+            ->leftJoin('m.solutionTraitements', 's')
+            ->addSelect('s');
 
         if (!empty($keyword)) {
             $qb->andWhere('LOWER(m.nom) LIKE :keyword 

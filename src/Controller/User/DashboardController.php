@@ -3,14 +3,17 @@
 namespace App\Controller\User;
 
 use App\Entity\User\Utilisateur;
+use App\Form\User\ProfilType;
 use App\Repository\Maladie\MaladieRepository;
 use App\Service\Maladie\Weather\MaladieWeatherAlertMailer;
 use App\Service\Maladie\Weather\MaladieWeatherAutoAlertService;
 use App\Service\Maladie\Weather\MaladieWeatherRiskService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -175,11 +178,35 @@ class DashboardController extends AbstractController
     }
 
     #[Route('/profil', name: 'user_profile')]
-    public function profile(MaladieWeatherAutoAlertService $autoAlertService): Response
-    {
+    public function profile(
+        Request $request,
+        MaladieWeatherAutoAlertService $autoAlertService,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher,
+    ): Response {
         $this->triggerAutoAlert($autoAlertService);
 
-        return $this->render('user/profile/index.html.twig');
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(ProfilType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $newPassword = $form->get('nouveauMotDePasse')->getData();
+            if (!empty($newPassword)) {
+                $user->setMotDePasse($passwordHasher->hashPassword($user, $newPassword));
+            }
+            $em->flush();
+            $this->addFlash('success', 'Profil mis a jour avec succes.');
+            return $this->redirectToRoute('user_profile');
+        }
+
+        return $this->render('user/profile/index.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     private function triggerAutoAlert(MaladieWeatherAutoAlertService $autoAlertService): void

@@ -20,9 +20,9 @@ return [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
     '@hotwired/stimulus' => [
-        'path' => './assets/vendor/hotwired/stimulus.js',
+        'path' => './assets/vendor/@hotwired/stimulus/stimulus.index.js',
     ],
     '@hotwired/turbo' => [
-        'path' => './assets/vendor/hotwired/turbo.js',
+        'path' => './assets/vendor/@hotwired/turbo/turbo.index.js',
     ],
 ];

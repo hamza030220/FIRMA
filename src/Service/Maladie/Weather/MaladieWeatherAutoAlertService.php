@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class MaladieWeatherAutoAlertService
 {
     private const COOLDOWN_SECONDS = 1800;
+    private const WEATHER_CACHE_SECONDS = 600;
 
     public function __construct(
         private readonly MaladieRepository $maladieRepository,
@@ -28,8 +29,15 @@ class MaladieWeatherAutoAlertService
             return ['checked' => false, 'sent' => false, 'error' => null, 'alerts' => 0, 'city' => $city !== '' ? $city : null];
         }
 
+        // Short-lived cache: skip entirely if we already checked this city recently.
+        // This avoids a synchronous OpenWeatherMap HTTP call on every user page load.
+        if ($this->isWeatherCacheFresh($city)) {
+            return ['checked' => false, 'sent' => false, 'error' => null, 'alerts' => 0, 'city' => $city];
+        }
+
         try {
             $weather = $this->weatherRiskService->getWeatherByCity($city);
+            $this->storeWeatherCache($city);
             $riskAnalyses = [];
 
             foreach ($this->maladieRepository->findAll() as $maladie) {
@@ -106,5 +114,26 @@ class MaladieWeatherAutoAlertService
 
         $session->set('maladie_weather_alert_signature', $signature);
         $session->set('maladie_weather_alert_sent_at', time());
+    }
+
+    private function isWeatherCacheFresh(string $city): bool
+    {
+        $session = $this->requestStack->getSession();
+        if ($session === null) {
+            return false;
+        }
+        $lastCity = (string) $session->get('maladie_weather_check_city', '');
+        $lastAt   = (int) $session->get('maladie_weather_check_at', 0);
+        return $lastCity === mb_strtolower($city) && $lastAt > 0 && (time() - $lastAt) < self::WEATHER_CACHE_SECONDS;
+    }
+
+    private function storeWeatherCache(string $city): void
+    {
+        $session = $this->requestStack->getSession();
+        if ($session === null) {
+            return;
+        }
+        $session->set('maladie_weather_check_city', mb_strtolower($city));
+        $session->set('maladie_weather_check_at', time());
     }
 }

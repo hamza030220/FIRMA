@@ -7,6 +7,7 @@ use App\Entity\Event\SecteurActivite;
 use App\Entity\Event\TypeEvenement;
 use App\Form\Event\EvenementType;
 use App\Service\Event\EvenementService;
+use App\Service\Event\ParticipationService;
 use App\Service\Event\SponsorService;
 use App\Repository\Event\EvenementRepository;
 use App\Repository\Event\ParticipationRepository;
@@ -25,6 +26,7 @@ class EvenementController extends AbstractController
 {
     public function __construct(
         private readonly EvenementService $evenementService,
+        private readonly ParticipationService $participationService,
         private readonly SponsorService $sponsorService,
         private readonly EvenementRepository $evenementRepo,
         private readonly ParticipationRepository $participationRepo,
@@ -32,13 +34,12 @@ class EvenementController extends AbstractController
         private readonly Packages $packages,
     ) {}
 
-    // ──────────────────────────────────────────
-    //  LIST (tab = liste, default)
-    // ──────────────────────────────────────────
-    #[Route('', name: 'admin_evenements')]
-    public function index(Request $request): Response
+    /**
+     * Build all common template variables for the index page.
+     */
+    private function getIndexTemplateData(Request $request, ?string $overrideTab = null): array
     {
-        $tab    = $request->query->get('tab', 'liste');
+        $tab    = $overrideTab ?? $request->query->get('tab', 'liste');
         $search = $request->query->get('q', '');
         $sort   = $request->query->get('sort', 'date_desc');
 
@@ -55,23 +56,28 @@ class EvenementController extends AbstractController
             default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
         });
 
+        // Pagination
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 6;
+        $totalEvt = count($evenements);
+        $totalPages = max(1, (int) ceil($totalEvt / $limit));
+        $page = min($page, $totalPages);
+        $paginatedEvenements = array_slice($evenements, ($page - 1) * $limit, $limit);
+
         $participationCounts = [];
-        foreach ($evenements as $evt) {
+        foreach ($paginatedEvenements as $evt) {
             $participationCounts[$evt->getIdEvenement()] =
                 $this->participationRepo->countConfirmedByEvent($evt->getIdEvenement());
         }
 
-        // Sponsors catalogue (for create/edit forms)
         $catalogSponsors = $this->sponsorService->getCatalog();
 
-        // If editing, load the event
         $editId    = $request->query->getInt('edit', 0);
         $editEvent = $editId ? $this->evenementService->getById($editId) : null;
         $editSponsorIds = [];
         if ($editEvent) {
             $tab = 'modifier';
             foreach ($this->sponsorRepo->findByEvenement($editId) as $s) {
-                // Match by catalog sponsor name
                 foreach ($catalogSponsors as $cs) {
                     if ($cs->getNom() === $s->getNom()) {
                         $editSponsorIds[] = $cs->getIdSponsor();
@@ -81,7 +87,6 @@ class EvenementController extends AbstractController
             }
         }
 
-        // ── Dashboard KPIs ──
         $dashStats = [
             'totalEvents'       => $this->evenementRepo->countAll(),
             'eventsActifs'      => $this->evenementRepo->countActifs(),
@@ -96,8 +101,8 @@ class EvenementController extends AbstractController
             'totalContributions'=> $this->sponsorRepo->totalContributions(),
         ];
 
-        return $this->render('admin/event/index.html.twig', [
-            'evenements'          => $evenements,
+        return [
+            'evenements'          => $paginatedEvenements,
             'search'              => $search,
             'sort'                => $sort,
             'tab'                 => $tab,
@@ -108,7 +113,34 @@ class EvenementController extends AbstractController
             'editEvent'           => $editEvent,
             'editSponsorIds'      => $editSponsorIds,
             'dashStats'           => $dashStats,
-        ]);
+            'formErrors'          => [],
+            'formData'            => [],
+            'editFormErrors'      => [],
+            'currentPage'         => $page,
+            'totalPages'          => $totalPages,
+        ];
+    }
+
+    /**
+     * Extract per-field errors from a submitted Symfony form.
+     */
+    private function extractFormErrors(\Symfony\Component\Form\FormInterface $form): array
+    {
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()?->getName() ?? 'global';
+            $errors[$field][] = $error->getMessage();
+        }
+        return $errors;
+    }
+
+    // ──────────────────────────────────────────
+    //  LIST (tab = liste, default)
+    // ──────────────────────────────────────────
+    #[Route('', name: 'admin_evenements')]
+    public function index(Request $request): Response
+    {
+        return $this->render('admin/event/index.html.twig', $this->getIndexTemplateData($request));
     }
 
     // ──────────────────────────────────────────
@@ -276,28 +308,63 @@ class EvenementController extends AbstractController
     }
 
     // ──────────────────────────────────────────
+    //  CALENDAR EVENTS JSON
+    // ──────────────────────────────────────────
+    #[Route('/calendar-events', name: 'admin_calendar_events', methods: ['GET'])]
+    public function calendarEvents(): JsonResponse
+    {
+        $allEvents = $this->evenementService->getAll();
+        $events = [];
+        foreach ($allEvents as $evt) {
+            $start = $evt->getDateDebut();
+            $end   = $evt->getDateFin() ?? $start;
+            if ($evt->getHoraireDebut()) {
+                $start = new \DateTime($start->format('Y-m-d') . ' ' . $evt->getHoraireDebut()->format('H:i'));
+            }
+            if ($evt->getHoraireFin()) {
+                $end = new \DateTime($end->format('Y-m-d') . ' ' . $evt->getHoraireFin()->format('H:i'));
+            } else {
+                $end = (clone $end)->modify('+1 day');
+            }
+            $events[] = [
+                'id'            => $evt->getIdEvenement(),
+                'title'         => $evt->getTitre(),
+                'start'         => $start->format('c'),
+                'end'           => $end->format('c'),
+                'extendedProps' => [
+                    'lieu'         => $evt->getLieu(),
+                    'adresse'      => $evt->getAdresse(),
+                    'organisateur' => $evt->getOrganisateur(),
+                    'imageUrl'     => $evt->getImageUrl() ? $this->packages->getUrl($evt->getImageUrl()) : null,
+                ],
+            ];
+        }
+        return $this->json($events);
+    }
+
+    // ──────────────────────────────────────────
     //  CREATE (POST)
     // ──────────────────────────────────────────
     #[Route('/create', name: 'admin_evenement_create', methods: ['POST'])]
-    public function create(Request $request): Response
+    public function create(Request $request): JsonResponse
     {
         $evt  = new Evenement();
         $form = $this->createForm(EvenementType::class, $evt);
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
+            $fieldErrors = $this->extractFormErrors($form);
             $errors = [];
             $errorFields = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $field . ': ' . $error->getMessage();
+            foreach ($fieldErrors as $field => $msgs) {
                 if ($field !== 'global') {
                     $errorFields[] = $field;
                 }
+                foreach ($msgs as $msg) {
+                    $errors[] = $msg;
+                }
             }
-            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            $this->addFlash('error_fields', implode(',', array_unique($errorFields)));
-            return $this->redirectToRoute('admin_evenements', ['tab' => 'creer']);
+            return $this->json(['success' => false, 'errors' => $errors, 'errorFields' => $errorFields]);
         }
 
         $this->evenementService->create($evt);
@@ -308,19 +375,18 @@ class EvenementController extends AbstractController
             $this->sponsorService->assignerMultiple($sponsorIds, $evt);
         }
 
-        $this->addFlash('success', 'Événement créé avec succès.');
-        return $this->redirectToRoute('admin_evenements');
+        return $this->json(['success' => true, 'message' => 'Événement créé avec succès.']);
     }
 
     // ──────────────────────────────────────────
     //  UPDATE (POST)
     // ──────────────────────────────────────────
     #[Route('/{id}/update', name: 'admin_evenement_update', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function update(int $id, Request $request): Response
+    public function update(int $id, Request $request): JsonResponse
     {
         $evt = $this->evenementService->getById($id);
         if (!$evt) {
-            throw $this->createNotFoundException();
+            return $this->json(['success' => false, 'errors' => ['Événement introuvable.']], 404);
         }
 
         $oldCapacite = $evt->getCapaciteMax();
@@ -329,18 +395,18 @@ class EvenementController extends AbstractController
         $form->submit($request->request->all());
 
         if (!$form->isValid()) {
+            $fieldErrors = $this->extractFormErrors($form);
             $errors = [];
             $errorFields = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()?->getName() ?? 'global';
-                $errors[] = $field . ': ' . $error->getMessage();
+            foreach ($fieldErrors as $field => $msgs) {
                 if ($field !== 'global') {
                     $errorFields[] = $field;
                 }
+                foreach ($msgs as $msg) {
+                    $errors[] = $msg;
+                }
             }
-            $this->addFlash('danger', 'Données invalides — ' . implode(' | ', $errors));
-            $this->addFlash('error_fields', implode(',', array_unique($errorFields)));
-            return $this->redirectToRoute('admin_evenements', ['tab' => 'modifier', 'edit' => $id]);
+            return $this->json(['success' => false, 'errors' => $errors, 'errorFields' => $errorFields]);
         }
 
         // Adjust available places if capacity changed
@@ -355,8 +421,14 @@ class EvenementController extends AbstractController
         $sponsorIds = array_map('intval', $request->request->all('sponsors') ?: []);
         $this->sponsorService->syncForEvent($sponsorIds, $evt);
 
-        $this->addFlash('success', 'Événement modifié avec succès.');
-        return $this->redirectToRoute('admin_evenements');
+        // Notify participants about the modification
+        try {
+            $this->participationService->notifyEventModified($evt);
+        } catch (\Throwable $e) {
+            // Email failure should not block the update
+        }
+
+        return $this->json(['success' => true, 'message' => 'Événement modifié avec succès.']);
     }
 
     // ──────────────────────────────────────────
@@ -369,6 +441,16 @@ class EvenementController extends AbstractController
         if (!$evenement) {
             throw $this->createNotFoundException();
         }
+
+        // Notify participants before cancelling
+        try {
+            $this->participationService->notifyEventCancelled($evenement);
+        } catch (\Throwable $e) {
+            // Email failure should not block the cancellation
+        }
+
+        // Cancel all active participations
+        $this->participationService->cancelAllForEvent($evenement->getIdEvenement());
 
         $this->evenementService->updateStatut($evenement, 'annule');
         $this->addFlash('success', 'Événement annulé avec succès.');

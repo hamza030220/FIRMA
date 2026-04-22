@@ -1139,6 +1139,12 @@ class ForumController extends AbstractController
             return $text;
         }
 
+        // Posts are authored in French. Skip the DeepL round-trip when the UI
+        // is already in French to avoid N synchronous HTTP calls per page load.
+        if (str_starts_with($targetLanguage, 'FR')) {
+            return $text;
+        }
+
         try {
             $result = $this->translationService->translate($text, $targetLanguage);
             $translatedText = trim((string) ($result['text'] ?? ''));
