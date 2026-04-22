@@ -620,38 +620,20 @@
                 </div>
                 {% endif %}
                 <div class="adm-info-row">
-                    <div class="adm-info-label">Température min</div>
+                    <div class="adm-info-label">Seuils météo</div>
                     <div class="adm-info-val">
-                        {% if maladie.tempMin is not null %}{{ maladie.tempMin }}°C{% else %}Non renseignée{% endif %}
-                    </div>
-                </div>
-                <div class="adm-info-row">
-                    <div class="adm-info-label">Température max</div>
-                    <div class="adm-info-val">
-                        {% if maladie.tempMax is not null %}{{ maladie.tempMax }}°C{% else %}Non renseignée{% endif %}
-                    </div>
-                </div>
-                <div class="adm-info-row">
-                    <div class="adm-info-label">Humidité min</div>
-                    <div class="adm-info-val">
-                        {% if maladie.humiditeMin is not null %}{{ maladie.humiditeMin }}%{% else %}Non renseignée{% endif %}
+                        {% if maladie.tempMin is not null or maladie.tempMax is not null or maladie.humiditeMin is not null %}
+                            <div>Température min : {{ maladie.tempMin is not null ? maladie.tempMin ~ ' °C' : 'Non renseignée' }}</div>
+                            <div>Température max : {{ maladie.tempMax is not null ? maladie.tempMax ~ ' °C' : 'Non renseignée' }}</div>
+                            <div>Humidité min : {{ maladie.humiditeMin is not null ? maladie.humiditeMin ~ ' %' : 'Non renseignée' }}</div>
+                        {% else %}
+                            Non renseignés
+                        {% endif %}
                     </div>
                 </div>
                 <div class="adm-info-row">
                     <div class="adm-info-label">Créée le</div>
                     <div class="adm-info-val">{{ maladie.createdAt|date('d/m/Y à H:i') }}</div>
-                </div>
-                {% if maladie.updatedAt %}
-                <div class="adm-info-row">
-                    <div class="adm-info-label">Modifiée le</div>
-                    <div class="adm-info-val">{{ maladie.updatedAt|date('d/m/Y à H:i') }}</div>
-                </div>
-                {% endif %}
-                <div class="adm-info-row">
-                    <div class="adm-info-label">Créée par</div>
-                    <div class="adm-info-val">
-                        {% if maladie.createdBy is not null %}{{ maladie.createdBy }}{% else %}Non renseigné{% endif %}
-                    </div>
                 </div>
                 <div class="adm-info-row">
                     <div class="adm-info-label">Description</div>

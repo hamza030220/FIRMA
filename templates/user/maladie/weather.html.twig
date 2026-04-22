@@ -4,6 +4,7 @@
 
 {% block user_content %}
     {% include 'partials/maladie_weather_panel.html.twig' with {
-        back_url: path('user_maladie')
+        back_url: path('user_maladie'),
+        weather_data_url: path('user_maladie_weather_data')
     } %}
 {% endblock %}

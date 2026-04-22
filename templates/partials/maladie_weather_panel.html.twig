@@ -114,7 +114,9 @@
                         <h4 id="mwxRiskTitle">Etat des maladies</h4>
                         <p id="mwxRiskText">Aucune analyse n a encore ete lancee.</p>
                         <div class="mwx-alerts" id="mwxAdvice"></div>
+                        {% if show_mail_status|default(true) %}
                         <div class="mwx-mail-status is-idle" id="mwxMailStatus">Aucun envoi d email n a encore ete tente.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -217,7 +219,7 @@
         setState('Chargement de la meteo en cours...');
 
         try {
-            const response = await fetch('{{ path('user_maladie_weather_data') }}', {
+            const response = await fetch('{{ weather_data_url|default(path('user_maladie_weather_data')) }}', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
             const payload = await response.json();

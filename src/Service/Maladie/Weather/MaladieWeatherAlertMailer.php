@@ -27,12 +27,15 @@ class MaladieWeatherAlertMailer
             return;
         }
 
-        $recipients = $this->utilisateurRepository->findClientEmails();
+        $recipients = array_values(array_unique(array_filter(array_merge(
+            $this->utilisateurRepository->findAdminEmails(),
+            $this->utilisateurRepository->findClientEmails(),
+        ))));
+
         if ($recipients === [] && $this->weatherAlertAdminFallback !== '') {
             $recipients[] = $this->weatherAlertAdminFallback;
         }
 
-        $recipients = array_values(array_unique(array_filter($recipients)));
         if ($recipients === []) {
             return;
         }
@@ -108,7 +111,7 @@ class MaladieWeatherAlertMailer
             . '<tr>'
             . '<td style="padding:0 20px 24px;">'
             . '<div style="font-size:13px;line-height:1.7;color:#6a7d74;background:#f8fbf9;border-radius:16px;padding:14px 16px;">'
-            . 'Email automatique envoye par FIRMA depuis <strong>Firmaagritech@gmail.com</strong>.'
+            . 'Alerte diffusee aux administrateurs et aux clients connectes de FIRMA.'
             . '</div>'
             . '</td>'
             . '</tr>'
@@ -136,7 +139,7 @@ class MaladieWeatherAlertMailer
             ->from($sender)
             ->to($sender)
             ->bcc(...$recipients)
-            ->subject('FIRMA - Alerte meteo maladie pour ' . $city)
+            ->subject('FIRMA - Alerte météo maladie pour ' . $city)
             ->text($text)
             ->html($html);
 

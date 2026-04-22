@@ -38,7 +38,15 @@
 
     {% if imageUrl is not empty %}
         <div class="photo-diag-image">
+            <div class="photo-diag-image-label">Image fournie par l'API</div>
             <img src="{{ imageUrl }}" alt="Photo analysee">
+        </div>
+    {% endif %}
+
+    {% if analysisImage is not empty %}
+        <div class="photo-diag-image">
+            <div class="photo-diag-image-label">Photo analysee</div>
+            <img src="{{ analysisImage }}" alt="Photo scannee">
         </div>
     {% endif %}
 
@@ -87,6 +95,7 @@
 .photo-diag-results { margin-top: 2.2rem; }
 .photo-diag-plant { margin: 1.6rem 0 0.6rem; background: #ffffff; border: 1px solid #e1ece1; border-radius: 14px; padding: 0.8rem 1rem; font-size: 0.95rem; box-shadow: 0 8px 18px rgba(15,92,47,0.07); }
 .photo-diag-image { margin: 0.8rem 0 0.6rem; background: #ffffff; border: 1px solid #e1ece1; border-radius: 14px; padding: 0.8rem; box-shadow: 0 8px 18px rgba(15,92,47,0.07); }
+.photo-diag-image-label { font-size: 0.72rem; color: #6f8378; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.45rem; }
 .photo-diag-image img { width: 100%; max-height: 360px; object-fit: contain; border-radius: 10px; border: 1px solid #d9eadc; background: #f8fbf8; display: block; }
 .photo-diag-card { background: #fff; border: 1px solid #e1ece1; border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 10px 22px rgba(15,92,47,0.08); }
 .photo-diag-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
@@ -96,4 +105,48 @@
 .photo-diag-raw { margin-top: 2.2rem; background: #f6fbf7; border: 1px dashed #cfe0d2; border-radius: 16px; padding: 1.4rem; }
 .photo-diag-raw pre { white-space: pre-wrap; margin: 0; font-size: 0.8rem; }
 </style>
+<script>
+(function () {
+    function initPhotoPreview() {
+        const input = document.getElementById('photo');
+        const preview = document.getElementById('photoPreview');
+        const wrapper = document.getElementById('photoPreviewWrapper');
+
+        if (!input || !preview || !wrapper || input.dataset.previewBound === '1') {
+            return;
+        }
+
+        input.dataset.previewBound = '1';
+
+        const showPreview = (file) => {
+            if (!file || !file.type || !file.type.startsWith('image/')) {
+                preview.removeAttribute('src');
+                wrapper.classList.remove('is-visible');
+                wrapper.setAttribute('aria-hidden', 'true');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                preview.src = String(reader.result || '');
+                wrapper.classList.add('is-visible');
+                wrapper.setAttribute('aria-hidden', 'false');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0] ? input.files[0] : null;
+            showPreview(file);
+        });
+
+        if (input.files && input.files[0]) {
+            showPreview(input.files[0]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initPhotoPreview);
+    document.addEventListener('turbo:load', initPhotoPreview);
+})();
+</script>
 {% endblock %}

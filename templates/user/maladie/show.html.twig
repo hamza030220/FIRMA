@@ -112,37 +112,20 @@
     </div>
     {% endif %}
 
-    {# ===== CONDITIONS METEO ===== #}
+    {# ===== SEUILS METEO ===== #}
     <div class="show-section">
         <div class="show-section-head">
-            <span class="show-section-icon">🌦️</span>
-            <h2>Conditions météo</h2>
+            <span class="show-section-icon">🌡️</span>
+            <h2>Seuils météo</h2>
         </div>
         <div class="show-section-body">
-            <p>
-                Température min :
-                {% if maladie.tempMin is not null %}
-                    {{ maladie.tempMin }}°C
-                {% else %}
-                    Non renseignée
-                {% endif %}
-            </p>
-            <p>
-                Température max :
-                {% if maladie.tempMax is not null %}
-                    {{ maladie.tempMax }}°C
-                {% else %}
-                    Non renseignée
-                {% endif %}
-            </p>
-            <p>
-                Humidité min :
-                {% if maladie.humiditeMin is not null %}
-                    {{ maladie.humiditeMin }}%
-                {% else %}
-                    Non renseignée
-                {% endif %}
-            </p>
+            {% if maladie.tempMin is not null or maladie.tempMax is not null or maladie.humiditeMin is not null %}
+                <p>Température min : {{ maladie.tempMin is not null ? maladie.tempMin ~ ' °C' : 'Non renseignée' }}</p>
+                <p>Température max : {{ maladie.tempMax is not null ? maladie.tempMax ~ ' °C' : 'Non renseignée' }}</p>
+                <p>Humidité min : {{ maladie.humiditeMin is not null ? maladie.humiditeMin ~ ' %' : 'Non renseignée' }}</p>
+            {% else %}
+                <p>Non renseignés.</p>
+            {% endif %}
         </div>
     </div>
 
@@ -154,17 +137,6 @@
         </div>
         <div class="show-section-body">
             <p>Créée le : {{ maladie.createdAt|date('d/m/Y à H:i') }}</p>
-            {% if maladie.updatedAt %}
-                <p>Modifiée le : {{ maladie.updatedAt|date('d/m/Y à H:i') }}</p>
-            {% endif %}
-            <p>
-                Créée par :
-                {% if maladie.createdBy is not null %}
-                    {{ maladie.createdBy }}
-                {% else %}
-                    Non renseigné
-                {% endif %}
-            </p>
         </div>
     </div>
 

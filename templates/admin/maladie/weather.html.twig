@@ -5,7 +5,9 @@
 
 {% block admin_content %}
     {% include 'partials/maladie_weather_panel.html.twig' with {
-        back_url: path('admin_maladie_index')
+        back_url: path('admin_maladie_index'),
+        weather_data_url: path('admin_maladie_weather_data'),
+        show_mail_status: false
     } %}
 {% endblock %}
 
