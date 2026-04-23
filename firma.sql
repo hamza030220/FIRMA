@@ -213,16 +213,17 @@ CREATE TABLE `commentaire` (
   `post_id` int(11) NOT NULL,
   `utilisateur_id` int(11) NOT NULL,
   `contenu` text NOT NULL,
-  `date_creation` timestamp NOT NULL DEFAULT current_timestamp()
+  `date_creation` timestamp NOT NULL DEFAULT current_timestamp(),
+  `image_path` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `commentaire`
 --
 
-INSERT INTO `commentaire` (`id`, `post_id`, `utilisateur_id`, `contenu`, `date_creation`) VALUES
-(1, 1, 11, 'oui c\'est vrai', '2026-03-03 15:51:54'),
-(2, 1, 4, 'hello  i am ramez', '2026-03-03 15:55:26');
+INSERT INTO `commentaire` (`id`, `post_id`, `utilisateur_id`, `contenu`, `date_creation`, `image_path`) VALUES
+(1, 1, 11, 'oui c\'est vrai', '2026-03-03 15:51:54', NULL),
+(2, 1, 4, 'hello  i am ramez', '2026-03-03 15:55:26', NULL);
 
 -- --------------------------------------------------------
 

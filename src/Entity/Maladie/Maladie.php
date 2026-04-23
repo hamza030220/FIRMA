@@ -45,6 +45,16 @@ class Maladie
     #[ORM\Column(name: "saison_frequente", length: 100, nullable: true)]
     private ?string $saisonFrequente = null;
 
+    // Seuils meteo stockes en base pour le diagnostic.
+    #[ORM\Column(name: "temp_min", type: 'float', nullable: true)]
+    private ?float $tempMin = null;
+
+    #[ORM\Column(name: "temp_max", type: 'float', nullable: true)]
+    private ?float $tempMax = null;
+
+    #[ORM\Column(name: "humidite_min", type: 'integer', nullable: true)]
+    private ?int $humiditeMin = null;
+
     #[ORM\Column(name: "created_by", nullable: true)]
     private ?int $createdBy = null;
 
@@ -91,6 +101,12 @@ class Maladie
     public function setNiveauGravite(?string $niveauGravite): self { $this->niveauGravite = $niveauGravite; return $this; }
     public function getSaisonFrequente(): ?string { return $this->saisonFrequente; }
     public function setSaisonFrequente(?string $saisonFrequente): self { $this->saisonFrequente = $saisonFrequente; return $this; }
+    public function getTempMin(): ?float { return $this->tempMin; }
+    public function setTempMin(?float $tempMin): self { $this->tempMin = $tempMin; return $this; }
+    public function getTempMax(): ?float { return $this->tempMax; }
+    public function setTempMax(?float $tempMax): self { $this->tempMax = $tempMax; return $this; }
+    public function getHumiditeMin(): ?int { return $this->humiditeMin; }
+    public function setHumiditeMin(?int $humiditeMin): self { $this->humiditeMin = $humiditeMin; return $this; }
     public function getCreatedBy(): ?int { return $this->createdBy; }
     public function setCreatedBy(?int $createdBy): self { $this->createdBy = $createdBy; return $this; }
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }

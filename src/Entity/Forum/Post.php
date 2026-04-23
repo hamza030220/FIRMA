@@ -14,6 +14,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'post')]
 class Post
 {
+    public const REACTION_LABELS = [
+        'like' => ['label' => 'Like', 'emoji' => '👍'],
+        'dislike' => ['label' => 'Dislike', 'emoji' => '👎'],
+        'solidaire' => ['label' => 'Solidaire', 'emoji' => '🤝'],
+        'encolere' => ['label' => 'En colère', 'emoji' => '😠'],
+        'triste' => ['label' => 'Triste', 'emoji' => '😢'],
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -42,6 +50,9 @@ class Post
     #[ORM\Column(length: 50)]
     private ?string $statut = 'actif';
 
+    #[ORM\Column(name: 'is_pinned', options: ['default' => false])]
+    private bool $isPinned = false;
+
     /**
      * @var Collection<int, Commentaire>
      */
@@ -49,9 +60,16 @@ class Post
     #[ORM\OrderBy(['dateCreation' => 'DESC'])]
     private Collection $commentaires;
 
+    /**
+     * @var Collection<int, ReactionPost>
+     */
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: ReactionPost::class, orphanRemoval: true)]
+    private Collection $reactions;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
+        $this->reactions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -131,11 +149,90 @@ class Post
         return $this;
     }
 
+    public function isPinned(): bool
+    {
+        return $this->isPinned;
+    }
+
+    public function setIsPinned(bool $isPinned): static
+    {
+        $this->isPinned = $isPinned;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Commentaire>
      */
     public function getCommentaires(): Collection
     {
         return $this->commentaires;
+    }
+
+    /**
+     * @return Collection<int, ReactionPost>
+     */
+    public function getReactions(): Collection
+    {
+        return $this->reactions;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function getReactionCounts(): array
+    {
+        $counts = array_fill_keys(array_keys(self::REACTION_LABELS), 0);
+
+        foreach ($this->reactions as $reaction) {
+            $type = $reaction->getType();
+            if (isset($counts[$type])) {
+                $counts[$type]++;
+            }
+        }
+
+        return $counts;
+    }
+
+    public function getReactionTotal(): int
+    {
+        return array_sum($this->getReactionCounts());
+    }
+
+    public function getUserReactionType(?Utilisateur $user): ?string
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        foreach ($this->reactions as $reaction) {
+            if ($reaction->getUtilisateur()?->getId() === $user->getId()) {
+                return $reaction->getType();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<array{type: string, label: string, emoji: string, count: int, active: bool}>
+     */
+    public function getReactionItems(?Utilisateur $user = null): array
+    {
+        $counts = $this->getReactionCounts();
+        $currentType = $this->getUserReactionType($user);
+        $items = [];
+
+        foreach (self::REACTION_LABELS as $type => $definition) {
+            $items[] = [
+                'type' => $type,
+                'label' => $definition['label'],
+                'emoji' => $definition['emoji'],
+                'count' => $counts[$type] ?? 0,
+                'active' => $currentType === $type,
+            ];
+        }
+
+        return $items;
     }
 }

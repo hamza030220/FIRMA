@@ -113,6 +113,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nouvelle maladie
     </a>
+    <a href="{{ path('admin_maladie_weather') }}" class="btn-new" style="background:#eaf3de;color:#245f2d;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3a7 7 0 0 0-7 7c0 2.5 1.2 4.3 2.9 5.6L7 20h10l-.9-4.4C17.8 14.3 19 12.5 19 10a7 7 0 0 0-7-7Z"/><path d="M9 21h6"/><path d="M10 17h4"/></svg>
+        Consulter la meteo
+    </a>
 </div>
 
 {% set maladie_success_flashes = app.flashes('success') %}
@@ -173,12 +177,6 @@
         <span id="count-info"></span>
         <span style="font-size:12px">FIRMA Admin · Module Maladies</span>
     </div>
-    {% include 'shared/_pagination.html.twig' with {
-        currentPage: currentPage,
-        totalPages: totalPages,
-        route: 'admin_maladie_index',
-        routeParams: {}
-    } %}
 </div>
 
 <script>
@@ -318,6 +316,13 @@ document.addEventListener('submit', (event) => {
     }
 }, true);
 </script>
+
+{% include 'shared/_pagination.html.twig' with {
+    currentPage: currentPage|default(1),
+    totalPages: totalPages|default(1),
+    route: 'admin_maladie_index',
+    routeParams: {}
+} %}
 
 {% endblock %}
 

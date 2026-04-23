@@ -4,6 +4,8 @@ namespace App\Entity\Forum;
 
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\CommentaireRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,6 +37,17 @@ class Commentaire
 
     #[ORM\Column(name: 'image_path', length: 255, nullable: true)]
     private ?string $imagePath = null;
+
+    /**
+     * @var Collection<int, ForumModerationAlert>
+     */
+    #[ORM\OneToMany(mappedBy: 'commentaire', targetEntity: ForumModerationAlert::class, orphanRemoval: true)]
+    private Collection $moderationAlerts;
+
+    public function __construct()
+    {
+        $this->moderationAlerts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -99,5 +112,13 @@ class Commentaire
         $this->imagePath = $imagePath;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ForumModerationAlert>
+     */
+    public function getModerationAlerts(): Collection
+    {
+        return $this->moderationAlerts;
     }
 }

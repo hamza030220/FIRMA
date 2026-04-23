@@ -240,6 +240,46 @@
                     {% endif %}
                 </div>
 
+                {# SEUILS METEO #}
+                <div class="form-group">
+                    <label class="form-label">Température min <span class="hint">optionnel</span></label>
+                    <input type="number" step="0.1" name="tempMin" class="form-input {% if errors.tempMin is defined %}is-error{% endif %}"
+                        value="{{ old.tempMinRaw|default('') }}"
+                        placeholder="Ex: 15.5">
+                    {% if errors.tempMin is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.tempMin }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Température max <span class="hint">optionnel</span></label>
+                    <input type="number" step="0.1" name="tempMax" class="form-input {% if errors.tempMax is defined %}is-error{% endif %}"
+                        value="{{ old.tempMaxRaw|default('') }}"
+                        placeholder="Ex: 28">
+                    {% if errors.tempMax is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.tempMax }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Humidité min (%) <span class="hint">optionnel</span></label>
+                    <input type="number" min="0" max="100" name="humiditeMin" class="form-input {% if errors.humiditeMin is defined %}is-error{% endif %}"
+                        value="{{ old.humiditeMinRaw|default('') }}"
+                        placeholder="Ex: 75">
+                    {% if errors.humiditeMin is defined %}
+                    <span class="error-msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {{ errors.humiditeMin }}
+                    </span>
+                    {% endif %}
+                </div>
+
                 {# IMAGE #}
                 <div class="form-group full">
                     <label class="form-label">Photo <span class="hint">JPG, PNG, WEBP · max 2MB</span></label>

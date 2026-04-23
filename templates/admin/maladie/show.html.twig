@@ -620,15 +620,21 @@
                 </div>
                 {% endif %}
                 <div class="adm-info-row">
+                    <div class="adm-info-label">Seuils météo</div>
+                    <div class="adm-info-val">
+                        {% if maladie.tempMin is not null or maladie.tempMax is not null or maladie.humiditeMin is not null %}
+                            <div>Température min : {{ maladie.tempMin is not null ? maladie.tempMin ~ ' °C' : 'Non renseignée' }}</div>
+                            <div>Température max : {{ maladie.tempMax is not null ? maladie.tempMax ~ ' °C' : 'Non renseignée' }}</div>
+                            <div>Humidité min : {{ maladie.humiditeMin is not null ? maladie.humiditeMin ~ ' %' : 'Non renseignée' }}</div>
+                        {% else %}
+                            Non renseignés
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="adm-info-row">
                     <div class="adm-info-label">Créée le</div>
                     <div class="adm-info-val">{{ maladie.createdAt|date('d/m/Y à H:i') }}</div>
                 </div>
-                {% if maladie.updatedAt %}
-                <div class="adm-info-row">
-                    <div class="adm-info-label">Modifiée le</div>
-                    <div class="adm-info-val">{{ maladie.updatedAt|date('d/m/Y à H:i') }}</div>
-                </div>
-                {% endif %}
                 <div class="adm-info-row">
                     <div class="adm-info-label">Description</div>
                     <div class="adm-info-val">{{ maladie.description|nl2br|default('Non renseignée') }}</div>
@@ -678,6 +684,7 @@
                     {% else %}
                         {% for t in traitements %}
                         {% set rate = t.usageCount > 0 ? (t.feedbackPositive * 100 / t.usageCount)|round : 0 %}
+                        {% set effScore = (t.feedbackPositive * 3) + t.usageCount - (t.feedbackNegative * 2) %}
                         <div class="adm-traitement"
                              data-titre="{{ t.titre|e('html_attr') }}"
                              data-solution="{{ t.solution|e('html_attr') }}"
@@ -762,6 +769,10 @@
                                     <div class="adm-trt-stat">
                                         <span class="adm-trt-stat-num {% if rate >= 70 %}green{% elseif rate >= 40 %}blue{% else %}red{% endif %}">{{ rate }}%</span>
                                         <span class="adm-trt-stat-lbl">Taux succès</span>
+                                    </div>
+                                    <div class="adm-trt-stat">
+                                        <span class="adm-trt-stat-num blue">{{ effScore }}</span>
+                                        <span class="adm-trt-stat-lbl">Score efficacité</span>
                                     </div>
                                 </div>
 

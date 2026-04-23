@@ -1,0 +1,191 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Detail Post Forum{% endblock %}
+{% block admin_page_title %}Detail Post Forum{% endblock %}
+
+{% block admin_content %}
+<section class="forum-admin-shell">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label == 'error' ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="{{ path('admin_forum') }}" class="forum-back-link">Retour a la moderation forum</a>
+
+    <article class="forum-panel forum-detail">
+        <div class="forum-detail-header">
+            <div class="forum-card-meta">
+                <span>{{ post.categorie ?: 'Sans categorie' }}{% if post.isPinned %} <span class="forum-post-badge">Epingle</span>{% endif %}</span>
+                <span>{{ post.dateCreation|date('d/m/Y H:i', 'Africa/Lagos') }}</span>
+            </div>
+            <div class="forum-detail-stats">
+                <span>{{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}</span>
+                <span>Auteur : {{ post.utilisateur.fullName }}</span>
+            </div>
+        </div>
+
+        <h1>{{ post.titre }}</h1>
+        <div class="forum-detail-content">{{ post.contenu|nl2br }}</div>
+        <div class="forum-actions" style="margin-top:1rem;">
+            <form method="post" action="{{ path('admin_forum_post_toggle_pin', {id: post.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('toggle_pin_post_' ~ post.id) }}">
+                <input type="hidden" name="return_to" value="{{ path('admin_forum_post_show', {id: post.id}) }}">
+                <button
+                    type="submit"
+                    class="forum-button{% if post.isPinned %} forum-button-secondary{% endif %}"
+                >
+                    {{ post.isPinned ? 'Desepingler le post' : 'Epingler le post' }}
+                </button>
+            </form>
+        </div>
+        {% include 'shared/forum/_reaction_bar.html.twig' with {
+            post: post,
+            reactionUser: app.user,
+            reactionCompact: false,
+            reactionEditable: false
+        } only %}
+    </article>
+
+    <section class="forum-panel" id="post-comments">
+        <div class="forum-toolbar">
+            <h2>Commentaires lies au post</h2>
+            <span>{{ post.commentaires|length }} au total</span>
+        </div>
+
+        <div class="forum-comments">
+            {% for commentaire in post.commentaires %}
+                {% set commentAlerts = alerts_by_comment[commentaire.id] ?? [] %}
+                <article class="forum-comment">
+                    <div class="forum-card-footer">
+                        <strong>{{ commentaire.utilisateur.fullName }}</strong>
+                        <span>{{ commentaire.dateCreation|date('d/m/Y H:i', 'Africa/Lagos') }}</span>
+                    </div>
+
+                    <p>{{ commentaire.contenu|nl2br }}</p>
+
+                    {% if commentAlerts is not empty %}
+                        <div class="forum-flash forum-flash-error" style="margin-top:0.75rem;">
+                            Signalement(s): {{ commentAlerts|length }} mot(s) interdit(s) detecte(s).
+                            <br>
+                            <small>Mot(s): {{ commentAlerts|first.matchedWords|join(', ') }}</small>
+                        </div>
+                        <details class="forum-comment-details" style="margin-top:0.75rem;">
+                            <summary>Voir le texte original</summary>
+                            <p style="margin-top:0.5rem;">{{ commentAlerts|first.originalContent|nl2br }}</p>
+                        </details>
+                    {% endif %}
+
+                    {% if commentaire.imagePath %}
+                        <img src="{{ asset(commentaire.imagePath) }}" alt="Image jointe au commentaire" class="forum-comment-image">
+                    {% endif %}
+
+                    <div class="forum-actions">
+                        <form
+                            id="admin-forum-post-show-comment-delete-{{ commentaire.id }}"
+                            method="post"
+                            action="{{ path('admin_forum_comment_delete', {id: commentaire.id}) }}"
+                            data-forum-confirm="true"
+                            data-forum-confirm-title="Supprimer ce commentaire"
+                            data-forum-confirm-message="Voulez-vous vraiment supprimer ce commentaire ? Cette action est irreversible."
+                            data-forum-confirm-submit="Supprimer"
+                            data-forum-confirm-variant="danger"
+                            data-forum-success-toast-message="Le commentaire a ete supprime avec succes."
+                            data-forum-success-toast-type="success"
+                            data-forum-success-toast-duration="10000"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ commentaire.id) }}">
+                            <input type="hidden" name="redirect_to_post" value="1">
+                            <button type="submit" class="forum-icon-action forum-icon-action-danger forum-icon-action-only" title="Supprimer le commentaire" aria-label="Supprimer le commentaire">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 6h18"/>
+                                    <path d="M8 6V4h8v2"/>
+                                    <path d="M19 6l-1 14H6L5 6"/>
+                                    <path d="M10 11v6"/>
+                                    <path d="M14 11v6"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <div class="forum-empty">
+                    <h3>Aucun commentaire</h3>
+                    <p>Ce post n'a pas encore recu de commentaire.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const actionToast = sessionStorage.getItem('forumActionToast');
+            if (actionToast) {
+                try {
+                    const data = JSON.parse(actionToast);
+                    if (typeof window.firmaToast === 'function') {
+                        window.firmaToast(data.message || 'Action réalisée avec succès.', data.type || 'success', Number.isFinite(data.duration) ? data.duration : 10000);
+                    }
+                } catch (e) {
+                    if (typeof window.firmaToast === 'function') {
+                        window.firmaToast('Action réalisée avec succès.', 'success', 10000);
+                    }
+                }
+                sessionStorage.removeItem('forumActionToast');
+            }
+
+            document.querySelectorAll('form[data-forum-confirm="true"]').forEach((confirmForm) => {
+                if (!(confirmForm instanceof HTMLFormElement) || confirmForm.dataset.forumConfirmBound === 'true') {
+                    return;
+                }
+
+                confirmForm.dataset.forumConfirmBound = 'true';
+                if (!confirmForm.id) {
+                    confirmForm.id = `admin-forum-show-confirm-${Math.random().toString(36).slice(2, 10)}`;
+                }
+
+                confirmForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const title = confirmForm.getAttribute('data-forum-confirm-title') || 'Confirmation';
+                    const message = confirmForm.getAttribute('data-forum-confirm-message') || 'Voulez-vous confirmer cette action ?';
+                    const submitLabel = confirmForm.getAttribute('data-forum-confirm-submit') || 'Confirmer';
+                    const submitVariant = confirmForm.getAttribute('data-forum-confirm-variant') || 'danger';
+
+                    if (typeof window.firmaConfirm === 'function') {
+                        window.firmaConfirm(title, message, submitLabel, submitVariant).then((ok) => {
+                            if (!ok) {
+                                return;
+                            }
+
+                            const toastMessage = confirmForm.getAttribute('data-forum-success-toast-message');
+                            const toastType = confirmForm.getAttribute('data-forum-success-toast-type') || 'success';
+                            const toastDuration = Number.parseInt(confirmForm.getAttribute('data-forum-success-toast-duration') || '10000', 10);
+                            if (toastMessage) {
+                                sessionStorage.setItem('forumActionToast', JSON.stringify({
+                                    message: toastMessage,
+                                    type: toastType,
+                                    duration: Number.isFinite(toastDuration) ? toastDuration : 10000
+                                }));
+                            }
+
+                            if (typeof window.firmaToast === 'function') {
+                                window.firmaToast('Action confirmee. Traitement en cours...', 'info', 10000);
+                            }
+
+                            confirmForm.submit();
+                        });
+                        return;
+                    }
+
+                    confirmForm.submit();
+                });
+            });
+        });
+    </script>
+{% endblock %}

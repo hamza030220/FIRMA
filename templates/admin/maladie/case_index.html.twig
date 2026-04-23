@@ -1,0 +1,114 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Suivi maladies{% endblock %}
+{% block admin_page_title %}Suivi maladies{% endblock %}
+
+{% block admin_content %}
+<style>
+.case-shell{display:flex;flex-direction:column;gap:1.2rem}
+.case-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.case-header h2{margin:0;font-size:20px;font-weight:600;color:var(--color-text-primary)}
+.case-header p{margin:0.25rem 0 0;color:var(--color-text-secondary);font-size:13px}
+.case-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.case-stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.9rem 1rem}
+.case-stat-label{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.08em}
+.case-stat-value{font-size:20px;font-weight:600;color:var(--color-text-primary);margin-top:0.3rem}
+.case-table{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.case-table table{width:100%;border-collapse:collapse;font-size:14px}
+.case-table thead{background:var(--color-background-secondary)}
+.case-table th{padding:12px 16px;text-align:left;font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;border-bottom:0.5px solid var(--color-border-tertiary)}
+.case-table td{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.case-table tbody tr:hover{background:var(--color-background-secondary)}
+.case-badge{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:600}
+.case-badge.public{background:#e6f1fb;color:#0c447c}
+.case-badge.private{background:#fcebeb;color:#791f1f}
+.case-actions a{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;text-decoration:none;color:#0f5c2f}
+.case-actions a:hover{text-decoration:underline}
+.case-muted{color:var(--color-text-secondary);font-size:12px}
+@media (max-width: 980px){
+  .case-stats{grid-template-columns:repeat(2,1fr)}
+  .case-table table{font-size:13px}
+}
+@media (max-width: 680px){
+  .case-stats{grid-template-columns:1fr}
+  .case-table th:nth-child(4),.case-table td:nth-child(4),
+  .case-table th:nth-child(6),.case-table td:nth-child(6){display:none}
+}
+</style>
+
+<div class="case-shell">
+    <div class="case-header">
+        <div>
+            <h2>Suivi des maladies</h2>
+            <p>Consultez les cas publics et les photos envoyees par les utilisateurs.</p>
+        </div>
+    </div>
+
+    <div class="case-stats">
+        <div class="case-stat">
+            <div class="case-stat-label">Total cas</div>
+            <div class="case-stat-value">{{ totalCases }}</div>
+        </div>
+        <div class="case-stat">
+            <div class="case-stat-label">Cas publics</div>
+            <div class="case-stat-value">{{ publicCases }}</div>
+        </div>
+        <div class="case-stat">
+            <div class="case-stat-label">Mises a jour</div>
+            <div class="case-stat-value">{{ updateCount }}</div>
+        </div>
+        <div class="case-stat">
+            <div class="case-stat-label">Photos</div>
+            <div class="case-stat-value">{{ photoCount }}</div>
+        </div>
+    </div>
+
+    <div class="case-table">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:70px">ID</th>
+                    <th>Maladie</th>
+                    <th>Utilisateur</th>
+                    <th>Statut</th>
+                    <th>Visibilite</th>
+                    <th style="text-align:center">Suivis</th>
+                    <th style="text-align:center">Photos</th>
+                    <th>Creation</th>
+                    <th style="width:90px">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if caseRows is empty %}
+                    <tr>
+                        <td colspan="9" class="case-muted">Aucun cas enregistre.</td>
+                    </tr>
+                {% else %}
+                    {% for row in caseRows %}
+                        {% set c = row.case %}
+                        <tr>
+                            <td>#{{ c.id }}</td>
+                            <td>{{ c.maladie.nom }}</td>
+                            <td>{{ c.utilisateur.fullName|default(c.utilisateur.email|default('Utilisateur')) }}</td>
+                            <td>{{ c.statut|capitalize }}</td>
+                            <td>
+                                {% if c.isPublic %}
+                                    <span class="case-badge public">Public</span>
+                                {% else %}
+                                    <span class="case-badge private">Prive</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:center">{{ row.updateCount }}</td>
+                            <td style="text-align:center">{{ row.photoCount }}</td>
+                            <td>{{ c.createdAt ? c.createdAt|date('d/m/Y') : '—' }}</td>
+                            <td class="case-actions">
+                                <a href="{{ path('admin_maladie_case_show', {id: c.id}) }}">Voir</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

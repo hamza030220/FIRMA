@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User\Utilisateur;
 use App\Form\User\InscriptionType;
 use App\Repository\User\UtilisateurRepository;
-use App\Repository\Event\AccompagnantRepository;
 use App\Service\Event\ParticipationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +17,6 @@ class SecurityController extends AbstractController
 {
     public function __construct(
         private readonly ParticipationService $participationService,
-        private readonly AccompagnantRepository $accompagnantRepo,
     ) {}
 
     #[Route('/login', name: 'app_login')]
@@ -133,45 +131,6 @@ class SecurityController extends AbstractController
         return $this->render('security/confirmation.html.twig', [
             'status'    => 'success',
             'eventName' => $eventName,
-        ]);
-    }
-
-    #[Route('/ticket/{code}', name: 'public_ticket', requirements: ['code' => '[A-Z0-9\-]+'], methods: ['GET'])]
-    public function viewTicket(string $code): Response
-    {
-        // Try participation code first
-        $participation = $this->participationService->getByCode($code);
-        if ($participation && $participation->getStatut() === 'confirme') {
-            return $this->render('security/ticket.html.twig', [
-                'type'          => 'participant',
-                'participation' => $participation,
-                'user'          => $participation->getUtilisateur(),
-                'evenement'     => $participation->getEvenement(),
-                'accompagnant'  => null,
-            ]);
-        }
-
-        // Try accompagnant code
-        $accompagnant = $this->accompagnantRepo->findOneBy(['codeAccompagnant' => $code]);
-        if ($accompagnant) {
-            $part = $accompagnant->getParticipation();
-            if ($part && $part->getStatut() === 'confirme') {
-                return $this->render('security/ticket.html.twig', [
-                    'type'          => 'accompagnant',
-                    'participation' => $part,
-                    'user'          => null,
-                    'evenement'     => $part->getEvenement(),
-                    'accompagnant'  => $accompagnant,
-                ]);
-            }
-        }
-
-        return $this->render('security/ticket.html.twig', [
-            'type'          => 'invalid',
-            'participation' => null,
-            'user'          => null,
-            'evenement'     => null,
-            'accompagnant'  => null,
         ]);
     }
 }

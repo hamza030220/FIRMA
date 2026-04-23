@@ -11,6 +11,21 @@
         <div class="mal-hero-badge">Bibliothèque phytosanitaire</div>
         <h1 class="mal-hero-title">Maladies des plantes</h1>
         <p class="mal-hero-sub">Identifiez, comprenez et traitez les maladies qui menacent vos cultures.</p>
+        <div class="mal-hero-actions">
+            <a href="{{ path('user_maladie_diagnostic') }}" class="mal-hero-btn secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                Lancer un diagnostic
+            </a>
+            <a href="{{ path('user_maladie_case_index') }}" class="mal-hero-btn secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18"/><path d="M3 12h18"/><path d="M3 17h18"/><path d="M7 7v10"/></svg>
+                Carnet maladies
+            </a>
+            <a href="{{ path('user_maladie_weather') }}" class="mal-hero-btn primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19a4 4 0 1 1 .88-7.903A5 5 0 0 1 21 12a4 4 0 0 1-1 7.874"/><path d="M8 19l2-3h2l-2 3h2l-3 4 1-3z"/></svg>
+                Consulter la meteo
+            </a>
+            <a href="#maladie-liste" class="mal-hero-btn secondary">Voir la liste</a>
+        </div>
 
         {# Stats rapides #}
         <div class="mal-hero-stats">
@@ -35,8 +50,9 @@
         </div>
     </div>
 
+
     {# ===== BARRE RECHERCHE + FILTRES ===== #}
-    <form method="get" action="{{ path('user_maladie') }}" class="mal-search-form" data-auto-search="true">
+    <form method="get" action="{{ path(listRoute|default('user_maladie')) }}" class="mal-search-form" data-auto-search data-auto-search-min="2">
         <div class="mal-search-wrap">
             <div class="mal-search-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -48,11 +64,9 @@
                 placeholder="Rechercher une maladie, symptôme, description…"
                 class="mal-search-input"
                 autocomplete="off"
-                minlength="3"
-                data-auto-search-input="true"
             >
             {% if keyword or gravite %}
-            <a href="{{ path('user_maladie') }}" class="mal-clear-btn" title="Réinitialiser">
+            <a href="{{ path(listRoute|default('user_maladie')) }}" class="mal-clear-btn" title="Réinitialiser">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </a>
             {% endif %}
@@ -89,9 +103,10 @@
         {% endif %}
     </div>
 
+
     {# ===== GRILLE DES MALADIES ===== #}
     {% if maladies is not empty %}
-    <div class="mal-grid">
+    <div class="mal-grid" id="maladie-liste">
         {% for maladie in maladies %}
         <a href="{{ path('user_maladie_show', {'id': maladie.id}) }}" class="mal-card">
 
@@ -164,9 +179,16 @@
         </div>
         <h3>Aucun résultat</h3>
         <p>Aucune maladie ne correspond à votre recherche{% if keyword %} "<strong>{{ keyword }}</strong>"{% endif %}.</p>
-        <a href="{{ path('user_maladie') }}" class="mal-btn-reset">Voir toutes les maladies</a>
+        <a href="{{ path(listRoute|default('user_maladie')) }}" class="mal-btn-reset">Voir toutes les maladies</a>
     </div>
     {% endif %}
+
+    {% include 'shared/_pagination.html.twig' with {
+        currentPage: currentPage|default(1),
+        totalPages: totalPages|default(1),
+        route: listRoute|default('user_maladie'),
+        routeParams: paginationRouteParams|default({})
+    } %}
 
 </div>
 
@@ -221,6 +243,37 @@
     margin: 0 auto 2rem;
     line-height: 1.6;
 }
+.mal-hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.8rem;
+}
+.mal-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.72rem 1.2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 700;
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+}
+.mal-hero-btn.primary {
+    background: #0f5c2f;
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(15,92,47,0.16);
+}
+.mal-hero-btn.secondary {
+    background: #eff7f1;
+    color: #0f5c2f;
+    border: 1px solid rgba(15,92,47,0.12);
+}
+.mal-hero-btn:hover {
+    transform: translateY(-1px);
+}
 .mal-hero-stats {
     display: inline-flex;
     align-items: center;
@@ -231,6 +284,8 @@
     padding: 0.8rem 1.5rem;
     box-shadow: 0 2px 12px rgba(15,92,47,0.06);
 }
+
+
 .mal-stat {
     display: flex;
     flex-direction: column;
@@ -525,12 +580,11 @@
 }
 </style>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.mal-search-form');
     if (!form) return;
-    const searchInput = form.querySelector('input[name="q"]');
-    let autoSearchTimer = null;
 
     form.querySelectorAll('select[name="gravite"], select[name="tri"]').forEach((select) => {
         select.addEventListener('change', () => {
@@ -541,26 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    if (searchInput instanceof HTMLInputElement && form.dataset.autoSearchBound !== 'true') {
-        searchInput.addEventListener('input', () => {
-            const value = (searchInput.value || '').trim();
-
-            if (autoSearchTimer) {
-                window.clearTimeout(autoSearchTimer);
-            }
-
-            autoSearchTimer = window.setTimeout(() => {
-                if (value.length >= 3 || value.length === 0) {
-                    if (typeof form.requestSubmit === 'function') {
-                        form.requestSubmit();
-                    } else {
-                        form.submit();
-                    }
-                }
-            }, 280);
-        });
-    }
 });
 </script>
 

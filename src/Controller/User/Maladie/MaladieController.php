@@ -29,9 +29,14 @@ class MaladieController extends AbstractController
         $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
 
         return $this->render('user/maladie/index.html.twig', [
-            'maladies'    => $maladies,
+            'maladies' => $maladies,
+            'keyword' => '',
+            'tri' => 'nom',
+            'gravite' => '',
             'currentPage' => $page,
-            'totalPages'  => $totalPages,
+            'totalPages' => $totalPages,
+            'listRoute' => 'user_maladie_index',
+            'paginationRouteParams' => [],
         ]);
     }
 
@@ -41,7 +46,7 @@ class MaladieController extends AbstractController
         $maladie = $maladieRepository->find($id);
 
         if (!$maladie) {
-            throw $this->createNotFoundException('Maladie non trouv�e.');
+            throw $this->createNotFoundException('Maladie non trouvee.');
         }
 
         return $this->render('user/maladie/show.html.twig', [
@@ -59,7 +64,7 @@ class MaladieController extends AbstractController
         $solution = $solutionRepo->find($id);
 
         if (!$solution) {
-            throw $this->createNotFoundException('Solution non trouv�e.');
+            throw $this->createNotFoundException('Solution non trouvee.');
         }
 
         if ($type === 'positif') {
@@ -89,12 +94,14 @@ class MaladieController extends AbstractController
         $maladie = $maladieRepository->find($id);
 
         if (!$maladie) {
-            throw $this->createNotFoundException('Maladie non trouv�e.');
+            throw $this->createNotFoundException('Maladie non trouvee.');
         }
 
-        // Helper: encoder proprement pour �viter l'erreur iconv/dompdf
+        // Helper: encode safely to avoid iconv/dompdf errors.
         $e = function (?string $str): string {
-            if ($str === null) return '';
+            if ($str === null) {
+                return '';
+            }
 
             $str = mb_convert_encoding($str, 'UTF-8', 'UTF-8');
             $str = iconv('UTF-8', 'UTF-8//IGNORE', $str);
@@ -182,7 +189,7 @@ class MaladieController extends AbstractController
     <table style="width:100%;border-collapse:collapse;">
         <tr>
             <td>
-                <div class="header-brand">FIRMA � Plateforme Agricole</div>
+                <div class="header-brand">FIRMA - Plateforme Agricole</div>
                 <div class="header-title">' . $e($maladie->getNom()) . '</div>
                 ' . ($maladie->getNomScientifique() ? '<div class="header-sci">' . $e($maladie->getNomScientifique()) . '</div>' : '') . '
                 <div class="header-badge">Fiche maladie complete</div>
@@ -243,7 +250,6 @@ class MaladieController extends AbstractController
             $html .= '<div class="section-content">Aucun traitement disponible pour le moment.</div>';
         } else {
             foreach ($maladie->getSolutionTraitements() as $s) {
-
                 $rate = $s->getUsageCount() > 0
                     ? round($s->getFeedbackPositive() * 100 / $s->getUsageCount())
                     : 0;
@@ -289,7 +295,7 @@ class MaladieController extends AbstractController
 
         $html .= '
     <div class="footer">
-        FIRMA � Plateforme Agricole | Fiche generee le ' . $date . ' | ' . $e($maladie->getNom()) . '
+        FIRMA - Plateforme Agricole | Fiche generee le ' . $date . ' | ' . $e($maladie->getNom()) . '
     </div>
 
 </div>

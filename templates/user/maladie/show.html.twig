@@ -112,6 +112,34 @@
     </div>
     {% endif %}
 
+    {# ===== SEUILS METEO ===== #}
+    <div class="show-section">
+        <div class="show-section-head">
+            <span class="show-section-icon">🌡️</span>
+            <h2>Seuils météo</h2>
+        </div>
+        <div class="show-section-body">
+            {% if maladie.tempMin is not null or maladie.tempMax is not null or maladie.humiditeMin is not null %}
+                <p>Température min : {{ maladie.tempMin is not null ? maladie.tempMin ~ ' °C' : 'Non renseignée' }}</p>
+                <p>Température max : {{ maladie.tempMax is not null ? maladie.tempMax ~ ' °C' : 'Non renseignée' }}</p>
+                <p>Humidité min : {{ maladie.humiditeMin is not null ? maladie.humiditeMin ~ ' %' : 'Non renseignée' }}</p>
+            {% else %}
+                <p>Non renseignés.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ===== INFORMATIONS ===== #}
+    <div class="show-section">
+        <div class="show-section-head">
+            <span class="show-section-icon">🧾</span>
+            <h2>Informations</h2>
+        </div>
+        <div class="show-section-body">
+            <p>Créée le : {{ maladie.createdAt|date('d/m/Y à H:i') }}</p>
+        </div>
+    </div>
+
     {# ===== TRAITEMENTS ===== #}
     <div class="show-section">
         <div class="show-section-head">

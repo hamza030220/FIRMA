@@ -1,0 +1,48 @@
+{% set reactionUser = reactionUser is defined ? reactionUser : null %}
+{% set reactionItems = post.getReactionItems(reactionUser) %}
+{% set reactionTotal = post.getReactionTotal() %}
+{% set reactionCompact = reactionCompact is defined ? reactionCompact : false %}
+{% set reactionEditable = reactionEditable is defined ? reactionEditable : true %}
+{% set reactionReturnTo = reactionReturnTo is defined ? reactionReturnTo : '' %}
+
+<div class="forum-reactions{% if reactionCompact %} forum-reactions-compact{% endif %}">
+    <div class="forum-reactions-head">
+        <strong>{{ reactionTotal }} {{ 'forum.common.reactions'|trans({}, 'forum') }}</strong>
+        <span>{{ 'forum.reaction.choose'|trans({}, 'forum') }}</span>
+    </div>
+
+    <div class="forum-reactions-list">
+        {% for item in reactionItems %}
+            {% if reactionEditable %}
+                <form method="post" action="{{ path('user_forum_reaction', {id: post.id}) }}" class="forum-reaction-form" data-forum-preserve-scroll="true">
+                    <input type="hidden" name="_token" value="{{ csrf_token('forum_reaction_' ~ post.id) }}">
+                    <input type="hidden" name="reaction" value="{{ item.type }}">
+                    {% if reactionReturnTo is not empty %}
+                        <input type="hidden" name="return_to" value="{{ reactionReturnTo }}">
+                    {% endif %}
+                    <button
+                        type="submit"
+                        class="forum-reaction-chip{% if item.active %} is-active{% endif %}"
+                        aria-pressed="{{ item.active ? 'true' : 'false' }}"
+                        aria-label="{{ item.label }}: {{ item.count }}"
+                        title="{{ item.label }}"
+                    >
+                        <span class="forum-reaction-emoji" aria-hidden="true">{{ item.emoji }}</span>
+                        {% if not reactionCompact %}
+                            <span class="forum-reaction-label">{{ item.label }}</span>
+                        {% endif %}
+                        <span class="forum-reaction-count">{{ item.count }}</span>
+                    </button>
+                </form>
+            {% else %}
+                <div class="forum-reaction-chip forum-reaction-chip-static{% if item.active %} is-active{% endif %}" aria-label="{{ item.label }}: {{ item.count }}">
+                    <span class="forum-reaction-emoji" aria-hidden="true">{{ item.emoji }}</span>
+                    {% if not reactionCompact %}
+                        <span class="forum-reaction-label">{{ item.label }}</span>
+                    {% endif %}
+                    <span class="forum-reaction-count">{{ item.count }}</span>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>

@@ -1,4 +1,4 @@
-{# ── Shared Pagination Component ──
+{# Shared Pagination Component
    Required variables:
      currentPage  : int (current page number, 1-based)
      totalPages   : int (total number of pages)
@@ -7,6 +7,9 @@
      pageParam    : string (default 'page', the query param name for page)
 #}
 {% set pageParam = pageParam|default('page') %}
+{% set currentPage = currentPage|default(1) %}
+{% set totalPages = totalPages|default(1) %}
+{% set routeParams = routeParams|default({}) %}
 {% if totalPages > 1 %}
 <style>
 .firma-pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin:1.5rem 0;flex-wrap:wrap}
@@ -18,11 +21,9 @@
 .firma-pagination__info{margin-left:12px;font-size:.8rem;color:#8a9a8e}
 @media(max-width:640px){.firma-pagination__info{display:none}}
 </style>
-{% if totalPages > 1 %}
 <nav class="firma-pagination" aria-label="Pagination">
-    {# Previous #}
     {% if currentPage > 1 %}
-        <a href="{{ path(route, routeParams|merge({(pageParam): currentPage - 1})) }}" class="firma-pagination__btn" aria-label="Page précédente">
+        <a href="{{ path(route, routeParams|merge({(pageParam): currentPage - 1})) }}" class="firma-pagination__btn" aria-label="Page precedente">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </a>
     {% else %}
@@ -31,14 +32,13 @@
         </span>
     {% endif %}
 
-    {# Page numbers #}
     {% set startPage = max(1, currentPage - 2) %}
     {% set endPage = min(totalPages, currentPage + 2) %}
 
     {% if startPage > 1 %}
         <a href="{{ path(route, routeParams|merge({(pageParam): 1})) }}" class="firma-pagination__num">1</a>
         {% if startPage > 2 %}
-            <span class="firma-pagination__dots">…</span>
+            <span class="firma-pagination__dots">...</span>
         {% endif %}
     {% endif %}
 
@@ -52,12 +52,11 @@
 
     {% if endPage < totalPages %}
         {% if endPage < totalPages - 1 %}
-            <span class="firma-pagination__dots">…</span>
+            <span class="firma-pagination__dots">...</span>
         {% endif %}
         <a href="{{ path(route, routeParams|merge({(pageParam): totalPages})) }}" class="firma-pagination__num">{{ totalPages }}</a>
     {% endif %}
 
-    {# Next #}
     {% if currentPage < totalPages %}
         <a href="{{ path(route, routeParams|merge({(pageParam): currentPage + 1})) }}" class="firma-pagination__btn" aria-label="Page suivante">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -70,5 +69,4 @@
 
     <span class="firma-pagination__info">Page {{ currentPage }} / {{ totalPages }}</span>
 </nav>
-{% endif %}
 {% endif %}
