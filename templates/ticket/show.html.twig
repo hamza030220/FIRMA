@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ticket {{ code }}{% endblock %}
+
+{% block body %}
+<style>
+    .tkt-wrap { max-width: 560px; margin: 40px auto; padding: 24px; font-family: system-ui, sans-serif; }
+    .tkt-card {
+        background: #fff; border: 2px solid #1a3a24; border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.08); overflow: hidden;
+    }
+    .tkt-head { background: #1a3a24; color: #fff; padding: 18px 22px; }
+    .tkt-head h1 { margin: 0 0 4px; font-size: 1.25rem; }
+    .tkt-head .sub { opacity: .85; font-size: .9rem; }
+    .tkt-body { padding: 22px; }
+    .tkt-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e0e0e0; }
+    .tkt-row:last-child { border-bottom: 0; }
+    .tkt-row .label { color: #666; font-size: .85rem; text-transform: uppercase; letter-spacing: .5px; }
+    .tkt-row .value { font-weight: 600; color: #1a3a24; }
+    .tkt-code {
+        margin-top: 18px; padding: 14px; background: #f5f9f2;
+        border: 1px dashed #1a3a24; border-radius: 10px; text-align: center;
+    }
+    .tkt-code .big { font-family: 'Courier New', monospace; font-size: 1.4rem; font-weight: 800; color: #1a3a24; letter-spacing: 2px; }
+    .tkt-badge { display: inline-block; background: #1a3a24; color: #fff; padding: 4px 12px; border-radius: 999px; font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .tkt-status { margin-top: 12px; text-align: center; }
+    .tkt-status .ok { color: #2e7d32; font-weight: 700; }
+    .tkt-status .ko { color: #c62828; font-weight: 700; }
+    .tkt-status .wait { color: #ef6c00; font-weight: 700; }
+</style>
+
+<div class="tkt-wrap">
+    <div class="tkt-card">
+        <div class="tkt-head">
+            <span class="tkt-badge">{{ ticketType }}</span>
+            <h1 style="margin-top:8px">{{ evenement.titre ?? 'Événement' }}</h1>
+            <div class="sub">FIRMA — Ticket officiel</div>
+        </div>
+        <div class="tkt-body">
+            <div class="tkt-row">
+                <span class="label">Titulaire</span>
+                <span class="value">{{ holderName }}</span>
+            </div>
+            {% if evenement.dateDebut %}
+            <div class="tkt-row">
+                <span class="label">Date</span>
+                <span class="value">{{ evenement.dateDebut|date('d/m/Y H:i') }}</span>
+            </div>
+            {% endif %}
+            {% if evenement.lieu %}
+            <div class="tkt-row">
+                <span class="label">Lieu</span>
+                <span class="value">{{ evenement.lieu }}</span>
+            </div>
+            {% endif %}
+            <div class="tkt-row">
+                <span class="label">Statut</span>
+                <span class="value">{{ participation.statut|capitalize }}</span>
+            </div>
+
+            <div class="tkt-code">
+                <div class="label" style="font-size:.75rem;color:#666;letter-spacing:1px">Code {{ ticketType }}</div>
+                <div class="big">{{ code }}</div>
+            </div>
+
+            <div class="tkt-status">
+                {% if participation.statut == 'confirme' %}
+                    <span class="ok">✓ Ticket valide</span>
+                {% elseif participation.statut == 'en_attente' %}
+                    <span class="wait">⏳ En attente de confirmation</span>
+                {% else %}
+                    <span class="ko">✗ {{ participation.statut|capitalize }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

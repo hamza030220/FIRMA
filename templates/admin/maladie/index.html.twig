@@ -1,0 +1,328 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Maladies des plantes{% endblock %}
+{% block admin_page_title %}Maladies des plantes{% endblock %}
+
+{% block admin_content %}
+
+<style>
+:root {
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #6b7280;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-border-secondary: #d1d5db;
+  --color-border-tertiary: #e5e7eb;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+*{box-sizing:border-box}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
+.top-left h2{font-size:20px;font-weight:500;color:var(--color-text-primary);margin:0}
+.top-left p{font-size:14px;color:var(--color-text-secondary);margin-top:4px}
+.btn-new{display:inline-flex;align-items:center;gap:7px;background:#2d7a3a;color:#fff;border:none;padding:10px 20px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none}
+.btn-new:hover{background:#245f2d;color:#fff;text-decoration:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.2rem;display:flex;align-items:center;gap:12px}
+.stat-icon{width:40px;height:40px;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:18px;height:18px}
+.si-green{background:#eaf3de;color:#3b6d11}
+.si-red{background:#fcebeb;color:#a32d2d}
+.si-amber{background:#faeeda;color:#854f0b}
+.si-blue{background:#e6f1fb;color:#185fa5}
+.stat-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.stat-lbl{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.flash-ok{display:flex;align-items:center;gap:10px;background:#eaf3de;border:0.5px solid #c0dd97;border-radius:var(--border-radius-md);padding:11px 14px;margin-bottom:1rem;font-size:14px;color:#27500a}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 12px}
+.search-wrap input{border:none;background:transparent;font-size:14px;color:var(--color-text-primary);outline:none;width:100%}
+.search-wrap svg{color:var(--color-text-secondary);flex-shrink:0}
+.filter-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);font-size:13px;color:var(--color-text-secondary);cursor:pointer;transition:all 0.15s}
+.filter-btn:hover,.filter-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.filter-btn.f-crit.active{background:#fcebeb;color:#791f1f;border-color:#f7c1c1}
+.filter-btn.f-elev.active{background:#faeeda;color:#633806;border-color:#fac775}
+.filter-btn.f-moy.active{background:#e6f1fb;color:#0c447c;border-color:#b5d4f4}
+.filter-btn.f-fai.active{background:#eaf3de;color:#27500a;border-color:#c0dd97}
+.filter-dot{width:7px;height:7px;border-radius:50%}
+.d-crit{background:#a32d2d}.d-elev{background:#854f0b}.d-moy{background:#185fa5}.d-fai{background:#3b6d11}
+.table-wrap{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl thead{background:var(--color-background-secondary)}
+.tbl thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap}
+.th-sort{cursor:pointer;display:inline-flex;align-items:center;gap:5px;user-select:none}
+.th-sort:hover{color:var(--color-text-primary)}
+.sort-icon{display:flex;flex-direction:column;gap:1px;opacity:0.4}
+.sort-icon.asc .si-up,.sort-icon.desc .si-dn{opacity:1;color:var(--color-text-primary)}
+.si-up,.si-dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent}
+.si-up{border-bottom:4px solid currentColor}
+.si-dn{border-top:4px solid currentColor}
+.tbl tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background 0.12s, box-shadow 0.18s, transform 0.18s}
+.tbl tbody tr:last-child{border-bottom:none}
+.tbl tbody tr:hover{background:var(--color-background-secondary);box-shadow:inset 0 0 0 1px rgba(15,92,47,0.10), 0 8px 22px rgba(15,92,47,0.08);transform:translateY(-1px)}
+.tbl td{padding:13px 16px;vertical-align:middle;color:var(--color-text-primary)}
+.cell-id{font-size:12px;color:var(--color-text-secondary);font-weight:500}
+.img-cell{width:42px;height:42px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.img-cell img{width:100%;height:100%;object-fit:cover}
+.mname{font-weight:500;font-size:14px;color:var(--color-text-primary)}
+.msci{font-size:12px;color:var(--color-text-secondary);font-style:italic;margin-top:2px}
+.mdesc{font-size:12px;color:var(--color-text-secondary);margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.bc{background:#fcebeb;color:#791f1f}
+.be{background:#faeeda;color:#633806}
+.bm{background:#e6f1fb;color:#0c447c}
+.bf{background:#eaf3de;color:#27500a}
+.bd{width:5px;height:5px;border-radius:50%;display:inline-block}
+.bc .bd{background:#a32d2d}.be .bd{background:#854f0b}.bm .bd{background:#185fa5}.bf .bd{background:#3b6d11}
+.saison-tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:3px 9px;border-radius:20px;border:0.5px solid var(--color-border-tertiary)}
+.treat-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.treat-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;background:#eaf3de;color:#27500a}
+.actions{display:flex;gap:5px;align-items:center;justify-content:center}
+.ab{width:30px;height:30px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);transition:all 0.15s;text-decoration:none}
+.ab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.ab.del:hover{background:#fcebeb;color:#a32d2d;border-color:#f7c1c1}
+.ab svg{width:14px;height:14px}
+.tfoot{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:0.5px solid var(--color-border-tertiary);font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary)}
+.no-results{text-align:center;padding:3rem;color:var(--color-text-secondary)}
+</style>
+
+{# Données JSON pour JS #}
+{% set maladiesJson = [] %}
+{% for m in maladies %}
+    {% set maladiesJson = maladiesJson|merge([{
+        id: m.id,
+        nom: m.nom,
+        sci: m.nomScientifique|default(''),
+        desc: m.description|default(''),
+        gravite: m.niveauGravite|default('faible'),
+        saison: m.saisonFrequente|default('—'),
+        traitements: m.solutionTraitements|length,
+        image: m.imageUrl ? asset('uploads/maladies/' ~ m.imageUrl) : '',
+        urlShow: path('admin_maladie_show', {id: m.id}),
+        urlEdit: path('admin_maladie_edit', {id: m.id}),
+        urlDelete: path('admin_maladie_delete', {id: m.id}),
+        token: csrf_token('delete' ~ m.id)
+    }]) %}
+{% endfor %}
+
+<div class="top">
+    <div class="top-left">
+        <h2>Maladies des plantes</h2>
+        <p>Gérez, filtrez et surveillez toutes les pathologies</p>
+    </div>
+    <a href="{{ path('admin_maladie_new') }}" class="btn-new">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle maladie
+    </a>
+    <a href="{{ path('admin_maladie_weather') }}" class="btn-new" style="background:#eaf3de;color:#245f2d;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3a7 7 0 0 0-7 7c0 2.5 1.2 4.3 2.9 5.6L7 20h10l-.9-4.4C17.8 14.3 19 12.5 19 10a7 7 0 0 0-7-7Z"/><path d="M9 21h6"/><path d="M10 17h4"/></svg>
+        Consulter la meteo
+    </a>
+</div>
+
+{% set maladie_success_flashes = app.flashes('success') %}
+{% for message in maladie_success_flashes %}
+<div class="flash-ok">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    {{ message }}
+</div>
+{% endfor %}
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-icon si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><div class="stat-val">{{ totalMaladies }}</div><div class="stat-lbl">Total maladies</div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-icon si-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div><div class="stat-val" style="color:#a32d2d">{{ maladies|filter(m => m.niveauGravite == 'critique')|length }}</div><div class="stat-lbl">Critiques</div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div><div class="stat-val" style="color:#854f0b">{{ maladies|filter(m => m.niveauGravite == 'eleve')|length }}</div><div class="stat-lbl">Élevées</div></div>
+    </div>
+    <div class="stat">
+        <div class="stat-icon si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div><div class="stat-val" style="color:#185fa5">{{ maladies|filter(m => m.niveauGravite == 'moyen')|length }}</div><div class="stat-lbl">Moyennes</div></div>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search" placeholder="Rechercher par nom, nom scientifique, saison...">
+    </div>
+    <button class="filter-btn active" onclick="setFilter(this,'tous')">Tous</button>
+    <button class="filter-btn f-crit" onclick="setFilter(this,'critique')"><span class="filter-dot d-crit"></span>Critique</button>
+    <button class="filter-btn f-elev" onclick="setFilter(this,'eleve')"><span class="filter-dot d-elev"></span>Élevé</button>
+    <button class="filter-btn f-moy" onclick="setFilter(this,'moyen')"><span class="filter-dot d-moy"></span>Moyen</button>
+    <button class="filter-btn f-fai" onclick="setFilter(this,'faible')"><span class="filter-dot d-fai"></span>Faible</button>
+</div>
+
+<div class="table-wrap">
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th style="width:44px"><span class="th-sort" onclick="sortBy('id')"># <span class="sort-icon" id="sort-id"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
+                <th style="width:54px">Photo</th>
+                <th><span class="th-sort" onclick="sortBy('nom')">Nom <span class="sort-icon" id="sort-nom"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
+                <th><span class="th-sort" onclick="sortBy('gravite')">Gravité <span class="sort-icon" id="sort-gravite"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
+                <th><span class="th-sort" onclick="sortBy('saison')">Saison <span class="sort-icon" id="sort-saison"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
+                <th style="text-align:center"><span class="th-sort" onclick="sortBy('traitements')">Traitements <span class="sort-icon" id="sort-traitements"><span class="si-up"></span><span class="si-dn"></span></span></span></th>
+                <th style="text-align:center">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+    <div class="tfoot">
+        <span id="count-info"></span>
+        <span style="font-size:12px">FIRMA Admin · Module Maladies</span>
+    </div>
+</div>
+
+<script>
+const DATA = {{ maladiesJson|json_encode|raw }};
+const graviteOrder = {critique:4,eleve:3,moyen:2,faible:1};
+const graviteLabel = {critique:'Critique',eleve:'Élevé',moyen:'Moyen',faible:'Faible'};
+const badgeClass = {critique:'bc',eleve:'be',moyen:'bm',faible:'bf'};
+let filterG='tous', sortCol='id', sortDir=1, searchVal='';
+
+function normalizeValue(value){
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function setFilter(btn,g){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    filterG=g; render();
+}
+
+function sortBy(col){
+    if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=1;}
+    document.querySelectorAll('.sort-icon').forEach(s=>s.className='sort-icon');
+    const el=document.getElementById('sort-'+col);
+    if(el) el.className='sort-icon '+(sortDir===1?'asc':'desc');
+    render();
+}
+
+document.getElementById('search').addEventListener('input',e=>{
+    searchVal=e.target.value.toLowerCase(); render();
+});
+
+function highlight(str){
+    if(!str) return '';
+    if(!searchVal) return str;
+    const re=new RegExp(`(${searchVal.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+    return str.replace(re,'<mark style="background:#faeeda;color:#633806;border-radius:2px;padding:0 2px">$1</mark>');
+}
+
+function render(){
+    let rows=DATA.filter(d=>{
+        if(filterG!=='tous'&&d.gravite!==filterG) return false;
+        if(searchVal&&![d.nom,d.sci,d.saison,d.desc].some(v=>(v||'').toLowerCase().includes(searchVal))) return false;
+        return true;
+    });
+    rows.sort((a,b)=>{
+        let va,vb;
+        if(sortCol==='nom'){va=a.nom;vb=b.nom;}
+        else if(sortCol==='gravite'){va=graviteOrder[a.gravite]||0;vb=graviteOrder[b.gravite]||0;}
+        else if(sortCol==='saison'){va=a.saison;vb=b.saison;}
+        else if(sortCol==='traitements'){va=a.traitements;vb=b.traitements;}
+        else{va=a.id;vb=b.id;}
+        if(typeof va==='string' || typeof vb==='string') return normalizeValue(va).localeCompare(normalizeValue(vb), 'fr')*sortDir;
+        return(va-vb)*sortDir;
+    });
+
+    const tb=document.getElementById('tbody');
+    if(!rows.length){
+        tb.innerHTML=`<tr><td colspan="7"><div class="no-results">Aucune maladie trouvée pour cette recherche</div></td></tr>`;
+    } else {
+        tb.innerHTML=rows.map(d=>`
+        <tr>
+            <td><span class="cell-id">${d.id}</span></td>
+            <td><div class="img-cell">${d.image?`<img src="${d.image}" alt="${d.nom}">`:'🌿'}</div></td>
+            <td>
+                <div class="mname">${highlight(d.nom)}</div>
+                <div class="msci">${highlight(d.sci)}</div>
+                <div class="mdesc">${d.desc}</div>
+            </td>
+            <td><span class="badge ${badgeClass[d.gravite]||'bf'}"><span class="bd"></span>${graviteLabel[d.gravite]||d.gravite}</span></td>
+            <td><span class="saison-tag"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${highlight(d.saison)}</span></td>
+            <td style="text-align:center"><span class="treat-pill"><span class="treat-num">${d.traitements}</span>${d.traitements>1?'traitements':'traitement'}</span></td>
+            <td>
+                <div class="actions">
+                    <a href="${d.urlShow}" class="ab" title="Voir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                    <a href="${d.urlEdit}" class="ab" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
+                    <form method="post" action="${d.urlDelete}" style="display:inline" data-firma-confirm="Êtes-vous sûr de vouloir supprimer cette maladie ? Cette action est irréversible.">
+                        <input type="hidden" name="_token" value="${d.token}">
+                        <button class="ab del" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                    </form>
+                </div>
+            </td>
+        </tr>`).join('');
+    }
+    document.getElementById('count-info').textContent=`${rows.length} maladie${rows.length>1?'s':''} affichée${rows.length>1?'s':''}`;
+}
+
+document.getElementById('sort-id')?.classList.add('asc');
+render();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const successMessages = {{ maladie_success_flashes|json_encode|raw }};
+    const notify = (message, type = 'success') => {
+        if (window.firmaToast) {
+            window.firmaToast(message, type);
+            return;
+        }
+
+        const el = document.createElement('div');
+        el.textContent = message;
+        el.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;padding:10px 14px;border-radius:10px;background:' + (type === 'danger' ? '#fdeaea;color:#a32d2d;border:1px solid #f5c5c0' : '#eaf3de;color:#27500a;border:1px solid #c0dd97');
+        document.body.appendChild(el);
+        window.setTimeout(() => el.remove(), 4200);
+    };
+
+    if (Array.isArray(successMessages)) {
+        successMessages.forEach((message) => {
+            notify(message, 'success');
+        });
+    }
+});
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest('.table-wrap form[data-firma-confirm]');
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    if (form.dataset.confirmed === 'true') {
+        form.dataset.confirmed = '';
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const msg = form.getAttribute('data-firma-confirm') || 'Voulez-vous confirmer cette suppression ?';
+    const formId = form.id || `maladie-delete-${Math.random().toString(36).slice(2, 9)}`;
+    form.id = formId;
+
+    if (window.firmaOpenConfirmModal) {
+        window.firmaOpenConfirmModal(formId, 'Confirmer la suppression', msg, 'Supprimer', 'danger');
+    } else if (window.firmaToast) {
+        window.firmaToast('La fenetre de confirmation est indisponible.', 'danger');
+    }
+}, true);
+</script>
+
+{% include 'shared/_pagination.html.twig' with {
+    currentPage: currentPage|default(1),
+    totalPages: totalPages|default(1),
+    route: 'admin_maladie_index',
+    routeParams: {}
+} %}
+
+{% endblock %}
+

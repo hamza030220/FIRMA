@@ -1,0 +1,151 @@
+forum:
+  language: Sprache
+  language_fr: Französisch
+  language_en: Englisch
+  language_en_gb: Englisch (GB)
+  language_en_us: Englisch (US)
+  language_de: Deutsch
+  language_es: Spanisch
+  language_it: Italienisch
+  language_nl: Niederländisch
+  language_pt_br: Portugiesisch (Brasilien)
+  language_pt_pt: Portugiesisch (Portugal)
+  language_pl: Polnisch
+  switch: Forum-Sprache ändern
+
+  common:
+    back_to_discussions: Zurück zu den Diskussionen
+    back_to_post: Zurück zum Beitrag
+    cancel: Abbrechen
+    save: Speichern
+    publish: Veröffentlichen
+    publish_comment: Kommentar veröffentlichen
+    loading: Wird geladen
+    reactions: Reaktionen
+    comments: Kommentare
+    comment: Kommentar
+    comment_total: insgesamt
+    characters: Zeichen
+    author: Autor
+    by: Von
+    connected: verbunden
+    search: Suchen
+    search_reset: Zurücksetzen
+    sort: Sortieren
+    no_category: Keine Kategorie
+
+  index:
+    kicker: FIRMA-Community
+    title: Austausch mit der FIRMA-Community
+    lead: Teilen Sie Ihre Fragen, Tipps und Erfahrungen in einem klaren und professionellen Bereich.
+    posts_visible: sichtbare Beiträge
+    new_post: Neuer Beitrag
+    title_label: Titel
+    title_placeholder: "Beispiel: Tipp zur Bewässerung"
+    category_label: Kategorie
+    category_placeholder: Kategorie wählen
+    content_label: Inhalt
+    content_placeholder: Beschreiben Sie Ihr Anliegen oder teilen Sie Ihre Erfahrung...
+    publish_title: Beitrag veröffentlichen
+    publish_message: Möchten Sie diesen Beitrag wirklich veröffentlichen?
+    discussions: Diskussionen
+    search_placeholder: Beitrag nach Titel suchen
+    search_button: Suchen
+    sort_aria: Diskussionen sortieren
+    open_post: Beitrag öffnen
+    sort_recent: Neueste
+    sort_oldest: Älteste
+    sort_title_asc: Titel A-Z
+    sort_title_desc: Titel Z-A
+    search_info: Ergebnis für
+    results_for: Ergebnisse für
+    view_post: Gesamten Beitrag ansehen
+    edit_post: Beitrag bearbeiten
+    edit_title: Diesen Beitrag bearbeiten
+    edit_message: Möchten Sie diesen Beitrag wirklich bearbeiten?
+    delete_post: Beitrag löschen
+    delete_message: Möchten Sie diesen Beitrag wirklich löschen? Diese Aktion ist nicht rückgängig zu machen.
+    empty_title: Keine Diskussion gefunden
+    empty_search: Kein Ergebnis passt zu Ihrer Suche. Versuchen Sie ein anderes Stichwort.
+    empty_default: Beginnen Sie mit dem ersten Forumsthema in der Symfony-Version.
+    flash_form_error: Das Formular enthält Fehler. Prüfen Sie die Felder unten.
+
+  show:
+    comments: Kommentare
+    add_comment: Kommentar hinzufügen
+    comment_placeholder: Antworten Sie auf diese Diskussion...
+    comment_counter: '%current% / %max% Zeichen'
+    image_label: Kommentarbild
+    image_preview: Vorschau vor dem Veröffentlichen
+    image_preview_alt: Vorschau des Kommentarbilder
+    image_format_error: Ungültiges Format. Verwenden Sie JPG, PNG, WEBP oder GIF.
+    image_edit_label: Bild ersetzen
+    remove_current_image: Aktuelles Bild entfernen
+    no_comments_title: Noch keine Kommentare
+    no_comments_text: Seien Sie der Erste, der auf dieses Thema antwortet.
+    save: Speichern
+    cancel: Abbrechen
+    edit_comment: Kommentar bearbeiten
+    edit_comment_title: Diesen Kommentar bearbeiten
+    edit_comment_message: Möchten Sie diesen Kommentar wirklich bearbeiten?
+    delete_comment: Kommentar löschen
+    delete_comment_title: Diesen Kommentar löschen
+    delete_comment_message: Möchten Sie diesen Kommentar wirklich löschen? Diese Aktion ist nicht rückgängig zu machen.
+
+  edit:
+    title: Beitrag bearbeiten
+    save: Speichern
+    cancel: Abbrechen
+    category_placeholder: Kategorie wählen
+    back_to_post: Zurück zum Beitrag
+
+  reaction:
+    choose: Klicken Sie, um Ihre Stimmung zu wählen
+
+  mood:
+    analyze: Stimmung analysieren
+    pending: Ausstehend
+    positive: Positiv
+    negative: Negativ
+    neutral: Neutral
+    relaunch: Erneut ausführen
+    warning: Interne Warnung
+
+  warning:
+    title: Forenwarnung
+    message: Unsere Anwendung erlaubt keine beleidigende Sprache. Prüfen Sie Ihre internen Warnungen.
+    cta: Warnung ansehen
+
+  flash:
+    post_created: Beitrag erfolgreich veröffentlicht
+    post_updated: Beitrag erfolgreich aktualisiert
+    post_deleted: Beitrag erfolgreich gelöscht
+    comment_created: Kommentar erfolgreich hinzugefügt
+    comment_updated: Kommentar erfolgreich aktualisiert
+    comment_deleted: Kommentar erfolgreich gelöscht
+    invalid_reaction: Ungültige Reaktion.
+    invalid_csrf: Ungültiger CSRF-Token.
+    invalid_user: Benutzer nicht angemeldet.
+    invalid_post: Beitrag nicht gefunden.
+    invalid_comment: Kommentar nicht gefunden.
+    invalid_image_file: Die hochgeladene Bilddatei ist ungültig.
+    image_upload_failed: Das Bild konnte nicht gespeichert werden. Bitte erneut versuchen.
+    validation:
+      title_required: Der Titel ist erforderlich.
+      title_length: Der Titel darf 255 Zeichen nicht überschreiten.
+      content_required: Der Inhalt ist erforderlich.
+      content_length: Der Inhalt muss mindestens 10 Zeichen enthalten.
+      category_required: Die Kategorie ist erforderlich.
+      category_invalid: Die ausgewählte Kategorie ist ungültig.
+      comment_required: Der Kommentar ist erforderlich.
+      comment_min: Der Kommentar muss mindestens %min% Zeichen enthalten.
+      comment_max: Der Kommentar darf nicht mehr als %max% Zeichen enthalten.
+      image_format: "Akzeptierte Formate: JPG, PNG, WEBP oder GIF."
+      image_extension: "Ungültige Erweiterung. Verwenden Sie JPG, PNG, WEBP oder GIF."
+      image_size: "Das Bild darf 5 MB nicht überschreiten."
+      image_too_small: "Bild zu klein: %width%x%height% px. Mindestgröße: %min_width%x%min_height% px."
+      image_too_large: "Bild zu groß: %width%x%height% px. Maximal erlaubt: %max_width%x%max_height% px."
+      image_read: Die Bildabmessungen konnten nicht gelesen werden.
+      image_invalid: Die Bilddatei konnte nicht gelesen werden.
+      self_edit_post: Sie können diesen Beitrag nicht bearbeiten.
+      self_edit_comment: Sie können diesen Kommentar nicht bearbeiten.

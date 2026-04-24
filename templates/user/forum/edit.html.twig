@@ -1,0 +1,108 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}{{ 'forum.edit.title'|trans({}, 'forum') }}{% endblock %}
+
+{% block user_content %}
+<section class="forum-shell">
+    {% include 'shared/forum/_language_switcher.html.twig' %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label in ['error', 'danger'] ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-back-link">{{ 'forum.edit.back_to_post'|trans({}, 'forum') }}</a>
+
+    <section class="forum-panel">
+        <div class="forum-toolbar">
+            <h1>{{ 'forum.edit.title'|trans({}, 'forum') }}</h1>
+            <span>{{ post.dateCreation|date('H:i', 'Africa/Lagos') }}</span>
+        </div>
+
+        <form id="edit-post-form" method="post" action="{{ path('user_forum_edit', {id: post.id}) }}" class="forum-form" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token('forum_edit_' ~ post.id) }}">
+
+            <label for="titre">{{ 'forum.index.title_label'|trans({}, 'forum') }}</label>
+            <input id="titre" name="titre" type="text" value="{{ form_data.titre }}">
+            {% if form_errors.titre is defined %}
+                <div class="forum-flash forum-flash-error">{{ form_errors.titre }}</div>
+            {% endif %}
+
+            <label for="categorie">{{ 'forum.index.category_label'|trans({}, 'forum') }}</label>
+            <select id="categorie" name="categorie" required>
+                <option value="">{{ 'forum.edit.category_placeholder'|trans({}, 'forum') }}</option>
+                {% for categorie in categories %}
+                    <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ translated_categories[categorie]|default(categorie) }}</option>
+                {% endfor %}
+            </select>
+            {% if form_errors.categorie is defined %}
+                <div class="forum-flash forum-flash-error">{{ form_errors.categorie }}</div>
+            {% endif %}
+
+            <label for="contenu">{{ 'forum.index.content_label'|trans({}, 'forum') }}</label>
+            <textarea id="contenu" name="contenu" rows="8">{{ form_data.contenu }}</textarea>
+            {% if form_errors.contenu is defined %}
+                <div class="forum-flash forum-flash-error">{{ form_errors.contenu }}</div>
+            {% endif %}
+
+            <div class="forum-actions">
+                <button type="submit" class="forum-button">{{ 'forum.edit.save'|trans({}, 'forum') }}</button>
+                <a href="{{ path('user_forum_show', {id: post.id}) }}#post-detail" class="forum-button forum-button-secondary">{{ 'forum.edit.cancel'|trans({}, 'forum') }}</a>
+            </div>
+        </form>
+    </section>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('edit-post-form');
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            let isConfirmed = false;
+            let pendingSubmit = false;
+
+            const modalSubmit = document.getElementById('appConfirmSubmit');
+
+            if (modalSubmit && !modalSubmit.dataset.editPostBound) {
+                modalSubmit.dataset.editPostBound = 'true';
+                modalSubmit.addEventListener('click', () => {
+                    if (!pendingSubmit) {
+                        return;
+                    }
+
+                    pendingSubmit = false;
+                    isConfirmed = true;
+                    form.submit();
+                });
+            }
+
+            form.addEventListener('submit', (event) => {
+                if (isConfirmed) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                if (typeof window.firmaOpenConfirmModal === 'function') {
+                    pendingSubmit = true;
+                    window.firmaOpenConfirmModal(
+                        'edit-post-form',
+                        '{{ 'forum.edit.title'|trans({}, 'forum')|e('js') }}',
+                        '{{ 'forum.index.edit_message'|trans({}, 'forum')|e('js') }}',
+                        '{{ 'forum.edit.save'|trans({}, 'forum')|e('js') }}',
+                        'primary'
+                    );
+                    return;
+                }
+
+                isConfirmed = true;
+                form.submit();
+            });
+        });
+    </script>
+{% endblock %}

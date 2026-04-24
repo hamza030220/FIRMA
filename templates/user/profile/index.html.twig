@@ -1,0 +1,197 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Mon Profil{% endblock %}
+
+{% block user_content %}
+<div class="profil-page">
+
+  {# ── En-tête profil ── #}
+  <div class="profil-header">
+    <div class="profil-avatar">
+      {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+    </div>
+    <div class="profil-header-info">
+      <h2>{{ app.user.fullName }}</h2>
+      <span class="profil-badge profil-badge--{{ app.user.typeUser }}">
+        {% if app.user.typeUser == 'admin' %}Administrateur
+        {% elseif app.user.typeUser == 'technicien' %}Technicien
+        {% else %}Utilisateur{% endif %}
+      </span>
+      <p class="profil-email">{{ app.user.email }}</p>
+    </div>
+  </div>
+
+  {# ── Flash messages ── #}
+  {% for msg in app.flashes('success') %}
+    <div class="profil-flash profil-flash--success">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      {{ msg }}
+    </div>
+  {% endfor %}
+  {% for msg in app.flashes('error') %}
+    <div class="profil-flash profil-flash--error">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      {{ msg }}
+    </div>
+  {% endfor %}
+
+  {# ── Formulaire ── #}
+  <div class="profil-card">
+    <h3 class="profil-section-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Informations personnelles
+    </h3>
+
+    {{ form_start(form, {'attr': {'class': 'profil-form', 'novalidate': 'novalidate'}}) }}
+
+      <div class="profil-grid">
+        <div class="form-group">
+          {{ form_label(form.nom) }}
+          {{ form_widget(form.nom, {'attr': {'class': 'form-input'}}) }}
+          {{ form_errors(form.nom) }}
+        </div>
+        <div class="form-group">
+          {{ form_label(form.prenom) }}
+          {{ form_widget(form.prenom, {'attr': {'class': 'form-input'}}) }}
+          {{ form_errors(form.prenom) }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email, {'attr': {'class': 'form-input'}}) }}
+        {{ form_errors(form.email) }}
+      </div>
+
+      <div class="profil-grid">
+        <div class="form-group">
+          {{ form_label(form.telephone) }}
+          {{ form_widget(form.telephone, {'attr': {'class': 'form-input'}}) }}
+          {{ form_errors(form.telephone) }}
+        </div>
+        <div class="form-group">
+          {{ form_label(form.ville) }}
+          {{ form_widget(form.ville, {'attr': {'class': 'form-input'}}) }}
+          {{ form_errors(form.ville) }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        {{ form_label(form.adresse) }}
+        {{ form_widget(form.adresse, {'attr': {'class': 'form-input'}}) }}
+        {{ form_errors(form.adresse) }}
+      </div>
+
+      <div class="profil-separator">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Changer le mot de passe <small>(laisser vide pour ne pas modifier)</small>
+      </div>
+
+      <div class="profil-grid">
+        <div class="form-group">
+          {{ form_label(form.nouveauMotDePasse.first) }}
+          <div class="input-wrapper">
+            {{ form_widget(form.nouveauMotDePasse.first, {'attr': {'class': 'form-input', 'id': 'prof-pwd1'}}) }}
+            <button type="button" class="toggle-password" onclick="togglePass('prof-pwd1','prof-eye1')" aria-label="Afficher">
+              <svg viewBox="0 0 20 20" fill="none" class="eye-icon" id="prof-eye1"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+          {{ form_errors(form.nouveauMotDePasse.first) }}
+        </div>
+        <div class="form-group">
+          {{ form_label(form.nouveauMotDePasse.second) }}
+          <div class="input-wrapper">
+            {{ form_widget(form.nouveauMotDePasse.second, {'attr': {'class': 'form-input', 'id': 'prof-pwd2'}}) }}
+            <button type="button" class="toggle-password" onclick="togglePass('prof-pwd2','prof-eye2')" aria-label="Afficher">
+              <svg viewBox="0 0 20 20" fill="none" class="eye-icon" id="prof-eye2"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+          {{ form_errors(form.nouveauMotDePasse.second) }}
+        </div>
+      </div>
+
+      {{ form_errors(form) }}
+
+      <div class="profil-actions">
+        <button type="submit" class="btn-profil-save">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Sauvegarder les modifications
+        </button>
+      </div>
+
+    {{ form_end(form) }}
+  </div>
+</div>
+
+<style>
+.profil-page { max-width: 760px; margin: 0 auto; padding: 2rem 1rem; }
+
+.profil-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;
+  background: #fff; border-radius: 16px; padding: 1.5rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+.profil-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #2d7a3a, #4caf50);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
+.profil-header-info h2 { margin: 0 0 .3rem; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; }
+.profil-email { color: #666; font-size: 0.9rem; margin-top: .2rem; }
+
+.profil-badge { display: inline-block; padding: .25rem .75rem; border-radius: 20px; font-size: .8rem; font-weight: 600; }
+.profil-badge--admin     { background: #fef3c7; color: #92400e; }
+.profil-badge--technicien{ background: #dbeafe; color: #1e40af; }
+.profil-badge--client    { background: #dcfce7; color: #166534; }
+
+.profil-flash { display: flex; align-items: center; gap: .6rem; padding: .85rem 1.2rem;
+  border-radius: 10px; margin-bottom: 1rem; font-size: .93rem; }
+.profil-flash--success { background: #f0faf2; color: #166534; border: 1px solid #bbf7d0; }
+.profil-flash--error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+.profil-card { background: #fff; border-radius: 16px; padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+.profil-section-title { display: flex; align-items: center; gap: .6rem; font-size: 1.1rem;
+  font-weight: 700; color: #1a1a1a; margin: 0 0 1.5rem; padding-bottom: .8rem;
+  border-bottom: 2px solid #f0f0f0; }
+
+.profil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 600px) { .profil-grid { grid-template-columns: 1fr; } }
+
+.profil-form .form-group { margin-bottom: 1rem; }
+.profil-form .form-group label { display: block; font-weight: 600; font-size: .875rem;
+  color: #374151; margin-bottom: .35rem; }
+.profil-form .form-input { width: 100%; padding: .6rem .9rem; border: 1.5px solid #e2e8f0;
+  border-radius: 8px; font-size: .95rem; transition: border-color .2s; box-sizing: border-box; }
+.profil-form .form-input:focus { outline: none; border-color: #2d7a3a; }
+.profil-form ul.form-error { color: #dc2626; font-size: .82rem; margin: .3rem 0 0; padding: 0; list-style: none; }
+
+.profil-separator { display: flex; align-items: center; gap: .5rem; font-weight: 600;
+  color: #374151; margin: 1.5rem 0 1rem; padding: .8rem 1rem; background: #f8fafc;
+  border-radius: 8px; border-left: 3px solid #2d7a3a; }
+.profil-separator small { font-weight: 400; color: #6b7280; font-size: .82rem; }
+
+.profil-form .input-wrapper { position: relative; }
+.profil-form .toggle-password { position: absolute; right: .7rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: #9ca3af; padding: 0; }
+.profil-form .toggle-password:hover { color: #374151; }
+.profil-form .eye-icon { width: 18px; height: 18px; }
+
+.profil-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
+.btn-profil-save { display: inline-flex; align-items: center; gap: .5rem;
+  background: linear-gradient(135deg, #2d7a3a, #4caf50); color: #fff;
+  border: none; border-radius: 10px; padding: .75rem 1.8rem; font-size: .95rem;
+  font-weight: 600; cursor: pointer; transition: opacity .2s, transform .15s; }
+.btn-profil-save:hover { opacity: .9; transform: translateY(-1px); }
+</style>
+
+<script>
+function togglePass(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/><line x1="3" y1="3" x2="17" y2="17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/>';
+  }
+}
+</script>
+{% endblock %}

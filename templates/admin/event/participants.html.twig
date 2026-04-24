@@ -1,0 +1,68 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Participants — {{ evenement.titre }}{% endblock %}
+{% block admin_page_title %}Participants{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/admin/evenements.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="aevt-detail">
+    {# ── Breadcrumb ── #}
+    <nav class="aevt-breadcrumb">
+        <a href="{{ path('admin_evenements') }}">Événements</a>
+        <span>/</span>
+        <a href="{{ path('admin_evenement_detail', {id: evenement.idEvenement}) }}">{{ evenement.titre }}</a>
+        <span>/</span>
+        <span>Participants</span>
+    </nav>
+
+    <div class="aevt-detail__header">
+        <div>
+            <h2>Participants — {{ evenement.titre }}</h2>
+            <p class="aevt-text-muted">{{ totalPersonnes }} personne{{ totalPersonnes > 1 ? 's' : '' }} au total (participants + accompagnants)</p>
+        </div>
+    </div>
+
+    {% if participations is empty %}
+        <div class="aevt-empty">
+            <p>Aucun participant pour cet événement.</p>
+        </div>
+    {% else %}
+        <div class="aevt-table-wrap">
+            <table class="aevt-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Participant</th>
+                        <th>Email</th>
+                        <th>Accompagnants</th>
+                        <th>Total personnes</th>
+                        <th>Statut</th>
+                        <th>Date inscription</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participations %}
+                        <tr>
+                            <td><code>{{ p.codeParticipation }}</code></td>
+                            <td>{{ p.utilisateur ? p.utilisateur.fullName : '—' }}</td>
+                            <td>{{ p.utilisateur ? p.utilisateur.email : '—' }}</td>
+                            <td>{{ p.nombreAccompagnants }}</td>
+                            <td>{{ p.totalPersonnes }}</td>
+                            <td>
+                                <span class="evt-badge {% if p.statut == 'confirme' %}badge-success{% elseif p.statut == 'en_attente' %}badge-warning{% else %}badge-danger{% endif %}">
+                                    {{ p.statut }}
+                                </span>
+                            </td>
+                            <td>{{ p.dateInscription|date('d/m/Y H:i') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

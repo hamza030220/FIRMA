@@ -1,0 +1,319 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FIRMA — Votre Plateforme Agricole{% endblock %}
+
+{% block body %}
+<div class="leaf-pattern"></div>
+
+{# ── NAVBAR ── #}
+<nav id="navbar">
+  <a href="{{ path('app_landing') }}" class="nav-logo">
+    <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="logo-img">
+    <span class="logo-text">FIRMA</span>
+  </a>
+
+  {# Desktop links #}
+  <div class="nav-links">
+    <a href="{{ path('app_landing') }}" class="nav-link nav-link--active">Accueil</a>
+    <a href="#services" class="nav-link">Services</a>
+    <a href="#roles" class="nav-link">Qui sommes-nous</a>
+  </div>
+
+  {# Desktop actions #}
+  <div class="nav-actions">
+    {% if app.user %}
+      <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="btn-login">Mon espace</a>
+      <a href="{{ path('app_logout') }}" class="btn-register">Déconnexion <span>→</span></a>
+    {% else %}
+      <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
+      <a href="{{ path('app_inscription') }}" class="btn-register">Commencer <span>→</span></a>
+    {% endif %}
+  </div>
+
+  {# Mobile hamburger #}
+  <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  {# Mobile drawer #}
+  <div class="nav-mobile-drawer" id="navDrawer">
+    <a href="{{ path('app_landing') }}" class="mob-active">Accueil</a>
+    <a href="#services">Services</a>
+    <a href="#roles">Qui sommes-nous</a>
+    <div class="nav-mobile-sep"></div>
+    {% if app.user %}
+      <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="btn-login">Mon espace</a>
+      <a href="{{ path('app_logout') }}" class="btn-register">Déconnexion <span>→</span></a>
+    {% else %}
+      <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
+      <a href="{{ path('app_inscription') }}" class="btn-register">Commencer <span>→</span></a>
+    {% endif %}
+  </div>
+</nav>
+
+{# ── HERO ── #}
+<section id="hero">
+  <div class="hero-circle"></div>
+  <div class="hero-circle-2"></div>
+
+  <span class="hero-badge">
+    <span class="badge-dot"></span>
+    Plateforme agricole intelligente
+  </span>
+
+  <h1 class="hero-title">
+    <span class="word w1">Gérez</span> <span class="word w2">tout.</span>
+    <em><span class="word w3">Cultivez</span> <span class="word w4">mieux.</span></em>
+  </h1>
+
+  <p class="hero-tagline">
+    Marketplace, événements, techniciens, communauté —<br>
+    <strong>tout ce dont vous avez besoin</strong>, au même endroit.
+  </p>
+
+  <div class="hero-cta">
+    {% if app.user %}
+      <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="cta-main">Mon tableau de bord →</a>
+    {% else %}
+      <a href="{{ path('app_inscription') }}" class="cta-main">Rejoindre FIRMA →</a>
+    {% endif %}
+    <a href="#services" class="cta-secondary">Voir nos services</a>
+  </div>
+
+  <div class="scroll-hint" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
+    <span class="scroll-label">Découvrir</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+{# ── SERVICES ── #}
+<section id="services">
+  <div class="section-header">
+    <p class="section-eyebrow reveal">Nos services</p>
+    <h2 class="section-title reveal">Ce que FIRMA<br>fait pour vous</h2>
+    <p class="section-sub reveal">Une suite complète de services conçus pour simplifier votre quotidien agricole, de la commande d'équipement à la mise en relation avec des experts.</p>
+  </div>
+
+  <div class="services-list">
+
+    {# MARKETPLACE #}
+    <div class="service-card reveal">
+      <div class="service-visual sv-forest">
+        <div class="sn-light service-number">01</div>
+        <div class="service-icon-big">🛒</div>
+        <div class="service-visual-title svt-light">Votre marché<br>agricole en ligne</div>
+        <div class="sv-deco">🌾</div>
+      </div>
+      <div class="service-content">
+        <span class="service-tag"><span class="tag-dot"></span>Marketplace</span>
+        <h3 class="service-heading">Un vaste catalogue d'équipements &amp; de produits agricoles</h3>
+        <p class="service-desc">
+          Parcourez des centaines de produits agricoles, du matériel de terrain aux intrants. <strong>Commandez en ligne</strong>, payez en toute sécurité et recevez votre reçu instantanément. Vous avez besoin d'un équipement pour une courte durée ? Notre service de <strong>location</strong> est là pour vous.
+        </p>
+        <div class="service-features">
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Catalogue complet : engrais, semences, matériel &amp; plus
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Paiement sécurisé · reçu PDF immédiat
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Location courte &amp; longue durée disponible
+          </div>
+        </div>
+        <a href="{% if app.user %}{{ path('user_marketplace') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Explorer la marketplace →</a>
+      </div>
+    </div>
+
+    {# ÉVÉNEMENTS #}
+    <div class="service-card reverse reveal delay-1">
+      <div class="service-visual sv-lime">
+        <div class="sn-light service-number">02</div>
+        <div class="service-icon-big">📅</div>
+        <div class="service-visual-title svt-light">Rejoignez la<br>communauté active</div>
+        <div class="sv-deco">🌻</div>
+      </div>
+      <div class="service-content">
+        <span class="service-tag"><span class="tag-dot"></span>Événements</span>
+        <h3 class="service-heading">Des événements agricoles près de chez vous</h3>
+        <p class="service-desc">
+          Foires agricoles, ateliers, formations, salons — restez connecté à l'actualité de votre secteur. <strong>Inscrivez-vous en quelques clics</strong>, recevez votre ticket PDF avec QR code et consultez la météo du jour avant de partir.
+        </p>
+        <div class="service-features">
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Inscription rapide · ticket QR code instantané
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Météo en temps réel pour chaque événement
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Rappels &amp; suivi de vos inscriptions
+          </div>
+        </div>
+        <a href="{% if app.user %}{{ path('user_evenements') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Voir les événements →</a>
+      </div>
+    </div>
+
+    {# MALADIES #}
+    <div class="service-card reveal delay-2">
+      <div class="service-visual sv-mixed">
+        <div class="sn-light service-number">03</div>
+        <div class="service-icon-big">🌿</div>
+        <div class="service-visual-title svt-light">Un expert à<br>portée de main</div>
+        <div class="sv-deco">⚙️</div>
+      </div>
+      <div class="service-content">
+        <span class="service-tag"><span class="tag-dot"></span>Maladies</span>
+        <h3 class="service-heading">Identifiez les maladies dès aujourd'hui</h3>
+        <p class="service-desc">
+          Symptômes, diagnostic, traitement — décrivez le problème de votre culture et notre système propose <strong>les maladies probables et les solutions adaptées</strong>. L'intelligence artificielle vous aide à agir rapidement pour protéger votre production.
+        </p>
+        <div class="service-features">
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Identification des maladies les plus probables
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Recommandations de traitements adaptées
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Prévention et bonnes pratiques pour vos cultures
+          </div>
+        </div>
+        <a href="{% if app.user %}{{ path('user_maladie') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Explorer le module maladies →</a>
+      </div>
+    </div>
+
+    {# FORUM #}
+    <div class="service-card reverse reveal delay-3">
+      <div class="service-visual sv-soft">
+        <div class="sn-dark service-number">04</div>
+        <div class="service-icon-big">💬</div>
+        <div class="service-visual-title svt-dark">L'intelligence<br>collective au travail</div>
+        <div class="sv-deco">🌿</div>
+      </div>
+      <div class="service-content">
+        <span class="service-tag"><span class="tag-dot"></span>Forum communautaire</span>
+        <h3 class="service-heading">Partagez, apprenez, échangez avec des agriculteurs comme vous</h3>
+        <p class="service-desc">
+          Rejoignez une communauté active d'agriculteurs, d'éleveurs et de professionnels du secteur. <strong>Posez vos questions</strong>, partagez votre expérience, découvrez des conseils pratiques et restez au courant des meilleures pratiques agricoles.
+        </p>
+        <div class="service-features">
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Discussions thématiques par catégorie
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Conseils d'experts &amp; retours d'expérience
+          </div>
+          <div class="sf-item">
+            <div class="sf-check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#4aac33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Communauté modérée &amp; bienveillante
+          </div>
+        </div>
+        <a href="{% if app.user %}{{ path('user_forum') }}{% else %}{{ path('app_login') }}{% endif %}" class="service-cta">Rejoindre le forum →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{# ── BANNER CTA ── #}
+<section id="banner">
+  <div class="banner-inner reveal">
+    <div>
+      <p class="banner-label">Prêt à commencer ?</p>
+      <h2 class="banner-title">Toute votre exploitation,<br>dans une seule appli.</h2>
+      <p class="banner-sub">Rejoignez les agriculteurs qui ont choisi FIRMA pour simplifier<br>leur quotidien et développer leur activité.</p>
+    </div>
+    <div class="banner-actions">
+      {% if app.user %}
+        <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}" class="btn-banner-main">Accéder à mon espace →</a>
+      {% else %}
+        <a href="{{ path('app_inscription') }}" class="btn-banner-main">Créer mon compte →</a>
+        <a href="{{ path('app_login') }}" class="btn-banner-ghost">J'ai déjà un compte</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# ── ROLES ── #}
+<section id="roles">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-header">
+      <p class="section-eyebrow reveal">Qui peut rejoindre FIRMA ?</p>
+      <h2 class="section-title reveal">Une plateforme pour<br>tous les profils</h2>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card reveal">
+        <span class="role-emoji">🧑‍🌾</span>
+        <div class="role-name">Agriculteur</div>
+        <p class="role-desc">Achetez, louez, participez aux événements, consultez des techniciens et échangez avec d'autres agriculteurs.</p>
+        <span class="role-pill pill-user">Accès utilisateur</span>
+      </div>
+      <div class="role-card reveal delay-2">
+        <span class="role-emoji">🔧</span>
+        <div class="role-name">Technicien</div>
+        <p class="role-desc">Recevez des demandes d'intervention, gérez votre planning et intervenez efficacement grâce au diagnostic IA.</p>
+        <span class="role-pill pill-tech">Accès technicien</span>
+      </div>
+      <div class="role-card reveal delay-4">
+        <span class="role-emoji">⚙️</span>
+        <div class="role-name">Administrateur</div>
+        <p class="role-desc">Supervisez la plateforme, gérez les utilisateurs, les contenus et configurez tous les modules selon vos besoins.</p>
+        <span class="role-pill pill-admin">Accès admin</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Navbar scroll effect
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+}, {passive:true});
+
+// Hamburger / mobile drawer
+const navBurger = document.getElementById('navBurger');
+const navDrawer = document.getElementById('navDrawer');
+if (navBurger && navDrawer) {
+  navBurger.addEventListener('click', () => {
+    const open = navDrawer.classList.toggle('open');
+    navBurger.classList.toggle('open', open);
+    navBurger.setAttribute('aria-expanded', open);
+  });
+  // Close drawer when a link inside it is clicked
+  navDrawer.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navDrawer.classList.remove('open');
+      navBurger.classList.remove('open');
+      navBurger.setAttribute('aria-expanded', 'false');
+    });
+  });
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target)) {
+      navDrawer.classList.remove('open');
+      navBurger.classList.remove('open');
+      navBurger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+// Reveal on scroll — trigger early for snappy feel
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.05, rootMargin: '0px 0px 120px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+{% endblock %}

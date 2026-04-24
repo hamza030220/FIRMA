@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRMA — Ticket</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 50%,#a5d6a7 100%);padding:20px}
+        .ticket{background:#fff;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.12);max-width:420px;width:100%;overflow:hidden}
+        .ticket-header{background:linear-gradient(135deg,#1a3a24,#20452c);padding:24px;text-align:center}
+        .ticket-logo{font-family:Georgia,serif;font-size:28px;font-weight:700;color:#fffade;letter-spacing:.5px}
+        .ticket-subtitle{font-size:11px;color:#a8c5b0;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+        .ticket-badge{display:inline-block;background:rgba(255,250,222,.15);border:1px solid rgba(255,250,222,.3);color:#fffade;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-top:10px;text-transform:uppercase;letter-spacing:1px}
+        .ticket-body{padding:24px}
+        .ticket-event{font-family:Georgia,serif;font-size:22px;font-weight:700;color:#1a3a24;margin-bottom:4px;line-height:1.3}
+        .ticket-org{font-size:13px;color:#5a6e5f;margin-bottom:20px}
+        .ticket-person{background:#f4f8f5;border-radius:12px;padding:16px;margin-bottom:20px;text-align:center}
+        .ticket-person-label{font-size:11px;color:#8a9a8e;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+        .ticket-person-name{font-size:20px;font-weight:700;color:#1a3a24}
+        .ticket-details{margin-bottom:20px}
+        .ticket-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:#2d2d2d;border-bottom:1px solid #f0f3f0}
+        .ticket-row:last-child{border-bottom:none}
+        .ticket-icon{width:20px;height:20px;flex-shrink:0;color:#5a6e5f}
+        .ticket-link{color:#1a3a24;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+        .ticket-link:hover{text-decoration:underline}
+        .ticket-map-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1a3a24,#2d5a3a);color:#fff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 20px;border-radius:12px;margin:16px 0;transition:opacity .2s}
+        .ticket-map-btn:hover{opacity:.9}
+        .ticket-map-btn svg{flex-shrink:0}
+        .ticket-contact{background:#f4f8f5;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+        .ticket-contact-title{font-size:11px;color:#8a9a8e;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+        .ticket-contact-row{display:flex;align-items:center;gap:8px;font-size:14px;color:#2d2d2d;padding:4px 0}
+        .ticket-contact-row a{color:#1a3a24;text-decoration:none;font-weight:500}
+        .ticket-code{background:#1a3a24;border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
+        .ticket-code-label{font-size:11px;color:#a8c5b0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+        .ticket-code-value{font-family:'Courier New',monospace;font-size:28px;font-weight:700;color:#fffade;letter-spacing:4px}
+        .ticket-footer{border-top:2px dashed #e0e5e0;padding:16px 24px;text-align:center;font-size:12px;color:#8a9a8e}
+        .ticket-error{padding:40px 32px;text-align:center}
+        .ticket-error-icon{width:64px;height:64px;border-radius:50%;background:#fde8e8;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+        .ticket-error-icon svg{color:#e74c3c}
+        .ticket-error h2{font-size:20px;color:#2d2d2d;margin-bottom:8px}
+        .ticket-error p{font-size:14px;color:#5a6e5f}
+        @media(max-width:440px){.ticket{border-radius:16px}.ticket-event{font-size:18px}.ticket-code-value{font-size:22px;letter-spacing:2px}}
+    </style>
+</head>
+<body>
+
+{% if type == 'invalid' %}
+<div class="ticket">
+    <div class="ticket-header">
+        <div class="ticket-logo">FIRMA</div>
+        <div class="ticket-subtitle">Événements & Salons</div>
+    </div>
+    <div class="ticket-error">
+        <div class="ticket-error-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <h2>Ticket introuvable</h2>
+        <p>Ce code de participation est invalide ou la participation a été annulée.</p>
+    </div>
+</div>
+
+{% else %}
+<div class="ticket">
+    <div class="ticket-header">
+        <div class="ticket-logo">FIRMA</div>
+        <div class="ticket-subtitle">Événements & Salons</div>
+        <div class="ticket-badge">{{ type == 'accompagnant' ? 'Accompagnant' : 'Participant' }}</div>
+    </div>
+
+    <div class="ticket-body">
+        <div class="ticket-event">{{ evenement.titre }}</div>
+        {% if evenement.organisateur %}
+            <div class="ticket-org">Par {{ evenement.organisateur }}</div>
+        {% endif %}
+
+        <div class="ticket-person">
+            <div class="ticket-person-label">
+                {{ type == 'accompagnant' ? 'Accompagnant' : 'Participant principal' }}
+            </div>
+            <div class="ticket-person-name">
+                {% if type == 'accompagnant' %}
+                    {{ accompagnant.prenom }} {{ accompagnant.nom }}
+                {% else %}
+                    {{ user.prenom }} {{ user.nom }}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ticket-details">
+            <div class="ticket-row">
+                <svg class="ticket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>{{ evenement.dateDebut|date('d/m/Y') }}{% if evenement.dateFin and evenement.dateFin != evenement.dateDebut %} — {{ evenement.dateFin|date('d/m/Y') }}{% endif %}</span>
+            </div>
+            <div class="ticket-row">
+                <svg class="ticket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>{{ evenement.horaireDebut|date('H:i') }} — {{ evenement.horaireFin|date('H:i') }}</span>
+            </div>
+            <div class="ticket-row">
+                <svg class="ticket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>{{ evenement.lieu }}{% if evenement.adresse %} — {{ evenement.adresse }}{% endif %}</span>
+            </div>
+        </div>
+
+        {% set mapQuery = evenement.adresse ? evenement.adresse : evenement.lieu %}
+        {% if mapQuery %}
+        <a href="https://www.google.com/maps/search/?api=1&query={{ mapQuery|url_encode }}" target="_blank" rel="noopener" class="ticket-map-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ouvrir dans Google Maps
+        </a>
+        {% endif %}
+
+        {% if evenement.contactTel or evenement.contactEmail %}
+        <div class="ticket-contact">
+            <div class="ticket-contact-title">Contact organisateur</div>
+            {% if evenement.contactTel %}
+            <div class="ticket-contact-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <a href="tel:{{ evenement.contactTel }}">{{ evenement.contactTel }}</a>
+            </div>
+            {% endif %}
+            {% if evenement.contactEmail %}
+            <div class="ticket-contact-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <a href="mailto:{{ evenement.contactEmail }}">{{ evenement.contactEmail }}</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="ticket-code">
+            <div class="ticket-code-label">Code {{ type == 'accompagnant' ? 'accompagnant' : 'de participation' }}</div>
+            <div class="ticket-code-value" id="ticketCode">{{ type == 'accompagnant' ? accompagnant.codeAccompagnant : participation.codeParticipation }}</div>
+        </div>
+    </div>
+
+    <div class="ticket-footer">
+        Présentez ce ticket à l'entrée de l'événement<br>
+        FIRMA © {{ "now"|date('Y') }}
+    </div>
+</div>
+{% endif %}
+
+</body>
+</html>

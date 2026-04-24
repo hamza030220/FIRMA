@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="earth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8D6E63"/>
+      <stop offset="100%" stop-color="#4E342E"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFE082"/>
+      <stop offset="100%" stop-color="#FFF8E1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#earth)"/>
+  <!-- Sun -->
+  <circle cx="400" cy="120" r="70" fill="#FF8F00" opacity="0.3"/>
+  <circle cx="400" cy="120" r="50" fill="#FFB300" opacity="0.5"/>
+  <circle cx="400" cy="120" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Raised garden beds -->
+  <rect x="80" y="310" width="160" height="50" fill="#6D4C41" rx="5"/>
+  <rect x="85" y="290" width="150" height="25" fill="#81C784" rx="3"/>
+  <rect x="100" y="275" width="25" height="20" fill="#4CAF50" rx="10"/>
+  <rect x="140" y="270" width="30" height="25" fill="#388E3C" rx="12"/>
+  <rect x="185" y="278" width="22" height="18" fill="#66BB6A" rx="8"/>
+  
+  <rect x="320" y="310" width="160" height="50" fill="#6D4C41" rx="5"/>
+  <rect x="325" y="290" width="150" height="25" fill="#81C784" rx="3"/>
+  <rect x="340" y="268" width="28" height="28" fill="#43A047" rx="12"/>
+  <rect x="380" y="272" width="25" height="24" fill="#2E7D32" rx="10"/>
+  <rect x="420" y="275" width="30" height="20" fill="#66BB6A" rx="10"/>
+  
+  <rect x="560" y="310" width="160" height="50" fill="#6D4C41" rx="5"/>
+  <rect x="565" y="290" width="150" height="25" fill="#81C784" rx="3"/>
+  <rect x="580" y="270" width="26" height="26" fill="#4CAF50" rx="10"/>
+  <rect x="620" y="265" width="30" height="30" fill="#388E3C" rx="12"/>
+  <rect x="665" y="275" width="22" height="20" fill="#66BB6A" rx="8"/>
+  <!-- People silhouettes -->
+  <g fill="#5D4037" opacity="0.7">
+    <circle cx="250" cy="230" r="12"/><rect x="243" y="242" width="14" height="35" rx="5"/>
+    <circle cx="530" cy="235" r="12"/><rect x="523" y="247" width="14" height="35" rx="5"/>
+    <circle cx="400" cy="225" r="14"/><rect x="392" y="239" width="16" height="38" rx="6"/>
+  </g>
+  <!-- Tools -->
+  <line x1="260" y1="245" x2="280" y2="290" stroke="#8D6E63" stroke-width="3"/>
+  <line x1="520" y1="250" x2="505" y2="295" stroke="#8D6E63" stroke-width="3"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Atelier Permaculture</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Jardinage durable - Sidi Bou Saïd</text>
+</svg>
