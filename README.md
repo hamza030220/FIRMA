@@ -5,7 +5,7 @@
 <h3 align="center">🌿 Votre Ferme, Notre Technologie</h3>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Symfony-7.4-purple?logo=symfony" alt="Symfony 7.4">
+  <img src="https://img.shields.io/badge/Symfony-6.4-purple?logo=symfony" alt="Symfony 7.4">
   <img src="https://img.shields.io/badge/PHP-≥8.2-777BB4?logo=php&logoColor=white" alt="PHP 8.2+">
   <img src="https://img.shields.io/badge/License-Proprietary-red" alt="License">
 </p>
