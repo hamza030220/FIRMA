@@ -23,7 +23,9 @@ class CommandeRepository extends ServiceEntityRepository
     public function findAllWithUser(array $orderBy = ['dateCommande' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('c')
-            ->leftJoin('c.utilisateur', 'u')->addSelect('u');
+            ->leftJoin('c.utilisateur', 'u')->addSelect('u')
+            ->leftJoin('c.details', 'd')->addSelect('d')
+            ->leftJoin('d.equipement', 'eq')->addSelect('eq');
 
         foreach ($orderBy as $field => $dir) {
             $qb->addOrderBy('c.' . $field, $dir);

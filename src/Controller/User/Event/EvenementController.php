@@ -33,42 +33,29 @@ class EvenementController extends AbstractController
     #[Route('', name: 'user_evenements')]
     public function index(Request $request): Response
     {
-        $search = $request->query->get('q', '');
-        $sort   = $request->query->get('sort', 'date_asc');
+        $search = (string) $request->query->get('q', '');
+        $sort   = (string) $request->query->get('sort', 'date_asc');
+        $page   = max(1, $request->query->getInt('page', 1));
+        $limit  = 6;
 
-        $evenements = $search
-            ? $this->evenementService->searchMulti($search)
-            : $this->evenementService->getAll();
-
-        // Tri
-        usort($evenements, match ($sort) {
-            'date_desc'  => fn($a, $b) => $b->getDateDebut() <=> $a->getDateDebut(),
-            'titre_asc'  => fn($a, $b) => strcasecmp($a->getTitre(), $b->getTitre()),
-            'places'     => fn($a, $b) => $b->getPlacesDisponibles() <=> $a->getPlacesDisponibles(),
-            default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
-        });
-
-        // Pagination
-        $page  = max(1, $request->query->getInt('page', 1));
-        $limit = 6;
-        $total = count($evenements);
+        $result = $this->evenementService->getPaginated($page, $limit, $search, $sort);
+        $evenements = $result['items'];
+        $total = $result['total'];
         $totalPages = max(1, (int) ceil($total / $limit));
         $page = min($page, $totalPages);
-        $evenements = array_slice($evenements, ($page - 1) * $limit, $limit);
 
-        // Vérifier participations de l'user connecté
+        // Vérifier participations de l'user connecté (1 requête batch)
         $user = $this->getUser();
         $userParticipations = [];
         if ($user instanceof Utilisateur && $user->getId() !== null) {
-            $userId = $user->getId();
+            $eventIds = [];
             foreach ($evenements as $evt) {
                 $evtId = $evt->getIdEvenement();
-                if (null === $evtId) {
-                    continue;
+                if ($evtId !== null) {
+                    $eventIds[] = $evtId;
                 }
-                $userParticipations[$evtId] =
-                    $this->participationRepo->isUserAlreadyParticipating($userId, $evtId);
             }
+            $userParticipations = $this->participationRepo->findUserParticipationMap($user->getId(), $eventIds);
         }
 
         // Use TICKET_BASE_URL (set to your Cloudflare/ngrok tunnel URL in .env.local)
@@ -338,11 +325,15 @@ class EvenementController extends AbstractController
 
         $events = [];
         foreach ($allEvents as $evt) {
+            $lat = $evt->getLatitude();
+            $lng = $evt->getLongitude();
             $events[] = [
                 'id'        => $evt->getIdEvenement(),
                 'titre'     => $evt->getTitre(),
                 'lieu'      => $evt->getLieu(),
                 'adresse'   => $evt->getAdresse(),
+                'lat'       => $lat !== null ? (float) $lat : null,
+                'lng'       => $lng !== null ? (float) $lng : null,
                 'dateDebut' => $evt->getDateDebut()?->format('d/m/Y'),
                 'type'      => $evt->getTypeEnum()?->label(),
                 'statut'    => $evt->getStatut(),

@@ -70,7 +70,7 @@
                         {% for sponsor in sponsors %}
                             <div class="evt-sponsor">
                                 {% if sponsor.logoUrl %}
-                                    <img src="{{ sponsor.logoUrl }}" alt="{{ sponsor.nom }}">
+                                    <img src="{{ sponsor.logoUrl }}" alt="{{ sponsor.nom }}" loading="lazy" decoding="async">
                                 {% else %}
                                     <div class="evt-sponsor__icon">{{ sponsor.nom|first }}</div>
                                 {% endif %}

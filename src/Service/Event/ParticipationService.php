@@ -34,20 +34,20 @@ class ParticipationService
         private readonly RequestStack $requestStack,
     ) {}
 
-    /** GÃ©nÃ¨re un token HMAC Ã  partir de l'id et du code (pas de colonne DB). */
+    /** Génère un token HMAC à partir de l'id et du code (pas de colonne DB). */
     public function generateToken(Participation $participation): string
     {
         return hash_hmac('sha256', $participation->getIdParticipation() . '|' . $participation->getCodeParticipation(), self::HMAC_SECRET);
     }
 
-    /** VÃ©rifie un token HMAC. */
+    /** Vérifie un token HMAC. */
     public function verifyToken(Participation $participation, string $token): bool
     {
         return hash_equals($this->generateToken($participation), $token);
     }
 
     /**
-     * Inscrit un utilisateur Ã  un Ã©vÃ©nement avec ses accompagnants.
+     * Inscrit un utilisateur à un événement avec ses accompagnants.
      *
      * @param Accompagnant[] $accompagnants
      * @throws \RuntimeException
@@ -62,21 +62,21 @@ class ParticipationService
         $userId = $utilisateur->getId();
         $evtId  = $evenement->getIdEvenement();
         if (null === $userId || null === $evtId) {
-            throw new \RuntimeException('Utilisateur ou Ã©vÃ©nement non persistÃ©.');
+            throw new \RuntimeException('Utilisateur ou événement non persisté.');
         }
 
-        // VÃ©rifier doublon
+        // Vérifier doublon
         if ($this->participationRepo->isUserAlreadyParticipating($userId, $evtId)) {
-            throw new \RuntimeException('Vous Ãªtes dÃ©jÃ  inscrit Ã  cet Ã©vÃ©nement.');
+            throw new \RuntimeException('Vous êtes déjà inscrit à cet événement.');
         }
 
-        // RÃ©server les places (1 participant + accompagnants)
+        // Réserver les places (1 participant + accompagnants)
         $totalPlaces = 1 + $nbAccompagnants;
         if (!$this->evenementRepo->reserverPlaces($evtId, $totalPlaces)) {
             throw new \RuntimeException('Pas assez de places disponibles.');
         }
 
-        // CrÃ©er la participation
+        // Créer la participation
         $participation = new Participation();
         $participation->setEvenement($evenement);
         $participation->setUtilisateur($utilisateur);
@@ -101,11 +101,11 @@ class ParticipationService
         return $participation;
     }
 
-    /** Confirme une participation (EN_ATTENTE â†’ CONFIRME) et envoie le code par email. */
+    /** Confirme une participation (EN_ATTENTE → CONFIRME) et envoie le code par email. */
     public function confirmer(Participation $participation): void
     {
         if ($participation->getStatut() !== 'en_attente') {
-            throw new \RuntimeException('Cette participation ne peut pas Ãªtre confirmÃ©e.');
+            throw new \RuntimeException('Cette participation ne peut pas être confirmée.');
         }
 
         $participation->setStatut('confirme');
@@ -123,14 +123,14 @@ class ParticipationService
         try {
             $this->sendConfirmedEmail($participation);
         } catch (\Throwable $e) {
-            // Le statut est mis Ã  jour mÃªme si l'email Ã©choue
-            // Le statut est mis Ã  jour mÃªme si l'email Ã©choue
+            // Le statut est mis à jour même si l'email échoue
+            // Le statut est mis à jour même si l'email échoue
         }
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  EMAIL 1 â€” Demande de confirmation
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
+    //  EMAIL 1 — Demande de confirmation
+    // ═══════════════════════════════════════════
     private function sendPendingEmail(Participation $participation): void
     {
         $user = $participation->getUtilisateur();
@@ -156,7 +156,7 @@ class ParticipationService
             'Confirmez votre participation',
             '
             <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
-            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre demande de participation a Ã©tÃ© enregistrÃ©e. Veuillez confirmer en cliquant sur le bouton ci-dessous.</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre demande de participation a été enregistrée. Veuillez confirmer en cliquant sur le bouton ci-dessous.</p>
 
             <!-- Event card -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f8f5;border-radius:12px;margin-bottom:24px">
@@ -164,19 +164,19 @@ class ParticipationService
                     <p style="margin:0 0 4px;font-family:\'Playfair Display\',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24">' . htmlspecialchars((string) $evt->getTitre()) . '</p>
                     <table cellpadding="0" cellspacing="0" style="margin-top:12px">
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">ðŸ“…</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' â€” ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">â°</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' â€“ ' . $evt->getHoraireFin()?->format('H:i') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">⏰</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' – ' . $evt->getHoraireFin()?->format('H:i') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ“</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ‘¥</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">👥</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $participation->getTotalPersonnes() . ' personne(s) (vous + ' . $participation->getNombreAccompagnants() . ' accompagnant(s))</td>
                         </tr>
                     </table>
@@ -193,7 +193,7 @@ class ParticipationService
             <!-- Status badge -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:24px">
                 <tr><td style="background:#fff3cd;color:#856404;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
-                    â³ En attente de confirmation
+                    ⏳ En attente de confirmation
                 </td></tr>
             </table>
 
@@ -201,27 +201,27 @@ class ParticipationService
             <table width="100%" cellpadding="0" cellspacing="0">
                 <tr><td align="center" style="padding:8px 0 24px">
                     <a href="' . htmlspecialchars($confirmUrl) . '" style="display:inline-block;background:#20452c;color:#ffffff;padding:14px 40px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;letter-spacing:.3px">
-                        âœ… Confirmer ma participation
+                        ✅ Confirmer ma participation
                     </a>
                 </td></tr>
             </table>
 
-            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Votre code de participation vous sera envoyÃ© aprÃ¨s confirmation.</p>
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Votre code de participation vous sera envoyé après confirmation.</p>
             '
         );
 
         $email = (new Email())
             ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
-            ->subject('FIRMA â€” Confirmez votre participation : ' . $evt->getTitre())
+            ->subject('FIRMA — Confirmez votre participation : ' . $evt->getTitre())
             ->html($html);
 
         $this->mailer->send($email);
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  EMAIL 2 â€” Participation confirmÃ©e + code
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
+    //  EMAIL 2 — Participation confirmée + code
+    // ═══════════════════════════════════════════
     private function sendConfirmedEmail(Participation $participation): void
     {
         $user = $participation->getUtilisateur();
@@ -237,24 +237,24 @@ class ParticipationService
         }
 
         $html = $this->buildEmailLayout(
-            'Participation confirmÃ©e !',
+            'Participation confirmée !',
             '
             <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
-            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre participation a Ã©tÃ© <strong style="color:#27ae60">confirmÃ©e</strong> avec succÃ¨s !</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre participation a été <strong style="color:#27ae60">confirmée</strong> avec succès !</p>
 
             <!-- Code card -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a3a24;border-radius:12px;margin-bottom:24px">
                 <tr><td style="padding:24px;text-align:center;background:#1a3a24;border-radius:12px">
                     <p style="margin:0 0 6px;color:#fffade;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600">Votre code de participation</p>
                     <p style="margin:0;font-family:\'Courier New\',monospace;font-size:32px;font-weight:700;color:#fffade;letter-spacing:4px">' . htmlspecialchars((string) $participation->getCodeParticipation()) . '</p>
-                    <p style="margin:8px 0 0;color:#a8c5b0;font-size:12px">Conservez ce code, il vous sera demandÃ© Ã  l\'entrÃ©e</p>
+                    <p style="margin:8px 0 0;color:#a8c5b0;font-size:12px">Conservez ce code, il vous sera demandé à l\'entrée</p>
                 </td></tr>
             </table>
 
             <!-- Confirmed badge -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
                 <tr><td style="background:#d4edda;color:#155724;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
-                    âœ… ConfirmÃ©
+                    ✅ Confirmé
                 </td></tr>
             </table>
 
@@ -264,19 +264,19 @@ class ParticipationService
                     <p style="margin:0 0 4px;font-family:\'Playfair Display\',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24">' . htmlspecialchars((string) $evt->getTitre()) . '</p>
                     <table cellpadding="0" cellspacing="0" style="margin-top:12px">
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">ðŸ“…</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' â€” ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">â°</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' â€“ ' . $evt->getHoraireFin()?->format('H:i') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">⏰</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' – ' . $evt->getHoraireFin()?->format('H:i') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ“</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ‘¥</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">👥</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $participation->getTotalPersonnes() . ' personne(s)</td>
                         </tr>
                     </table>
@@ -289,7 +289,7 @@ class ParticipationService
                 ' . $accompHtml . '
             </table>' : '') . '
 
-            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Ã€ bientÃ´t Ã  l\'Ã©vÃ©nement !</p>
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">À bientôt à l\'événement !</p>
             '
         );
 
@@ -299,7 +299,7 @@ class ParticipationService
         $email = (new Email())
             ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
-            ->subject('FIRMA â€” Participation confirmÃ©e : ' . $evt->getTitre())
+            ->subject('FIRMA — Participation confirmée : ' . $evt->getTitre())
             ->html($html)
             ->attach($pdfContent, 'Tickets_FIRMA_' . $participation->getCodeParticipation() . '.pdf', 'application/pdf');
 
@@ -308,8 +308,8 @@ class ParticipationService
 
     private function getTicketBaseUrl(): string
     {
-        // 1) PrioritÃ© Ã  la config explicite (recommandÃ© pour scan mobile)
-        //    DÃ©finir TICKET_BASE_URL dans .env.local, ex: TICKET_BASE_URL=http://192.168.1.42:8000
+        // 1) Priorité à la config explicite (recommandé pour scan mobile)
+        //    Définir TICKET_BASE_URL dans .env.local, ex: TICKET_BASE_URL=http://192.168.1.42:8000
         $envBase = $_ENV['TICKET_BASE_URL'] ?? $_SERVER['TICKET_BASE_URL'] ?? getenv('TICKET_BASE_URL');
         if (is_string($envBase) && $envBase !== '') {
             return rtrim($envBase, '/') . '/ticket/';
@@ -338,9 +338,9 @@ class ParticipationService
         return 'data:image/png;base64,' . base64_encode($builder->build()->getString());
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     //  PDF ticket generation (same structure as client-side)
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     private function generateTicketsPdf(Participation $participation): string
     {
         $evt  = $participation->getEvenement();
@@ -423,12 +423,12 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
 
         $dateStr = $evt->getDateDebut()?->format('d/m/Y') ?? '';
         if ($evt->getDateFin() && $evt->getDateFin()->format('Y-m-d') !== $evt->getDateDebut()?->format('Y-m-d')) {
-            $dateStr .= ' â€” ' . $evt->getDateFin()->format('d/m/Y');
+            $dateStr .= ' — ' . $evt->getDateFin()->format('d/m/Y');
         }
-        $timeStr = ($evt->getHoraireDebut()?->format('H:i') ?? '') . ' â€” ' . ($evt->getHoraireFin()?->format('H:i') ?? '');
+        $timeStr = ($evt->getHoraireDebut()?->format('H:i') ?? '') . ' — ' . ($evt->getHoraireFin()?->format('H:i') ?? '');
         $locStr  = $e($evt->getLieu() ?? '');
         if ($evt->getAdresse()) {
-            $locStr .= ' â€” ' . $e($evt->getAdresse());
+            $locStr .= ' — ' . $e($evt->getAdresse());
         }
 
         return '
@@ -450,9 +450,9 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
             <td style="vertical-align:top;width:60%">
                 <p class="tkt-person-label">' . $e($personLabel) . '</p>
                 <p class="tkt-person">' . $e($personName) . '</p>
-                <div class="tkt-detail-row"><span class="tkt-detail-icon">ðŸ“…</span> ' . $dateStr . '</div>
-                <div class="tkt-detail-row"><span class="tkt-detail-icon">â°</span> ' . $timeStr . '</div>
-                <div class="tkt-detail-row"><span class="tkt-detail-icon">ðŸ“</span> ' . $locStr . '</div>
+                <div class="tkt-detail-row"><span class="tkt-detail-icon">📅</span> ' . $dateStr . '</div>
+                <div class="tkt-detail-row"><span class="tkt-detail-icon">⏰</span> ' . $timeStr . '</div>
+                <div class="tkt-detail-row"><span class="tkt-detail-icon">📍</span> ' . $locStr . '</div>
             </td>
             <td class="tkt-qr-box" style="vertical-align:middle;text-align:center;width:40%">
                 <img src="' . $qrSvg . '" alt="QR" />
@@ -466,16 +466,16 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
     <hr class="tkt-divider">
     <div class="tkt-footer">
         <table><tr>
-            <td>FIRMA â€” Ã‰vÃ©nements & Salons</td>
-            <td style="text-align:right">PrÃ©sentez ce ticket Ã  l\'entrÃ©e</td>
+            <td>FIRMA — Événements & Salons</td>
+            <td style="text-align:right">Présentez ce ticket à l\'entrée</td>
         </tr></table>
     </div>
 </div>';
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  EMAIL 3 â€” Participation modifiÃ©e + nouveaux tickets
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
+    //  EMAIL 3 — Participation modifiée + nouveaux tickets
+    // ═══════════════════════════════════════════
     private function sendModificationEmail(Participation $participation): void
     {
         $user = $participation->getUtilisateur();
@@ -491,10 +491,10 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         }
 
         $html = $this->buildEmailLayout(
-            'Participation modifiÃ©e',
+            'Participation modifiée',
             '
             <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
-            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre participation a Ã©tÃ© <strong style="color:#2980b9">modifiÃ©e</strong> avec succÃ¨s. Vous trouverez vos nouveaux tickets en piÃ¨ce jointe.</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Votre participation a été <strong style="color:#2980b9">modifiée</strong> avec succès. Vous trouverez vos nouveaux tickets en pièce jointe.</p>
 
             <!-- Code card -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a3a24;border-radius:12px;margin-bottom:24px">
@@ -507,7 +507,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
             <!-- Modified badge -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
                 <tr><td style="background:#d1ecf1;color:#0c5460;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
-                    âœï¸ Modification effectuÃ©e
+                    ✏️ Modification effectuée
                 </td></tr>
             </table>
 
@@ -517,19 +517,19 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
                     <p style="margin:0 0 4px;font-family:\'Playfair Display\',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24">' . htmlspecialchars((string) $evt->getTitre()) . '</p>
                     <table cellpadding="0" cellspacing="0" style="margin-top:12px">
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">ðŸ“…</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' â€” ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">â°</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' â€“ ' . $evt->getHoraireFin()?->format('H:i') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">⏰</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' – ' . $evt->getHoraireFin()?->format('H:i') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ“</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ‘¥</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">👥</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $participation->getTotalPersonnes() . ' personne(s) (vous + ' . $participation->getNombreAccompagnants() . ' accompagnant(s))</td>
                         </tr>
                     </table>
@@ -542,7 +542,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
                 ' . $accompHtml . '
             </table>' : '') . '
 
-            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Vos nouveaux tickets sont en piÃ¨ce jointe de cet email.</p>
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Vos nouveaux tickets sont en pièce jointe de cet email.</p>
             '
         );
 
@@ -552,16 +552,16 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         $email = (new Email())
             ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
-            ->subject('FIRMA â€” Participation modifiÃ©e : ' . $evt->getTitre())
+            ->subject('FIRMA — Participation modifiée : ' . $evt->getTitre())
             ->html($html)
             ->attach($pdfContent, 'Tickets_FIRMA_' . $participation->getCodeParticipation() . '.pdf', 'application/pdf');
 
         $this->mailer->send($email);
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     //  HTML email layout wrapper
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
     private function buildEmailLayout(string $title, string $bodyContent): string
     {
         return '<!DOCTYPE html>
@@ -575,7 +575,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
             <!-- Header -->
             <tr><td style="background:#1a3a24;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center">
                 <p style="margin:0;font-family:\'Playfair Display\',Georgia,serif;font-size:28px;font-weight:700;color:#fffade;letter-spacing:.5px">FIRMA</p>
-                <p style="margin:4px 0 0;font-size:12px;color:#a8c5b0;text-transform:uppercase;letter-spacing:2px">Ã‰vÃ©nements & Salons</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#a8c5b0;text-transform:uppercase;letter-spacing:2px">Événements & Salons</p>
             </td></tr>
 
             <!-- Title bar -->
@@ -590,8 +590,8 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
 
             <!-- Footer -->
             <tr><td style="padding:20px 32px;text-align:center">
-                <p style="margin:0;font-size:12px;color:#8a9a8e">Â© ' . date('Y') . ' FIRMA â€” Tous droits rÃ©servÃ©s</p>
-                <p style="margin:4px 0 0;font-size:11px;color:#aab5ac">Cet email a Ã©tÃ© envoyÃ© automatiquement, merci de ne pas y rÃ©pondre.</p>
+                <p style="margin:0;font-size:12px;color:#8a9a8e">© ' . date('Y') . ' FIRMA — Tous droits réservés</p>
+                <p style="margin:4px 0 0;font-size:11px;color:#aab5ac">Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
             </td></tr>
 
         </table>
@@ -602,7 +602,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
     }
 
     /**
-     * Met Ã  jour une participation (accompagnants + commentaire).
+     * Met à jour une participation (accompagnants + commentaire).
      *
      * @param Accompagnant[] $newAccompagnants
      */
@@ -619,7 +619,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         $evt   = $participation->getEvenement();
         $evtId = $evt?->getIdEvenement();
         if (null === $evtId) {
-            throw new \RuntimeException('Ã‰vÃ©nement non persistÃ©.');
+            throw new \RuntimeException('Événement non persisté.');
         }
 
         // Ajuster les places si le nombre change
@@ -661,7 +661,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         return $participation;
     }
 
-    /** Annule une participation et libÃ¨re les places. */
+    /** Annule une participation et libère les places. */
     public function annuler(Participation $participation): void
     {
         $total = $participation->getTotalPersonnes();
@@ -675,7 +675,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         }
     }
 
-    // â”€â”€ Lecture â”€â”€
+    // ── Lecture ──
 
     public function getById(int $id): ?Participation
     {
@@ -697,14 +697,14 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         return $this->participationRepo->findActiveByUser($userId);
     }
 
-    /** Annule toutes les participations actives d'un Ã©vÃ©nement. */
+    /** Annule toutes les participations actives d'un événement. */
     public function cancelAllForEvent(int $evenementId): int
     {
         return $this->participationRepo->cancelAllByEvent($evenementId);
     }
 
     /**
-     * Participations d'un Ã©vÃ©nement (admin).
+     * Participations d'un événement (admin).
      *
      * @return Participation[]
      */
@@ -714,7 +714,7 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
     }
 
     /**
-     * DÃ©tails complets (participation + user) pour l'admin.
+     * Détails complets (participation + user) pour l'admin.
      *
      * @return array<int, mixed>
      */
@@ -733,24 +733,24 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         return $this->participationRepo->findByUserAndEvent($userId, $evenementId);
     }
 
-    /** Nombre de participations confirmÃ©es pour un Ã©vÃ©nement. */
+    /** Nombre de participations confirmées pour un événement. */
     public function countConfirmedByEvent(int $evenementId): int
     {
         return $this->participationRepo->countConfirmedByEvent($evenementId);
     }
 
-    /** Total des personnes (participants + accompagnants confirmÃ©s). */
+    /** Total des personnes (participants + accompagnants confirmés). */
     public function countTotalPersonnesByEvent(int $evenementId): int
     {
         return $this->participationRepo->countTotalPersonnesByEvent($evenementId);
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  EMAIL 3 â€” Ã‰vÃ©nement modifiÃ©
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
+    //  EMAIL 3 — Événement modifié
+    // ═══════════════════════════════════════════
 
     /**
-     * Notifie tous les participants actifs qu'un Ã©vÃ©nement a Ã©tÃ© modifiÃ©.
+     * Notifie tous les participants actifs qu'un événement a été modifié.
      */
     public function notifyEventModified(Evenement $evt): void
     {
@@ -778,15 +778,15 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         }
 
         $html = $this->buildEmailLayout(
-            'Ã‰vÃ©nement mis Ã  jour',
+            'Événement mis à jour',
             '
             <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
-            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">L\'Ã©vÃ©nement auquel vous participez a Ã©tÃ© <strong style="color:#e67e22">modifiÃ©</strong>. Voici les nouveaux dÃ©tails :</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">L\'événement auquel vous participez a été <strong style="color:#e67e22">modifié</strong>. Voici les nouveaux détails :</p>
 
             <!-- Updated badge -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
                 <tr><td style="background:#fef3e2;color:#e67e22;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
-                    ðŸ”„ DÃ©tails mis Ã  jour
+                    🔄 Détails mis à jour
                 </td></tr>
             </table>
 
@@ -797,19 +797,19 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
                     ' . ($evt->getDescription() ? '<p style="margin:8px 0 12px;font-size:14px;color:#5a6e5f">' . htmlspecialchars($evt->getDescription()) . '</p>' : '') . '
                     <table cellpadding="0" cellspacing="0" style="margin-top:12px">
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">ðŸ“…</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' â€” ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">â°</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' â€“ ' . $evt->getHoraireFin()?->format('H:i') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">⏰</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . $evt->getHoraireDebut()?->format('H:i') . ' – ' . $evt->getHoraireFin()?->format('H:i') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ“</td>
-                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . ($evt->getAdresse() ? ' â€” ' . htmlspecialchars($evt->getAdresse()) : '') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
+                            <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getLieu() ?? '') . ($evt->getAdresse() ? ' — ' . htmlspecialchars($evt->getAdresse()) : '') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ·ï¸</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">🏷️</td>
                             <td style="padding:4px 0;color:#2d2d2d;font-size:14px">' . htmlspecialchars($evt->getOrganisateur() ?? '') . '</td>
                         </tr>
                     </table>
@@ -817,25 +817,25 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
             </table>
 
             <p style="font-size:14px;color:#5a6e5f;margin:0 0 8px;text-align:center">Votre participation reste valide. Aucune action n\'est requise de votre part.</p>
-            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Si vous avez des questions, n\'hÃ©sitez pas Ã  nous contacter.</p>
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Si vous avez des questions, n\'hésitez pas à nous contacter.</p>
             '
         );
 
         $email = (new Email())
             ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
-            ->subject('FIRMA â€” Ã‰vÃ©nement modifiÃ© : ' . $evt->getTitre())
+            ->subject('FIRMA — Événement modifié : ' . $evt->getTitre())
             ->html($html);
 
         $this->mailer->send($email);
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  EMAIL 4 â€” Ã‰vÃ©nement annulÃ©
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════
+    //  EMAIL 4 — Événement annulé
+    // ═══════════════════════════════════════════
 
     /**
-     * Notifie tous les participants actifs qu'un Ã©vÃ©nement a Ã©tÃ© annulÃ©.
+     * Notifie tous les participants actifs qu'un événement a été annulé.
      */
     public function notifyEventCancelled(Evenement $evt): void
     {
@@ -863,15 +863,15 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
         }
 
         $html = $this->buildEmailLayout(
-            'Ã‰vÃ©nement annulÃ©',
+            'Événement annulé',
             '
             <p style="font-size:16px;color:#2d2d2d;margin:0 0 8px">Bonjour <strong>' . htmlspecialchars($user->getPrenom() . ' ' . $user->getNom()) . '</strong>,</p>
-            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Nous avons le regret de vous informer que l\'Ã©vÃ©nement suivant a Ã©tÃ© <strong style="color:#e74c3c">annulÃ©</strong>.</p>
+            <p style="font-size:15px;color:#5a6e5f;margin:0 0 24px">Nous avons le regret de vous informer que l\'événement suivant a été <strong style="color:#e74c3c">annulé</strong>.</p>
 
             <!-- Cancelled badge -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:20px">
                 <tr><td style="background:#fde8e8;color:#e74c3c;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600">
-                    âŒ Ã‰vÃ©nement annulÃ©
+                    ❌ Événement annulé
                 </td></tr>
             </table>
 
@@ -881,11 +881,11 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
                     <p style="margin:0 0 4px;font-family:\'Playfair Display\',Georgia,serif;font-size:20px;font-weight:700;color:#1a3a24;text-decoration:line-through">' . htmlspecialchars((string) $evt->getTitre()) . '</p>
                     <table cellpadding="0" cellspacing="0" style="margin-top:12px">
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">ðŸ“…</td>
-                            <td style="padding:4px 0;color:#999;font-size:14px;text-decoration:line-through">' . $evt->getDateDebut()?->format('d/m/Y') . ' â€” ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;width:30px;vertical-align:top">📅</td>
+                            <td style="padding:4px 0;color:#999;font-size:14px;text-decoration:line-through">' . $evt->getDateDebut()?->format('d/m/Y') . ' — ' . $evt->getDateFin()?->format('d/m/Y') . '</td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">ðŸ“</td>
+                            <td style="padding:4px 0;color:#5a6e5f;font-size:14px;vertical-align:top">📍</td>
                             <td style="padding:4px 0;color:#999;font-size:14px;text-decoration:line-through">' . htmlspecialchars($evt->getLieu() ?? '') . '</td>
                         </tr>
                     </table>
@@ -895,19 +895,19 @@ body{font-family:DejaVu Sans,Helvetica,Arial,sans-serif;font-size:12px;color:#2d
             <!-- Apology message -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f0;border-left:4px solid #e67e22;border-radius:0 8px 8px 0;margin-bottom:24px">
                 <tr><td style="padding:16px 20px">
-                    <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#2d2d2d">Nous sommes sincÃ¨rement dÃ©solÃ©s</p>
-                    <p style="margin:0;font-size:14px;color:#5a6e5f;line-height:1.6">Nous comprenons votre dÃ©ception et nous nous excusons pour ce dÃ©sagrÃ©ment. Notre Ã©quipe travaille activement pour organiser de nouveaux Ã©vÃ©nements qui, nous l\'espÃ©rons, sauront vous satisfaire. Restez connectÃ© pour dÃ©couvrir nos prochaines dates !</p>
+                    <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#2d2d2d">Nous sommes sincèrement désolés</p>
+                    <p style="margin:0;font-size:14px;color:#5a6e5f;line-height:1.6">Nous comprenons votre déception et nous nous excusons pour ce désagrément. Notre équipe travaille activement pour organiser de nouveaux événements qui, nous l\'espérons, sauront vous satisfaire. Restez connecté pour découvrir nos prochaines dates !</p>
                 </td></tr>
             </table>
 
-            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Votre participation a Ã©tÃ© automatiquement annulÃ©e. Merci pour votre comprÃ©hension.</p>
+            <p style="font-size:13px;color:#8a9a8e;text-align:center;margin:0">Votre participation a été automatiquement annulée. Merci pour votre compréhension.</p>
             '
         );
 
         $email = (new Email())
             ->from('FIRMA <firmaagritech@gmail.com>')
             ->to($user->getEmail())
-            ->subject('FIRMA â€” Ã‰vÃ©nement annulÃ© : ' . $evt->getTitre())
+            ->subject('FIRMA — Événement annulé : ' . $evt->getTitre())
             ->html($html);
 
         $this->mailer->send($email);

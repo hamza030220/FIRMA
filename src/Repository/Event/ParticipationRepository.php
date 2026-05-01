@@ -32,6 +32,38 @@ class ParticipationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Retourne un map [eventId => true] pour les événements où l'utilisateur a une participation
+     * non annulée. Une seule requête au lieu de N.
+     *
+     * @param list<int> $eventIds
+     * @return array<int, bool>
+     */
+    public function findUserParticipationMap(int $userId, array $eventIds): array
+    {
+        if ($eventIds === []) {
+            return [];
+        }
+
+        /** @var list<array{eid: int}> $rows */
+        $rows = $this->createQueryBuilder('p')
+            ->select('IDENTITY(p.evenement) AS eid')
+            ->andWhere('p.utilisateur = :uid')
+            ->andWhere('p.evenement IN (:eids)')
+            ->andWhere('p.statut != :cancelled')
+            ->setParameter('uid', $userId)
+            ->setParameter('eids', $eventIds)
+            ->setParameter('cancelled', 'annule')
+            ->getQuery()
+            ->getArrayResult();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) $row['eid']] = true;
+        }
+        return $map;
+    }
+
+    /**
      * Participations actives (confirmées ou en attente) d'un événement.
      * @return list<Participation>
      */

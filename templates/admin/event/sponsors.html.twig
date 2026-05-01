@@ -55,7 +55,7 @@
                     <div class="sp-card">
                         <div class="sp-card__logo">
                             {% if s.logoUrl %}
-                                <img src="{{ s.logoUrl }}" alt="{{ s.nom }}">
+                                <img src="{{ s.logoUrl }}" alt="{{ s.nom }}" loading="lazy" decoding="async">
                             {% else %}
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
                             {% endif %}
@@ -255,7 +255,7 @@
                            data-search="{{ s.nom|lower }} {{ s.secteurActivite|lower }} {{ s.emailContact|lower }}">
                             <div class="sp-form__picker-logo">
                                 {% if s.logoUrl %}
-                                    <img src="{{ s.logoUrl }}" alt="">
+                                    <img src="{{ s.logoUrl }}" alt="" loading="lazy" decoding="async">
                                 {% else %}
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3b5a8" stroke-width="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
                                 {% endif %}

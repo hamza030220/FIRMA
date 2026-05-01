@@ -11,6 +11,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EvenementRepository::class)]
 #[ORM\Table(name: 'evenements')]
+#[ORM\Index(columns: ['statut'], name: 'idx_evt_statut')]
+#[ORM\Index(columns: ['date_debut'], name: 'idx_evt_date_debut')]
+#[ORM\Index(columns: ['type_evenement'], name: 'idx_evt_type')]
 #[ORM\HasLifecycleCallbacks]
 class Evenement
 {
@@ -57,6 +60,14 @@ class Evenement
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Length(max: 255, maxMessage: 'L\'adresse ne peut pas dépasser {{ limit }} caractères')]
     private ?string $adresse = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 7, nullable: true)]
+    #[Assert\Range(min: -90, max: 90, notInRangeMessage: 'La latitude doit être entre {{ min }} et {{ max }}')]
+    private ?string $latitude = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 7, nullable: true)]
+    #[Assert\Range(min: -180, max: 180, notInRangeMessage: 'La longitude doit être entre {{ min }} et {{ max }}')]
+    private ?string $longitude = null;
 
     #[ORM\Column(name: 'capacite_max')]
     #[Assert\NotNull(message: 'La capacité est requise')]
@@ -176,6 +187,14 @@ class Evenement
 
     public function getAdresse(): ?string { return $this->adresse; }
     public function setAdresse(?string $adresse): static { $this->adresse = $adresse; return $this; }
+
+    public function getLatitude(): ?string { return $this->latitude; }
+    public function setLatitude(?string $latitude): static { $this->latitude = $latitude; return $this; }
+
+    public function getLongitude(): ?string { return $this->longitude; }
+    public function setLongitude(?string $longitude): static { $this->longitude = $longitude; return $this; }
+
+    public function hasCoordinates(): bool { return $this->latitude !== null && $this->longitude !== null; }
 
     public function getCapaciteMax(): ?int { return $this->capaciteMax; }
     public function setCapaciteMax(?int $capaciteMax): static { $this->capaciteMax = $capaciteMax; return $this; }

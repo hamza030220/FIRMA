@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['date_reservation'], name: 'idx_loc_date_reservation')]
 #[ORM\Index(columns: ['statut'], name: 'idx_loc_statut')]
 #[ORM\Index(columns: ['type_location'], name: 'idx_loc_type')]
+#[ORM\Index(columns: ['type_location', 'date_debut', 'date_fin', 'statut'], name: 'idx_loc_booking_check')]
 class Location
 {
     #[ORM\Id]

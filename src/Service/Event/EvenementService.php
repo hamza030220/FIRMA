@@ -11,6 +11,7 @@ class EvenementService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly EvenementRepository $repo,
+        private readonly GeocodingService $geocoder,
     ) {}
 
     /**
@@ -21,6 +22,16 @@ class EvenementService
     public function getAll(): array
     {
         return $this->repo->findAllOrdered();
+    }
+
+    /**
+     * Page paginée côté SQL.
+     *
+     * @return array{items: list<Evenement>, total: int}
+     */
+    public function getPaginated(int $page, int $limit, string $search = '', string $sort = 'date_asc'): array
+    {
+        return $this->repo->findPaginated($page, $limit, $search, $sort);
     }
 
     public function getById(int $id): ?Evenement
@@ -51,6 +62,7 @@ class EvenementService
     /** Crée un nouvel événement. */
     public function create(Evenement $evenement): Evenement
     {
+        $this->geocode($evenement);
         $this->em->persist($evenement);
         $this->em->flush();
 
@@ -60,10 +72,31 @@ class EvenementService
     /** Met à jour un événement existant. */
     public function update(Evenement $evenement): Evenement
     {
+        $this->geocode($evenement);
         $evenement->setDateModification(new \DateTime());
         $this->em->flush();
 
         return $evenement;
+    }
+
+    /**
+     * Populate latitude/longitude from address fields when missing or empty.
+     * Silently skips on failure (the entity stays valid without coordinates).
+     */
+    private function geocode(Evenement $evt): void
+    {
+        if ($evt->hasCoordinates()) {
+            return;
+        }
+        $candidates = $this->geocoder->buildCandidates($evt->getAdresse(), $evt->getLieu());
+        if ($candidates === []) {
+            return;
+        }
+        $coords = $this->geocoder->geocodeBest($candidates);
+        if ($coords !== null) {
+            $evt->setLatitude((string) $coords['lat']);
+            $evt->setLongitude((string) $coords['lng']);
+        }
     }
 
     /** Supprime un événement. */

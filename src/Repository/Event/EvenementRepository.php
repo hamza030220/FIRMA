@@ -30,6 +30,47 @@ class EvenementRepository extends ServiceEntityRepository
     }
 
     /**
+     * Page d'événements paginée côté SQL avec recherche et tri optionnels.
+     *
+     * @return array{items: list<Evenement>, total: int}
+     */
+    public function findPaginated(int $page, int $limit, string $search = '', string $sort = 'date_asc'): array
+    {
+        $page  = max(1, $page);
+        $limit = max(1, $limit);
+
+        $qb = $this->createQueryBuilder('e');
+
+        if ($search !== '') {
+            $qb->andWhere('LOWER(e.titre) LIKE :q OR LOWER(e.organisateur) LIKE :q OR LOWER(e.lieu) LIKE :q')
+               ->setParameter('q', '%' . mb_strtolower($search) . '%');
+        }
+
+        match ($sort) {
+            'date_desc'  => $qb->orderBy('e.dateDebut', 'DESC'),
+            'titre_asc'  => $qb->orderBy('e.titre', 'ASC'),
+            'titre_desc' => $qb->orderBy('e.titre', 'DESC'),
+            'places'     => $qb->orderBy('e.placesDisponibles', 'DESC'),
+            'statut'     => $qb->orderBy('e.statut', 'ASC'),
+            default      => $qb->orderBy('e.dateDebut', 'ASC'),
+        };
+
+        $countQb = clone $qb;
+        $total = (int) $countQb->select('COUNT(e.idEvenement)')
+            ->resetDQLPart('orderBy')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        /** @var list<Evenement> $items */
+        $items = $qb->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return ['items' => $items, 'total' => $total];
+    }
+
+    /**
      * Recherche par titre (LIKE insensible à la casse).
      * @return list<Evenement>
      */

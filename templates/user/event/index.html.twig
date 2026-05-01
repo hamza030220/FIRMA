@@ -1355,16 +1355,27 @@ document.addEventListener('DOMContentLoaded', function() {
     async function geocodeEvents(events, progressText) {
         var geocoded = [];
         var total = events.length;
+        var needsGeocoding = events.filter(function(e) { return e.lat == null || e.lng == null; }).length;
+        var processed = 0;
 
         for (var i = 0; i < total; i++) {
             var evt = events[i];
-            progressText.textContent = 'Géocodage... (' + (i + 1) + '/' + total + ')';
 
-            // Build address string: prefer adresse, fallback to lieu
+            // Server-provided coordinates (preferred path — no API call)
+            if (evt.lat != null && evt.lng != null) {
+                evt._geocoded = true;
+                evt._distance = null;
+                geocoded.push({ lat: evt.lat, lng: evt.lng, evt: evt });
+                continue;
+            }
+
+            // Fallback: client-side geocoding for legacy events without coordinates
+            processed++;
+            progressText.textContent = 'Géocodage... (' + processed + '/' + needsGeocoding + ')';
+
             var addr = evt.adresse || evt.lieu || '';
             if (!addr) { continue; }
 
-            // Check cache first (no delay needed)
             var cache = getGeocodeCache();
             var key = addr.trim().toLowerCase();
             var cached = cache[key];
@@ -1374,8 +1385,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 result = cached;
             } else {
                 result = await geocodeAddress(addr);
-                // Respect Nominatim rate limit: only delay if we actually made a request
-                if (i < total - 1) {
+                if (processed < needsGeocoding) {
                     await delay(1100);
                 }
             }

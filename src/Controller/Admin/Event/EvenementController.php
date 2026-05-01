@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Asset\Packages;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[Route('/admin/evenements')]
 #[IsGranted('ROLE_ADMIN')]
@@ -32,6 +34,7 @@ class EvenementController extends AbstractController
         private readonly ParticipationRepository $participationRepo,
         private readonly SponsorRepository $sponsorRepo,
         private readonly Packages $packages,
+        private readonly CacheInterface $cache,
     ) {}
 
     /**
@@ -43,27 +46,14 @@ class EvenementController extends AbstractController
         $tab    = $overrideTab ?? (string) $request->query->get('tab', 'liste');
         $search = (string) $request->query->get('q', '');
         $sort   = (string) $request->query->get('sort', 'date_desc');
+        $page   = max(1, $request->query->getInt('page', 1));
+        $limit  = 6;
 
-        $evenements = $search
-            ? $this->evenementService->search($search)
-            : $this->evenementService->getAll();
-
-        usort($evenements, match ($sort) {
-            'date_desc'  => fn($a, $b) => $b->getDateDebut() <=> $a->getDateDebut(),
-            'titre_asc'  => fn($a, $b) => strcasecmp($a->getTitre(), $b->getTitre()),
-            'titre_desc' => fn($a, $b) => strcasecmp($b->getTitre(), $a->getTitre()),
-            'places'     => fn($a, $b) => $b->getPlacesDisponibles() <=> $a->getPlacesDisponibles(),
-            'statut'     => fn($a, $b) => strcmp($a->getStatut(), $b->getStatut()),
-            default      => fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut(),
-        });
-
-        // Pagination
-        $page  = max(1, $request->query->getInt('page', 1));
-        $limit = 6;
-        $totalEvt = count($evenements);
+        $result = $this->evenementService->getPaginated($page, $limit, $search, $sort);
+        $paginatedEvenements = $result['items'];
+        $totalEvt = $result['total'];
         $totalPages = max(1, (int) ceil($totalEvt / $limit));
         $page = min($page, $totalPages);
-        $paginatedEvenements = array_slice($evenements, ($page - 1) * $limit, $limit);
 
         $participationCounts = [];
         foreach ($paginatedEvenements as $evt) {
@@ -92,19 +82,23 @@ class EvenementController extends AbstractController
             }
         }
 
-        $dashStats = [
-            'totalEvents'       => $this->evenementRepo->countAll(),
-            'eventsActifs'      => $this->evenementRepo->countActifs(),
-            'eventsCetteSemaine'=> $this->evenementRepo->countCetteSemaine(),
-            'eventsCeMois'      => $this->evenementRepo->countCeMois(),
-            'tauxRemplissage'   => $this->evenementRepo->tauxRemplissageMoyen(),
-            'totalParticipants' => $this->participationRepo->countTotalParticipants(),
-            'participConfirm'   => $this->participationRepo->countConfirmees(),
-            'participAttente'   => $this->participationRepo->countEnAttente(),
-            'totalSponsors'     => count($catalogSponsors),
-            'sponsorsAssignes'  => $this->sponsorRepo->countAssignes(),
-            'totalContributions'=> $this->sponsorRepo->totalContributions(),
-        ];
+        /** @var array<string, mixed> $dashStats */
+        $dashStats = $this->cache->get('admin_event_dashboard_stats', function (ItemInterface $item) use ($catalogSponsors): array {
+            $item->expiresAfter(3600);
+            return [
+                'totalEvents'       => $this->evenementRepo->countAll(),
+                'eventsActifs'      => $this->evenementRepo->countActifs(),
+                'eventsCetteSemaine'=> $this->evenementRepo->countCetteSemaine(),
+                'eventsCeMois'      => $this->evenementRepo->countCeMois(),
+                'tauxRemplissage'   => $this->evenementRepo->tauxRemplissageMoyen(),
+                'totalParticipants' => $this->participationRepo->countTotalParticipants(),
+                'participConfirm'   => $this->participationRepo->countConfirmees(),
+                'participAttente'   => $this->participationRepo->countEnAttente(),
+                'totalSponsors'     => count($catalogSponsors),
+                'sponsorsAssignes'  => $this->sponsorRepo->countAssignes(),
+                'totalContributions'=> $this->sponsorRepo->totalContributions(),
+            ];
+        });
 
         return [
             'evenements'          => $paginatedEvenements,
