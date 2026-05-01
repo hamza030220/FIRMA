@@ -188,4 +188,113 @@ class LocationTest extends TestCase
 
         $this->assertSame($this->location, $result);
     }
+
+    // ── Edge cases — prixTotal & caution ──────────────────────────────────────
+
+    public function testSetPrixTotalToZero(): void
+    {
+        $this->location->setPrixTotal('0.00');
+        $this->assertSame('0.00', $this->location->getPrixTotal());
+    }
+
+    public function testSetPrixTotalNegative(): void
+    {
+        // PHP level stores it; validation handles real constraint
+        $this->location->setPrixTotal('-100.00');
+        $this->assertSame('-100.00', $this->location->getPrixTotal());
+    }
+
+    public function testCautionDefaultValue(): void
+    {
+        $fresh = new Location();
+        $this->assertSame('0.00', $fresh->getCaution());
+    }
+
+    public function testSetCautionToNull(): void
+    {
+        $this->location->setCaution(null);
+        $this->assertNull($this->location->getCaution());
+    }
+
+    // ── Edge cases — dureeJours ───────────────────────────────────────────────
+
+    public function testSetDureeJoursToZero(): void
+    {
+        $this->location->setDureeJours(0);
+        $this->assertSame(0, $this->location->getDureeJours());
+    }
+
+    public function testSetDureeJoursToNegative(): void
+    {
+        // Entity stores it; business logic/validators handle real constraint
+        $this->location->setDureeJours(-1);
+        $this->assertSame(-1, $this->location->getDureeJours());
+    }
+
+    // ── Edge cases — dates ────────────────────────────────────────────────────
+
+    public function testSetDateFinBeforeDateDebut(): void
+    {
+        // Entity does not enforce date order — form/validator handles it
+        $debut = new \DateTime('2026-06-01');
+        $fin   = new \DateTime('2026-05-01');
+        $this->location->setDateDebut($debut);
+        $this->location->setDateFin($fin);
+        $this->assertSame($fin, $this->location->getDateFin());
+    }
+
+    public function testDateReservationIsSetInConstructor(): void
+    {
+        $fresh = new Location();
+        $this->assertInstanceOf(\DateTimeInterface::class, $fresh->getDateReservation());
+    }
+
+    // ── Edge cases — statut ───────────────────────────────────────────────────
+
+    public function testSetStatutWithUnknownValue(): void
+    {
+        // PHP level stores any string; business logic handles valid values
+        $this->location->setStatut('inconnu');
+        $this->assertSame('inconnu', $this->location->getStatut());
+    }
+
+    // ── Edge cases — getItemName with null typeLocation ───────────────────────
+
+    public function testGetItemNameWithNullTypeLocation(): void
+    {
+        // typeLocation is null by default — getItemName should return ''
+        $fresh = new Location();
+        $this->assertSame('', $fresh->getItemName());
+    }
+
+    public function testGetItemNameWithVehiculeNomNull(): void
+    {
+        $vehicule = new Vehicule(); // nom is null
+        $this->location->setTypeLocation('vehicule');
+        $this->location->setVehicule($vehicule);
+        $this->assertSame('', $this->location->getItemName());
+    }
+
+    public function testGetItemNameBothVehiculeAndTerrainSet(): void
+    {
+        $vehicule = new Vehicule();
+        $vehicule->setNom('Tracteur');
+        $terrain = new Terrain();
+        $terrain->setTitre('Terrain Nord');
+
+        $this->location->setTypeLocation('vehicule');
+        $this->location->setVehicule($vehicule);
+        $this->location->setTerrain($terrain);
+
+        // typeLocation='vehicule' → should return vehicule name
+        $this->assertSame('Tracteur', $this->location->getItemName());
+    }
+
+    // ── Edge cases — utilisateur ──────────────────────────────────────────────
+
+    public function testSetUtilisateurToNull(): void
+    {
+        $this->location->setUtilisateur(null);
+        $this->assertNull($this->location->getUtilisateur());
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Controller\User\Event;
 
 use App\Entity\Event\Accompagnant;
+use App\Entity\User\Utilisateur;
 use App\Form\Event\ParticipationType;
 use App\Service\Event\EvenementService;
 use App\Service\Event\ParticipationService;
@@ -58,10 +59,15 @@ class EvenementController extends AbstractController
         // Vérifier participations de l'user connecté
         $user = $this->getUser();
         $userParticipations = [];
-        if ($user) {
+        if ($user instanceof Utilisateur && $user->getId() !== null) {
+            $userId = $user->getId();
             foreach ($evenements as $evt) {
-                $userParticipations[$evt->getIdEvenement()] =
-                    $this->participationRepo->isUserAlreadyParticipating($user->getId(), $evt->getIdEvenement());
+                $evtId = $evt->getIdEvenement();
+                if (null === $evtId) {
+                    continue;
+                }
+                $userParticipations[$evtId] =
+                    $this->participationRepo->isUserAlreadyParticipating($userId, $evtId);
             }
         }
 
@@ -96,7 +102,7 @@ class EvenementController extends AbstractController
 
         $sponsors = $this->sponsorRepo->findByEvenement($id);
         $user = $this->getUser();
-        $participation = $user
+        $participation = ($user instanceof Utilisateur && $user->getId() !== null)
             ? $this->participationRepo->findByUserAndEvent($user->getId(), $id)
             : null;
         $confirmedCount = $this->participationRepo->countConfirmedByEvent($id);
@@ -172,16 +178,18 @@ class EvenementController extends AbstractController
         }
 
         $data        = $form->getData();
+        \assert(\is_array($data));
         $user        = $this->getUser();
-        $nbAccomp    = $data['nb_accompagnants'] ?? 0;
+        \assert($user instanceof Utilisateur);
+        $nbAccomp    = (int) ($data['nb_accompagnants'] ?? 0);
         $commentaire = $data['commentaire'] ?? null;
-        $prenoms     = $data['accomp_prenom'] ?? [];
-        $noms        = $data['accomp_nom'] ?? [];
+        $prenoms     = (array) ($data['accomp_prenom'] ?? []);
+        $noms        = (array) ($data['accomp_nom'] ?? []);
 
         $accompagnants = [];
         for ($i = 0; $i < $nbAccomp; $i++) {
-            $prenom = trim($prenoms[$i] ?? '');
-            $nom    = trim($noms[$i] ?? '');
+            $prenom = trim((string) ($prenoms[$i] ?? ''));
+            $nom    = trim((string) ($noms[$i] ?? ''));
             if ($prenom === '' || $nom === '') {
                 return $this->json(['error' => 'Veuillez renseigner le nom et prénom de chaque accompagnant.'], 400);
             }
@@ -214,7 +222,8 @@ class EvenementController extends AbstractController
         }
 
         $user = $this->getUser();
-        if ($participation->getUtilisateur()->getId() !== $user->getId()) {
+        \assert($user instanceof Utilisateur);
+        if ($participation->getUtilisateur()?->getId() !== $user->getId()) {
             return $this->json(['error' => 'Non autorisé'], 403);
         }
 
@@ -234,7 +243,8 @@ class EvenementController extends AbstractController
         }
 
         $user = $this->getUser();
-        if ($participation->getUtilisateur()->getId() !== $user->getId()) {
+        \assert($user instanceof Utilisateur);
+        if ($participation->getUtilisateur()?->getId() !== $user->getId()) {
             return $this->json(['error' => 'Non autorisé'], 403);
         }
 
@@ -246,15 +256,16 @@ class EvenementController extends AbstractController
         }
 
         $data        = $form->getData();
-        $nbAccomp    = $data['nb_accompagnants'] ?? 0;
+        \assert(\is_array($data));
+        $nbAccomp    = (int) ($data['nb_accompagnants'] ?? 0);
         $commentaire = $data['commentaire'] ?? null;
-        $prenoms     = $data['accomp_prenom'] ?? [];
-        $noms        = $data['accomp_nom'] ?? [];
+        $prenoms     = (array) ($data['accomp_prenom'] ?? []);
+        $noms        = (array) ($data['accomp_nom'] ?? []);
 
         $accompagnants = [];
         for ($i = 0; $i < $nbAccomp; $i++) {
-            $prenom = trim($prenoms[$i] ?? '');
-            $nom    = trim($noms[$i] ?? '');
+            $prenom = trim((string) ($prenoms[$i] ?? ''));
+            $nom    = trim((string) ($noms[$i] ?? ''));
             if ($prenom === '' || $nom === '') {
                 return $this->json(['error' => 'Veuillez renseigner le nom et prénom de chaque accompagnant.'], 400);
             }
@@ -283,7 +294,10 @@ class EvenementController extends AbstractController
         $events = [];
         foreach ($allEvents as $evt) {
             $start = $evt->getDateDebut();
-            $end   = $evt->getDateFin() ?? $start;
+            if (null === $start) {
+                continue;
+            }
+            $end = $evt->getDateFin() ?? $start;
 
             if ($evt->getHoraireDebut()) {
                 $start = new \DateTime($start->format('Y-m-d') . ' ' . $evt->getHoraireDebut()->format('H:i'));
@@ -291,7 +305,10 @@ class EvenementController extends AbstractController
             if ($evt->getHoraireFin()) {
                 $end = new \DateTime($end->format('Y-m-d') . ' ' . $evt->getHoraireFin()->format('H:i'));
             } else {
-                $end = (clone $end)->modify('+1 day');
+                $endClone = clone $end;
+                \assert($endClone instanceof \DateTime);
+                $endClone->modify('+1 day');
+                $end = $endClone;
             }
 
             $events[] = [
@@ -345,11 +362,16 @@ class EvenementController extends AbstractController
     public function mesParticipations(): JsonResponse
     {
         $user = $this->getUser();
+        \assert($user instanceof Utilisateur);
+        \assert($user->getId() !== null);
         $participations = $this->participationService->getByUser($user->getId());
 
         $rows = [];
         foreach ($participations as $p) {
             $evt = $p->getEvenement();
+            if (null === $evt) {
+                continue;
+            }
             $accompList = [];
             foreach ($p->getAccompagnants() as $acc) {
                 $accompList[] = [
@@ -396,7 +418,7 @@ class EvenementController extends AbstractController
 
         $sponsors = $this->sponsorRepo->findByEvenement($id);
         $user = $this->getUser();
-        $participation = $user
+        $participation = ($user instanceof Utilisateur && $user->getId() !== null)
             ? $this->participationRepo->findByUserAndEvent($user->getId(), $id)
             : null;
 

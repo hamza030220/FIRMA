@@ -146,4 +146,125 @@ class SponsorTest extends TestCase
 
         $this->assertSame('5000.00', $clone->getMontantContribution());
     }
+
+    // ── Edge cases — montantContribution ─────────────────────────────────────
+
+    public function testSetMontantContributionZeroString(): void
+    {
+        $this->sponsor->setMontantContribution('0');
+        $this->assertSame('0', $this->sponsor->getMontantContribution());
+    }
+
+    public function testSetMontantContributionNegativeString(): void
+    {
+        // PHP level stores it; business logic / validators would reject in real usage
+        $this->sponsor->setMontantContribution('-500.00');
+        $this->assertSame('-500.00', $this->sponsor->getMontantContribution());
+    }
+
+    public function testSetMontantContributionLargeValue(): void
+    {
+        $this->sponsor->setMontantContribution('9999999.99');
+        $this->assertSame('9999999.99', $this->sponsor->getMontantContribution());
+    }
+
+    // ── Edge cases — nullable fields ──────────────────────────────────────────
+
+    public function testSetLogoUrlToNull(): void
+    {
+        $this->sponsor->setLogoUrl('logo.png');
+        $this->sponsor->setLogoUrl(null);
+        $this->assertNull($this->sponsor->getLogoUrl());
+    }
+
+    public function testSetSiteWebToNull(): void
+    {
+        $this->sponsor->setSiteWeb('https://example.com');
+        $this->sponsor->setSiteWeb(null);
+        $this->assertNull($this->sponsor->getSiteWeb());
+    }
+
+    public function testSetEmailContactToNull(): void
+    {
+        $this->sponsor->setEmailContact('a@b.com');
+        $this->sponsor->setEmailContact(null);
+        $this->assertNull($this->sponsor->getEmailContact());
+    }
+
+    public function testSetTelephoneToNull(): void
+    {
+        $this->sponsor->setTelephone('+216 70 000 000');
+        $this->sponsor->setTelephone(null);
+        $this->assertNull($this->sponsor->getTelephone());
+    }
+
+    public function testSetDescriptionToNull(): void
+    {
+        $this->sponsor->setDescription('Desc');
+        $this->sponsor->setDescription(null);
+        $this->assertNull($this->sponsor->getDescription());
+    }
+
+    public function testSetEvenementToNull(): void
+    {
+        $this->sponsor->setEvenement(new Evenement());
+        $this->sponsor->setEvenement(null);
+        $this->assertNull($this->sponsor->getEvenement());
+        $this->assertTrue($this->sponsor->isCatalog());
+    }
+
+    // ── Edge cases — secteurActivite ──────────────────────────────────────────
+
+    public function testGetSecteurEnumReturnsNullForInvalidSecteur(): void
+    {
+        $this->sponsor->setSecteurActivite('inconnu');
+        $this->assertNull($this->sponsor->getSecteurEnum());
+    }
+
+    public function testGetSecteurEnumIsCaseSensitive(): void
+    {
+        $this->sponsor->setSecteurActivite('TECH'); // uppercase — not a valid enum value
+        $this->assertNull($this->sponsor->getSecteurEnum());
+    }
+
+    // ── Edge cases — cloneForEvent ────────────────────────────────────────────
+
+    public function testCloneForEventWithZeroMontantOverride(): void
+    {
+        $this->sponsor->setMontantContribution('1000.00');
+        $clone = $this->sponsor->cloneForEvent(new Evenement(), '0');
+        $this->assertSame('0', $clone->getMontantContribution());
+    }
+
+    public function testCloneForEventOriginalIsUnchanged(): void
+    {
+        $this->sponsor->setNom('AgriCorp')->setMontantContribution('1000.00');
+        $event = new Evenement();
+        $this->sponsor->cloneForEvent($event, '9999.00');
+
+        // Original must not be affected
+        $this->assertSame('1000.00', $this->sponsor->getMontantContribution());
+        $this->assertNull($this->sponsor->getEvenement());
+    }
+
+    public function testCloneForEventDoesNotShareSameInstance(): void
+    {
+        $clone = $this->sponsor->cloneForEvent(new Evenement());
+        $this->assertNotSame($this->sponsor, $clone);
+    }
+
+    // ── Edge cases — nom ─────────────────────────────────────────────────────
+
+    public function testSetNomWithSpecialCharacters(): void
+    {
+        $this->sponsor->setNom('Agri & Co. — Tunisie');
+        $this->assertSame('Agri & Co. — Tunisie', $this->sponsor->getNom());
+    }
+
+    public function testSetNomToNull(): void
+    {
+        $this->sponsor->setNom('AgriCorp');
+        $this->sponsor->setNom(null);
+        $this->assertNull($this->sponsor->getNom());
+    }
 }

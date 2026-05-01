@@ -20,12 +20,12 @@ class Equipement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'equipements')]
+    #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'equipements', fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'categorie_id', nullable: false)]
     #[Assert\NotNull(message: 'La catégorie est obligatoire.')]
     private ?Categorie $categorie = null;
 
-    #[ORM\ManyToOne(targetEntity: Fournisseur::class, inversedBy: 'equipements')]
+    #[ORM\ManyToOne(targetEntity: Fournisseur::class, inversedBy: 'equipements', fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'fournisseur_id', nullable: false)]
     #[Assert\NotNull(message: 'Le fournisseur est obligatoire.')]
     private ?Fournisseur $fournisseur = null;

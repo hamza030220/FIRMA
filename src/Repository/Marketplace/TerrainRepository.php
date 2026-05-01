@@ -16,6 +16,10 @@ class TerrainRepository extends ServiceEntityRepository
         parent::__construct($registry, Terrain::class);
     }
 
+    /**
+     * @param array<string, string> $orderBy
+     * @return list<Terrain>
+     */
     public function findAllWithRelations(array $orderBy = ['dateCreation' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('t')
@@ -25,11 +29,14 @@ class TerrainRepository extends ServiceEntityRepository
             $qb->addOrderBy('t.' . $field, $dir);
         }
 
+        /** @var list<Terrain> */
         return $qb->getQuery()->getResult();
     }
 
+    /** @return list<Terrain> */
     public function findAvailableWithRelations(): array
     {
+        /** @var list<Terrain> */
         return $this->createQueryBuilder('t')
             ->leftJoin('t.categorie', 'c')->addSelect('c')
             ->where('t.disponible = true')
@@ -38,8 +45,10 @@ class TerrainRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<Terrain> */
     public function findAvailablePaginated(int $page, int $limit = 12): array
     {
+        /** @var list<Terrain> */
         return $this->createQueryBuilder('t')
             ->leftJoin('t.categorie', 'c')->addSelect('c')
             ->where('t.disponible = true')

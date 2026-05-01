@@ -16,6 +16,10 @@ class CommandeRepository extends ServiceEntityRepository
         parent::__construct($registry, Commande::class);
     }
 
+    /**
+     * @param array<string, string> $orderBy
+     * @return list<Commande>
+     */
     public function findAllWithUser(array $orderBy = ['dateCommande' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('c')
@@ -25,6 +29,7 @@ class CommandeRepository extends ServiceEntityRepository
             $qb->addOrderBy('c.' . $field, $dir);
         }
 
+        /** @var list<Commande> */
         return $qb->getQuery()->getResult();
     }
 }

@@ -16,6 +16,10 @@ class LocationRepository extends ServiceEntityRepository
         parent::__construct($registry, Location::class);
     }
 
+    /**
+     * @param array<string, string> $orderBy
+     * @return list<Location>
+     */
     public function findAllWithRelations(array $orderBy = ['dateReservation' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('l')
@@ -27,12 +31,14 @@ class LocationRepository extends ServiceEntityRepository
             $qb->addOrderBy('l.' . $field, $dir);
         }
 
+        /** @var list<Location> */
         return $qb->getQuery()->getResult();
     }
 
     /**
      * Find locations that overlap with a given date range for a specific vehicle or terrain.
      * Only considers active statuses (not cancelled/terminated).
+     * @return list<Location>
      */
     public function findOverlapping(string $type, int $itemId, \DateTimeInterface $start, \DateTimeInterface $end): array
     {
@@ -53,12 +59,13 @@ class LocationRepository extends ServiceEntityRepository
         }
         $qb->setParameter('itemId', $itemId);
 
+        /** @var list<Location> */
         return $qb->getQuery()->getResult();
     }
 
     /**
      * Get all booked date ranges for a specific vehicle or terrain (current & future only).
-     * Returns array of ['dateDebut' => ..., 'dateFin' => ...].
+     * @return list<array{dateDebut: \DateTimeInterface, dateFin: \DateTimeInterface}>
      */
     public function findBookedRanges(string $type, int $itemId): array
     {
@@ -79,14 +86,17 @@ class LocationRepository extends ServiceEntityRepository
         }
         $qb->setParameter('itemId', $itemId);
 
+        /** @var list<array{dateDebut: \DateTimeInterface, dateFin: \DateTimeInterface}> */
         return $qb->getQuery()->getArrayResult();
     }
 
     /**
      * Get all current & future locations with relations (for admin calendar).
+     * @return list<Location>
      */
     public function findCurrentAndFutureWithRelations(): array
     {
+        /** @var list<Location> */
         return $this->createQueryBuilder('l')
             ->leftJoin('l.utilisateur', 'u')->addSelect('u')
             ->leftJoin('l.vehicule', 'v')->addSelect('v')

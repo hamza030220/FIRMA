@@ -44,4 +44,45 @@ class TypeEvenementTest extends TestCase
     {
         $this->assertCount(6, TypeEvenement::cases());
     }
+
+    // ── Edge cases ────────────────────────────────────────────────────────────
+
+    public function testTryFromEmptyStringReturnsNull(): void
+    {
+        $this->assertNull(TypeEvenement::tryFrom(''));
+    }
+
+    public function testTryFromUppercaseReturnsNull(): void
+    {
+        // Enum values are lowercase — uppercase must not match
+        $this->assertNull(TypeEvenement::tryFrom('SALON'));
+        $this->assertNull(TypeEvenement::tryFrom('Atelier'));
+    }
+
+    public function testTryFromRandomStringReturnsNull(): void
+    {
+        $this->assertNull(TypeEvenement::tryFrom('concert'));
+        $this->assertNull(TypeEvenement::tryFrom('123'));
+    }
+
+    public function testAllLabelsAreNonEmpty(): void
+    {
+        foreach (TypeEvenement::cases() as $case) {
+            $this->assertNotEmpty($case->label(), "Label for {$case->value} must not be empty");
+        }
+    }
+
+    public function testAllValuesAreStrings(): void
+    {
+        foreach (TypeEvenement::cases() as $case) {
+            $this->assertIsString($case->value);
+        }
+    }
+
+    public function testAllValuesAreLowercase(): void
+    {
+        foreach (TypeEvenement::cases() as $case) {
+            $this->assertSame(strtolower($case->value), $case->value, "Value '{$case->value}' should be lowercase");
+        }
+    }
 }

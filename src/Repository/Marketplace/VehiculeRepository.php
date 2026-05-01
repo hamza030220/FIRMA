@@ -16,6 +16,10 @@ class VehiculeRepository extends ServiceEntityRepository
         parent::__construct($registry, Vehicule::class);
     }
 
+    /**
+     * @param array<string, string> $orderBy
+     * @return list<Vehicule>
+     */
     public function findAllWithRelations(array $orderBy = ['dateCreation' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('v')
@@ -25,11 +29,14 @@ class VehiculeRepository extends ServiceEntityRepository
             $qb->addOrderBy('v.' . $field, $dir);
         }
 
+        /** @var list<Vehicule> */
         return $qb->getQuery()->getResult();
     }
 
+    /** @return list<Vehicule> */
     public function findAvailableWithRelations(): array
     {
+        /** @var list<Vehicule> */
         return $this->createQueryBuilder('v')
             ->leftJoin('v.categorie', 'c')->addSelect('c')
             ->where('v.disponible = true')
@@ -38,8 +45,10 @@ class VehiculeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<Vehicule> */
     public function findAvailablePaginated(int $page, int $limit = 12): array
     {
+        /** @var list<Vehicule> */
         return $this->createQueryBuilder('v')
             ->leftJoin('v.categorie', 'c')->addSelect('c')
             ->where('v.disponible = true')

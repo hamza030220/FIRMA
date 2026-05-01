@@ -114,4 +114,108 @@ class CommandeTest extends TestCase
         $this->assertInstanceOf(\Doctrine\Common\Collections\Collection::class, $this->commande->getDetails());
         $this->assertCount(0, $this->commande->getDetails());
     }
+
+    // ── Edge cases — montantTotal ─────────────────────────────────────────────
+
+    public function testSetMontantTotalZero(): void
+    {
+        $this->commande->setMontantTotal('0.00');
+        $this->assertSame('0.00', $this->commande->getMontantTotal());
+    }
+
+    public function testSetMontantTotalNegative(): void
+    {
+        // PHP level stores it; validation handles the real constraint
+        $this->commande->setMontantTotal('-100.00');
+        $this->assertSame('-100.00', $this->commande->getMontantTotal());
+    }
+
+    public function testSetMontantTotalLargeValue(): void
+    {
+        $this->commande->setMontantTotal('99999999.99');
+        $this->assertSame('99999999.99', $this->commande->getMontantTotal());
+    }
+
+    // ── Edge cases — statuts ──────────────────────────────────────────────────
+
+    public function testSetStatutPaiementUnknownValue(): void
+    {
+        // PHP level stores it; business logic/validators handle allowed values
+        $this->commande->setStatutPaiement('inconnu');
+        $this->assertSame('inconnu', $this->commande->getStatutPaiement());
+    }
+
+    public function testSetStatutLivraisonUnknownValue(): void
+    {
+        $this->commande->setStatutLivraison('inconnu');
+        $this->assertSame('inconnu', $this->commande->getStatutLivraison());
+    }
+
+    // ── Edge cases — adresse & ville ─────────────────────────────────────────
+
+    public function testSetVilleLivraisonToNull(): void
+    {
+        $this->commande->setVilleLivraison('Tunis');
+        $this->commande->setVilleLivraison(null);
+        $this->assertNull($this->commande->getVilleLivraison());
+    }
+
+    public function testSetAdresseLivraisonWithLongText(): void
+    {
+        $long = str_repeat('A', 500);
+        $this->commande->setAdresseLivraison($long);
+        $this->assertSame(500, strlen($this->commande->getAdresseLivraison()));
+    }
+
+    // ── Edge cases — dates ────────────────────────────────────────────────────
+
+    public function testDateLivraisonCanBeBeforeDateCommande(): void
+    {
+        // Entity does not enforce order — that is a form/validator concern
+        $commande = new \DateTime('2026-06-01');
+        $livraison = new \DateTime('2026-01-01');
+        $this->commande->setDateCommande($commande);
+        $this->commande->setDateLivraison($livraison);
+        $this->assertSame($livraison, $this->commande->getDateLivraison());
+    }
+
+    public function testDateCommandeIsSetInConstructor(): void
+    {
+        $fresh = new \App\Entity\Marketplace\Commande();
+        $this->assertInstanceOf(\DateTimeInterface::class, $fresh->getDateCommande());
+    }
+
+    // ── Edge cases — utilisateur ──────────────────────────────────────────────
+
+    public function testSetUtilisateurToNull(): void
+    {
+        $user = new Utilisateur();
+        $this->commande->setUtilisateur($user);
+        $this->commande->setUtilisateur(null);
+        $this->assertNull($this->commande->getUtilisateur());
+    }
+
+    // ── Edge cases — numeroCommande ───────────────────────────────────────────
+
+    public function testSetNumeroCommandeToNull(): void
+    {
+        $this->commande->setNumeroCommande('CMD-001');
+        $this->commande->setNumeroCommande(null);
+        $this->assertNull($this->commande->getNumeroCommande());
+    }
+
+    public function testSetNumeroCommandeFluentInterface(): void
+    {
+        $result = $this->commande->setNumeroCommande('CMD-XYZ');
+        $this->assertSame($this->commande, $result);
+    }
+
+    // ── Edge cases — notes ────────────────────────────────────────────────────
+
+    public function testSetNotesWithLongText(): void
+    {
+        $long = str_repeat('note ', 200);
+        $this->commande->setNotes($long);
+        $this->assertSame(strlen($long), strlen($this->commande->getNotes()));
+    }
 }

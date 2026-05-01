@@ -16,9 +16,13 @@ class ParticipationRepository extends ServiceEntityRepository
         parent::__construct($registry, Participation::class);
     }
 
-    /** Participations d'un événement. */
+    /**
+     * Participations d'un événement.
+     * @return list<Participation>
+     */
     public function findByEvenement(int $evenementId): array
     {
+        /** @var list<Participation> */
         return $this->createQueryBuilder('p')
             ->andWhere('p.evenement = :eid')
             ->setParameter('eid', $evenementId)
@@ -27,9 +31,13 @@ class ParticipationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Participations actives (confirmées ou en attente) d'un événement. */
+    /**
+     * Participations actives (confirmées ou en attente) d'un événement.
+     * @return list<Participation>
+     */
     public function findActiveByEvent(int $evenementId): array
     {
+        /** @var list<Participation> */
         return $this->createQueryBuilder('p')
             ->join('p.utilisateur', 'u')
             ->addSelect('u')
@@ -58,12 +66,18 @@ class ParticipationRepository extends ServiceEntityRepository
             ->execute();
     }
 
-    /** Participations actives d'un utilisateur (exclut événements annulés ou passés). */
+    /**
+     * Participations actives d'un utilisateur (exclut événements annulés ou passés).
+     * @return list<Participation>
+     */
     public function findActiveByUser(int $userId): array
     {
+        /** @var list<Participation> */
         return $this->createQueryBuilder('p')
             ->join('p.utilisateur', 'u')
+            ->addSelect('u')
             ->join('p.evenement', 'e')
+            ->addSelect('e')
             ->andWhere('u.id = :uid')
             ->andWhere('p.statut IN (:statuts)')
             ->andWhere('e.statut != :annule')
@@ -146,10 +160,11 @@ class ParticipationRepository extends ServiceEntityRepository
 
     /**
      * Détails des participants avec infos utilisateur (pour le listing admin).
-     * @return array<array{participation: Participation, nom: string, prenom: string, email: string}>
+     * @return list<Participation>
      */
     public function findParticipantsDetailsByEvent(int $evenementId): array
     {
+        /** @var list<Participation> */
         return $this->createQueryBuilder('p')
             ->join('p.utilisateur', 'u')
             ->join('p.evenement', 'e')
@@ -191,19 +206,23 @@ class ParticipationRepository extends ServiceEntityRepository
     /** @return array<array{statut: string, count: int}> */
     public function repartitionParStatut(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{statut: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT statut, COUNT(*) AS count FROM participations GROUP BY statut"
         );
+        return $rows;
     }
 
     /** @return array<array{mois: string, count: int}> */
     public function participationsParMois(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{mois: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT DATE_FORMAT(date_inscription, '%Y-%m') AS mois, COUNT(*) AS count
              FROM participations
              WHERE date_inscription >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
              GROUP BY mois ORDER BY mois"
         );
+        return $rows;
     }
 }

@@ -43,7 +43,7 @@ class Sponsor
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(name: 'montant_contribution', type: Types::DECIMAL, precision: 10, scale: 2, options: ['default' => 0])]
+    #[ORM\Column(name: 'montant_contribution', type: Types::DECIMAL, precision: 10, scale: 2, options: ['default' => '0.00'])]
     #[Assert\PositiveOrZero(message: 'Le montant ne peut pas être négatif')]
     private ?string $montantContribution = '0';
 
@@ -66,7 +66,7 @@ class Sponsor
 
     public function getSecteurEnum(): ?SecteurActivite
     {
-        return SecteurActivite::tryFrom($this->secteurActivite);
+        return SecteurActivite::tryFrom($this->secteurActivite ?? '');
     }
 
     public function isCatalog(): bool

@@ -124,12 +124,12 @@ class Evenement
 
     public function getTypeEnum(): ?TypeEvenement
     {
-        return TypeEvenement::tryFrom($this->typeEvenement);
+        return TypeEvenement::tryFrom($this->typeEvenement ?? '');
     }
 
     public function getStatutEnum(): ?StatutEvenement
     {
-        return StatutEvenement::tryFrom($this->statut);
+        return StatutEvenement::tryFrom($this->statut ?? '');
     }
 
     public function getGoogleMapsUrl(): ?string

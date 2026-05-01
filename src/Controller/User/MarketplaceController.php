@@ -166,10 +166,10 @@ class MarketplaceController extends AbstractController
     #[Route('/locations/ajouter', name: 'user_marketplace_loc_add', methods: ['POST'])]
     public function locAdd(Request $request, VehiculeRepository $vehicRepo, TerrainRepository $terrainRepo, LocationRepository $locRepo): JsonResponse
     {
-        $type = $request->request->get('type'); // 'vehicule' or 'terrain'
+        $type = (string) $request->request->get('type'); // 'vehicule' or 'terrain'
         $id = (int) $request->request->get('id');
-        $dateDebut = $request->request->get('dateDebut');
-        $dateFin = $request->request->get('dateFin');
+        $dateDebut = (string) $request->request->get('dateDebut');
+        $dateFin = (string) $request->request->get('dateFin');
 
         if (!in_array($type, ['vehicule', 'terrain'], true)) {
             return $this->json(['error' => 'Type invalide'], 400);
@@ -241,7 +241,7 @@ class MarketplaceController extends AbstractController
     #[Route('/locations/supprimer', name: 'user_marketplace_loc_remove', methods: ['POST'])]
     public function locRemove(Request $request): JsonResponse
     {
-        $key = $request->request->get('key');
+        $key = (string) $request->request->get('key');
         $locs = $this->getLocationsSession();
         unset($locs[$key]);
         $this->saveLocationsSession($locs);
@@ -268,11 +268,11 @@ class MarketplaceController extends AbstractController
         $amountEur = round($total / 3.4, 2);
         $stripeCents = (int) round($amountEur * 100);
 
-        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
         $intent = PaymentIntent::create([
             'amount' => $stripeCents,
             'currency' => 'eur',
-            'metadata' => ['type' => 'equipement', 'total_tnd' => $total],
+            'metadata' => ['type' => 'equipement', 'total_tnd' => (string) $total],
         ]);
 
         // Store intent ID in session for verification
@@ -296,7 +296,7 @@ class MarketplaceController extends AbstractController
         $cart = $this->getCart();
         if (empty($cart)) return $this->redirectToRoute('user_marketplace');
 
-        if (!$this->isCsrfTokenValid('paiement_equipements', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('paiement_equipements', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
             return $this->redirectToRoute('user_marketplace_paiement');
         }
@@ -317,11 +317,12 @@ class MarketplaceController extends AbstractController
         }
 
         $user = $this->getUser();
+        \assert($user instanceof \App\Entity\User\Utilisateur);
         $commande = new Commande();
         $commande->setUtilisateur($user);
         $commande->setNumeroCommande('CMD-' . strtoupper(uniqid()));
-        $commande->setAdresseLivraison($request->request->get('adresse', ''));
-        $commande->setVilleLivraison($request->request->get('ville', ''));
+        $commande->setAdresseLivraison((string) $request->request->get('adresse', ''));
+        $commande->setVilleLivraison((string) $request->request->get('ville', ''));
         $commande->setStatutPaiement('paye');
         $commande->setStatutLivraison('en_preparation');
 
@@ -335,7 +336,7 @@ class MarketplaceController extends AbstractController
             $detail->setCommande($commande);
             $detail->setEquipement($equip);
             $detail->setQuantite($item['qty']);
-            $detail->setPrixUnitaire($equip->getPrixVente());
+            $detail->setPrixUnitaire($equip->getPrixVente() ?? '0');
             $sousTotal = (float) $equip->getPrixVente() * $item['qty'];
             $detail->setSousTotal((string) $sousTotal);
             $montantTotal += $sousTotal;
@@ -396,13 +397,13 @@ class MarketplaceController extends AbstractController
             return $this->redirectToRoute('user_marketplace');
         }
 
-        if (!$this->isCsrfTokenValid('paiement_equipements', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('paiement_equipements', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
             return $this->redirectToRoute('user_marketplace_paiement');
         }
 
-        $adresse = trim($request->request->get('adresse', ''));
-        $ville   = trim($request->request->get('ville', ''));
+        $adresse = trim((string) $request->request->get('adresse', ''));
+        $ville   = trim((string) $request->request->get('ville', ''));
 
         if ($adresse === '' || $ville === '') {
             $this->addFlash('danger', 'Veuillez remplir l\'adresse et la ville de livraison.');
@@ -410,6 +411,7 @@ class MarketplaceController extends AbstractController
         }
 
         $user = $this->getUser();
+        \assert($user instanceof \App\Entity\User\Utilisateur);
         $commande = new Commande();
         $commande->setUtilisateur($user);
         $commande->setNumeroCommande('CMD-' . strtoupper(uniqid()));
@@ -428,7 +430,7 @@ class MarketplaceController extends AbstractController
             $detail->setCommande($commande);
             $detail->setEquipement($equip);
             $detail->setQuantite($item['qty']);
-            $detail->setPrixUnitaire($equip->getPrixVente());
+            $detail->setPrixUnitaire($equip->getPrixVente() ?? '0');
             $sousTotal = (float) $equip->getPrixVente() * $item['qty'];
             $detail->setSousTotal((string) $sousTotal);
             $montantTotal += $sousTotal;
@@ -495,11 +497,11 @@ class MarketplaceController extends AbstractController
         $amountEur = round($grandTotal / 3.4, 2);
         $stripeCents = (int) round($amountEur * 100);
 
-        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
         $intent = PaymentIntent::create([
             'amount' => $stripeCents,
             'currency' => 'eur',
-            'metadata' => ['type' => 'location', 'total_tnd' => $grandTotal],
+            'metadata' => ['type' => 'location', 'total_tnd' => (string) $grandTotal],
         ]);
 
         $this->requestStack->getSession()->set('stripe_pi_loc', $intent->id);
@@ -525,7 +527,7 @@ class MarketplaceController extends AbstractController
         $locs = $this->getLocationsSession();
         if (empty($locs)) return $this->redirectToRoute('user_marketplace');
 
-        if (!$this->isCsrfTokenValid('paiement_locations', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('paiement_locations', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
             return $this->redirectToRoute('user_marketplace_paiement_locations');
         }
@@ -555,6 +557,7 @@ class MarketplaceController extends AbstractController
         }
 
         $user = $this->getUser();
+        \assert($user instanceof \App\Entity\User\Utilisateur);
         $createdLocations = [];
 
         foreach ($locs as $loc) {
@@ -604,7 +607,7 @@ class MarketplaceController extends AbstractController
     #[Route('/paiement/annuler', name: 'user_marketplace_paiement_cancel', methods: ['POST'])]
     public function cancelPayment(Request $request): JsonResponse
     {
-        $type = $request->request->get('type', 'equipement');
+        $type = (string) $request->request->get('type', 'equipement');
         $sessionKey = $type === 'location' ? 'stripe_pi_loc' : 'stripe_pi_equip';
         $piId = $this->requestStack->getSession()->get($sessionKey);
 
@@ -632,6 +635,7 @@ class MarketplaceController extends AbstractController
     public function historiqueCommandes(CommandeRepository $cmdRepo): JsonResponse
     {
         $user = $this->getUser();
+        \assert($user instanceof \App\Entity\User\Utilisateur);
         $commandes = $cmdRepo->findBy(['utilisateur' => $user], ['dateCommande' => 'DESC']);
 
         $hidden = $this->requestStack->getSession()->get('hidden_commandes', []);
@@ -658,7 +662,7 @@ class MarketplaceController extends AbstractController
             $result[] = [
                 'id' => $cmd->getId(),
                 'numero' => $cmd->getNumeroCommande(),
-                'date' => $cmd->getDateCommande()->format('d/m/Y H:i'),
+                'date' => $cmd->getDateCommande()?->format('d/m/Y H:i'),
                 'montant' => $cmd->getMontantTotal(),
                 'statutPaiement' => $cmd->getStatutPaiement(),
                 'statutLivraison' => $cmd->getStatutLivraison(),
@@ -687,7 +691,7 @@ class MarketplaceController extends AbstractController
     #[Route('/historique-commandes/reorder', name: 'user_marketplace_historique_reorder', methods: ['POST'])]
     public function historiqueReorder(Request $request, EquipementRepository $equipRepo): JsonResponse
     {
-        $items = json_decode($request->request->get('items', '[]'), true);
+        $items = json_decode((string) $request->request->get('items', '[]'), true);
         if (empty($items)) return $this->json(['error' => 'Aucun article sélectionné.'], 400);
 
         $cart = $this->getCart();
@@ -742,6 +746,7 @@ class MarketplaceController extends AbstractController
     public function historiqueLocations(LocationRepository $locRepo): JsonResponse
     {
         $user = $this->getUser();
+        \assert($user instanceof \App\Entity\User\Utilisateur);
         $locations = $locRepo->findBy(['utilisateur' => $user], ['dateDebut' => 'DESC']);
 
         $hidden = $this->requestStack->getSession()->get('hidden_locations', []);
@@ -759,8 +764,8 @@ class MarketplaceController extends AbstractController
                 'numero' => $loc->getNumeroLocation(),
                 'type' => $loc->getTypeLocation(),
                 'nom' => $loc->getItemName(),
-                'dateDebut' => $loc->getDateDebut()->format('d/m/Y'),
-                'dateFin' => $loc->getDateFin()->format('d/m/Y'),
+                'dateDebut' => $loc->getDateDebut()?->format('d/m/Y'),
+                'dateFin' => $loc->getDateFin()?->format('d/m/Y'),
                 'jours' => $loc->getDureeJours(),
                 'prix' => $loc->getPrixTotal(),
                 'caution' => $loc->getCaution(),
@@ -802,16 +807,23 @@ class MarketplaceController extends AbstractController
        HELPERS — Session management
        ================================================================ */
 
+    /** @return array<int|string, array<string, mixed>> */
     private function getCart(): array
     {
+        /** @var array<int|string, array<string, mixed>> */
         return $this->requestStack->getSession()->get('marketplace_cart', []);
     }
 
+    /** @param array<int|string, array<string, mixed>> $cart */
     private function saveCart(array $cart): void
     {
         $this->requestStack->getSession()->set('marketplace_cart', $cart);
     }
 
+    /**
+     * @param array<int|string, array<string, mixed>> $cart
+     * @return array<string, mixed>
+     */
     private function cartSummary(array $cart): array
     {
         $items = [];
@@ -834,16 +846,23 @@ class MarketplaceController extends AbstractController
         return ['items' => $items, 'total' => round($total, 2), 'count' => $count];
     }
 
+    /** @return array<string, array<string, mixed>> */
     private function getLocationsSession(): array
     {
+        /** @var array<string, array<string, mixed>> */
         return $this->requestStack->getSession()->get('marketplace_locations', []);
     }
 
+    /** @param array<string, array<string, mixed>> $locs */
     private function saveLocationsSession(array $locs): void
     {
         $this->requestStack->getSession()->set('marketplace_locations', $locs);
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $locs
+     * @return array<string, mixed>
+     */
     private function locSummary(array $locs): array
     {
         $items = [];

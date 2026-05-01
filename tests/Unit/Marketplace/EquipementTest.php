@@ -129,4 +129,130 @@ class EquipementTest extends TestCase
         $this->assertSame('150.00', $this->equipement->getPrixVente());
         $this->assertSame(10, $this->equipement->getQuantiteStock());
     }
+
+    // ── Edge cases — prix ─────────────────────────────────────────────────────
+
+    public function testSetPrixAchatZero(): void
+    {
+        $this->equipement->setPrixAchat('0.00');
+        $this->assertSame('0.00', $this->equipement->getPrixAchat());
+    }
+
+    public function testSetPrixAchatNegative(): void
+    {
+        // PHP level stores it; @Assert\Positive would reject in real usage
+        $this->equipement->setPrixAchat('-1.00');
+        $this->assertSame('-1.00', $this->equipement->getPrixAchat());
+    }
+
+    public function testSetPrixVenteLowerThanPrixAchat(): void
+    {
+        // Entity does not enforce prixVente > prixAchat — that is business logic
+        $this->equipement->setPrixAchat('200.00');
+        $this->equipement->setPrixVente('50.00');
+        $this->assertSame('50.00', $this->equipement->getPrixVente());
+    }
+
+    public function testSetPrixVenteLargeValue(): void
+    {
+        $this->equipement->setPrixVente('9999999.99');
+        $this->assertSame('9999999.99', $this->equipement->getPrixVente());
+    }
+
+    // ── Edge cases — stock ────────────────────────────────────────────────────
+
+    public function testSetQuantiteStockToZero(): void
+    {
+        $this->equipement->setQuantiteStock(0);
+        $this->assertSame(0, $this->equipement->getQuantiteStock());
+    }
+
+    public function testSetQuantiteStockToNegative(): void
+    {
+        // Can represent out-of-sync inventory; entity stores it
+        $this->equipement->setQuantiteStock(-5);
+        $this->assertSame(-5, $this->equipement->getQuantiteStock());
+    }
+
+    public function testSetSeuilAlerteToZero(): void
+    {
+        $this->equipement->setSeuilAlerte(0);
+        $this->assertSame(0, $this->equipement->getSeuilAlerte());
+    }
+
+    public function testSetSeuilAlerteToNegative(): void
+    {
+        $this->equipement->setSeuilAlerte(-1);
+        $this->assertSame(-1, $this->equipement->getSeuilAlerte());
+    }
+
+    // ── Edge cases — nullable fields ──────────────────────────────────────────
+
+    public function testSetDescriptionToNull(): void
+    {
+        $this->equipement->setDescription('Desc');
+        $this->equipement->setDescription(null);
+        $this->assertNull($this->equipement->getDescription());
+    }
+
+    public function testSetImageUrlToNull(): void
+    {
+        $this->equipement->setImageUrl('image.jpg');
+        $this->equipement->setImageUrl(null);
+        $this->assertNull($this->equipement->getImageUrl());
+    }
+
+    public function testSetCategorieToNull(): void
+    {
+        $this->equipement->setCategorie(new Categorie());
+        $this->equipement->setCategorie(null);
+        $this->assertNull($this->equipement->getCategorie());
+    }
+
+    public function testSetFournisseurToNull(): void
+    {
+        $this->equipement->setFournisseur(new Fournisseur());
+        $this->equipement->setFournisseur(null);
+        $this->assertNull($this->equipement->getFournisseur());
+    }
+
+    // ── Edge cases — nom ──────────────────────────────────────────────────────
+
+    public function testSetNomToNull(): void
+    {
+        $this->equipement->setNom('Test');
+        $this->equipement->setNom(null);
+        $this->assertNull($this->equipement->getNom());
+    }
+
+    public function testSetNomWithMaxLength(): void
+    {
+        $long = str_repeat('E', 200);
+        $this->equipement->setNom($long);
+        $this->assertSame(200, strlen($this->equipement->getNom()));
+    }
+
+    // ── Edge cases — __toString ───────────────────────────────────────────────
+
+    public function testToStringWithNullNom(): void
+    {
+        $this->assertSame('', (string) $this->equipement);
+    }
+
+    // ── Edge cases — dateCreation ─────────────────────────────────────────────
+
+    public function testDateCreationIsSetInConstructor(): void
+    {
+        $fresh = new Equipement();
+        $this->assertInstanceOf(\DateTimeInterface::class, $fresh->getDateCreation());
+    }
+
+    public function testEachInstanceHasIndependentDateCreation(): void
+    {
+        $e1 = new Equipement();
+        $e2 = new Equipement();
+        // Both should be DateTimeInterface but may differ slightly in time
+        $this->assertInstanceOf(\DateTimeInterface::class, $e1->getDateCreation());
+        $this->assertInstanceOf(\DateTimeInterface::class, $e2->getDateCreation());
+    }
 }

@@ -16,18 +16,26 @@ class SponsorRepository extends ServiceEntityRepository
         parent::__construct($registry, Sponsor::class);
     }
 
-    /** Tous les sponsors triés par nom. */
+    /**
+     * Tous les sponsors triés par nom.
+     * @return list<Sponsor>
+     */
     public function findAllOrdered(): array
     {
+        /** @var list<Sponsor> */
         return $this->createQueryBuilder('s')
             ->orderBy('s.nom', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    /** Sponsors du catalogue (non assignés à un événement). */
+    /**
+     * Sponsors du catalogue (non assignés à un événement).
+     * @return list<Sponsor>
+     */
     public function findCatalog(): array
     {
+        /** @var list<Sponsor> */
         return $this->createQueryBuilder('s')
             ->where('s.evenement IS NULL')
             ->orderBy('s.nom', 'ASC')
@@ -35,9 +43,13 @@ class SponsorRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Sponsors assignés à un événement. */
+    /**
+     * Sponsors assignés à un événement.
+     * @return list<Sponsor>
+     */
     public function findByEvenement(int $evenementId): array
     {
+        /** @var list<Sponsor> */
         return $this->createQueryBuilder('s')
             ->join('s.evenement', 'e')
             ->andWhere('e.idEvenement = :eid')
@@ -81,18 +93,22 @@ class SponsorRepository extends ServiceEntityRepository
     /** @return array<array{secteur: string, count: int}> */
     public function repartitionParSecteur(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{secteur: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT secteur_activite AS secteur, COUNT(*) AS count FROM sponsors GROUP BY secteur_activite"
         );
+        return $rows;
     }
 
     /** @return array<array{nom: string, count: int}> */
     public function topSponsors(int $limit = 5): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{nom: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT nom, COUNT(*) AS count FROM sponsors WHERE id_evenement IS NOT NULL GROUP BY nom ORDER BY count DESC LIMIT :lim",
             ['lim' => $limit],
             ['lim' => \Doctrine\DBAL\ParameterType::INTEGER]
         );
+        return $rows;
     }
 }

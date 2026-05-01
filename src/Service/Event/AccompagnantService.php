@@ -13,13 +13,21 @@ class AccompagnantService
         private readonly AccompagnantRepository $repo,
     ) {}
 
-    /** Accompagnants d'une participation. */
+    /**
+     * Accompagnants d'une participation.
+     *
+     * @return Accompagnant[]
+     */
     public function getByParticipation(int $participationId): array
     {
         return $this->repo->findByParticipation($participationId);
     }
 
-    /** Accompagnants d'un événement (toutes participations confondues). */
+    /**
+     * Accompagnants d'un événement (toutes participations confondues).
+     *
+     * @return Accompagnant[]
+     */
     public function getByEvenement(int $evenementId): array
     {
         return $this->repo->findByEvenement($evenementId);

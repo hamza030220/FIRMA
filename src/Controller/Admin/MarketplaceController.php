@@ -261,11 +261,20 @@ class MarketplaceController extends AbstractController
             $itemName = $loc->getItemName();
             $userName = $user ? $user->getFullName() : 'Inconnu';
 
+            $debut = $loc->getDateDebut();
+            $fin   = $loc->getDateFin();
+            if (!$debut || !$fin) {
+                continue;
+            }
+            $finPlus1 = clone $fin;
+            \assert($finPlus1 instanceof \DateTime);
+            $finPlus1->modify('+1 day');
+
             $events[] = [
                 'id' => $loc->getId(),
                 'title' => $itemName,
-                'start' => $loc->getDateDebut()->format('Y-m-d'),
-                'end' => (clone $loc->getDateFin())->modify('+1 day')->format('Y-m-d'),
+                'start' => $debut->format('Y-m-d'),
+                'end' => $finPlus1->format('Y-m-d'),
                 'color' => $type === 'terrain' ? '#27ae60' : '#e67e22',
                 'extendedProps' => [
                     'type' => $type,
@@ -273,8 +282,8 @@ class MarketplaceController extends AbstractController
                     'userName' => $userName,
                     'prixTotal' => $loc->getPrixTotal() . ' TND',
                     'statut' => $loc->getStatut(),
-                    'dateDebut' => $loc->getDateDebut()->format('d/m/Y'),
-                    'dateFin' => $loc->getDateFin()->format('d/m/Y'),
+                    'dateDebut' => $debut->format('d/m/Y'),
+                    'dateFin' => $fin->format('d/m/Y'),
                 ],
             ];
         }
@@ -342,7 +351,7 @@ class MarketplaceController extends AbstractController
     #[Route('/equipements/{id}/delete', name: 'admin_marketplace_equipements_delete', methods: ['POST'])]
     public function equipementsDelete(Request $request, Equipement $equipement): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $equipement->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $equipement->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($equipement);
             $this->em->flush();
             $this->addFlash('success', 'Équipement supprimé.');
@@ -353,7 +362,7 @@ class MarketplaceController extends AbstractController
     #[Route('/equipements/analyser-stock', name: 'admin_marketplace_analyser_stock', methods: ['POST'])]
     public function analyserStock(Request $request, EquipementRepository $repo, PdfMailerService $pdfMailer): Response
     {
-        if (!$this->isCsrfTokenValid('analyser_stock', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('analyser_stock', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
             return $this->redirectToRoute('admin_marketplace_equipements');
         }
@@ -366,7 +375,7 @@ class MarketplaceController extends AbstractController
         }
 
         try {
-            $pdfMailer->sendAnalyseStock(array_values($lowStock));
+            $pdfMailer->sendAnalyseStock($lowStock);
             $this->addFlash('success', 'Rapport envoyé ! ' . count($lowStock) . ' équipement(s) en alerte — email envoyé à hamza.slimani@esprit.tn');
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors de l\'envoi du rapport : ' . $e->getMessage());
@@ -435,7 +444,7 @@ class MarketplaceController extends AbstractController
     #[Route('/vehicules/{id}/delete', name: 'admin_marketplace_vehicules_delete', methods: ['POST'])]
     public function vehiculesDelete(Request $request, Vehicule $vehicule): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $vehicule->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $vehicule->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($vehicule);
             $this->em->flush();
             $this->addFlash('success', 'Véhicule supprimé.');
@@ -503,7 +512,7 @@ class MarketplaceController extends AbstractController
     #[Route('/terrains/{id}/delete', name: 'admin_marketplace_terrains_delete', methods: ['POST'])]
     public function terrainsDelete(Request $request, Terrain $terrain): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $terrain->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $terrain->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($terrain);
             $this->em->flush();
             $this->addFlash('success', 'Terrain supprimé.');
@@ -569,7 +578,7 @@ class MarketplaceController extends AbstractController
     #[Route('/fournisseurs/{id}/delete', name: 'admin_marketplace_fournisseurs_delete', methods: ['POST'])]
     public function fournisseursDelete(Request $request, Fournisseur $fournisseur): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $fournisseur->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $fournisseur->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($fournisseur);
             $this->em->flush();
             $this->addFlash('success', 'Fournisseur supprimé.');
@@ -593,20 +602,21 @@ class MarketplaceController extends AbstractController
     public function commandesEdit(Request $request, Commande $commande): Response
     {
         if ($request->isMethod('POST')) {
-            if (!$this->isCsrfTokenValid('commande_status' . $commande->getId(), $request->request->get('_token'))) {
+            if (!$this->isCsrfTokenValid('commande_status' . $commande->getId(), (string) $request->request->get('_token'))) {
                 $this->addFlash('danger', 'Token CSRF invalide.');
                 return $this->redirectToRoute('admin_marketplace_commandes');
             }
 
-            $commande->setStatutPaiement($request->request->get('statut_paiement', $commande->getStatutPaiement()));
-            $commande->setStatutLivraison($request->request->get('statut_livraison', $commande->getStatutLivraison()));
+            $commande->setStatutPaiement((string) $request->request->get('statut_paiement', $commande->getStatutPaiement()));
+            $commande->setStatutLivraison((string) $request->request->get('statut_livraison', $commande->getStatutLivraison()));
 
             $dateLivraison = $request->request->get('date_livraison');
-            if ($dateLivraison) {
+            if (is_string($dateLivraison) && $dateLivraison !== '') {
                 $commande->setDateLivraison(new \DateTime($dateLivraison));
             }
 
-            $commande->setNotes($request->request->get('notes', $commande->getNotes()));
+            $notes = $request->request->get('notes');
+            $commande->setNotes(is_string($notes) ? $notes : $commande->getNotes());
             $this->em->flush();
             $this->addFlash('success', 'Commande mise à jour.');
             return $this->redirectToRoute('admin_marketplace_commandes');
@@ -620,7 +630,7 @@ class MarketplaceController extends AbstractController
     #[Route('/commandes/{id}/delete', name: 'admin_marketplace_commandes_delete', methods: ['POST'])]
     public function commandesDelete(Request $request, Commande $commande): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $commande->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $commande->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($commande);
             $this->em->flush();
             $this->addFlash('success', 'Commande supprimée.');
@@ -644,13 +654,14 @@ class MarketplaceController extends AbstractController
     public function locationsEdit(Request $request, Location $location): Response
     {
         if ($request->isMethod('POST')) {
-            if (!$this->isCsrfTokenValid('location_status' . $location->getId(), $request->request->get('_token'))) {
+            if (!$this->isCsrfTokenValid('location_status' . $location->getId(), (string) $request->request->get('_token'))) {
                 $this->addFlash('danger', 'Token CSRF invalide.');
                 return $this->redirectToRoute('admin_marketplace_locations');
             }
 
-            $location->setStatut($request->request->get('statut', $location->getStatut()));
-            $location->setNotes($request->request->get('notes', $location->getNotes()));
+            $location->setStatut((string) $request->request->get('statut', $location->getStatut()));
+            $notesLoc = $request->request->get('notes');
+            $location->setNotes(is_string($notesLoc) ? $notesLoc : $location->getNotes());
             $this->em->flush();
             $this->addFlash('success', 'Location mise à jour.');
             return $this->redirectToRoute('admin_marketplace_locations');
@@ -664,7 +675,7 @@ class MarketplaceController extends AbstractController
     #[Route('/locations/{id}/delete', name: 'admin_marketplace_locations_delete', methods: ['POST'])]
     public function locationsDelete(Request $request, Location $location): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $location->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $location->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($location);
             $this->em->flush();
             $this->addFlash('success', 'Location supprimée.');
@@ -676,10 +687,11 @@ class MarketplaceController extends AbstractController
        HELPERS
        ================================================================ */
 
-    private function handleImageUpload($form, object $entity, string $subfolder): void
+    /** @param \Symfony\Component\Form\FormInterface<mixed> $form */
+    private function handleImageUpload(\Symfony\Component\Form\FormInterface $form, object $entity, string $subfolder): void
     {
         $file = $form->get('imageFile')->getData();
-        if (!$file) {
+        if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
             return;
         }
 
@@ -687,14 +699,17 @@ class MarketplaceController extends AbstractController
         $safeFilename = $this->slugger->slug($originalFilename);
         $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/marketplace/' . $subfolder;
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $uploadDir = (is_string($projectDir) ? $projectDir : '') . '/public/uploads/marketplace/' . $subfolder;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0775, true);
         }
 
         try {
             $file->move($uploadDir, $newFilename);
-            $entity->setImageUrl('uploads/marketplace/' . $subfolder . '/' . $newFilename);
+            if (method_exists($entity, 'setImageUrl')) {
+                $entity->setImageUrl('uploads/marketplace/' . $subfolder . '/' . $newFilename);
+            }
         } catch (FileException $e) {
             $this->addFlash('danger', 'Erreur lors du téléchargement de l\'image.');
         }

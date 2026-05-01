@@ -251,4 +251,176 @@ class EvenementTest extends TestCase
         $this->evenement->getSponsors()->add(new Sponsor());
         $this->assertCount(1, $this->evenement->getSponsors());
     }
+
+    // ── Edge cases — titre ────────────────────────────────────────────────────
+
+    public function testSetTitreToNull(): void
+    {
+        $this->evenement->setTitre('Salon');
+        $this->evenement->setTitre(null);
+        $this->assertNull($this->evenement->getTitre());
+    }
+
+    public function testSetTitreWithEmptyString(): void
+    {
+        // PHP level accepts it; Symfony validator would reject it
+        $this->evenement->setTitre('');
+        $this->assertSame('', $this->evenement->getTitre());
+    }
+
+    public function testSetTitreFluentInterface(): void
+    {
+        $result = $this->evenement->setTitre('Test');
+        $this->assertSame($this->evenement, $result);
+    }
+
+    // ── Edge cases — capacité ─────────────────────────────────────────────────
+
+    public function testSetCapaciteMaxToZero(): void
+    {
+        // Zero is stored at PHP level; Symfony Range validator (min:1) would reject it
+        $this->evenement->setCapaciteMax(0);
+        $this->assertSame(0, $this->evenement->getCapaciteMax());
+    }
+
+    public function testSetCapaciteMaxToNegative(): void
+    {
+        // Negative stored at PHP level; validator would reject in real usage
+        $this->evenement->setCapaciteMax(-10);
+        $this->assertSame(-10, $this->evenement->getCapaciteMax());
+    }
+
+    public function testSetPlacesDisponiblesZero(): void
+    {
+        $this->evenement->setPlacesDisponibles(0);
+        $this->assertSame(0, $this->evenement->getPlacesDisponibles());
+    }
+
+    public function testSetPlacesDisponiblesNegative(): void
+    {
+        // Can happen if more people are registered than capacity (over-booking edge case)
+        $this->evenement->setPlacesDisponibles(-5);
+        $this->assertSame(-5, $this->evenement->getPlacesDisponibles());
+    }
+
+    // ── Edge cases — statut ───────────────────────────────────────────────────
+
+    public function testGetStatutEnumReturnsNullForUnknownStatut(): void
+    {
+        $this->evenement->setStatut('inconnu');
+        $this->assertNull($this->evenement->getStatutEnum());
+    }
+
+    public function testIsModifiableWithUnknownStatut(): void
+    {
+        // Unknown statut is not in ['annule','termine'], so isModifiable returns true
+        $this->evenement->setStatut('inconnu');
+        $this->assertTrue($this->evenement->isModifiable());
+    }
+
+    // ── Edge cases — getTypeEnum ──────────────────────────────────────────────
+
+    public function testGetTypeEnumIsCaseSensitive(): void
+    {
+        $this->evenement->setTypeEvenement('SALON'); // uppercase — not a valid enum value
+        $this->assertNull($this->evenement->getTypeEnum());
+    }
+
+    // ── Edge cases — dates ────────────────────────────────────────────────────
+
+    public function testDateDebutCanBeAfterDateFin(): void
+    {
+        // Entity does not enforce chronological order — that is a form/validator concern
+        $debut = new \DateTime('2026-12-31');
+        $fin   = new \DateTime('2026-01-01');
+        $this->evenement->setDateDebut($debut);
+        $this->evenement->setDateFin($fin);
+        $this->assertSame($debut, $this->evenement->getDateDebut());
+        $this->assertSame($fin, $this->evenement->getDateFin());
+    }
+
+    public function testSameDateDebutAndDateFin(): void
+    {
+        $date = new \DateTime('2026-06-15');
+        $this->evenement->setDateDebut($date);
+        $this->evenement->setDateFin($date);
+        $this->assertSame($this->evenement->getDateDebut(), $this->evenement->getDateFin());
+    }
+
+    // ── Edge cases — getGoogleMapsUrl ─────────────────────────────────────────
+
+    public function testGetGoogleMapsUrlWithOnlyLieu(): void
+    {
+        $this->evenement->setLieu('Sfax');
+        $url = $this->evenement->getGoogleMapsUrl();
+        $this->assertNotNull($url);
+        $this->assertStringContainsString('Sfax', $url);
+    }
+
+    public function testGetGoogleMapsUrlWithOnlyAdresse(): void
+    {
+        $this->evenement->setAdresse('Rue de la Liberté, Sousse');
+        $url = $this->evenement->getGoogleMapsUrl();
+        $this->assertNotNull($url);
+        $this->assertStringContainsString('Sousse', $url);
+    }
+
+    public function testGetGoogleMapsUrlIsUrlEncoded(): void
+    {
+        $this->evenement->setLieu('Parc des Expositions');
+        $this->evenement->setAdresse('Tunis');
+        $url = $this->evenement->getGoogleMapsUrl();
+        // spaces must be encoded — no raw space in the query string
+        $this->assertStringNotContainsString(' ', $url);
+    }
+
+    // ── Edge cases — onPrePersist ─────────────────────────────────────────────
+
+    public function testOnPrePersistDoesNotOverrideDateCreationIfAlreadySet(): void
+    {
+        $existing = new \DateTime('2020-01-01');
+        $this->evenement->setDateCreation($existing);
+        $this->evenement->setCapaciteMax(10);
+        $this->evenement->onPrePersist();
+        $this->assertSame($existing, $this->evenement->getDateCreation());
+    }
+
+    public function testOnPrePersistWithNullCapaciteMaxLeavesPlacesDisponiblesNull(): void
+    {
+        // capaciteMax is null → placesDisponibles stays null (??= null = null)
+        $this->evenement->onPrePersist();
+        $this->assertNull($this->evenement->getPlacesDisponibles());
+    }
+
+    // ── Edge cases — contact ──────────────────────────────────────────────────
+
+    public function testSetContactEmailToNull(): void
+    {
+        $this->evenement->setContactEmail('x@y.com');
+        $this->evenement->setContactEmail(null);
+        $this->assertNull($this->evenement->getContactEmail());
+    }
+
+    public function testSetContactTelToNull(): void
+    {
+        $this->evenement->setContactTel('+216 70 000 000');
+        $this->evenement->setContactTel(null);
+        $this->assertNull($this->evenement->getContactTel());
+    }
+
+    // ── Edge cases — lieu / adresse ───────────────────────────────────────────
+
+    public function testSetLieuToNull(): void
+    {
+        $this->evenement->setLieu('Tunis');
+        $this->evenement->setLieu(null);
+        $this->assertNull($this->evenement->getLieu());
+    }
+
+    public function testSetAdresseToNull(): void
+    {
+        $this->evenement->setAdresse('Rue X');
+        $this->evenement->setAdresse(null);
+        $this->assertNull($this->evenement->getAdresse());
+    }
 }

@@ -25,3 +25,23 @@
 temp_*.sql
 /public/uploads/maladies/cases/
 ###< custom ###
+
+###> reports & analysis artifacts (local only) ###
+phpstan-*.txt
+phpstan-*.json
+phpstan-baseline.neon
+RAPPORT_*.md
+RAPPORT_*.docx
+rap.md
+rap.docx
+reference.docx
+~$*.docx
+doctrine*.txt
+err*.txt
+errr*.txt
+lighthouse-*.html
+phpbench.json
+scripts/md_to_docx.py
+scripts/rap_to_docx.py
+tests/Benchmark/
+###< reports & analysis artifacts ###

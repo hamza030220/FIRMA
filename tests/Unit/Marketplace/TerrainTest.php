@@ -128,4 +128,100 @@ class TerrainTest extends TestCase
 
         $this->assertSame($this->terrain, $result);
     }
+
+    // ── Edge cases — superficieHectares ──────────────────────────────────────
+
+    public function testSetSuperficieHectaresToZero(): void
+    {
+        $this->terrain->setSuperficieHectares('0.00');
+        $this->assertSame('0.00', $this->terrain->getSuperficieHectares());
+    }
+
+    public function testSetSuperficieHectaresToNegative(): void
+    {
+        // PHP level stores it; @Assert\Positive would reject in real usage
+        $this->terrain->setSuperficieHectares('-1.00');
+        $this->assertSame('-1.00', $this->terrain->getSuperficieHectares());
+    }
+
+    public function testSetSuperficieHectaresToLargeValue(): void
+    {
+        $this->terrain->setSuperficieHectares('99999.99');
+        $this->assertSame('99999.99', $this->terrain->getSuperficieHectares());
+    }
+
+    // ── Edge cases — pricing ──────────────────────────────────────────────────
+
+    public function testCautionDefaultValue(): void
+    {
+        $fresh = new \App\Entity\Marketplace\Terrain();
+        $this->assertSame('0.00', $fresh->getCaution());
+    }
+
+    public function testSetPrixAnneeNegative(): void
+    {
+        // PHP level stores it; validator would reject
+        $this->terrain->setPrixAnnee('-5000.00');
+        $this->assertSame('-5000.00', $this->terrain->getPrixAnnee());
+    }
+
+    public function testSetPrixMoisZero(): void
+    {
+        $this->terrain->setPrixMois('0.00');
+        $this->assertSame('0.00', $this->terrain->getPrixMois());
+    }
+
+    // ── Edge cases — nullable fields ──────────────────────────────────────────
+
+    public function testSetAdresseToNull(): void
+    {
+        $this->terrain->setAdresse('123 Rue Test');
+        $this->terrain->setAdresse(null);
+        $this->assertNull($this->terrain->getAdresse());
+    }
+
+    public function testSetImageUrlToNull(): void
+    {
+        $this->terrain->setImageUrl('terrain.jpg');
+        $this->terrain->setImageUrl(null);
+        $this->assertNull($this->terrain->getImageUrl());
+    }
+
+    public function testSetDescriptionToNull(): void
+    {
+        $this->terrain->setDescription('Une description');
+        $this->terrain->setDescription(null);
+        $this->assertNull($this->terrain->getDescription());
+    }
+
+    public function testSetCategorieToNull(): void
+    {
+        $this->terrain->setCategorie(new \App\Entity\Marketplace\Categorie());
+        $this->terrain->setCategorie(null);
+        $this->assertNull($this->terrain->getCategorie());
+    }
+
+    // ── Edge cases — titre ────────────────────────────────────────────────────
+
+    public function testSetTitreToNull(): void
+    {
+        $this->terrain->setTitre('Test');
+        $this->terrain->setTitre(null);
+        $this->assertNull($this->terrain->getTitre());
+    }
+
+    public function testSetTitreWithMaxLength(): void
+    {
+        $long = str_repeat('T', 200);
+        $this->terrain->setTitre($long);
+        $this->assertSame(200, strlen($this->terrain->getTitre()));
+    }
+
+    // ── Edge cases — dateCreation ─────────────────────────────────────────────
+
+    public function testDateCreationIsSetInConstructor(): void
+    {
+        $fresh = new \App\Entity\Marketplace\Terrain();
+        $this->assertInstanceOf(\DateTimeInterface::class, $fresh->getDateCreation());
+    }
 }

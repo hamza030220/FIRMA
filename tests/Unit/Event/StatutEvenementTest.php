@@ -43,4 +43,51 @@ class StatutEvenementTest extends TestCase
         $this->assertSame('badge-secondary', StatutEvenement::TERMINE->badgeClass());
         $this->assertSame('badge-warning',   StatutEvenement::COMPLET->badgeClass());
     }
+
+    // ── Edge cases ────────────────────────────────────────────────────────────
+
+    public function testTryFromEmptyStringReturnsNull(): void
+    {
+        $this->assertNull(StatutEvenement::tryFrom(''));
+    }
+
+    public function testTryFromUppercaseReturnsNull(): void
+    {
+        // Enum values are lowercase — uppercase must not match
+        $this->assertNull(StatutEvenement::tryFrom('ACTIF'));
+        $this->assertNull(StatutEvenement::tryFrom('Annule'));
+    }
+
+    public function testCasesCountIsFour(): void
+    {
+        $this->assertCount(4, StatutEvenement::cases());
+    }
+
+    public function testAllLabelsAreNonEmpty(): void
+    {
+        foreach (StatutEvenement::cases() as $case) {
+            $this->assertNotEmpty($case->label(), "Label for {$case->value} must not be empty");
+        }
+    }
+
+    public function testAllBadgeClassesAreNonEmpty(): void
+    {
+        foreach (StatutEvenement::cases() as $case) {
+            $this->assertNotEmpty($case->badgeClass(), "Badge class for {$case->value} must not be empty");
+        }
+    }
+
+    public function testAllBadgeClassesStartWithBadgePrefix(): void
+    {
+        foreach (StatutEvenement::cases() as $case) {
+            $this->assertStringStartsWith('badge-', $case->badgeClass());
+        }
+    }
+
+    public function testAllValuesAreStrings(): void
+    {
+        foreach (StatutEvenement::cases() as $case) {
+            $this->assertIsString($case->value);
+        }
+    }
 }

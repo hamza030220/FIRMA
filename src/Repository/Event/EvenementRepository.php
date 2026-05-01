@@ -16,18 +16,26 @@ class EvenementRepository extends ServiceEntityRepository
         parent::__construct($registry, Evenement::class);
     }
 
-    /** Tous les événements triés par date de début (ASC). */
+    /**
+     * Tous les événements triés par date de début (ASC).
+     * @return list<Evenement>
+     */
     public function findAllOrdered(): array
     {
+        /** @var list<Evenement> */
         return $this->createQueryBuilder('e')
             ->orderBy('e.dateDebut', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    /** Recherche par titre (LIKE insensible à la casse). */
+    /**
+     * Recherche par titre (LIKE insensible à la casse).
+     * @return list<Evenement>
+     */
     public function search(string $query): array
     {
+        /** @var list<Evenement> */
         return $this->createQueryBuilder('e')
             ->where('LOWER(e.titre) LIKE :q')
             ->setParameter('q', '%' . mb_strtolower($query) . '%')
@@ -36,11 +44,15 @@ class EvenementRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Recherche multi-champs (titre, organisateur, lieu) pour le front user. */
+    /**
+     * Recherche multi-champs (titre, organisateur, lieu) pour le front user.
+     * @return list<Evenement>
+     */
     public function searchMulti(string $query): array
     {
         $q = '%' . mb_strtolower($query) . '%';
 
+        /** @var list<Evenement> */
         return $this->createQueryBuilder('e')
             ->where('LOWER(e.titre) LIKE :q')
             ->orWhere('LOWER(e.organisateur) LIKE :q')
@@ -118,34 +130,41 @@ class EvenementRepository extends ServiceEntityRepository
     /** @return array<array{type: string, count: int}> */
     public function repartitionParType(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{type: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT type_evenement AS type, COUNT(*) AS count FROM evenements GROUP BY type_evenement"
         );
+        return $rows;
     }
 
     /** @return array<array{statut: string, count: int}> */
     public function repartitionParStatut(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{statut: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT statut, COUNT(*) AS count FROM evenements GROUP BY statut"
         );
+        return $rows;
     }
 
     /** @return array<array{mois: string, count: int}> */
     public function evenementsParMois(): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{mois: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT DATE_FORMAT(date_debut, '%Y-%m') AS mois, COUNT(*) AS count
              FROM evenements
              WHERE date_debut >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
              GROUP BY mois ORDER BY mois"
         );
+        return $rows;
     }
 
     /** @return array<array{titre: string, count: int}> */
     public function topEvenements(int $limit = 5): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{titre: string, count: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT e.titre, COUNT(p.id_participation) AS count
              FROM evenements e
              LEFT JOIN participations p ON e.id_evenement = p.id_evenement AND p.statut = 'confirme'
@@ -154,16 +173,19 @@ class EvenementRepository extends ServiceEntityRepository
             ['lim' => $limit],
             ['lim' => \Doctrine\DBAL\ParameterType::INTEGER]
         );
+        return $rows;
     }
 
     /** @return array<array{titre: string, places: int}> */
     public function evenementsPlacesDisponibles(int $limit = 5): array
     {
-        return $this->getEntityManager()->getConnection()->fetchAllAssociative(
+        /** @var array<array{titre: string, places: int}> $rows */
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
             "SELECT titre, places_disponibles AS places FROM evenements WHERE statut = 'actif' ORDER BY places_disponibles DESC LIMIT :lim",
             ['lim' => $limit],
             ['lim' => \Doctrine\DBAL\ParameterType::INTEGER]
         );
+        return $rows;
     }
 
     public function countCetteSemaine(): int

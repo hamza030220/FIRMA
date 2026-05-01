@@ -16,9 +16,13 @@ class AccompagnantRepository extends ServiceEntityRepository
         parent::__construct($registry, Accompagnant::class);
     }
 
-    /** Accompagnants d'une participation. */
+    /**
+     * Accompagnants d'une participation.
+     * @return list<Accompagnant>
+     */
     public function findByParticipation(int $participationId): array
     {
+        /** @var list<Accompagnant> */
         return $this->createQueryBuilder('a')
             ->join('a.participation', 'p')
             ->andWhere('p.idParticipation = :pid')
@@ -27,9 +31,13 @@ class AccompagnantRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Accompagnants d'un événement (via participations). */
+    /**
+     * Accompagnants d'un événement (via participations).
+     * @return list<Accompagnant>
+     */
     public function findByEvenement(int $evenementId): array
     {
+        /** @var list<Accompagnant> */
         return $this->createQueryBuilder('a')
             ->join('a.participation', 'p')
             ->join('p.evenement', 'e')

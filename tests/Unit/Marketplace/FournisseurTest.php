@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Marketplace;
 
+use App\Entity\Marketplace\Equipement;
 use App\Entity\Marketplace\Fournisseur;
 use PHPUnit\Framework\TestCase;
 
@@ -104,5 +105,75 @@ class FournisseurTest extends TestCase
 
         $this->fournisseur->setVille(null);
         $this->assertNull($this->fournisseur->getVille());
+    }
+
+    // ── Edge cases — actif ────────────────────────────────────────────────────
+
+    public function testActifToggleFalseToTrue(): void
+    {
+        $this->fournisseur->setActif(false);
+        $this->assertFalse($this->fournisseur->isActif());
+        $this->fournisseur->setActif(true);
+        $this->assertTrue($this->fournisseur->isActif());
+    }
+
+    public function testSetActifFluentInterface(): void
+    {
+        $result = $this->fournisseur->setActif(false);
+        $this->assertSame($this->fournisseur, $result);
+    }
+
+    // ── Edge cases — nomEntreprise ────────────────────────────────────────────
+
+    public function testSetNomEntrepriseWithAccentedChars(): void
+    {
+        $this->fournisseur->setNomEntreprise('Société Générale & Frères');
+        $this->assertSame('Société Générale & Frères', $this->fournisseur->getNomEntreprise());
+    }
+
+    public function testSetNomEntrepriseWithMaxLength(): void
+    {
+        $long = str_repeat('A', 200);
+        $this->fournisseur->setNomEntreprise($long);
+        $this->assertSame(200, strlen($this->fournisseur->getNomEntreprise()));
+    }
+
+    public function testSetNomEntrepriseFluentInterface(): void
+    {
+        $result = $this->fournisseur->setNomEntreprise('Test');
+        $this->assertSame($this->fournisseur, $result);
+    }
+
+    // ── Edge cases — email ────────────────────────────────────────────────────
+
+    public function testSetEmailWithAnyString(): void
+    {
+        // Entity stores any string; validator handles format validation
+        $this->fournisseur->setEmail('not-an-email');
+        $this->assertSame('not-an-email', $this->fournisseur->getEmail());
+    }
+
+    // ── Edge cases — dateCreation ─────────────────────────────────────────────
+
+    public function testDateCreationIsSetInConstructor(): void
+    {
+        $fresh = new Fournisseur();
+        $this->assertInstanceOf(\DateTimeInterface::class, $fresh->getDateCreation());
+    }
+
+    // ── Edge cases — equipements collection ───────────────────────────────────
+
+    public function testEquipementsCollectionInitiallyEmpty(): void
+    {
+        $this->assertCount(0, $this->fournisseur->getEquipements());
+    }
+
+    public function testEachFournisseurHasIndependentCollection(): void
+    {
+        $f2 = new Fournisseur();
+        $f2->getEquipements()->add(new Equipement());
+
+        $this->assertCount(0, $this->fournisseur->getEquipements());
+        $this->assertCount(1, $f2->getEquipements());
     }
 }

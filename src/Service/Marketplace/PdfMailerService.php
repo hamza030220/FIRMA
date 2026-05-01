@@ -24,6 +24,11 @@ class PdfMailerService
      */
     public function sendRecuCommande(Commande $commande): void
     {
+        $user = $commande->getUtilisateur();
+        if (null === $user || null === $user->getEmail()) {
+            return;
+        }
+
         $html = $this->twig->render('pdf/recu.html.twig', [
             'commande' => $commande,
             'logo_base64' => $this->getLogoBase64(),
@@ -34,10 +39,10 @@ class PdfMailerService
 
         $email = (new Email())
             ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
-            ->to($commande->getUtilisateur()->getEmail())
+            ->to($user->getEmail())
             ->subject('FIRMA — Reçu de paiement N° ' . $commande->getNumeroCommande())
             ->html($this->getEmailBody(
-                $commande->getUtilisateur()->getPrenom(),
+                (string) $user->getPrenom(),
                 'Votre paiement a été confirmé avec succès !',
                 'Vous trouverez en pièce jointe le reçu de votre commande <strong>N° ' . $commande->getNumeroCommande() . '</strong>.',
                 '#4aac33'
@@ -49,9 +54,15 @@ class PdfMailerService
 
     /**
      * Reçu de paiement (Stripe) — locations véhicules/terrains
+     *
+     * @param array<int, Location> $locations
      */
     public function sendRecuLocations(Utilisateur $user, array $locations): void
     {
+        if (null === $user->getEmail()) {
+            return;
+        }
+
         $html = $this->twig->render('pdf/recu_location.html.twig', [
             'user' => $user,
             'locations' => $locations,
@@ -67,7 +78,7 @@ class PdfMailerService
             ->to($user->getEmail())
             ->subject('FIRMA — Reçu de location(s) ' . implode(', ', $nums))
             ->html($this->getEmailBody(
-                $user->getPrenom(),
+                (string) $user->getPrenom(),
                 'Votre paiement de location a été confirmé !',
                 'Vous trouverez en pièce jointe le reçu de vos <strong>' . count($locations) . ' location(s)</strong>.',
                 '#4aac33'
@@ -79,6 +90,8 @@ class PdfMailerService
 
     /**
      * Alerte stock automatique — envoyée à l'admin quand le stock tombe sous le seuil après une commande
+     *
+     * @param array<int, \App\Entity\Marketplace\Equipement> $lowStockEquipements
      */
     public function sendStockAlert(array $lowStockEquipements, Commande $commande): void
     {
@@ -111,6 +124,8 @@ class PdfMailerService
 
     /**
      * Rapport d'analyse du stock — envoyé manuellement depuis l'admin
+     *
+     * @param array<int, \App\Entity\Marketplace\Equipement> $lowStockEquipements
      */
     public function sendAnalyseStock(array $lowStockEquipements): void
     {
@@ -159,6 +174,11 @@ class PdfMailerService
      */
     public function sendCompteRendu(Commande $commande): void
     {
+        $user = $commande->getUtilisateur();
+        if (null === $user || null === $user->getEmail()) {
+            return;
+        }
+
         $html = $this->twig->render('pdf/compte_rendu.html.twig', [
             'commande' => $commande,
             'logo_base64' => $this->getLogoBase64(),
@@ -169,10 +189,10 @@ class PdfMailerService
 
         $email = (new Email())
             ->from('FIRMA Marketplace <firmaagritech@gmail.com>')
-            ->to($commande->getUtilisateur()->getEmail())
+            ->to($user->getEmail())
             ->subject('FIRMA — Compte-rendu de livraison N° ' . $commande->getNumeroCommande())
             ->html($this->getEmailBody(
-                $commande->getUtilisateur()->getPrenom(),
+                (string) $user->getPrenom(),
                 'Votre commande a été enregistrée !',
                 'Vous trouverez en pièce jointe le compte-rendu de livraison pour la commande <strong>N° ' . $commande->getNumeroCommande() . '</strong>.<br>'
                 . 'Ce document devra être signé par vous et le livreur lors de la réception.',
@@ -215,8 +235,11 @@ class PdfMailerService
     {
         $logoPath = $this->projectDir . '/public/images/logofirma.jpg';
         if (file_exists($logoPath)) {
-            $data = base64_encode(file_get_contents($logoPath));
-            return 'data:image/jpeg;base64,' . $data;
+            $contents = file_get_contents($logoPath);
+            if (false === $contents) {
+                return '';
+            }
+            return 'data:image/jpeg;base64,' . base64_encode($contents);
         }
         return '';
     }
@@ -225,8 +248,11 @@ class PdfMailerService
     {
         $path = $this->projectDir . '/public/images/firma.png';
         if (file_exists($path)) {
-            $data = base64_encode(file_get_contents($path));
-            return 'data:image/png;base64,' . $data;
+            $contents = file_get_contents($path);
+            if (false === $contents) {
+                return '';
+            }
+            return 'data:image/png;base64,' . base64_encode($contents);
         }
         return '';
     }

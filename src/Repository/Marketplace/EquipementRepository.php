@@ -16,6 +16,10 @@ class EquipementRepository extends ServiceEntityRepository
         parent::__construct($registry, Equipement::class);
     }
 
+    /**
+     * @param array<string, string> $orderBy
+     * @return list<Equipement>
+     */
     public function findAllWithRelations(array $orderBy = ['dateCreation' => 'DESC']): array
     {
         $qb = $this->createQueryBuilder('e')
@@ -26,11 +30,14 @@ class EquipementRepository extends ServiceEntityRepository
             $qb->addOrderBy('e.' . $field, $dir);
         }
 
+        /** @var list<Equipement> */
         return $qb->getQuery()->getResult();
     }
 
+    /** @return list<Equipement> */
     public function findAvailableWithRelations(): array
     {
+        /** @var list<Equipement> */
         return $this->createQueryBuilder('e')
             ->leftJoin('e.categorie', 'c')->addSelect('c')
             ->leftJoin('e.fournisseur', 'f')->addSelect('f')
@@ -40,8 +47,10 @@ class EquipementRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<Equipement> */
     public function findAvailablePaginated(int $page, int $limit = 12): array
     {
+        /** @var list<Equipement> */
         return $this->createQueryBuilder('e')
             ->leftJoin('e.categorie', 'c')->addSelect('c')
             ->leftJoin('e.fournisseur', 'f')->addSelect('f')
@@ -62,8 +71,10 @@ class EquipementRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /** @return list<Equipement> */
     public function findLowStock(): array
     {
+        /** @var list<Equipement> */
         return $this->createQueryBuilder('e')
             ->where('e.quantiteStock < e.seuilAlerte')
             ->getQuery()

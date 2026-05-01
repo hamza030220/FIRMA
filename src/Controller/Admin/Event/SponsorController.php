@@ -27,8 +27,8 @@ class SponsorController extends AbstractController
     #[Route('', name: 'admin_sponsors')]
     public function index(Request $request): Response
     {
-        $tab    = $request->query->get('tab', 'liste');
-        $search = $request->query->get('q', '');
+        $tab    = (string) $request->query->get('tab', 'liste');
+        $search = (string) $request->query->get('q', '');
 
         $sponsors = $this->sponsorService->getCatalog();
 
@@ -36,9 +36,9 @@ class SponsorController extends AbstractController
         if ($search) {
             $q = mb_strtolower($search);
             $sponsors = array_filter($sponsors, function (Sponsor $s) use ($q) {
-                return str_contains(mb_strtolower($s->getNom()), $q)
+                return str_contains(mb_strtolower($s->getNom() ?? ''), $q)
                     || str_contains(mb_strtolower($s->getEmailContact() ?? ''), $q)
-                    || str_contains(mb_strtolower($s->getSecteurActivite()), $q);
+                    || str_contains(mb_strtolower($s->getSecteurActivite() ?? ''), $q);
             });
         }
 
@@ -168,7 +168,7 @@ class SponsorController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        if (!$this->isCsrfTokenValid('delete' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete' . $id, (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token CSRF invalide.');
             return $this->redirectToRoute('admin_evenements', ['tab' => 'sponsors']);
         }
@@ -199,7 +199,8 @@ class SponsorController extends AbstractController
             return $this->json(['error' => 'Fichier trop volumineux (max 5 Mo).'], 400);
         }
 
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/sponsors';
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $uploadDir = (is_string($projectDir) ? $projectDir : '') . '/public/uploads/sponsors';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }

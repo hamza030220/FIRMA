@@ -16,7 +16,11 @@ class SponsorService
 
     // ── Catalogue CRUD ──
 
-    /** Tous les sponsors du catalogue (non assignés). */
+    /**
+     * Tous les sponsors du catalogue (non assignés).
+     *
+     * @return Sponsor[]
+     */
     public function getCatalog(): array
     {
         return $this->repo->findCatalog();
@@ -53,7 +57,11 @@ class SponsorService
 
     // ── Assignation à un événement ──
 
-    /** Sponsors assignés à un événement. */
+    /**
+     * Sponsors assignés à un événement.
+     *
+     * @return Sponsor[]
+     */
     public function getByEvenement(int $evenementId): array
     {
         return $this->repo->findByEvenement($evenementId);
@@ -103,7 +111,11 @@ class SponsorService
      */
     public function syncForEvent(array $sponsorIds, Evenement $evenement): void
     {
-        $this->deleteByEvenement($evenement->getIdEvenement());
+        $eventId = $evenement->getIdEvenement();
+        if (null === $eventId) {
+            return;
+        }
+        $this->deleteByEvenement($eventId);
         $this->assignerMultiple($sponsorIds, $evenement);
     }
 

@@ -36,12 +36,13 @@ class EvenementController extends AbstractController
 
     /**
      * Build all common template variables for the index page.
+     * @return array<string, mixed>
      */
     private function getIndexTemplateData(Request $request, ?string $overrideTab = null): array
     {
-        $tab    = $overrideTab ?? $request->query->get('tab', 'liste');
-        $search = $request->query->get('q', '');
-        $sort   = $request->query->get('sort', 'date_desc');
+        $tab    = $overrideTab ?? (string) $request->query->get('tab', 'liste');
+        $search = (string) $request->query->get('q', '');
+        $sort   = (string) $request->query->get('sort', 'date_desc');
 
         $evenements = $search
             ? $this->evenementService->search($search)
@@ -66,8 +67,12 @@ class EvenementController extends AbstractController
 
         $participationCounts = [];
         foreach ($paginatedEvenements as $evt) {
-            $participationCounts[$evt->getIdEvenement()] =
-                $this->participationRepo->countConfirmedByEvent($evt->getIdEvenement());
+            $evtId = $evt->getIdEvenement();
+            if (null === $evtId) {
+                continue;
+            }
+            $participationCounts[$evtId] =
+                $this->participationRepo->countConfirmedByEvent($evtId);
         }
 
         $catalogSponsors = $this->sponsorService->getCatalog();
@@ -123,6 +128,8 @@ class EvenementController extends AbstractController
 
     /**
      * Extract per-field errors from a submitted Symfony form.
+     * @param \Symfony\Component\Form\FormInterface<mixed> $form
+     * @return array<string, list<string>>
      */
     private function extractFormErrors(\Symfony\Component\Form\FormInterface $form): array
     {
@@ -149,14 +156,17 @@ class EvenementController extends AbstractController
     #[Route('/generate-image', name: 'admin_evenement_generate_image', methods: ['POST'])]
     public function generateImage(Request $request): JsonResponse
     {
-        $prompt = $request->request->get('prompt', 'agricultural event');
-        $token  = $this->getParameter('app.huggingface_token');
+        $promptRaw = $request->request->get('prompt', 'agricultural event');
+        $prompt = is_string($promptRaw) ? $promptRaw : 'agricultural event';
+        $tokenRaw  = $this->getParameter('app.huggingface_token');
+        $token = is_string($tokenRaw) ? $tokenRaw : '';
 
         // Call Hugging Face Inference API (FLUX.1-schnell)
         $model = 'black-forest-labs/FLUX.1-schnell';
         $url   = 'https://router.huggingface.co/hf-inference/models/' . $model;
 
         $ch = curl_init($url);
+        \assert($ch !== false);
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
@@ -165,7 +175,7 @@ class EvenementController extends AbstractController
                 'Authorization: Bearer ' . $token,
                 'Content-Type: application/json',
             ],
-            CURLOPT_POSTFIELDS => json_encode([
+            CURLOPT_POSTFIELDS => (string) json_encode([
                 'inputs' => $prompt,
             ]),
         ]);
@@ -174,28 +184,30 @@ class EvenementController extends AbstractController
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error    = curl_error($ch);
         curl_close($ch);
+        $responseStr = is_string($response) ? $response : '';
 
         if ($error || $httpCode !== 200) {
             // Check if it's a JSON error from HF
-            $decoded = json_decode($response, true);
-            $msg = $decoded['error'] ?? ($error ?: 'Erreur Hugging Face (HTTP ' . $httpCode . ')');
+            $decoded = json_decode($responseStr, true);
+            $msg = (is_array($decoded) ? ($decoded['error'] ?? null) : null) ?? ($error ?: 'Erreur Hugging Face (HTTP ' . $httpCode . ')');
             return $this->json(['error' => $msg], 500);
         }
 
         // If the response is JSON instead of binary, it's an error/loading message
-        if (str_starts_with(trim($response), '{')) {
-            $decoded = json_decode($response, true);
-            return $this->json(['error' => $decoded['error'] ?? 'Modèle en cours de chargement, réessayez dans quelques secondes.'], 503);
+        if (str_starts_with(trim($responseStr), '{')) {
+            $decoded = json_decode($responseStr, true);
+            return $this->json(['error' => (is_array($decoded) ? ($decoded['error'] ?? null) : null) ?? 'Modèle en cours de chargement, réessayez dans quelques secondes.'], 503);
         }
 
         // Save the image
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/assets/image/event';
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $uploadDir = (is_string($projectDir) ? $projectDir : '') . '/assets/image/event';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
         $filename = 'ai_' . uniqid() . '.png';
-        file_put_contents($uploadDir . '/' . $filename, $response);
+        file_put_contents($uploadDir . '/' . $filename, $responseStr);
 
         return $this->json([
             'url' => 'image/event/' . $filename,
@@ -223,7 +235,8 @@ class EvenementController extends AbstractController
             return $this->json(['error' => 'Fichier trop volumineux (max 5 Mo).'], 400);
         }
 
-        $uploadDir = $this->getParameter('kernel.project_dir') . '/assets/image/event';
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $uploadDir = (is_string($projectDir) ? $projectDir : '') . '/assets/image/event';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -317,14 +330,20 @@ class EvenementController extends AbstractController
         $events = [];
         foreach ($allEvents as $evt) {
             $start = $evt->getDateDebut();
-            $end   = $evt->getDateFin() ?? $start;
+            if (null === $start) {
+                continue;
+            }
+            $end = $evt->getDateFin() ?? $start;
             if ($evt->getHoraireDebut()) {
                 $start = new \DateTime($start->format('Y-m-d') . ' ' . $evt->getHoraireDebut()->format('H:i'));
             }
             if ($evt->getHoraireFin()) {
                 $end = new \DateTime($end->format('Y-m-d') . ' ' . $evt->getHoraireFin()->format('H:i'));
             } else {
-                $end = (clone $end)->modify('+1 day');
+                $endClone = clone $end;
+                \assert($endClone instanceof \DateTime);
+                $endClone->modify('+1 day');
+                $end = $endClone;
             }
             $events[] = [
                 'id'            => $evt->getIdEvenement(),
@@ -450,7 +469,7 @@ class EvenementController extends AbstractController
         }
 
         // Cancel all active participations
-        $this->participationService->cancelAllForEvent($evenement->getIdEvenement());
+        $this->participationService->cancelAllForEvent($evenement->getIdEvenement() ?? 0);
 
         $this->evenementService->updateStatut($evenement, 'annule');
         $this->addFlash('success', 'Événement annulé avec succès.');

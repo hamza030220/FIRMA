@@ -13,7 +13,11 @@ class EvenementService
         private readonly EvenementRepository $repo,
     ) {}
 
-    /** Liste triée par date de début. */
+    /**
+     * Liste triée par date de début.
+     *
+     * @return Evenement[]
+     */
     public function getAll(): array
     {
         return $this->repo->findAllOrdered();
@@ -24,13 +28,21 @@ class EvenementService
         return $this->repo->find($id);
     }
 
-    /** Recherche admin (titre uniquement). */
+    /**
+     * Recherche admin (titre uniquement).
+     *
+     * @return Evenement[]
+     */
     public function search(string $query): array
     {
         return $this->repo->search($query);
     }
 
-    /** Recherche user (titre, organisateur, lieu). */
+    /**
+     * Recherche user (titre, organisateur, lieu).
+     *
+     * @return Evenement[]
+     */
     public function searchMulti(string $query): array
     {
         return $this->repo->searchMulti($query);
@@ -78,13 +90,13 @@ class EvenementService
         if (!$this->repo->reserverPlaces($evenementId, $nb)) {
             throw new \RuntimeException('Pas assez de places disponibles.');
         }
-        $this->em->clear(Evenement::class);
+        $this->em->clear();
     }
 
     /** Libère des places (annulation, modification). */
     public function libererPlaces(int $evenementId, int $nb): void
     {
         $this->repo->libererPlaces($evenementId, $nb);
-        $this->em->clear(Evenement::class);
+        $this->em->clear();
     }
 }

@@ -1,0 +1,17 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    ignoreErrors:
+        # Doctrine column mapping mismatches: properties default to null because
+        # they are populated by form binding or @ORM\PrePersist lifecycle callbacks
+        # before any persist/flush. The DB columns themselves remain NOT NULL.
+        -
+            message: '#type mapping mismatch: property can contain .* but database expects .*#'
+            paths:
+                - src/Entity/*
+
+    # Avoid scanning vendor (already implicit) and var/cache
+    excludePaths:
+        - var/*
+        - vendor/*

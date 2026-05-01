@@ -62,7 +62,7 @@ class Participation
 
     public function getStatutEnum(): ?StatutParticipation
     {
-        return StatutParticipation::tryFrom($this->statut);
+        return StatutParticipation::tryFrom($this->statut ?? '');
     }
 
     public function getTotalPersonnes(): int
