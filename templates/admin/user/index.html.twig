@@ -137,16 +137,6 @@
                   <a href="{{ path('admin_utilisateur_edit', {id: u.id}) }}" class="btn-action btn-edit" title="Modifier">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </a>
-                  {% if u.id != app.user.id %}
-                    <button type="button"
-                      class="btn-action btn-delete"
-                      title="Supprimer"
-                      data-delete-id="{{ u.id }}"
-                      data-delete-name="{{ u.fullName|e('html_attr') }}"
-                      data-delete-token="{{ csrf_token('delete_user_' ~ u.id) }}">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                    </button>
-                  {% endif %}
                 </div>
               </td>
             </tr>
@@ -161,24 +151,6 @@
         routeParams: { q: keyword, role: role }
     } %}
   {% endif %}
-</div>
-
-{# ── Modal confirmation suppression ── #}
-<div id="deleteModal" class="delete-modal-overlay" style="display:none">
-  <div class="delete-modal">
-    <div class="delete-modal-icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-    </div>
-    <h3>Confirmer la suppression</h3>
-    <p id="deleteModalMsg">Voulez-vous vraiment supprimer cet utilisateur ?</p>
-    <div class="delete-modal-actions">
-      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Annuler</button>
-      <form id="deleteForm" method="post" style="display:inline">
-        <input type="hidden" name="_token" id="deleteToken">
-        <button type="submit" class="btn-modal-confirm">Supprimer</button>
-      </form>
-    </div>
-  </div>
 </div>
 
 <style>
@@ -244,50 +216,12 @@
 .user-actions { display:flex; gap:.4rem; }
 .btn-action { width:30px; height:30px; border:none; border-radius:7px; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
-.btn-view   { background:#eff6ff; color:#3b82f6; }
-.btn-edit   { background:#f0fdf4; color:#16a34a; }
-.btn-delete { background:#fef2f2; color:#dc2626; }
+.btn-view { background:#eff6ff; color:#3b82f6; }
+.btn-edit { background:#f0fdf4; color:#16a34a; }
 .btn-action:hover { opacity:.8; }
 
 .user-empty { text-align:center; padding:3rem; color:#9ca3af; background:#fff;
   border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.05); }
 .user-empty svg { margin-bottom:.7rem; opacity:.4; }
-
-/* Delete modal */
-.delete-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4);
-  display:flex; align-items:center; justify-content:center; z-index:9999; }
-.delete-modal { background:#fff; border-radius:16px; padding:2rem; max-width:400px;
-  width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); }
-.delete-modal-icon { margin-bottom:1rem; }
-.delete-modal h3 { font-size:1.15rem; font-weight:700; color:#1a1a1a; margin:0 0 .5rem; }
-.delete-modal p  { color:#6b7280; font-size:.9rem; margin:0 0 1.5rem; }
-.delete-modal-actions { display:flex; gap:.75rem; justify-content:center; }
-.btn-modal-cancel  { padding:.65rem 1.5rem; background:#f3f4f6; color:#374151;
-  border:1.5px solid #e2e8f0; border-radius:9px; font-size:.9rem; cursor:pointer; font-weight:600; }
-.btn-modal-confirm { padding:.65rem 1.5rem; background:#dc2626; color:#fff;
-  border:none; border-radius:9px; font-size:.9rem; cursor:pointer; font-weight:600; }
 </style>
-
-<script>
-function closeDeleteModal() {
-  document.getElementById('deleteModal').style.display = 'none';
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('[data-delete-id]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var id    = btn.dataset.deleteId;
-      var name  = btn.dataset.deleteName;
-      var token = btn.dataset.deleteToken;
-      document.getElementById('deleteModalMsg').textContent = 'Voulez-vous vraiment supprimer "' + name + '" ? Cette action est irréversible.';
-      document.getElementById('deleteForm').action = '/admin/utilisateurs/' + id + '/supprimer';
-      document.getElementById('deleteToken').value = token;
-      document.getElementById('deleteModal').style.display = 'flex';
-    });
-  });
-  document.getElementById('deleteModal').addEventListener('click', function(e){
-    if (e.target === this) closeDeleteModal();
-  });
-});
-</script>
 {% endblock %}
