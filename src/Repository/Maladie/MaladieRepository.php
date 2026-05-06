@@ -4,6 +4,7 @@ namespace App\Repository\Maladie;
 
 use App\Entity\Maladie\Maladie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 class MaladieRepository extends ServiceEntityRepository
@@ -19,6 +20,65 @@ class MaladieRepository extends ServiceEntityRepository
             ->orderBy('m.nom', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return array{items: list<Maladie>, total: int}
+     */
+    public function findPaginatedForUserList(
+        string $keyword = '',
+        string $tri = 'nom',
+        string $gravite = '',
+        int $page = 1,
+        int $limit = 9
+    ): array {
+        $qb = $this->createQueryBuilder('m')
+            ->distinct()
+            ->leftJoin('m.solutionTraitements', 's')
+            ->addSelect('s');
+
+        $keyword = trim($keyword);
+        if ($keyword !== '') {
+            $qb->andWhere('LOWER(COALESCE(m.nom, \'\')) LIKE :keyword
+                OR LOWER(COALESCE(m.description, \'\')) LIKE :keyword
+                OR LOWER(COALESCE(m.symptomes, \'\')) LIKE :keyword')
+                ->setParameter('keyword', '%' . mb_strtolower($keyword) . '%');
+        }
+
+        if ($gravite !== '') {
+            $qb->andWhere('m.niveauGravite = :gravite')
+                ->setParameter('gravite', $gravite);
+        }
+
+        switch ($tri) {
+            case 'gravite':
+                $qb->addSelect("CASE
+                        WHEN m.niveauGravite = 'critique' THEN 1
+                        WHEN m.niveauGravite = 'eleve' THEN 2
+                        WHEN m.niveauGravite = 'moyen' THEN 3
+                        ELSE 4
+                    END AS HIDDEN gravite_order")
+                    ->orderBy('gravite_order', 'ASC')
+                    ->addOrderBy('m.nom', 'ASC');
+                break;
+            case 'saison':
+                $qb->orderBy('m.saisonFrequente', 'ASC')
+                    ->addOrderBy('m.nom', 'ASC');
+                break;
+            default:
+                $qb->orderBy('m.nom', 'ASC');
+        }
+
+        $query = $qb->getQuery()
+            ->setFirstResult(max(0, ($page - 1) * $limit))
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($query, true);
+
+        return [
+            'items' => array_values(iterator_to_array($paginator)),
+            'total' => count($paginator),
+        ];
     }
 
     public function searchAndFilter(string $keyword = '', string $tri = 'nom', string $gravite = ''): array

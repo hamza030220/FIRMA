@@ -2,6 +2,9 @@
 
 namespace App\Entity\Forum;
 
+use App\Entity\Forum\Traits\ForumTextRepairTrait;
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\ForumModerationAlertRepository;
 use Doctrine\DBAL\Types\Types;
@@ -9,8 +12,13 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ForumModerationAlertRepository::class)]
 #[ORM\Table(name: 'forum_moderation_alert')]
+#[ORM\HasLifecycleCallbacks]
 class ForumModerationAlert
 {
+    use ForumTextRepairTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+    use BlameableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -22,22 +30,22 @@ class ForumModerationAlert
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Utilisateur $utilisateur = null;
+    private Utilisateur $utilisateur;
 
     #[ORM\Column(name: 'original_content', type: Types::TEXT)]
-    private ?string $originalContent = null;
+    private string $originalContent;
 
     #[ORM\Column(name: 'masked_content', type: Types::TEXT)]
-    private ?string $maskedContent = null;
+    private string $maskedContent;
 
+    /**
+     * @var list<string>
+     */
     #[ORM\Column(name: 'matched_words', type: Types::JSON)]
     private array $matchedWords = [];
 
     #[ORM\Column(length: 30)]
     private string $status = 'pending';
-
-    #[ORM\Column(name: 'created_at', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(name: 'reviewed_at', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $reviewedAt = null;
@@ -64,11 +72,17 @@ class ForumModerationAlert
 
     public function getUtilisateur(): ?Utilisateur
     {
-        return $this->utilisateur;
+        return isset($this->utilisateur) ? $this->utilisateur : null;
     }
 
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
+        if ($utilisateur === null) {
+            unset($this->utilisateur);
+
+            return $this;
+        }
+
         $this->utilisateur = $utilisateur;
 
         return $this;
@@ -76,7 +90,7 @@ class ForumModerationAlert
 
     public function getOriginalContent(): ?string
     {
-        return $this->originalContent;
+        return isset($this->originalContent) ? $this->repairForumText($this->originalContent) : null;
     }
 
     public function setOriginalContent(string $originalContent): static
@@ -88,7 +102,7 @@ class ForumModerationAlert
 
     public function getMaskedContent(): ?string
     {
-        return $this->maskedContent;
+        return isset($this->maskedContent) ? $this->repairForumText($this->maskedContent) : null;
     }
 
     public function setMaskedContent(string $maskedContent): static
@@ -107,7 +121,7 @@ class ForumModerationAlert
     }
 
     /**
-     * @param list<string> $matchedWords
+     * @param array<int|string, scalar|null> $matchedWords
      */
     public function setMatchedWords(array $matchedWords): static
     {
@@ -124,18 +138,6 @@ class ForumModerationAlert
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
-    {
-        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -160,6 +162,13 @@ class ForumModerationAlert
     public function setNote(?string $note): static
     {
         $this->note = $note;
+
+        return $this;
+    }
+
+    public function initializeTimestamp(\DateTimeInterface $createdAt): static
+    {
+        $this->traitSetCreatedAt($createdAt);
 
         return $this;
     }

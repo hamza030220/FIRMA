@@ -75,6 +75,7 @@ class CaseController extends AbstractController
                 }
 
                 $case = new MaladieCase();
+                $case->assignCreatedBy($user)->assignUpdatedBy($user);
                 $case->setMaladie($maladie);
                 $case->setUtilisateur($user);
                 $case->setCulture($culture ?: null);
@@ -177,6 +178,7 @@ class CaseController extends AbstractController
         }
 
         $update = new MaladieCaseUpdate();
+        $update->assignCreatedBy($user)->assignUpdatedBy($user);
         $update->setCase($case);
         $update->setResultat($resultat);
         $update->setCommentaire($commentaire ?: null);
@@ -205,6 +207,7 @@ class CaseController extends AbstractController
                 try {
                     $file->move($uploadDir, $newFilename);
                     $photo = new MaladieCasePhoto();
+                    $photo->assignCreatedBy($user)->assignUpdatedBy($user);
                     $photo->setCaseUpdate($update);
                     $photo->setFilename($newFilename);
                     $em->persist($photo);

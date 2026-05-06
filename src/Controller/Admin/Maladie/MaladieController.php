@@ -236,7 +236,8 @@ class MaladieController extends AbstractController
                 $maladie->setTempMin($tempMin === null ? null : (float) $tempMin);
                 $maladie->setTempMax($tempMax === null ? null : (float) $tempMax);
                 $maladie->setHumiditeMin($humiditeMin === null ? null : (int) $humiditeMin);
-                $maladie->setCreatedBy($this->getUser()->getId());
+                $adminUser = $this->getAdminUser();
+                $maladie->assignCreatedBy($adminUser)->assignUpdatedBy($adminUser);
 
                 if ($imageFile) {
                     $extension   = strtolower($imageFile->getClientOriginalExtension());
@@ -380,6 +381,7 @@ class MaladieController extends AbstractController
                 }
 
                 if (empty($errors)) {
+                    $maladie->assignUpdatedBy($this->getAdminUser());
                     $this->em->flush();
                     $this->addFlash('success', 'Maladie "' . $nom . '" modifiée avec succès !');
                     return $this->redirectToRoute('admin_maladie_edit', ['id' => $maladie->getId()]);
@@ -463,7 +465,8 @@ class MaladieController extends AbstractController
             $traitement->setProduitsRecommandes($produitsRecommandes ?: null);
             $traitement->setConseilsPrevention($conseilsPrevention ?: null);
             $traitement->setDureeTraitement($dureeTraitement ?: null);
-            $traitement->setCreatedBy($this->getUser()->getId());
+            $adminUser = $this->getAdminUser();
+            $traitement->assignCreatedBy($adminUser)->assignUpdatedBy($adminUser);
 
             $this->em->persist($traitement);
             $this->em->flush();
@@ -527,14 +530,19 @@ class MaladieController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('admin_maladie_edit', ['id' => $traitement->getMaladie()->getId()]);
+        $maladie = $traitement->getMaladie();
+        if (!$maladie) {
+            return $this->redirectToRoute('admin_maladie_index');
+        }
+
+        return $this->redirectToRoute('admin_maladie_edit', ['id' => $maladie->getId()]);
     }
 
     // ==================== SUPPRIMER SOLUTION ====================
     #[Route('/solution/delete/{id}', name: 'admin_solution_delete', methods: ['POST'])]
     public function deleteSolution(SolutionTraitement $traitement, Request $request): Response
     {
-        $maladieId = $traitement->getMaladie()->getId();
+        $maladieId = $traitement->getMaladie()?->getId();
 
         if ($this->isCsrfTokenValid('delete-solution' . $traitement->getId(), $request->request->get('_token'))) {
             $this->em->remove($traitement);
@@ -542,6 +550,17 @@ class MaladieController extends AbstractController
             $this->addFlash('success', 'Solution supprimée avec succès !');
         }
 
-        return $this->redirectToRoute('admin_maladie_edit', ['id' => $maladieId]);
+        return $maladieId
+            ? $this->redirectToRoute('admin_maladie_edit', ['id' => $maladieId])
+            : $this->redirectToRoute('admin_maladie_index');
+    }
+    private function getAdminUser(): Utilisateur
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException('Utilisateur administrateur non connecte.');
+        }
+
+        return $user;
     }
 }

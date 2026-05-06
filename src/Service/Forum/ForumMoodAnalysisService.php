@@ -161,6 +161,7 @@ class ForumMoodAnalysisService
                 1, 2 => 'negatif',
                 3 => 'neutre',
                 4, 5 => 'positif',
+                default => 'neutre',
             };
         }
 

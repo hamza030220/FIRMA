@@ -9,6 +9,7 @@ use App\Repository\Forum\CategorieForumRepository;
 use App\Repository\Forum\CommentaireRepository;
 use App\Repository\Forum\ForumModerationAlertRepository;
 use App\Repository\Forum\PostRepository;
+use App\Entity\User\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -256,6 +257,8 @@ class ForumController extends AbstractController
         $post = $alert->getCommentaire()?->getPost();
 
         $createdAt = new \DateTime('now', new \DateTimeZone('Africa/Lagos'));
+        $adminUser = $this->getUser();
+        $adminUserEntity = $adminUser instanceof Utilisateur ? $adminUser : null;
         $linkUrl = $post !== null && $post->getId() !== null
             ? $this->generateUrl('user_forum_show', ['id' => $post->getId(), '_fragment' => 'post-comments'])
             : $this->generateUrl('user_notifications');
@@ -277,6 +280,7 @@ class ForumController extends AbstractController
 
             $alert
                 ->setStatus('treated')
+                ->assignUpdatedBy($adminUserEntity)
                 ->setReviewedAt($createdAt);
             $alert->setNote('Avertissement envoye le ' . $createdAt->format('d/m/Y H:i'));
             $entityManager->flush();
@@ -300,9 +304,12 @@ class ForumController extends AbstractController
         }
 
         $now = new \DateTime('now', new \DateTimeZone('Africa/Lagos'));
+        $adminUser = $this->getUser();
+        $adminUserEntity = $adminUser instanceof Utilisateur ? $adminUser : null;
         foreach ($commentaire->getModerationAlerts() as $alert) {
             $alert
                 ->setStatus('treated')
+                ->assignUpdatedBy($adminUserEntity)
                 ->setReviewedAt($now)
                 ->setNote('Commentaire supprime par l\'administrateur.');
         }
@@ -432,7 +439,8 @@ class ForumController extends AbstractController
             $day = $windowStart->modify('+' . $i . ' days');
             $key = $day->format('Y-m-d');
             $trendBuckets[$key] = 0;
-            $trendLabels[] = $weekdayLabels[(int) $day->format('N')] ?? $day->format('d/m');
+            $weekdayIndex = (int) $day->format('N');
+            $trendLabels[] = $weekdayLabels[$weekdayIndex];
         }
 
         foreach ($posts as $post) {

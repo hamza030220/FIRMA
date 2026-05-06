@@ -4,6 +4,7 @@ namespace App\Controller\Admin\Maladie;
 
 use App\Entity\Maladie\Maladie;
 use App\Entity\Maladie\SolutionTraitement;
+use App\Entity\User\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -62,7 +63,8 @@ class SolutionTraitementController extends AbstractController
         $traitement->setUsageCount(0);
         $traitement->setFeedbackPositive(0);
         $traitement->setFeedbackNegative(0);
-        $traitement->setCreatedBy($this->getUser()->getId());
+        $adminUser = $this->getAdminUser();
+        $traitement->assignCreatedBy($adminUser)->assignUpdatedBy($adminUser);
 
         $em->persist($traitement);
         $em->flush();
@@ -77,10 +79,6 @@ class SolutionTraitementController extends AbstractController
     #[Route('/edit/{id}', name: 'admin_solution_traitement_edit', methods: ['POST'])]
     public function edit(Request $request, SolutionTraitement $traitement, EntityManagerInterface $em): JsonResponse
     {
-        if (!$traitement) {
-            return $this->json(['success' => false, 'error' => 'Traitement non trouve']);
-        }
-
         $data = json_decode($request->getContent(), true) ?? [];
 
         $titre = trim((string) ($data['titre'] ?? ''));
@@ -105,6 +103,7 @@ class SolutionTraitementController extends AbstractController
         $traitement->setProduitsRecommandes($this->sanitizeNullable($data['produitsRecommandes'] ?? null));
         $traitement->setConseilsPrevention($this->sanitizeNullable($data['conseilsPrevention'] ?? null));
         $traitement->setDureeTraitement(htmlspecialchars($dureeTraitement, ENT_QUOTES, 'UTF-8'));
+        $traitement->assignUpdatedBy($this->getAdminUser());
 
         $em->flush();
 
@@ -117,23 +116,23 @@ class SolutionTraitementController extends AbstractController
     #[Route('/delete/{id}', name: 'admin_solution_traitement_delete', methods: ['POST'])]
     public function delete(Request $request, SolutionTraitement $traitement, EntityManagerInterface $em): Response
     {
-        if (!$traitement) {
-            $this->addFlash('error', 'Traitement non trouve');
-            return $this->redirectToRoute('admin_maladie_index');
-        }
-
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete-solution' . $traitement->getId(), $token)) {
             $this->addFlash('error', 'Token invalide');
-            return $this->redirectToRoute('admin_maladie_show', ['id' => $traitement->getMaladie()->getId()]);
+            $maladie = $traitement->getMaladie();
+            return $maladie
+                ? $this->redirectToRoute('admin_maladie_show', ['id' => $maladie->getId()])
+                : $this->redirectToRoute('admin_maladie_index');
         }
 
-        $maladieId = $traitement->getMaladie()->getId();
+        $maladieId = $traitement->getMaladie()?->getId();
         $em->remove($traitement);
         $em->flush();
 
         $this->addFlash('success', 'Traitement supprime avec succes');
-        return $this->redirectToRoute('admin_maladie_show', ['id' => $maladieId]);
+        return $maladieId
+            ? $this->redirectToRoute('admin_maladie_show', ['id' => $maladieId])
+            : $this->redirectToRoute('admin_maladie_index');
     }
 
     private function sanitizeNullable(mixed $value): ?string
@@ -144,5 +143,15 @@ class SolutionTraitementController extends AbstractController
         }
 
         return htmlspecialchars($raw, ENT_QUOTES, 'UTF-8');
+    }
+
+    private function getAdminUser(): Utilisateur
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException('Utilisateur administrateur non connecte.');
+        }
+
+        return $user;
     }
 }

@@ -43,7 +43,7 @@
         </div>
     {% endif %}
 
-    {% if analysisImage is not empty %}
+    {% if analysisImage is not empty and imageUrl is empty %}
         <div class="photo-diag-image">
             <div class="photo-diag-image-label">Photo analysee</div>
             <img src="{{ analysisImage }}" alt="Photo scannee">

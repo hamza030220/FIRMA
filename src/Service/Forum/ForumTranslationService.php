@@ -2,6 +2,7 @@
 
 namespace App\Service\Forum;
 
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ForumTranslationService
@@ -26,6 +27,7 @@ class ForumTranslationService
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly CacheInterface $cache,
         private readonly string $deeplAuthKey,
         private readonly string $deeplBaseUri = 'https://api-free.deepl.com',
     ) {
@@ -37,7 +39,7 @@ class ForumTranslationService
     public function translate(string $text, string $targetLanguage, ?string $sourceLanguage = null): array
     {
         if (trim($this->deeplAuthKey) === '') {
-            throw new \RuntimeException('La clé DeepL est manquante. Ajoutez DEEPL_AUTH_KEY dans .env.local.');
+            throw new \RuntimeException('La cle DeepL est manquante. Ajoutez DEEPL_AUTH_KEY dans .env.local.');
         }
 
         if (trim($this->deeplBaseUri) === '') {
@@ -46,52 +48,60 @@ class ForumTranslationService
 
         $text = trim($text);
         if ($text === '') {
-            throw new \InvalidArgumentException('Le texte à traduire est obligatoire.');
+            throw new \InvalidArgumentException('Le texte a traduire est obligatoire.');
         }
 
         if (strlen($text) > self::MAX_TEXT_BYTES) {
-            throw new \InvalidArgumentException('Le texte dépasse la taille maximale autorisée.');
+            throw new \InvalidArgumentException('Le texte depasse la taille maximale autorisee.');
         }
 
-        $targetLanguage = $this->normalizeLanguageCode($targetLanguage);
-        if (!in_array($targetLanguage, self::SUPPORTED_TARGET_LANGUAGES, true)) {
+        $normalizedTargetLanguage = $this->normalizeLanguageCode($targetLanguage);
+        if (!in_array($normalizedTargetLanguage, self::SUPPORTED_TARGET_LANGUAGES, true)) {
             throw new \InvalidArgumentException("La langue cible choisie n'est pas prise en charge.");
         }
 
-        $payload = [
-            'text' => [$text],
-            'target_lang' => $targetLanguage,
-        ];
+        $normalizedSourceLanguage = $sourceLanguage !== null && trim($sourceLanguage) !== ''
+            ? $this->normalizeLanguageCode($sourceLanguage)
+            : null;
 
-        if ($sourceLanguage !== null && trim($sourceLanguage) !== '') {
-            $payload['source_lang'] = $this->normalizeLanguageCode($sourceLanguage);
-        }
+        $cacheKey = 'forum_translation_' . sha1($normalizedTargetLanguage . '|' . ($normalizedSourceLanguage ?? '') . '|' . $text);
 
-        $response = $this->httpClient->request('POST', rtrim($this->deeplBaseUri, '/') . '/v2/translate', [
-            'headers' => [
-                'Authorization' => 'DeepL-Auth-Key ' . $this->deeplAuthKey,
-            ],
-            'json' => $payload,
-        ]);
+        return $this->cache->get($cacheKey, function () use ($text, $normalizedTargetLanguage, $normalizedSourceLanguage): array {
+            $payload = [
+                'text' => [$text],
+                'target_lang' => $normalizedTargetLanguage,
+            ];
 
-        $statusCode = $response->getStatusCode();
-        $data = $response->toArray(false);
+            if ($normalizedSourceLanguage !== null) {
+                $payload['source_lang'] = $normalizedSourceLanguage;
+            }
 
-        if ($statusCode >= 400) {
-            $message = $data['message'] ?? $data['error'] ?? ('DeepL a répondu avec le code HTTP ' . $statusCode . '.');
-            throw new \RuntimeException(is_string($message) ? $message : 'Erreur inattendue lors de la traduction.');
-        }
+            $response = $this->httpClient->request('POST', rtrim($this->deeplBaseUri, '/') . '/v2/translate', [
+                'headers' => [
+                    'Authorization' => 'DeepL-Auth-Key ' . $this->deeplAuthKey,
+                ],
+                'json' => $payload,
+            ]);
 
-        $translation = $data['translations'][0] ?? null;
-        if (!is_array($translation) || !isset($translation['text'])) {
-            throw new \RuntimeException('Réponse de traduction invalide.');
-        }
+            $statusCode = $response->getStatusCode();
+            $data = $response->toArray(false);
 
-        return [
-            'text' => (string) $translation['text'],
-            'detectedSourceLanguage' => isset($translation['detected_source_language']) ? (string) $translation['detected_source_language'] : null,
-            'targetLanguage' => $targetLanguage,
-        ];
+            if ($statusCode >= 400) {
+                $message = $data['message'] ?? $data['error'] ?? ('DeepL a repondu avec le code HTTP ' . $statusCode . '.');
+                throw new \RuntimeException(is_string($message) ? $message : 'Erreur inattendue lors de la traduction.');
+            }
+
+            $translation = $data['translations'][0] ?? null;
+            if (!is_array($translation) || !isset($translation['text'])) {
+                throw new \RuntimeException('Reponse de traduction invalide.');
+            }
+
+            return [
+                'text' => (string) $translation['text'],
+                'detectedSourceLanguage' => isset($translation['detected_source_language']) ? (string) $translation['detected_source_language'] : null,
+                'targetLanguage' => $normalizedTargetLanguage,
+            ];
+        });
     }
 
     /**

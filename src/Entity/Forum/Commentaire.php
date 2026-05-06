@@ -2,6 +2,7 @@
 
 namespace App\Entity\Forum;
 
+use App\Entity\Forum\Traits\ForumTextRepairTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\CommentaireRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,6 +15,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'commentaire')]
 class Commentaire
 {
+    use ForumTextRepairTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -21,19 +24,19 @@ class Commentaire
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'commentaires')]
     #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Post $post = null;
+    private Post $post;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Utilisateur $utilisateur = null;
+    private Utilisateur $utilisateur;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Le commentaire est obligatoire.')]
     #[Assert\Length(min: 2, minMessage: 'Le commentaire doit contenir au moins 2 caractères.', max: 1000, maxMessage: 'Le commentaire ne peut pas dépasser 1000 caractères.')]
-    private ?string $contenu = null;
+    private string $contenu;
 
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateCreation = null;
+    private \DateTimeInterface $dateCreation;
 
     #[ORM\Column(name: 'image_path', length: 255, nullable: true)]
     private ?string $imagePath = null;
@@ -41,7 +44,7 @@ class Commentaire
     /**
      * @var Collection<int, ForumModerationAlert>
      */
-    #[ORM\OneToMany(mappedBy: 'commentaire', targetEntity: ForumModerationAlert::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'commentaire', targetEntity: ForumModerationAlert::class)]
     private Collection $moderationAlerts;
 
     public function __construct()
@@ -56,11 +59,17 @@ class Commentaire
 
     public function getPost(): ?Post
     {
-        return $this->post;
+        return isset($this->post) ? $this->post : null;
     }
 
     public function setPost(?Post $post): static
     {
+        if ($post === null) {
+            unset($this->post);
+
+            return $this;
+        }
+
         $this->post = $post;
 
         return $this;
@@ -68,11 +77,17 @@ class Commentaire
 
     public function getUtilisateur(): ?Utilisateur
     {
-        return $this->utilisateur;
+        return isset($this->utilisateur) ? $this->utilisateur : null;
     }
 
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
+        if ($utilisateur === null) {
+            unset($this->utilisateur);
+
+            return $this;
+        }
+
         $this->utilisateur = $utilisateur;
 
         return $this;
@@ -80,7 +95,7 @@ class Commentaire
 
     public function getContenu(): ?string
     {
-        return $this->contenu;
+        return isset($this->contenu) ? $this->repairForumText($this->contenu) : null;
     }
 
     public function setContenu(string $contenu): static
@@ -92,10 +107,10 @@ class Commentaire
 
     public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->dateCreation;
+        return isset($this->dateCreation) ? $this->dateCreation : null;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): static
+    public function initializeDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
 

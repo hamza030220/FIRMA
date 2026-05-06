@@ -31,6 +31,7 @@ class ForumController extends AbstractController
 {
     private const APP_TIMEZONE = 'Africa/Lagos';
     private const FORUM_SORT_OPTIONS = ['recent', 'oldest', 'title_asc', 'title_desc'];
+    private const FORUM_PAGE_SIZE = 8;
     private const FORUM_REACTION_TYPES = ['like', 'dislike', 'solidaire', 'encolere', 'triste'];
     private const COMMENT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
     private const COMMENT_IMAGE_FORMAT_MESSAGE = 'Formats acceptes : JPG, PNG, WEBP ou GIF.';
@@ -129,8 +130,7 @@ class ForumController extends AbstractController
         ForumPostBookmarkRepository $bookmarkRepository
     ): Response
     {
-        /** @var Utilisateur $user */
-        $user = $this->getUser();
+        $user = $this->getForumUser();
 
         if (!$this->isCsrfTokenValid('forum_create', (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -151,7 +151,9 @@ class ForumController extends AbstractController
             ->setContenu($contenu)
             ->setCategorie($categorie !== '' ? $categorie : null)
             ->setStatut('actif')
-            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+            ->assignCreatedBy($user)
+            ->assignUpdatedBy($user)
+            ->initializeDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         $entityManager->persist($post);
         $entityManager->flush();
@@ -236,11 +238,12 @@ class ForumController extends AbstractController
             $post
                 ->setTitre($titre)
                 ->setContenu($contenu)
-                ->setCategorie($categorie !== '' ? $categorie : null);
+                ->setCategorie($categorie !== '' ? $categorie : null)
+                ->assignUpdatedBy($this->getForumUser());
 
             $entityManager->flush();
 
-            $this->queueForumSuccessToast($request, 'Post Modifié avec succès');
+            $this->queueForumSuccessToast($request, 'Post modifié avec succès');
 
             return $this->redirectToRoute('user_forum');
         }
@@ -286,8 +289,7 @@ class ForumController extends AbstractController
         ForumPostBookmarkRepository $bookmarkRepository
     ): Response
     {
-        /** @var Utilisateur $user */
-        $user = $this->getUser();
+        $user = $this->getForumUser();
 
         if (!$this->isCsrfTokenValid('forum_comment_' . $post->getId(), (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -321,14 +323,14 @@ class ForumController extends AbstractController
             ->setPost($post)
             ->setUtilisateur($user)
             ->setContenu($maskedContent)
-            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+            ->initializeDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         if ($image instanceof UploadedFile) {
             try {
                 $commentaire->setImagePath($this->storeCommentImage($image));
             } catch (FileException $exception) {
                 return $this->renderShowPage($request, $post, null, ['contenu' => $contenu], [
-                    'image' => "L'image n'a pas pu etre enregistree. Veuillez reessayer.",
+                    'image' => "L'image n'a pas pu être enregistrée. Veuillez réessayer.",
                 ], $categorieForumRepository, $moderationAlertRepository, $bookmarkRepository);
             }
         }
@@ -337,15 +339,17 @@ class ForumController extends AbstractController
         $entityManager->flush();
 
         if (!empty($moderation['matches'])) {
-            $alert = new ForumModerationAlert();
-            $alert
+        $alert = new ForumModerationAlert();
+        $alert
                 ->setCommentaire($commentaire)
                 ->setUtilisateur($user)
                 ->setOriginalContent($originalContent)
                 ->setMaskedContent($maskedContent)
                 ->setMatchedWords($moderation['matches'])
                 ->setStatus('pending')
-                ->setCreatedAt(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+                ->assignCreatedBy($user)
+                ->assignUpdatedBy($user)
+                ->initializeTimestamp(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
             $entityManager->persist($alert);
             $entityManager->flush();
@@ -421,7 +425,7 @@ class ForumController extends AbstractController
                 $newImagePath = $this->storeCommentImage($image);
             } catch (FileException $exception) {
                 return $this->renderShowPage($request, $post, $commentaire, ['contenu' => $contenu], [
-                    'image' => "L'image n'a pas pu etre enregistree. Veuillez reessayer.",
+                    'image' => "L'image n'a pas pu être enregistrée. Veuillez réessayer.",
                 ], $categorieForumRepository, $moderationAlertRepository, $bookmarkRepository);
             }
 
@@ -435,15 +439,18 @@ class ForumController extends AbstractController
         $entityManager->flush();
 
         if (!empty($moderation['matches'])) {
-            $alert = new ForumModerationAlert();
+        $alert = new ForumModerationAlert();
+            $currentUser = $this->getForumUser();
             $alert
                 ->setCommentaire($commentaire)
-                ->setUtilisateur($this->getUser())
+                ->setUtilisateur($currentUser)
                 ->setOriginalContent($originalContent)
                 ->setMaskedContent($maskedContent)
                 ->setMatchedWords($moderation['matches'])
                 ->setStatus('pending')
-                ->setCreatedAt(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+                ->assignCreatedBy($currentUser)
+                ->assignUpdatedBy($currentUser)
+                ->initializeTimestamp(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
             $entityManager->persist($alert);
             $entityManager->flush();
@@ -487,11 +494,7 @@ class ForumController extends AbstractController
         EntityManagerInterface $entityManager,
         ReactionPostRepository $reactionPostRepository
     ): RedirectResponse {
-        /** @var Utilisateur|null $user */
-        $user = $this->getUser();
-        if (!$user) {
-            throw $this->createAccessDeniedException('Utilisateur non connecte.');
-        }
+        $user = $this->getForumUser();
 
         if (!$this->isCsrfTokenValid('forum_reaction_' . $post->getId(), (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -516,13 +519,16 @@ class ForumController extends AbstractController
             $existingReaction = new ReactionPost();
             $existingReaction
                 ->setPost($post)
-                ->setUtilisateur($user);
+                ->setUtilisateur($user)
+                ->assignCreatedBy($user)
+                ->assignUpdatedBy($user);
             $entityManager->persist($existingReaction);
         }
 
         $existingReaction
             ->setType($reactionType)
-            ->setDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+            ->assignUpdatedBy($user)
+            ->initializeDateCreation(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         $entityManager->flush();
 
@@ -537,11 +543,7 @@ class ForumController extends AbstractController
         EntityManagerInterface $entityManager,
         ForumPostBookmarkRepository $bookmarkRepository
     ): RedirectResponse {
-        /** @var Utilisateur|null $user */
-        $user = $this->getUser();
-        if (!$user) {
-            throw $this->createAccessDeniedException('Utilisateur non connecte.');
-        }
+        $user = $this->getForumUser();
 
         $bookmarkType = $this->sanitizeBookmarkType($type);
         if ($bookmarkType === null) {
@@ -561,8 +563,8 @@ class ForumController extends AbstractController
             $this->queueForumSuccessToast(
                 $request,
                 $bookmarkType === ForumPostBookmark::TYPE_FAVORITE
-                    ? 'Publication retiree des favoris.'
-                    : 'Publication retiree de la liste de lecture.'
+                    ? 'Publication retirée des favoris.'
+                    : 'Publication retirée de la liste de lecture.'
             );
 
             return $this->redirectBackToPost($request, $post);
@@ -573,7 +575,8 @@ class ForumController extends AbstractController
             ->setPost($post)
             ->setUtilisateur($user)
             ->setBookmarkType($bookmarkType)
-            ->setCreatedAt(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
+            ->assignCreatedBy($user)
+            ->initializeTimestamp(new \DateTime('now', new \DateTimeZone(self::APP_TIMEZONE)));
 
         $entityManager->persist($bookmark);
         $entityManager->flush();
@@ -581,8 +584,8 @@ class ForumController extends AbstractController
         $this->queueForumSuccessToast(
             $request,
             $bookmarkType === ForumPostBookmark::TYPE_FAVORITE
-                ? 'Publication ajoutee aux favoris.'
-                : 'Publication ajoutee a la liste de lecture.'
+                ? 'Publication ajoutée aux favoris.'
+                : 'Publication ajoutée à la liste de lecture.'
         );
 
         return $this->redirectBackToPost($request, $post);
@@ -590,10 +593,9 @@ class ForumController extends AbstractController
 
     private function denyPostAccess(Post $post): void
     {
-        /** @var Utilisateur|null $user */
-        $user = $this->getUser();
+        $user = $this->getForumUser();
 
-        if (!$user || $post->getUtilisateur()?->getId() !== $user->getId()) {
+        if ($post->getUtilisateur()?->getId() !== $user->getId()) {
             throw $this->createAccessDeniedException('Vous ne pouvez pas modifier ce post.');
         }
     }
@@ -607,10 +609,9 @@ class ForumController extends AbstractController
 
     private function canManageComment(Commentaire $commentaire): bool
     {
-        /** @var Utilisateur|null $user */
-        $user = $this->getUser();
+        $user = $this->getForumUser();
 
-        return $user !== null && $commentaire->getUtilisateur()?->getId() === $user->getId();
+        return $commentaire->getUtilisateur()?->getId() === $user->getId();
     }
 
     private function sanitizeCategory(string $categorie): ?string
@@ -621,6 +622,7 @@ class ForumController extends AbstractController
     }
 
     /**
+     * @param list<string> $availableCategories
      * @return array<string, string>
      */
     private function getPostValidationErrors(string $titre, string $contenu, ?string $categorie, array $availableCategories): array
@@ -663,21 +665,6 @@ class ForumController extends AbstractController
         $contentScan = $this->badWordsService->scan($contenu);
         if (!empty($contentScan['blocked'])) {
             $errors['contenu'] = 'Le contenu contient un mot interdit.';
-        }
-
-        return $errors;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function getCommentModerationErrors(string $contenu): array
-    {
-        $errors = [];
-        $scan = $this->badWordsService->scan($contenu);
-
-        if (!empty($scan['blocked'])) {
-            $errors['contenu'] = 'Le commentaire contient un mot interdit.';
         }
 
         return $errors;
@@ -757,31 +744,34 @@ class ForumController extends AbstractController
             $errors['image'] = self::COMMENT_IMAGE_FORMAT_MESSAGE;
         } elseif ($extension === null) {
             $errors['image'] = 'Extension invalide. Utilisez JPG, PNG, WEBP ou GIF.';
-        } elseif ($image->getSize() !== null && $image->getSize() > self::COMMENT_IMAGE_MAX_BYTES) {
-            $errors['image'] = "L'image ne doit pas depasser 5 Mo.";
         } else {
-            $dimensions = @getimagesize($image->getPathname());
-            if ($dimensions === false) {
-                $errors['image'] = "Impossible de lire les dimensions de l'image.";
+            $size = $image->getSize();
+            if ($size !== false && $size > self::COMMENT_IMAGE_MAX_BYTES) {
+                $errors['image'] = "L'image ne doit pas depasser 5 Mo.";
             } else {
-                [$width, $height] = $dimensions;
+                $dimensions = @getimagesize($image->getPathname());
+                if ($dimensions === false) {
+                    $errors['image'] = "Impossible de lire les dimensions de l'image.";
+                } else {
+                    [$width, $height] = $dimensions;
 
-                if ($width < self::COMMENT_IMAGE_MIN_WIDTH || $height < self::COMMENT_IMAGE_MIN_HEIGHT) {
-                    $errors['image'] = sprintf(
-                        "Image trop petite : %dx%d px. Minimum requis : %dx%d px.",
-                        $width,
-                        $height,
-                        self::COMMENT_IMAGE_MIN_WIDTH,
-                        self::COMMENT_IMAGE_MIN_HEIGHT
-                    );
-                } elseif ($width > self::COMMENT_IMAGE_MAX_WIDTH || $height > self::COMMENT_IMAGE_MAX_HEIGHT) {
-                    $errors['image'] = sprintf(
-                        "Image trop grande : %dx%d px. Maximum autorise : %dx%d px.",
-                        $width,
-                        $height,
-                        self::COMMENT_IMAGE_MAX_WIDTH,
-                        self::COMMENT_IMAGE_MAX_HEIGHT
-                    );
+                    if ($width < self::COMMENT_IMAGE_MIN_WIDTH || $height < self::COMMENT_IMAGE_MIN_HEIGHT) {
+                        $errors['image'] = sprintf(
+                            "Image trop petite : %dx%d px. Minimum requis : %dx%d px.",
+                            $width,
+                            $height,
+                            self::COMMENT_IMAGE_MIN_WIDTH,
+                            self::COMMENT_IMAGE_MIN_HEIGHT
+                        );
+                    } elseif ($width > self::COMMENT_IMAGE_MAX_WIDTH || $height > self::COMMENT_IMAGE_MAX_HEIGHT) {
+                        $errors['image'] = sprintf(
+                            "Image trop grande : %dx%d px. Maximum autorise : %dx%d px.",
+                            $width,
+                            $height,
+                            self::COMMENT_IMAGE_MAX_WIDTH,
+                            self::COMMENT_IMAGE_MAX_HEIGHT
+                        );
+                    }
                 }
             }
         }
@@ -866,7 +856,7 @@ class ForumController extends AbstractController
         }
 
         $bookmarkFlags = $bookmarkRepository !== null
-            ? $this->buildBookmarkFlags($this->getUser(), $bookmarkRepository)
+            ? $this->buildBookmarkFlags($this->getForumUser(), $bookmarkRepository)
             : ['favorite' => [], 'saved' => []];
 
         return $this->render('user/forum/show.html.twig', [
@@ -893,7 +883,7 @@ class ForumController extends AbstractController
      */
     private function storeCommentImage(UploadedFile $image): string
     {
-        $projectDir = (string) $this->getParameter('kernel.project_dir');
+        $projectDir = $this->getProjectDir();
         $uploadDirectory = $projectDir . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . self::COMMENT_IMAGE_DIRECTORY;
 
         if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0777, true) && !is_dir($uploadDirectory)) {
@@ -914,7 +904,7 @@ class ForumController extends AbstractController
 
     private function removeCommentImage(string $imagePath): void
     {
-        $projectDir = (string) $this->getParameter('kernel.project_dir');
+        $projectDir = $this->getProjectDir();
         $absolutePath = $projectDir . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $imagePath);
 
         if (is_file($absolutePath)) {
@@ -943,13 +933,13 @@ class ForumController extends AbstractController
     ): Response {
         $locale = $request->getLocale();
         $categories = $categorieForumRepository->findCategoryNames();
-        $posts = $postRepository->findForumFeed(null, $sort);
+        $page = $this->resolvePage($request->query->getInt('page', 1));
+        $feed = $postRepository->findForumFeedPage($search, $sort, $page, self::FORUM_PAGE_SIZE);
+        $posts = $feed['posts'];
+        $totalPosts = $feed['total'];
         $translatedPosts = $this->buildTranslatedForumPosts($posts, $locale);
-        $bookmarkFlags = $this->buildBookmarkFlags($this->getUser(), $bookmarkRepository);
-
-        if ($search !== '' && mb_strlen($search) >= 3) {
-            [$posts, $translatedPosts] = $this->filterForumPostsBySearch($posts, $translatedPosts, $search);
-        }
+        $bookmarkFlags = $this->buildBookmarkFlags($this->getForumUser(), $bookmarkRepository);
+        $totalPages = max(1, (int) ceil($totalPosts / self::FORUM_PAGE_SIZE));
 
         return $this->render('user/forum/index.html.twig', [
             'posts' => $posts,
@@ -960,6 +950,9 @@ class ForumController extends AbstractController
             'forum_active_section' => 'feed',
             'search' => $search,
             'sort' => $sort,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'bookmark_total' => $totalPosts,
             'categories' => $categories,
             'forum_success_toast' => $this->consumeForumSuccessToast($request),
             'form_data' => $formData,
@@ -975,13 +968,16 @@ class ForumController extends AbstractController
         CategorieForumRepository $categorieForumRepository,
         ForumPostBookmarkRepository $bookmarkRepository
     ): Response {
-        /** @var Utilisateur $user */
-        $user = $this->getUser();
+        $user = $this->getForumUser();
         $locale = $request->getLocale();
         $categories = $categorieForumRepository->findCategoryNames();
-        $posts = $bookmarkRepository->findPostsByUserAndType($user, $bookmarkType);
+        $page = $this->resolvePage($request->query->getInt('page', 1));
+        $feed = $bookmarkRepository->findPostsByUserAndTypePage($user, $bookmarkType, $page, self::FORUM_PAGE_SIZE);
+        $posts = $feed['posts'];
+        $totalPosts = $feed['total'];
         $translatedPosts = $this->buildTranslatedForumPosts($posts, $locale);
         $bookmarkFlags = $this->buildBookmarkFlags($user, $bookmarkRepository);
+        $totalPages = max(1, (int) ceil($totalPosts / self::FORUM_PAGE_SIZE));
 
         return $this->render('user/forum/bookmarks.html.twig', [
             'posts' => $posts,
@@ -993,11 +989,13 @@ class ForumController extends AbstractController
             'forum_page_title' => $pageTitle,
             'forum_page_lead' => $pageLead,
             'bookmark_type' => $bookmarkType,
-            'bookmark_total' => count($posts),
+            'bookmark_total' => $totalPosts,
             'forum_success_toast' => $this->consumeForumSuccessToast($request),
             'forum_back_to_feed' => $this->generateUrl('user_forum'),
             'forum_favorites_link' => $this->generateUrl('user_forum_favorites'),
             'forum_saved_link' => $this->generateUrl('user_forum_saved'),
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 
@@ -1010,11 +1008,12 @@ class ForumController extends AbstractController
         $translatedPosts = [];
 
         foreach ($posts as $post) {
-            if (!$post instanceof Post) {
+            $postId = $post->getId();
+            if ($postId === null) {
                 continue;
             }
 
-            $translatedPosts[$post->getId()] = $this->buildTranslatedForumPost($post, $locale);
+            $translatedPosts[$postId] = $this->buildTranslatedForumPost($post, $locale);
         }
 
         return $translatedPosts;
@@ -1036,10 +1035,6 @@ class ForumController extends AbstractController
         $visiblePostIds = [];
 
         foreach ($posts as $post) {
-            if (!$post instanceof Post) {
-                continue;
-            }
-
             $postId = $post->getId();
             if ($postId === null) {
                 continue;
@@ -1069,7 +1064,7 @@ class ForumController extends AbstractController
     {
         return [
             'title' => $this->translateAndMaskForumText($post->getTitre() ?? '', $locale),
-            'content' => $this->translateAndMaskForumText($post->getContenu() ?? '', $locale),
+            'content' => $this->translateAndMaskForumPreviewText($post->getContenu() ?? '', $locale),
         ];
     }
 
@@ -1097,11 +1092,12 @@ class ForumController extends AbstractController
         $translatedComments = [];
 
         foreach ($comments as $commentaire) {
-            if (!$commentaire instanceof Commentaire) {
+            $commentId = $commentaire->getId();
+            if ($commentId === null) {
                 continue;
             }
 
-            $translatedComments[$commentaire->getId()] = [
+            $translatedComments[$commentId] = [
                 'content' => $this->translateAndMaskForumText($commentaire->getContenu() ?? '', $locale),
             ];
         }
@@ -1147,7 +1143,7 @@ class ForumController extends AbstractController
 
         try {
             $result = $this->translationService->translate($text, $targetLanguage);
-            $translatedText = trim((string) ($result['text'] ?? ''));
+            $translatedText = trim($result['text']);
             return $translatedText !== '' ? $translatedText : $text;
         } catch (\Throwable) {
             return $text;
@@ -1173,6 +1169,18 @@ class ForumController extends AbstractController
         $translatedText = $this->translateForumText($preMaskedText, $locale);
 
         return $this->badWordsService->mask($translatedText)['maskedText'];
+    }
+
+    private function translateAndMaskForumPreviewText(string $text, string $locale, int $maxChars = 400): string
+    {
+        $text = trim($text);
+        if ($text === '') {
+            return '';
+        }
+
+        $preview = mb_substr($text, 0, max(1, $maxChars));
+
+        return $this->translateAndMaskForumText($preview, $locale);
     }
 
     private function translateForumCategory(string $category, string $locale): string
@@ -1277,6 +1285,24 @@ class ForumController extends AbstractController
         ]);
     }
 
+    private function getForumUser(): Utilisateur
+    {
+        $user = $this->getUser();
+        if (!$user instanceof Utilisateur) {
+            throw $this->createAccessDeniedException('Utilisateur non connecte.');
+        }
+
+        return $user;
+    }
+
+    private function resolvePage(int $page): int
+    {
+        return max(1, $page);
+    }
+
+    /**
+     * @return array{message: string, type: string, duration: int}|null
+     */
     private function consumeForumSuccessToast(Request $request): ?array
     {
         if (!$request->hasSession()) {
@@ -1284,8 +1310,8 @@ class ForumController extends AbstractController
         }
 
         $session = $request->getSession();
-        $toast = $session->get('forum_success_toast');
-        if (!is_array($toast)) {
+        $toast = $this->normalizeForumSuccessToast($session->get('forum_success_toast'));
+        if ($toast === null) {
             return null;
         }
 
@@ -1293,4 +1319,40 @@ class ForumController extends AbstractController
 
         return $toast;
     }
+
+    /**
+     * @param mixed $toast
+     * @return array{message: string, type: string, duration: int}|null
+     */
+    private function normalizeForumSuccessToast(mixed $toast): ?array
+    {
+        if (!is_array($toast)) {
+            return null;
+        }
+
+        $message = $toast['message'] ?? null;
+        $type = $toast['type'] ?? null;
+        $duration = $toast['duration'] ?? null;
+
+        if (!is_string($message) || !is_string($type) || !is_int($duration)) {
+            return null;
+        }
+
+        return [
+            'message' => $message,
+            'type' => $type,
+            'duration' => $duration,
+        ];
+    }
+
+    private function getProjectDir(): string
+    {
+        $projectDir = $this->getParameter('kernel.project_dir');
+        if (!is_string($projectDir)) {
+            throw new \RuntimeException('Le chemin du projet est invalide.');
+        }
+
+        return $projectDir;
+    }
 }
+

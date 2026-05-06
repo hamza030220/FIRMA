@@ -2,6 +2,9 @@
 
 namespace App\Entity\Forum;
 
+use App\Entity\Forum\Traits\ForumTextRepairTrait;
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\PostRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,6 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'post')]
 class Post
 {
+    use ForumTextRepairTrait;
+    use BlameableTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+
     public const REACTION_LABELS = [
         'like' => ['label' => 'Like', 'emoji' => '👍'],
         'dislike' => ['label' => 'Dislike', 'emoji' => '👎'],
@@ -29,26 +36,26 @@ class Post
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Utilisateur $utilisateur = null;
+    private Utilisateur $utilisateur;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
     #[Assert\Length(max: 255, maxMessage: 'Le titre ne peut pas dépasser 255 caractères.')]
-    private ?string $titre = null;
+    private string $titre;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
     #[Assert\Length(min: 10, minMessage: 'Le contenu doit contenir au moins 10 caractères.')]
-    private ?string $contenu = null;
+    private string $contenu;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $categorie = null;
 
-    #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateCreation = null;
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
+    private \DateTimeInterface $dateCreation;
 
     #[ORM\Column(length: 50)]
-    private ?string $statut = 'actif';
+    private string $statut = 'actif';
 
     #[ORM\Column(name: 'is_pinned', options: ['default' => false])]
     private bool $isPinned = false;
@@ -79,11 +86,17 @@ class Post
 
     public function getUtilisateur(): ?Utilisateur
     {
-        return $this->utilisateur;
+        return isset($this->utilisateur) ? $this->utilisateur : null;
     }
 
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
+        if ($utilisateur === null) {
+            unset($this->utilisateur);
+
+            return $this;
+        }
+
         $this->utilisateur = $utilisateur;
 
         return $this;
@@ -91,7 +104,7 @@ class Post
 
     public function getTitre(): ?string
     {
-        return $this->titre;
+        return isset($this->titre) ? $this->repairForumText($this->titre) : null;
     }
 
     public function setTitre(string $titre): static
@@ -103,7 +116,7 @@ class Post
 
     public function getContenu(): ?string
     {
-        return $this->contenu;
+        return isset($this->contenu) ? $this->repairForumText($this->contenu) : null;
     }
 
     public function setContenu(string $contenu): static
@@ -127,10 +140,10 @@ class Post
 
     public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->dateCreation;
+        return isset($this->dateCreation) ? $this->dateCreation : null;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): static
+    public function initializeDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
 
@@ -234,5 +247,12 @@ class Post
         }
 
         return $items;
+    }
+
+    #[ORM\PrePersist]
+    public function setDateCreationValue(): void
+    {
+        $this->dateCreation ??= new \DateTimeImmutable();
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
     }
 }

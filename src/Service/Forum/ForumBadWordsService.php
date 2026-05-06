@@ -182,14 +182,8 @@ class ForumBadWordsService
         }
 
         $tokens = explode(' ', $normalizedText);
-        if ($tokens === []) {
-            return false;
-        }
 
         $normalizedWords = array_flip(array_map([$this, 'normalizeText'], self::LOCAL_WORDS));
-        if ($normalizedWords === []) {
-            return false;
-        }
 
         foreach ($tokens as $token) {
             if ($token === '') {
@@ -212,7 +206,7 @@ class ForumBadWordsService
         }
 
         $parts = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        if ($parts === false || $parts === []) {
+        if ($parts === false) {
             return false;
         }
 
@@ -355,7 +349,7 @@ class ForumBadWordsService
         return (string) preg_replace_callback(
             '/\b' . preg_quote($word, '/') . '\b/iu',
             static function (array $matches): string {
-                $matchedWord = $matches[0] ?? '';
+                $matchedWord = $matches[0];
                 $letters = preg_split('//u', $matchedWord, -1, PREG_SPLIT_NO_EMPTY) ?: [];
                 if ($letters === []) {
                     return $matchedWord;
@@ -378,7 +372,7 @@ class ForumBadWordsService
         return (string) preg_replace_callback(
             '/\b' . preg_quote($phrase, '/') . '\b/iu',
             static function (array $matches): string {
-                $matchedPhrase = trim((string) ($matches[0] ?? ''));
+                $matchedPhrase = trim((string) $matches[0]);
                 if ($matchedPhrase === '') {
                     return $matchedPhrase;
                 }

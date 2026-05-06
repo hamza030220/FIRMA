@@ -2,6 +2,8 @@
 
 namespace App\Entity\Maladie;
 
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Maladie\SolutionTraitementVoteRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,30 +15,31 @@ use Doctrine\ORM\Mapping as ORM;
         new ORM\UniqueConstraint(name: 'uniq_solution_user_vote', columns: ['solution_traitement_id', 'utilisateur_id'])
     ]
 )]
+#[ORM\HasLifecycleCallbacks]
 class SolutionTraitementVote
 {
+    use BlameableTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: SolutionTraitement::class)]
-    #[ORM\JoinColumn(name: 'solution_traitement_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'solution_traitement_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?SolutionTraitement $solutionTraitement = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column(length: 8)]
+    #[ORM\Column(length: 8, nullable: true)]
     private ?string $type = null;
-
-    #[ORM\Column(name: 'created_at')]
-    private ?\DateTimeImmutable $createdAt = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
     }
 
     public function getId(): ?int
@@ -80,8 +83,15 @@ class SolutionTraitementVote
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
+    }
+
+    public function initializeTimestamp(): static
+    {
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
+
+        return $this;
     }
 }

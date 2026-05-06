@@ -1,5 +1,7 @@
 {% extends 'user/base.html.twig' %}
 
+{% block meta_description %}Bibliotheque des maladies des plantes, diagnostic, traitements et suivi agricole sur FIRMA.{% endblock %}
+
 {% block page_title %}Maladies des plantes{% endblock %}
 
 {% block user_content %}
@@ -113,7 +115,7 @@
             {# Image ou placeholder #}
             <div class="mal-card-img">
                 {% if maladie.imageUrl %}
-                    <img src="{{ asset('uploads/maladies/' ~ maladie.imageUrl) }}" alt="{{ maladie.nom }}">
+                    <img src="{{ asset('uploads/maladies/' ~ maladie.imageUrl) }}" alt="{{ maladie.nom }}" loading="lazy" decoding="async" width="300" height="140">
                 {% else %}
                     <div class="mal-card-img-placeholder">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
@@ -165,13 +167,6 @@
         </a>
         {% endfor %}
     </div>
-    {% include 'shared/_pagination.html.twig' with {
-        currentPage: currentPage,
-        totalPages: totalPages,
-        route: 'user_maladie_index',
-        routeParams: {}
-    } %}
-
     {% else %}
     <div class="mal-empty">
         <div class="mal-empty-icon">

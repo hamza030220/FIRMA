@@ -2,6 +2,8 @@
 
 namespace App\Entity\Maladie;
 
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Repository\Maladie\MaladieCaseUpdateRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,27 +15,27 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class MaladieCaseUpdate
 {
+    use BlameableTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: MaladieCase::class, inversedBy: 'updates')]
-    #[ORM\JoinColumn(name: 'case_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'case_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?MaladieCase $case = null;
 
     #[ORM\ManyToOne(targetEntity: SolutionTraitement::class)]
     #[ORM\JoinColumn(name: 'solution_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?SolutionTraitement $solutionTraitement = null;
 
-    #[ORM\Column(length: 30)]
+    #[ORM\Column(length: 30, nullable: true)]
     private ?string $resultat = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $commentaire = null;
-
-    #[ORM\Column(name: 'created_at')]
-    private ?\DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, MaladieCasePhoto>
@@ -41,15 +43,10 @@ class MaladieCaseUpdate
     #[ORM\OneToMany(mappedBy: 'caseUpdate', targetEntity: MaladieCasePhoto::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $photos;
 
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
-
     public function __construct()
     {
         $this->photos = new ArrayCollection();
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
     }
 
     public function getId(): ?int
@@ -65,6 +62,7 @@ class MaladieCaseUpdate
     public function setCase(?MaladieCase $case): self
     {
         $this->case = $case;
+
         return $this;
     }
 
@@ -76,6 +74,7 @@ class MaladieCaseUpdate
     public function setSolutionTraitement(?SolutionTraitement $solutionTraitement): self
     {
         $this->solutionTraitement = $solutionTraitement;
+
         return $this;
     }
 
@@ -87,6 +86,7 @@ class MaladieCaseUpdate
     public function setResultat(string $resultat): self
     {
         $this->resultat = $resultat;
+
         return $this;
     }
 
@@ -98,12 +98,20 @@ class MaladieCaseUpdate
     public function setCommentaire(?string $commentaire): self
     {
         $this->commentaire = $commentaire;
+
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
+    }
+
+    public function initializeTimestamp(): static
+    {
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
+
+        return $this;
     }
 
     /**

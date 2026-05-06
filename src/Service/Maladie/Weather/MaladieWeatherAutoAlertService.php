@@ -4,7 +4,9 @@ namespace App\Service\Maladie\Weather;
 
 use App\Entity\User\Utilisateur;
 use App\Repository\Maladie\MaladieRepository;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class MaladieWeatherAutoAlertService
 {
@@ -94,7 +96,7 @@ class MaladieWeatherAutoAlertService
 
     private function isCooldownActive(string $signature): bool
     {
-        $session = $this->requestStack->getSession();
+        $session = $this->getSession();
         if ($session === null) {
             return false;
         }
@@ -107,7 +109,7 @@ class MaladieWeatherAutoAlertService
 
     private function storeCooldown(string $signature): void
     {
-        $session = $this->requestStack->getSession();
+        $session = $this->getSession();
         if ($session === null) {
             return;
         }
@@ -118,7 +120,7 @@ class MaladieWeatherAutoAlertService
 
     private function isWeatherCacheFresh(string $city): bool
     {
-        $session = $this->requestStack->getSession();
+        $session = $this->getSession();
         if ($session === null) {
             return false;
         }
@@ -129,11 +131,20 @@ class MaladieWeatherAutoAlertService
 
     private function storeWeatherCache(string $city): void
     {
-        $session = $this->requestStack->getSession();
+        $session = $this->getSession();
         if ($session === null) {
             return;
         }
         $session->set('maladie_weather_check_city', mb_strtolower($city));
         $session->set('maladie_weather_check_at', time());
+    }
+
+    private function getSession(): ?SessionInterface
+    {
+        try {
+            return $this->requestStack->getSession();
+        } catch (SessionNotFoundException) {
+            return null;
+        }
     }
 }

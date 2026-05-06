@@ -1,0 +1,16 @@
+parameters:
+    level: 5
+    paths:
+        - src/Entity/Maladie
+        - src/Repository/Maladie
+        - src/Form/Maladie
+        - src/Service/Maladie
+        - src/Controller/Admin/Maladie/CaseController.php
+        - src/Controller/Admin/Maladie/MaladieController.php
+        - src/Controller/Admin/Maladie/SolutionTraitementController.php
+        - src/Controller/User/Maladie/CaseController.php
+        - src/Controller/User/Maladie/DiagnosticController.php
+        - src/Controller/User/Maladie/MaladieController.php
+        - tests/Unit/Maladie
+    bootstrapFiles:
+        - tests/bootstrap.php

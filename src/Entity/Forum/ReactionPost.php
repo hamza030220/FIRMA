@@ -2,9 +2,10 @@
 
 namespace App\Entity\Forum;
 
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\ReactionPostRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,6 +16,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(name: 'idx_post_reaction_user', columns: ['utilisateur_id'])]
 class ReactionPost
 {
+    use BlameableTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -22,18 +26,18 @@ class ReactionPost
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'reactions')]
     #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Post $post = null;
+    private Post $post;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Utilisateur $utilisateur = null;
+    private Utilisateur $utilisateur;
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'La reaction est obligatoire.')]
-    private ?string $type = null;
+    private string $type;
 
-    #[ORM\Column(name: 'date_creation', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateCreation = null;
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
+    private \DateTimeInterface $dateCreation;
 
     public function getId(): ?int
     {
@@ -42,11 +46,16 @@ class ReactionPost
 
     public function getPost(): ?Post
     {
-        return $this->post;
+        return isset($this->post) ? $this->post : null;
     }
 
     public function setPost(?Post $post): static
     {
+        if ($post === null) {
+            unset($this->post);
+            return $this;
+        }
+
         $this->post = $post;
 
         return $this;
@@ -54,11 +63,16 @@ class ReactionPost
 
     public function getUtilisateur(): ?Utilisateur
     {
-        return $this->utilisateur;
+        return isset($this->utilisateur) ? $this->utilisateur : null;
     }
 
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
+        if ($utilisateur === null) {
+            unset($this->utilisateur);
+            return $this;
+        }
+
         $this->utilisateur = $utilisateur;
 
         return $this;
@@ -66,7 +80,7 @@ class ReactionPost
 
     public function getType(): ?string
     {
-        return $this->type;
+        return isset($this->type) ? $this->type : null;
     }
 
     public function setType(string $type): static
@@ -78,13 +92,20 @@ class ReactionPost
 
     public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->dateCreation;
+        return isset($this->dateCreation) ? $this->dateCreation : null;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): static
+    public function initializeDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setDateCreationValue(): void
+    {
+        $this->dateCreation ??= new \DateTimeImmutable();
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
     }
 }

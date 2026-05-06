@@ -62,6 +62,10 @@ class ForumModerationAlertRepository extends ServiceEntityRepository
     /**
      * @return list<ForumModerationAlert>
      */
+    /**
+     * @param list<int> $commentIds
+     * @return list<ForumModerationAlert>
+     */
     public function findByCommentIds(array $commentIds): array
     {
         if ($commentIds === []) {

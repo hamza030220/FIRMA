@@ -1,0 +1,14 @@
+parameters:
+    level: 5
+    paths:
+        - src/Entity/Forum
+        - src/Repository/Forum
+        - src/Controller/Admin/ForumController.php
+        - src/Controller/User/ForumController.php
+        - src/Controller/User/ForumBadWordsController.php
+        - src/Controller/User/ForumLocaleController.php
+        - src/Controller/User/ForumMoodController.php
+        - src/Controller/User/ForumTranslationController.php
+        - tests/Unit/Forum
+    bootstrapFiles:
+        - tests/bootstrap.php

@@ -2,6 +2,8 @@
 
 namespace App\Entity\Maladie;
 
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Maladie\MaladieCaseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,17 +16,20 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class MaladieCase
 {
+    use BlameableTrait;
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Maladie::class)]
-    #[ORM\JoinColumn(name: 'maladie_id', referencedColumnName: 'id_maladie', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'maladie_id', referencedColumnName: 'id_maladie', nullable: true, onDelete: 'CASCADE')]
     private ?Maladie $maladie = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(length: 120, nullable: true)]
@@ -33,20 +38,14 @@ class MaladieCase
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $parcelle = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $symptomes = null;
 
-    #[ORM\Column(length: 30)]
+    #[ORM\Column(length: 30, nullable: true)]
     private ?string $statut = 'ouvert';
 
     #[ORM\Column(options: ['default' => true])]
     private bool $isPublic = true;
-
-    #[ORM\Column(name: 'created_at')]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(name: 'updated_at', nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, MaladieCaseUpdate>
@@ -58,18 +57,7 @@ class MaladieCase
     public function __construct()
     {
         $this->updates = new ArrayCollection();
-    }
-
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate]
-    public function setUpdatedAtValue(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
     }
 
     public function getId(): ?int
@@ -85,6 +73,7 @@ class MaladieCase
     public function setMaladie(?Maladie $maladie): self
     {
         $this->maladie = $maladie;
+
         return $this;
     }
 
@@ -96,6 +85,7 @@ class MaladieCase
     public function setUtilisateur(?Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
+
         return $this;
     }
 
@@ -107,6 +97,7 @@ class MaladieCase
     public function setCulture(?string $culture): self
     {
         $this->culture = $culture;
+
         return $this;
     }
 
@@ -118,6 +109,7 @@ class MaladieCase
     public function setParcelle(?string $parcelle): self
     {
         $this->parcelle = $parcelle;
+
         return $this;
     }
 
@@ -129,6 +121,7 @@ class MaladieCase
     public function setSymptomes(string $symptomes): self
     {
         $this->symptomes = $symptomes;
+
         return $this;
     }
 
@@ -140,6 +133,7 @@ class MaladieCase
     public function setStatut(string $statut): self
     {
         $this->statut = $statut;
+
         return $this;
     }
 
@@ -151,17 +145,25 @@ class MaladieCase
     public function setIsPublic(bool $isPublic): self
     {
         $this->isPublic = $isPublic;
+
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
+    }
+
+    public function initializeTimestamp(): static
+    {
+        $this->traitSetCreatedAt(new \DateTimeImmutable());
+
+        return $this;
     }
 
     /**

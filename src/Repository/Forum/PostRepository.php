@@ -4,6 +4,7 @@ namespace App\Repository\Forum;
 
 use App\Entity\Forum\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -20,6 +21,14 @@ class PostRepository extends ServiceEntityRepository
      * @return list<Post>
      */
     public function findForumFeed(?string $search = null, string $sort = 'recent'): array
+    {
+        return $this->findForumFeedPage($search, $sort, 1, PHP_INT_MAX)['posts'];
+    }
+
+    /**
+     * @return array{posts: list<Post>, total: int}
+     */
+    public function findForumFeedPage(?string $search, string $sort, int $page, int $limit): array
     {
         $qb = $this->createQueryBuilder('p')
             ->leftJoin('p.utilisateur', 'u')
@@ -67,10 +76,32 @@ class PostRepository extends ServiceEntityRepository
                 break;
         }
 
-        return $qb
+        $query = $qb
             ->distinct()
             ->getQuery()
-            ->getResult();
+            ->setFirstResult(max(0, ($page - 1) * $limit))
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($query, true);
+
+        return [
+            'posts' => array_values(iterator_to_array($paginator->getIterator(), false)),
+            'total' => count($paginator),
+        ];
+    }
+
+    public function countForumFeed(?string $search = null): int
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(DISTINCT p.id)');
+
+        if ($search !== null && $search !== '') {
+            $qb
+                ->andWhere('LOWER(p.titre) LIKE :term')
+                ->setParameter('term', '%' . mb_strtolower(trim($search)) . '%');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     public function findOneForForum(int $id): ?Post

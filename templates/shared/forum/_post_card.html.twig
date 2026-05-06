@@ -31,9 +31,6 @@
             </svg>
         </span>
     </a>
-    <div class="forum-mood-widget" data-forum-mood-widget data-post-id="{{ post.id }}" data-mood-url="{{ path('user_forum_mood_analyze') }}">
-        <span class="forum-mood-result" data-forum-mood-result>{{ 'forum.mood.pending'|trans({}, 'forum') }}</span>
-    </div>
     <div class="forum-card-footer">
         <span>{{ 'forum.common.by'|trans({}, 'forum') }} {{ post.utilisateur.fullName }}</span>
         <div class="forum-inline-actions">

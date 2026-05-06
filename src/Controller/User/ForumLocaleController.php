@@ -52,6 +52,9 @@ class ForumLocaleController extends AbstractController
         return $locale;
     }
 
+    /**
+     * @param array<string, string|int|float|bool|\Stringable|null> $parameters
+     */
     protected function t(string $key, array $parameters = []): string
     {
         return $this->translator->trans($key, $parameters, 'forum');

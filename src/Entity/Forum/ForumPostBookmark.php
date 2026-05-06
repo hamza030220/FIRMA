@@ -2,9 +2,10 @@
 
 namespace App\Entity\Forum;
 
+use App\Entity\Trait\BlameableTrait;
+use App\Entity\Trait\TimestampableTrait;
 use App\Entity\User\Utilisateur;
 use App\Repository\Forum\ForumPostBookmarkRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ForumPostBookmarkRepository::class)]
@@ -15,6 +16,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_forum_post_bookmark_type', columns: ['bookmark_type'])]
 class ForumPostBookmark
 {
+    use TimestampableTrait { setCreatedAt as protected traitSetCreatedAt; }
+    use BlameableTrait;
+
     public const TYPE_FAVORITE = 'favorite';
     public const TYPE_SAVED = 'saved';
 
@@ -25,17 +29,14 @@ class ForumPostBookmark
 
     #[ORM\ManyToOne(targetEntity: Post::class)]
     #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Post $post = null;
+    private Post $post;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'utilisateur_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private ?Utilisateur $utilisateur = null;
+    private Utilisateur $utilisateur;
 
     #[ORM\Column(name: 'bookmark_type', length: 20)]
     private string $bookmarkType = self::TYPE_FAVORITE;
-
-    #[ORM\Column(name: 'created_at', type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int
     {
@@ -44,11 +45,16 @@ class ForumPostBookmark
 
     public function getPost(): ?Post
     {
-        return $this->post;
+        return isset($this->post) ? $this->post : null;
     }
 
     public function setPost(?Post $post): static
     {
+        if ($post === null) {
+            unset($this->post);
+            return $this;
+        }
+
         $this->post = $post;
 
         return $this;
@@ -56,11 +62,16 @@ class ForumPostBookmark
 
     public function getUtilisateur(): ?Utilisateur
     {
-        return $this->utilisateur;
+        return isset($this->utilisateur) ? $this->utilisateur : null;
     }
 
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
+        if ($utilisateur === null) {
+            unset($this->utilisateur);
+            return $this;
+        }
+
         $this->utilisateur = $utilisateur;
 
         return $this;
@@ -81,14 +92,9 @@ class ForumPostBookmark
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function initializeTimestamp(\DateTimeInterface $createdAt): static
     {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
-    {
-        $this->createdAt = $createdAt;
+        $this->traitSetCreatedAt($createdAt);
 
         return $this;
     }

@@ -6,6 +6,7 @@ use App\Entity\Forum\ForumPostBookmark;
 use App\Entity\Forum\Post;
 use App\Entity\User\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -61,6 +62,14 @@ class ForumPostBookmarkRepository extends ServiceEntityRepository
      */
     public function findPostsByUserAndType(Utilisateur $user, string $bookmarkType): array
     {
+        return $this->findPostsByUserAndTypePage($user, $bookmarkType, 1, PHP_INT_MAX)['posts'];
+    }
+
+    /**
+     * @return array{posts: list<Post>, total: int}
+     */
+    public function findPostsByUserAndTypePage(Utilisateur $user, string $bookmarkType, int $page, int $limit): array
+    {
         $bookmarks = $this->createQueryBuilder('b')
             ->select('b, p, u, c, cu, r, ru')
             ->innerJoin('b.post', 'p')
@@ -83,11 +92,14 @@ class ForumPostBookmarkRepository extends ServiceEntityRepository
             ->addOrderBy('p.dateCreation', 'DESC')
             ->distinct()
             ->getQuery()
-            ->getResult();
+            ->setFirstResult(max(0, ($page - 1) * $limit))
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($bookmarks, true);
 
         $posts = [];
 
-        foreach ($bookmarks as $bookmark) {
+        foreach ($paginator as $bookmark) {
             if (!$bookmark instanceof ForumPostBookmark) {
                 continue;
             }
@@ -105,6 +117,21 @@ class ForumPostBookmarkRepository extends ServiceEntityRepository
             $posts[$postId] = $post;
         }
 
-        return array_values($posts);
+        return [
+            'posts' => array_values($posts),
+            'total' => count($paginator),
+        ];
+    }
+
+    public function countPostsByUserAndType(Utilisateur $user, string $bookmarkType): int
+    {
+        return (int) $this->createQueryBuilder('b')
+            ->select('COUNT(DISTINCT b.id)')
+            ->andWhere('b.utilisateur = :user')
+            ->andWhere('b.bookmarkType = :bookmarkType')
+            ->setParameter('user', $user)
+            ->setParameter('bookmarkType', $bookmarkType)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

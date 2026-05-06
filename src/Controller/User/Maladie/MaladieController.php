@@ -18,25 +18,34 @@ class MaladieController extends AbstractController
     #[Route('/maladies', name: 'user_maladie_index')]
     public function index(MaladieRepository $maladieRepository, Request $request): Response
     {
-        $allMaladies = $maladieRepository->findAll();
-
-        // Pagination
-        $page  = max(1, $request->query->getInt('page', 1));
+        $keyword = trim((string) $request->query->get('q', ''));
+        $tri = (string) $request->query->get('tri', 'nom');
+        $gravite = trim((string) $request->query->get('gravite', ''));
+        $page = max(1, $request->query->getInt('page', 1));
         $limit = 9;
-        $total = count($allMaladies);
+
+        $tri = in_array($tri, ['nom', 'gravite', 'saison'], true) ? $tri : 'nom';
+        $gravite = in_array($gravite, ['faible', 'moyen', 'eleve', 'critique'], true) ? $gravite : '';
+
+        $paginated = $maladieRepository->findPaginatedForUserList($keyword, $tri, $gravite, $page, $limit);
+        $maladies = $paginated['items'];
+        $total = $paginated['total'];
         $totalPages = max(1, (int) ceil($total / $limit));
         $page = min($page, $totalPages);
-        $maladies = array_slice($allMaladies, ($page - 1) * $limit, $limit);
 
         return $this->render('user/maladie/index.html.twig', [
             'maladies' => $maladies,
-            'keyword' => '',
-            'tri' => 'nom',
-            'gravite' => '',
+            'keyword' => $keyword,
+            'tri' => $tri,
+            'gravite' => $gravite,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'listRoute' => 'user_maladie_index',
-            'paginationRouteParams' => [],
+            'paginationRouteParams' => array_filter([
+                'q' => $keyword !== '' ? $keyword : null,
+                'tri' => $tri !== 'nom' ? $tri : null,
+                'gravite' => $gravite !== '' ? $gravite : null,
+            ], static fn ($value): bool => $value !== null),
         ]);
     }
 
@@ -83,9 +92,10 @@ class MaladieController extends AbstractController
                 : 'Merci pour votre retour !'
         );
 
-        return $this->redirectToRoute('user_maladie_show', [
-            'id' => $solution->getMaladie()->getId()
-        ]);
+        $maladie = $solution->getMaladie();
+        return $maladie
+            ? $this->redirectToRoute('user_maladie_show', ['id' => $maladie->getId()])
+            : $this->redirectToRoute('user_maladie_index');
     }
 
     #[Route('/maladie/{id}/pdf', name: 'user_maladie_pdf', requirements: ['id' => '\\d+'])]

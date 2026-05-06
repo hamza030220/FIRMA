@@ -18,7 +18,7 @@ class CategorieForum
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom de la catégorie est obligatoire.')]
     #[Assert\Length(max: 100, maxMessage: 'Le nom ne peut pas dépasser 100 caractères.')]
-    private ?string $nom = null;
+    private string $nom;
 
     public function getId(): ?int
     {
@@ -27,7 +27,7 @@ class CategorieForum
 
     public function getNom(): ?string
     {
-        return $this->nom;
+        return isset($this->nom) ? $this->nom : null;
     }
 
     public function setNom(string $nom): static
