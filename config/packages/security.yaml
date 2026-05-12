@@ -15,6 +15,11 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        api:
+            pattern: ^/integration/
+            stateless: true
+            custom_authenticators:
+                - App\Security\ApiKeyAuthenticator
         main:
             switch_user: true
             lazy: true
@@ -33,6 +38,7 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        - { path: ^/integration/, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }
         - { path: ^/participation/.+/confirmer/, roles: PUBLIC_ACCESS }
