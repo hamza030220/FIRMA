@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#64B5F6"/>
+      <stop offset="100%" stop-color="#E3F2FD"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#42A5F5"/>
+      <stop offset="100%" stop-color="#1565C0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="280" width="800" height="220" fill="url(#water)"/>
+  <!-- Coast/shore -->
+  <path d="M0,280 Q200,260 400,280 Q600,300 800,275 L800,300 L0,300 Z" fill="#D7CCC8"/>
+  <!-- Fish farm nets/cages -->
+  <g transform="translate(250,340)">
+    <ellipse cx="0" cy="0" rx="60" ry="15" fill="none" stroke="#FFB74D" stroke-width="3"/>
+    <ellipse cx="0" cy="0" rx="60" ry="15" fill="#42A5F5" opacity="0.3"/>
+    <line x1="-60" y1="0" x2="-60" y2="30" stroke="#FFB74D" stroke-width="2"/>
+    <line x1="60" y1="0" x2="60" y2="30" stroke="#FFB74D" stroke-width="2"/>
+    <line x1="0" y1="15" x2="0" y2="30" stroke="#FFB74D" stroke-width="1"/>
+    <ellipse cx="0" cy="30" rx="60" ry="12" fill="none" stroke="#FFB74D" stroke-width="2"/>
+  </g>
+  <g transform="translate(550,350)">
+    <ellipse cx="0" cy="0" rx="60" ry="15" fill="none" stroke="#FFB74D" stroke-width="3"/>
+    <ellipse cx="0" cy="0" rx="60" ry="15" fill="#42A5F5" opacity="0.3"/>
+    <line x1="-60" y1="0" x2="-60" y2="30" stroke="#FFB74D" stroke-width="2"/>
+    <line x1="60" y1="0" x2="60" y2="30" stroke="#FFB74D" stroke-width="2"/>
+    <ellipse cx="0" cy="30" rx="60" ry="12" fill="none" stroke="#FFB74D" stroke-width="2"/>
+  </g>
+  <!-- Fish -->
+  <g transform="translate(300,370)">
+    <ellipse cx="0" cy="0" rx="15" ry="8" fill="#B0BEC5"/>
+    <polygon points="15,0 22,-6 22,6" fill="#90A4AE"/>
+    <circle cx="-8" cy="-2" r="2" fill="#212121"/>
+  </g>
+  <g transform="translate(500,380)">
+    <ellipse cx="0" cy="0" rx="12" ry="6" fill="#B0BEC5"/>
+    <polygon points="12,0 18,-5 18,5" fill="#90A4AE"/>
+    <circle cx="-6" cy="-1" r="2" fill="#212121"/>
+  </g>
+  <g transform="translate(400,390)">
+    <ellipse cx="0" cy="0" rx="18" ry="9" fill="#78909C"/>
+    <polygon points="18,0 26,-7 26,7" fill="#607D8B"/>
+    <circle cx="-10" cy="-2" r="2" fill="#212121"/>
+  </g>
+  <!-- Boat -->
+  <g transform="translate(650,265)">
+    <path d="M-30,5 L-25,-5 L25,-5 L30,5 Z" fill="#795548"/>
+    <line x1="0" y1="-5" x2="0" y2="-30" stroke="#5D4037" stroke-width="2"/>
+    <polygon points="0,-30 15,-20 0,-10" fill="#F5F5F5"/>
+  </g>
+  <!-- Waves -->
+  <path d="M0,310 Q50,300 100,310 Q150,320 200,310 Q250,300 300,310 Q350,320 400,310 Q450,300 500,310 Q550,320 600,310 Q650,300 700,310 Q750,320 800,310" fill="none" stroke="white" stroke-width="1.5" opacity="0.3"/>
+  <!-- Sun -->
+  <circle cx="100" cy="60" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="420" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="450" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Salon de l'Aquaculture</text>
+  <text x="400" y="475" text-anchor="middle" fill="#90CAF9" font-family="Arial,sans-serif" font-size="18">Pisciculture durable - Monastir</text>
+</svg>

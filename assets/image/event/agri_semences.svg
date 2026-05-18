@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8D6E63"/>
+      <stop offset="100%" stop-color="#5D4037"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#soil)"/>
+  <!-- Seed packets -->
+  <g transform="translate(200,200)">
+    <rect x="-25" y="-35" width="50" height="70" fill="#4CAF50" rx="5"/>
+    <rect x="-20" y="-30" width="40" height="25" fill="white" rx="3"/>
+    <circle cx="0" cy="-18" r="8" fill="#FF9800"/>
+    <text x="0" y="10" text-anchor="middle" fill="white" font-size="10" font-family="Arial" font-weight="bold">BLÉ</text>
+  </g>
+  <g transform="translate(300,210)">
+    <rect x="-25" y="-35" width="50" height="70" fill="#F44336" rx="5"/>
+    <rect x="-20" y="-30" width="40" height="25" fill="white" rx="3"/>
+    <circle cx="-5" cy="-18" r="6" fill="#F44336"/><circle cx="8" cy="-18" r="6" fill="#E53935"/>
+    <text x="0" y="10" text-anchor="middle" fill="white" font-size="9" font-family="Arial" font-weight="bold">TOMATE</text>
+  </g>
+  <g transform="translate(400,205)">
+    <rect x="-25" y="-35" width="50" height="70" fill="#FF9800" rx="5"/>
+    <rect x="-20" y="-30" width="40" height="25" fill="white" rx="3"/>
+    <ellipse cx="0" cy="-18" rx="10" ry="6" fill="#FF9800"/>
+    <text x="0" y="10" text-anchor="middle" fill="white" font-size="9" font-family="Arial" font-weight="bold">MELON</text>
+  </g>
+  <!-- Seedlings in pots -->
+  <g transform="translate(550,260)">
+    <rect x="-12" y="0" width="24" height="20" fill="#8D6E63" rx="2"/>
+    <line x1="0" y1="0" x2="0" y2="-20" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-6" cy="-18" rx="6" ry="4" fill="#66BB6A" transform="rotate(-20 -6 -18)"/>
+    <ellipse cx="6" cy="-20" rx="6" ry="4" fill="#66BB6A" transform="rotate(20 6 -20)"/>
+  </g>
+  <g transform="translate(610,265)">
+    <rect x="-10" y="0" width="20" height="18" fill="#8D6E63" rx="2"/>
+    <line x1="0" y1="0" x2="0" y2="-15" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-5" cy="-13" rx="5" ry="3" fill="#81C784" transform="rotate(-25 -5 -13)"/>
+    <ellipse cx="5" cy="-15" rx="5" ry="3" fill="#81C784" transform="rotate(25 5 -15)"/>
+  </g>
+  <!-- Wheat stalks -->
+  <g>
+    <line x1="680" y1="300" x2="680" y2="240" stroke="#FFC107" stroke-width="2"/>
+    <ellipse cx="680" cy="235" rx="5" ry="12" fill="#FFD54F"/>
+    <line x1="710" y1="300" x2="715" y2="245" stroke="#FFC107" stroke-width="2"/>
+    <ellipse cx="715" cy="240" rx="5" ry="12" fill="#FFD54F"/>
+    <line x1="740" y1="300" x2="738" y2="248" stroke="#FFC107" stroke-width="2"/>
+    <ellipse cx="738" cy="243" rx="5" ry="12" fill="#FFD54F"/>
+  </g>
+  <!-- Sun -->
+  <circle cx="100" cy="70" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Salon des Semences et Plants</text>
+  <text x="400" y="445" text-anchor="middle" fill="#C5E1A5" font-family="Arial,sans-serif" font-size="18">Variétés locales - Béja</text>
+</svg>

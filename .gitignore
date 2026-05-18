@@ -1,0 +1,47 @@
+
+###> symfony/framework-bundle ###
+/.env
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+###> custom ###
+*.sql
+temp_*.sql
+/public/uploads/maladies/cases/
+###< custom ###
+
+###> reports & analysis artifacts (local only) ###
+phpstan-*.txt
+phpstan-*.json
+phpstan-baseline.neon
+RAPPORT_*.md
+RAPPORT_*.docx
+rap.md
+rap.docx
+reference.docx
+~$*.docx
+doctrine*.txt
+err*.txt
+errr*.txt
+lighthouse-*.html
+phpbench.json
+scripts/md_to_docx.py
+scripts/rap_to_docx.py
+tests/Benchmark/
+###< reports & analysis artifacts ###

@@ -1,0 +1,146 @@
+﻿vendor\bin\phpbench : PHPBench (1.6.1) running benchmarks... #standwithukraine
+Au caractère Ligne:1 : 1
++ vendor\bin\phpbench run tests/Benchmark --report=aggregate 2>&1 | Out ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHPBench (1.6.1...tandwithukraine:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+with configuration file: C:\Users\zussl\Desktop\maineTESTUNIT\FIRMA-main/phpbench.json
+with PHP version 8.2.12, xdebug ❌, opcache ❌
+
+\App\Tests\Benchmark\EvenementBench
+
+[0G    benchFindAllEvenementsOrdered...........I0 [0G    benchFindAllEvenementsOrdered...........I1 [0G    
+benchFindAllEvenementsOrdered...........I2 [0G    benchFindAllEvenementsOrdered...........I3 [0G    
+benchFindAllEvenementsOrdered...........I4 - Mo1.459ms (±10.39%)
+[0G    benchFindEvenementsByStatut.............I0 [0G    benchFindEvenementsByStatut.............I1 [0G    
+benchFindEvenementsByStatut.............I2 [0G    benchFindEvenementsByStatut.............I3 [0G    
+benchFindEvenementsByStatut.............I4 - Mo1.352ms (±6.56%)
+[0G    benchSearchEvenementsMulti..............I0 [0G    benchSearchEvenementsMulti..............I1 [0G    
+benchSearchEvenementsMulti..............I2 [0G    benchSearchEvenementsMulti..............I3 [0G    
+benchSearchEvenementsMulti..............I4 - Mo0.883ms (±9.33%)
+[0G    benchFindOneEvenement...................I0 [0G    benchFindOneEvenement...................I1 [0G    
+benchFindOneEvenement...................I2 [0G    benchFindOneEvenement...................I3 [0G    
+benchFindOneEvenement...................I4 - Mo0.414ms (±5.44%)
+[0G    benchFindParticipationsByEvenement......I0 [0G    benchFindParticipationsByEvenement......I1 [0G    
+benchFindParticipationsByEvenement......I2 [0G    benchFindParticipationsByEvenement......I3 [0G    
+benchFindParticipationsByEvenement......I4 - Mo0.493ms (±13.68%)
+[0G    benchFindParticipantsDetails............I0 [0G    benchFindParticipantsDetails............I1 [0G    
+benchFindParticipantsDetails............I2 [0G    benchFindParticipantsDetails............I3 [0G    
+benchFindParticipantsDetails............I4 - Mo0.735ms (±7.94%)
+[0G    benchFindActiveParticipations...........I0 [0G    benchFindActiveParticipations...........I1 [0G    
+benchFindActiveParticipations...........I2 [0G    benchFindActiveParticipations...........I3 [0G    
+benchFindActiveParticipations...........I4 - Mo0.750ms (±3.08%)
+[0G    benchFindAllSponsors....................I0 [0G    benchFindAllSponsors....................I1 [0G    
+benchFindAllSponsors....................I2 [0G    benchFindAllSponsors....................I3 [0G    
+benchFindAllSponsors....................I4 - Mo0.877ms (±9.13%)
+[0G    benchFindSponsorsByEvenement............I0 [0G    benchFindSponsorsByEvenement............I1 [0G    
+benchFindSponsorsByEvenement............I2 [0G    benchFindSponsorsByEvenement............I3 [0G    
+benchFindSponsorsByEvenement............I4 - Mo0.360ms (±15.07%)
+[0G    benchFindAccompagnantsByParticipation...I0 [0G    benchFindAccompagnantsByParticipation...I1 [0G    
+benchFindAccompagnantsByParticipation...I2 [0G    benchFindAccompagnantsByParticipation...I3 [0G    
+benchFindAccompagnantsByParticipation...I4 - Mo0.342ms (±5.72%)
+[0G    benchN1LazySponsorsPerEvenement.........I0 [0G    benchN1LazySponsorsPerEvenement.........I1 [0G    
+benchN1LazySponsorsPerEvenement.........I2 [0G    benchN1LazySponsorsPerEvenement.........I3 [0G    
+benchN1LazySponsorsPerEvenement.........I4 - Mo6.031ms (±6.03%)
+[0G    benchN1LazyParticipationsPerEvenement...I0 [0G    benchN1LazyParticipationsPerEvenement...I1 [0G    
+benchN1LazyParticipationsPerEvenement...I2 [0G    benchN1LazyParticipationsPerEvenement...I3 [0G    
+benchN1LazyParticipationsPerEvenement...I4 - Mo7.115ms (±5.04%)
+
+\App\Tests\Benchmark\MarketplaceBench
+
+[0G    benchFindAllEquipementsWithRelations....I0 [0G    benchFindAllEquipementsWithRelations....I1 [0G    
+benchFindAllEquipementsWithRelations....I2 [0G    benchFindAllEquipementsWithRelations....I3 [0G    
+benchFindAllEquipementsWithRelations....I4 - Mo1.935ms (±8.84%)
+[0G    benchFindAvailableEquipements...........I0 [0G    benchFindAvailableEquipements...........I1 [0G    
+benchFindAvailableEquipements...........I2 [0G    benchFindAvailableEquipements...........I3 [0G    
+benchFindAvailableEquipements...........I4 - Mo2.163ms (±8.47%)
+[0G    benchFindEquipementsPaginated...........I0 [0G    benchFindEquipementsPaginated...........I1 [0G    
+benchFindEquipementsPaginated...........I2 [0G    benchFindEquipementsPaginated...........I3 [0G    
+benchFindEquipementsPaginated...........I4 - Mo1.199ms (±9.70%)
+[0G    benchFindLowStockEquipements............I0 [0G    benchFindLowStockEquipements............I1 [0G    
+benchFindLowStockEquipements............I2 [0G    benchFindLowStockEquipements............I3 [0G    
+benchFindLowStockEquipements............I4 - Mo0.986ms (±4.95%)
+[0G    benchFindAllCategories..................I0 [0G    benchFindAllCategories..................I1 [0G    
+benchFindAllCategories..................I2 [0G    benchFindAllCategories..................I3 [0G    
+benchFindAllCategories..................I4 - Mo0.608ms (±10.33%)
+[0G    benchFindCategoriesByType...............I0 [0G    benchFindCategoriesByType...............I1 [0G    
+benchFindCategoriesByType...............I2 [0G    benchFindCategoriesByType...............I3 [0G    
+benchFindCategoriesByType...............I4 - Mo0.496ms (±5.97%)
+[0G    benchFindAllFournisseurs................I0 [0G    benchFindAllFournisseurs................I1 [0G    
+benchFindAllFournisseurs................I2 [0G    benchFindAllFournisseurs................I3 [0G    
+benchFindAllFournisseurs................I4 - Mo0.637ms (±9.27%)
+[0G    benchFindActiveFournisseurs.............I0 [0G    benchFindActiveFournisseurs.............I1 [0G    
+benchFindActiveFournisseurs.............I2 [0G    benchFindActiveFournisseurs.............I3 [0G    
+benchFindActiveFournisseurs.............I4 - Mo0.648ms (±17.29%)
+[0G    benchFindAllCommandesWithUser...........I0 [0G    benchFindAllCommandesWithUser...........I1 [0G    
+benchFindAllCommandesWithUser...........I2 [0G    benchFindAllCommandesWithUser...........I3 [0G    
+benchFindAllCommandesWithUser...........I4 - Mo6.732ms (±7.37%)
+[0G    benchFindCommandesByStatutPaiement......I0 [0G    benchFindCommandesByStatutPaiement......I1 [0G    
+benchFindCommandesByStatutPaiement......I2 [0G    benchFindCommandesByStatutPaiement......I3 [0G    
+benchFindCommandesByStatutPaiement......I4 - Mo0.264ms (±12.85%)
+[0G    benchFindAllLocationsWithRelations......I0 [0G    benchFindAllLocationsWithRelations......I1 [0G    
+benchFindAllLocationsWithRelations......I2 [0G    benchFindAllLocationsWithRelations......I3 [0G    
+benchFindAllLocationsWithRelations......I4 - Mo1.551ms (±16.14%)
+[0G    benchFindCurrentAndFutureLocations......I0 [0G    benchFindCurrentAndFutureLocations......I1 [0G    
+benchFindCurrentAndFutureLocations......I2 [0G    benchFindCurrentAndFutureLocations......I3 [0G    
+benchFindCurrentAndFutureLocations......I4 - Mo0.663ms (±34.26%)
+[0G    benchFindAllTerrainsWithRelations.......I0 [0G    benchFindAllTerrainsWithRelations.......I1 [0G    
+benchFindAllTerrainsWithRelations.......I2 [0G    benchFindAllTerrainsWithRelations.......I3 [0G    
+benchFindAllTerrainsWithRelations.......I4 - Mo1.376ms (±10.22%)
+[0G    benchFindAvailableTerrains..............I0 [0G    benchFindAvailableTerrains..............I1 [0G    
+benchFindAvailableTerrains..............I2 [0G    benchFindAvailableTerrains..............I3 [0G    
+benchFindAvailableTerrains..............I4 - Mo1.400ms (±7.92%)
+[0G    benchFindAllVehiculesWithRelations......I0 [0G    benchFindAllVehiculesWithRelations......I1 [0G    
+benchFindAllVehiculesWithRelations......I2 [0G    benchFindAllVehiculesWithRelations......I3 [0G    
+benchFindAllVehiculesWithRelations......I4 - Mo1.707ms (±8.66%)
+[0G    benchFindAvailableVehicules.............I0 [0G    benchFindAvailableVehicules.............I1 [0G    
+benchFindAvailableVehicules.............I2 [0G    benchFindAvailableVehicules.............I3 [0G    
+benchFindAvailableVehicules.............I4 - Mo1.397ms (±3.45%)
+[0G    benchN1LazyCategoriePerEquipement.......I0 [0G    benchN1LazyCategoriePerEquipement.......I1 [0G    
+benchN1LazyCategoriePerEquipement.......I2 [0G    benchN1LazyCategoriePerEquipement.......I3 [0G    
+benchN1LazyCategoriePerEquipement.......I4 - Mo1.790ms (±2.66%)
+[0G    benchN1LazyFournisseurPerEquipement.....I0 [0G    benchN1LazyFournisseurPerEquipement.....I1 [0G    
+benchN1LazyFournisseurPerEquipement.....I2 [0G    benchN1LazyFournisseurPerEquipement.....I3 [0G    
+benchN1LazyFournisseurPerEquipement.....I4 - Mo1.845ms (±5.17%)
+[0G    benchN1LazyDetailsPerCommande...........I0 [0G    benchN1LazyDetailsPerCommande...........I1 [0G    
+benchN1LazyDetailsPerCommande...........I2 [0G    benchN1LazyDetailsPerCommande...........I3 [0G    
+benchN1LazyDetailsPerCommande...........I4 - Mo1.934ms (±5.37%)
+
+Subjects: 31, Assertions: 0, Failures: 0, Errors: 0
++------------------+---------------------------------------+-----+------+-----+----------+---------+---------+
+| benchmark        | subject                               | set | revs | its | mem_peak | mode    | rstdev  |
++------------------+---------------------------------------+-----+------+-----+----------+---------+---------+
+| EvenementBench   | benchFindAllEvenementsOrdered         |     | 3    | 5   | 14.376mb | 1.459ms | ±10.39% |
+| EvenementBench   | benchFindEvenementsByStatut           |     | 3    | 5   | 13.531mb | 1.352ms | ±6.56%  |
+| EvenementBench   | benchSearchEvenementsMulti            |     | 3    | 5   | 14.178mb | 0.883ms | ±9.33%  |
+| EvenementBench   | benchFindOneEvenement                 |     | 3    | 5   | 13.220mb | 0.414ms | ±5.44%  |
+| EvenementBench   | benchFindParticipationsByEvenement    |     | 3    | 5   | 14.658mb | 0.493ms | ±13.68% |
+| EvenementBench   | benchFindParticipantsDetails          |     | 3    | 5   | 14.691mb | 0.735ms | ±7.94%  |
+| EvenementBench   | benchFindActiveParticipations         |     | 3    | 5   | 14.271mb | 0.750ms | ±3.08%  |
+| EvenementBench   | benchFindAllSponsors                  |     | 3    | 5   | 14.504mb | 0.877ms | ±9.13%  |
+| EvenementBench   | benchFindSponsorsByEvenement          |     | 3    | 5   | 13.988mb | 0.360ms | ±15.07% |
+| EvenementBench   | benchFindAccompagnantsByParticipation |     | 3    | 5   | 13.918mb | 0.342ms | ±5.72%  |
+| EvenementBench   | benchN1LazySponsorsPerEvenement       |     | 3    | 5   | 13.647mb | 6.031ms | ±6.03%  |
+| EvenementBench   | benchN1LazyParticipationsPerEvenement |     | 3    | 5   | 13.917mb | 7.115ms | ±5.04%  |
+| MarketplaceBench | benchFindAllEquipementsWithRelations  |     | 3    | 5   | 14.279mb | 1.935ms | ±8.84%  |
+| MarketplaceBench | benchFindAvailableEquipements         |     | 3    | 5   | 14.290mb | 2.163ms | ±8.47%  |
+| MarketplaceBench | benchFindEquipementsPaginated         |     | 3    | 5   | 14.252mb | 1.199ms | ±9.70%  |
+| MarketplaceBench | benchFindLowStockEquipements          |     | 3    | 5   | 14.668mb | 0.986ms | ±4.95%  |
+| MarketplaceBench | benchFindAllCategories                |     | 3    | 5   | 13.263mb | 0.608ms | ±10.33% |
+| MarketplaceBench | benchFindCategoriesByType             |     | 3    | 5   | 13.215mb | 0.496ms | ±5.97%  |
+| MarketplaceBench | benchFindAllFournisseurs              |     | 3    | 5   | 13.121mb | 0.637ms | ±9.27%  |
+| MarketplaceBench | benchFindActiveFournisseurs           |     | 3    | 5   | 13.131mb | 0.648ms | ±17.29% |
+| MarketplaceBench | benchFindAllCommandesWithUser         |     | 3    | 5   | 14.936mb | 6.732ms | ±7.37%  |
+| MarketplaceBench | benchFindCommandesByStatutPaiement    |     | 3    | 5   | 13.059mb | 0.264ms | ±12.85% |
+| MarketplaceBench | benchFindAllLocationsWithRelations    |     | 3    | 5   | 14.786mb | 1.551ms | ±16.14% |
+| MarketplaceBench | benchFindCurrentAndFutureLocations    |     | 3    | 5   | 14.231mb | 0.663ms | ±34.26% |
+| MarketplaceBench | benchFindAllTerrainsWithRelations     |     | 3    | 5   | 14.185mb | 1.376ms | ±10.22% |
+| MarketplaceBench | benchFindAvailableTerrains            |     | 3    | 5   | 14.199mb | 1.400ms | ±7.92%  |
+| MarketplaceBench | benchFindAllVehiculesWithRelations    |     | 3    | 5   | 14.192mb | 1.707ms | ±8.66%  |
+| MarketplaceBench | benchFindAvailableVehicules           |     | 3    | 5   | 14.199mb | 1.397ms | ±3.45%  |
+| MarketplaceBench | benchN1LazyCategoriePerEquipement     |     | 3    | 5   | 13.414mb | 1.790ms | ±2.66%  |
+| MarketplaceBench | benchN1LazyFournisseurPerEquipement   |     | 3    | 5   | 13.414mb | 1.845ms | ±5.17%  |
+| MarketplaceBench | benchN1LazyDetailsPerCommande         |     | 3    | 5   | 13.530mb | 1.934ms | ±5.37%  |
++------------------+---------------------------------------+-----+------+-----+----------+---------+---------+
+

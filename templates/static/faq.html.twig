@@ -1,0 +1,261 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FAQ — FIRMA{% endblock %}
+
+{% block body %}
+<div class="sp-page">
+
+    {# ── Hero ── #}
+    <div class="sp-hero">
+        <img src="{{ asset('image/firma.png') }}" alt="FIRMA" class="sp-hero-logo">
+        <h1>Foire aux questions</h1>
+        <p>Les réponses aux questions les plus fréquemment posées par nos utilisateurs.</p>
+        <div class="sp-hero-breadcrumb">
+            <a href="{{ path('app_landing') }}">Accueil</a> / FAQ
+        </div>
+    </div>
+
+    {# ── Content ── #}
+    <div class="sp-container">
+
+        {# ── Compte & inscription ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h2>Compte & inscription</h2>
+            </div>
+            <div class="sp-faq-list">
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment créer un compte FIRMA ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Cliquez sur « Commencer » depuis la page d'accueil, remplissez le formulaire d'inscription avec votre nom, prénom, email et mot de passe. Vous recevrez un email de confirmation — cliquez sur le lien pour activer votre compte.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        J'ai oublié mon mot de passe, que faire ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Sur la page de connexion, cliquez sur « Mot de passe oublié ». Renseignez votre adresse email et suivez les instructions envoyées pour réinitialiser votre mot de passe.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment modifier mes informations personnelles ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Une fois connecté, accédez à votre page « Profil » depuis la barre de navigation. Vous pouvez y modifier votre nom, prénom, téléphone, adresse et photo de profil.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        L'inscription est-elle gratuite ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Oui, l'inscription et l'utilisation de la plateforme FIRMA sont entièrement <strong>gratuites</strong>. Vous ne payez que lorsque vous effectuez un achat d'équipement ou une réservation de véhicule / terrain.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Marketplace ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <img src="{{ asset('image/marketplace/icone_equipements.png') }}" alt="">
+                </div>
+                <h2>Marketplace & achats</h2>
+            </div>
+            <div class="sp-faq-list">
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment acheter un équipement ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Rendez-vous dans l'onglet « Équipements » de la marketplace. Cliquez sur « Voir les détails » d'un article, choisissez la quantité, puis cliquez sur « Ajouter au panier ». Une fois vos articles sélectionnés, ouvrez le panier via le bouton flottant en bas à droite et cliquez sur « Payer avec carte ».</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Quels moyens de paiement sont acceptés ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Nous acceptons les cartes bancaires (Visa, Mastercard, etc.) via la plateforme de paiement sécurisée <strong>Stripe</strong>. Tous les montants sont en <strong>Dinar Tunisien (TND)</strong>.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Puis-je annuler une commande ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Les demandes d'annulation sont possibles dans un délai de <strong>24 heures</strong> suivant la commande. Contactez-nous à support@firma.tn avec votre numéro de commande. Passé ce délai, l'annulation est soumise à notre approbation.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Où puis-je voir l'historique de mes commandes ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Ouvrez le tiroir « Mon panier » via le bouton flottant en bas à droite de la marketplace. Vous y trouverez la section « Anciens paniers » affichant l'historique complet de vos commandes passées, avec les montants et détails.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Locations ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <img src="{{ asset('image/marketplace/icone_location.png') }}" alt="">
+                </div>
+                <h2>Locations (véhicules & terrains)</h2>
+            </div>
+            <div class="sp-faq-list">
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment réserver un véhicule ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Dans l'onglet « Véhicules », cliquez sur « Voir les détails » du véhicule souhaité. Sélectionnez votre date de début et date de fin. Le prix est calculé automatiquement (tarif journalier, hebdomadaire ou mensuel). Cliquez sur « Ajouter à mes locations » puis procédez au paiement.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment fonctionne la location de terrains ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Similaire aux véhicules : choisissez un terrain dans l'onglet « Terrains », sélectionnez les dates et ajoutez-le à vos locations. Le prix est calculé au mois ou à l'année selon la durée. Une carte interactive vous permet de visualiser l'emplacement du terrain.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Qu'est-ce que la caution ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>La caution est un montant prélevé en garantie lors de la réservation. Elle est <strong>remboursable</strong> dans un délai de 15 jours ouvrables après restitution du bien en bon état. Le montant de la caution est indiqué sur la fiche de chaque véhicule ou terrain.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Événements & forum ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <h2>Événements & communauté</h2>
+            </div>
+            <div class="sp-faq-list">
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment m'inscrire à un événement ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Consultez la liste des événements à venir depuis le menu « Événements ». Cliquez sur l'événement qui vous intéresse pour voir les détails (programme, lieu, date, intervenants) et cliquez sur le bouton « S'inscrire ».</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment participer au forum ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Accédez au forum depuis la barre de navigation. Vous pouvez créer de nouveaux sujets de discussion, répondre aux sujets existants et interagir avec la communauté agricole. Veuillez respecter les règles de bonne conduite.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Sécurité & données ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h2>Sécurité & données personnelles</h2>
+            </div>
+            <div class="sp-faq-list">
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Mes données bancaires sont-elles en sécurité ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Absolument. Les paiements sont traités par <strong>Stripe</strong>, certifié PCI-DSS niveau 1 (le plus haut niveau de sécurité). Vos données de carte ne transitent jamais par nos serveurs — elles sont directement chiffrées et traitées par Stripe.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        Comment supprimer mon compte ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Envoyez une demande de suppression à <strong>support@firma.tn</strong> depuis l'adresse email associée à votre compte. Nous traiterons votre demande sous 30 jours maximum. Toutes vos données personnelles seront définitivement supprimées.</p>
+                    </div>
+                </div>
+                <div class="sp-faq-item">
+                    <button class="sp-faq-q" type="button">
+                        FIRMA utilise-t-elle des cookies ?
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sp-faq-a">
+                        <p>Nous utilisons uniquement des <strong>cookies techniques</strong> indispensables au fonctionnement de la plateforme (session, panier, sécurité CSRF). Aucun cookie publicitaire ni de tracking tiers n'est utilisé. Consultez notre <a href="{{ path('app_privacy') }}">politique de confidentialité</a> pour plus de détails.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Contact ── #}
+        <div class="sp-contact-banner">
+            <div class="sp-contact-banner-icon">
+                <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA">
+            </div>
+            <div>
+                <h3>Vous n'avez pas trouvé votre réponse ?</h3>
+                <p>Contactez notre support à <strong>support@firma.tn</strong> ou appelez le <strong>+216 XX XXX XXX</strong>. Notre équipe vous répondra dans les plus brefs délais.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{# ── FAQ accordion JS ── #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.sp-faq-q').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const item = btn.closest('.sp-faq-item');
+            const wasOpen = item.classList.contains('open');
+            // Close all in same section
+            item.closest('.sp-faq-list').querySelectorAll('.sp-faq-item').forEach(i => i.classList.remove('open'));
+            if (!wasOpen) item.classList.add('open');
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#FFF9C4"/>
+    </linearGradient>
+    <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C5E1A5"/>
+      <stop offset="100%" stop-color="#8BC34A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="280" width="800" height="220" fill="url(#meadow)"/>
+  <!-- Large flowers for bees -->
+  <g>
+    <line x1="150" y1="280" x2="150" y2="210" stroke="#4CAF50" stroke-width="3"/>
+    <circle cx="140" cy="205" r="10" fill="#FF80AB"/><circle cx="160" cy="205" r="10" fill="#FF80AB"/>
+    <circle cx="150" cy="195" r="10" fill="#FF80AB"/><circle cx="150" cy="215" r="10" fill="#FF80AB"/>
+    <circle cx="150" cy="205" r="7" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="350" y1="280" x2="348" y2="220" stroke="#4CAF50" stroke-width="3"/>
+    <circle cx="338" cy="215" r="10" fill="#CE93D8"/><circle cx="358" cy="215" r="10" fill="#CE93D8"/>
+    <circle cx="348" cy="205" r="10" fill="#CE93D8"/><circle cx="348" cy="225" r="10" fill="#CE93D8"/>
+    <circle cx="348" cy="215" r="7" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="550" y1="280" x2="552" y2="215" stroke="#4CAF50" stroke-width="3"/>
+    <circle cx="542" cy="210" r="10" fill="#FFCC80"/><circle cx="562" cy="210" r="10" fill="#FFCC80"/>
+    <circle cx="552" cy="200" r="10" fill="#FFCC80"/><circle cx="552" cy="220" r="10" fill="#FFCC80"/>
+    <circle cx="552" cy="210" r="7" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="700" y1="280" x2="700" y2="225" stroke="#4CAF50" stroke-width="3"/>
+    <circle cx="690" cy="220" r="10" fill="#81D4FA"/><circle cx="710" cy="220" r="10" fill="#81D4FA"/>
+    <circle cx="700" cy="210" r="10" fill="#81D4FA"/><circle cx="700" cy="230" r="10" fill="#81D4FA"/>
+    <circle cx="700" cy="220" r="7" fill="#FFF176"/>
+  </g>
+  <!-- Bees visiting flowers -->
+  <g><ellipse cx="180" cy="195" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="176" y="191" width="3" height="3" fill="#212121"/><rect x="182" y="191" width="3" height="3" fill="#212121"/>
+    <line x1="175" y1="188" x2="168" y2="183" stroke="#90A4AE" stroke-width="1.5"/>
+    <line x1="185" y1="188" x2="192" y2="183" stroke="#90A4AE" stroke-width="1.5"/></g>
+  <g><ellipse cx="380" cy="205" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="376" y="201" width="3" height="3" fill="#212121"/><rect x="382" y="201" width="3" height="3" fill="#212121"/>
+    <line x1="375" y1="198" x2="368" y2="193" stroke="#90A4AE" stroke-width="1.5"/>
+    <line x1="385" y1="198" x2="392" y2="193" stroke="#90A4AE" stroke-width="1.5"/></g>
+  <g><ellipse cx="450" cy="150" rx="10" ry="7" fill="#FFD54F"/>
+    <rect x="446" y="146" width="3" height="3" fill="#212121"/><rect x="452" y="146" width="3" height="3" fill="#212121"/>
+    <line x1="445" y1="143" x2="438" y2="138" stroke="#90A4AE" stroke-width="1.5"/>
+    <line x1="455" y1="143" x2="462" y2="138" stroke="#90A4AE" stroke-width="1.5"/></g>
+  <!-- Bee flight paths (dotted) -->
+  <path d="M190,195 Q250,160 370,205" stroke="#FFD54F" stroke-width="1" fill="none" stroke-dasharray="4,4" opacity="0.5"/>
+  <path d="M390,205 Q420,170 445,155" stroke="#FFD54F" stroke-width="1" fill="none" stroke-dasharray="4,4" opacity="0.5"/>
+  <!-- Bee awareness sign -->
+  <g transform="translate(400,100)">
+    <rect x="-60" y="-20" width="120" height="40" fill="#FFC107" rx="8"/>
+    <text x="0" y="5" text-anchor="middle" fill="#5D4037" font-family="Arial,sans-serif" font-size="14" font-weight="bold">SAUVONS LES ABEILLES</text>
+  </g>
+  <!-- Sun -->
+  <circle cx="80" cy="60" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Journée Mondiale des Abeilles</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Pollinisation et biodiversité - Tabarka</text>
+</svg>

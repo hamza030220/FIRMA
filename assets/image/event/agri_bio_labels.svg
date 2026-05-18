@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#4CAF50"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#field)"/>
+  <!-- Bio certification badge -->
+  <g transform="translate(400,150)">
+    <circle cx="0" cy="0" r="70" fill="#2E7D32"/>
+    <circle cx="0" cy="0" r="63" fill="none" stroke="#A5D6A7" stroke-width="2"/>
+    <circle cx="0" cy="0" r="58" fill="none" stroke="#A5D6A7" stroke-width="1"/>
+    <!-- Leaf icon -->
+    <path d="M-15,10 Q0,-30 15,10 Q0,5 -15,10 Z" fill="#A5D6A7"/>
+    <line x1="0" y1="10" x2="0" y2="-10" stroke="#1B5E20" stroke-width="2"/>
+    <text x="0" y="35" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="16" font-weight="bold">BIO CERTIFIÉ</text>
+    <text x="0" y="-40" text-anchor="middle" fill="#A5D6A7" font-family="Arial,sans-serif" font-size="11">AGRICULTURE</text>
+  </g>
+  <!-- Organic produce -->
+  <g transform="translate(180,310)">
+    <circle cx="0" cy="0" r="12" fill="#F44336"/>
+    <line x1="0" y1="-12" x2="3" y2="-18" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="5" cy="-20" rx="5" ry="3" fill="#66BB6A"/>
+  </g>
+  <g transform="translate(230,320)">
+    <ellipse cx="0" cy="0" rx="15" ry="10" fill="#FF9800"/>
+    <line x1="0" y1="-10" x2="2" y2="-16" stroke="#4CAF50" stroke-width="1"/>
+  </g>
+  <g transform="translate(580,315)">
+    <ellipse cx="0" cy="0" rx="12" ry="8" fill="#8BC34A"/>
+    <line x1="0" y1="-8" x2="0" y2="-15" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="3" cy="-17" rx="5" ry="3" fill="#66BB6A"/>
+  </g>
+  <g transform="translate(630,310)">
+    <circle cx="0" cy="0" r="10" fill="#9C27B0" opacity="0.8"/>
+    <circle cx="8" cy="-3" r="10" fill="#7B1FA2" opacity="0.8"/>
+    <line x1="4" y1="-10" x2="4" y2="-20" stroke="#4CAF50" stroke-width="1"/>
+    <ellipse cx="4" cy="-22" rx="4" ry="3" fill="#66BB6A"/>
+  </g>
+  <!-- Labels/tags -->
+  <g transform="translate(350,280)">
+    <rect x="-20" y="-8" width="40" height="16" fill="#FFF9C4" rx="3"/>
+    <text x="0" y="3" text-anchor="middle" fill="#2E7D32" font-size="8" font-family="Arial" font-weight="bold">LABEL</text>
+  </g>
+  <g transform="translate(480,285)">
+    <rect x="-15" y="-8" width="30" height="16" fill="#FFF9C4" rx="3"/>
+    <text x="0" y="3" text-anchor="middle" fill="#2E7D32" font-size="8" font-family="Arial" font-weight="bold">AOC</text>
+  </g>
+  <!-- Sun -->
+  <circle cx="700" cy="60" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Conférence Agriculture Biologique</text>
+  <text x="400" y="445" text-anchor="middle" fill="#A5D6A7" font-family="Arial,sans-serif" font-size="18">Labels et certifications - Tunis</text>
+</svg>

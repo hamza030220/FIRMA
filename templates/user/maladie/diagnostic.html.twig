@@ -1,0 +1,177 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Diagnostic maladies{% endblock %}
+
+{% block user_content %}
+<div class="diag-page">
+    <div class="diag-hero">
+        <div class="diag-hero-badge">Diagnostic rapide</div>
+        <h1>Diagnostic simple des maladies</h1>
+        <p>Decrivez vos symptomes. Le systeme compare avec la base des maladies et affiche les traitements.</p>
+        <div class="diag-hero-actions">
+            <a href="{{ path('user_maladie') }}" class="diag-back">Retour a la liste des maladies</a>
+            <a href="{{ path('user_maladie_diagnostic_photo') }}" class="diag-photo-link">Scanner une photo</a>
+        </div>
+    </div>
+
+    <form method="post" action="{{ path('user_maladie_diagnostic') }}" class="diag-form">
+        <div class="diag-field">
+            <label for="symptomes">Symptomes observes *</label>
+            <textarea id="symptomes" name="symptomes" rows="5" placeholder="Ex: taches jaunes, feuilles seches, poudre blanche...">{{ symptomes }}</textarea>
+            {% if errors.symptomes is defined %}<div class="diag-error">{{ errors.symptomes }}</div>{% endif %}
+        </div>
+
+        <div class="diag-grid">
+            <div class="diag-field">
+                <label for="culture">Culture (optionnel)</label>
+                <input id="culture" name="culture" type="text" value="{{ culture }}" placeholder="Ex: tomate, vigne, olivier">
+            </div>
+            <div class="diag-field">
+                <label for="saison">Saison (optionnel)</label>
+                <select id="saison" name="saison">
+                    <option value="">Choisir une saison</option>
+                    <option value="Printemps" {% if saison == 'Printemps' %}selected{% endif %}>Printemps</option>
+                    <option value="Été" {% if saison == 'Été' %}selected{% endif %}>Été</option>
+                    <option value="Automne" {% if saison == 'Automne' %}selected{% endif %}>Automne</option>
+                    <option value="Hiver" {% if saison == 'Hiver' %}selected{% endif %}>Hiver</option>
+                    <option value="Printemps-Été" {% if saison == 'Printemps-Été' %}selected{% endif %}>Printemps - Été</option>
+                </select>
+                {% if errors.saison is defined %}<div class="diag-error">{{ errors.saison }}</div>{% endif %}
+            </div>
+        </div>
+
+        <button type="submit" class="diag-submit">Lancer le diagnostic</button>
+    </form>
+
+    {% if symptomes and errors is empty %}
+        <div class="diag-results">
+            <h2>Resultats du diagnostic</h2>
+
+            {% if results is empty %}
+                <div class="diag-empty">
+                    Aucun resultat pertinent. Essayez de detailler davantage les symptomes.
+                </div>
+            {% else %}
+                {% for item in results %}
+                    {% set maladie = item.maladie %}
+                    {% set bestTraitement = item.traitements[0] ?? null %}
+                    <div class="diag-card">
+                        <div class="diag-card-head">
+                            <div>
+                                <h3>{{ maladie.nom }}</h3>
+                                {% if maladie.nomScientifique %}
+                                    <p class="diag-sci">{{ maladie.nomScientifique }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="diag-score">Score {{ item.score }}</div>
+                        </div>
+                        <div class="diag-meta">
+                            <span class="diag-badge diag-badge-{{ maladie.niveauGravite }}">{{ maladie.niveauGravite|capitalize }}</span>
+                            {% if maladie.saisonFrequente %}
+                                <span class="diag-badge">Saison: {{ maladie.saisonFrequente }}</span>
+                            {% endif %}
+                            {% if item.matches is not empty %}
+                                <span class="diag-tags">Mots detectes: {{ item.matches|join(', ') }}</span>
+                            {% endif %}
+                        </div>
+                        {% if maladie.symptomes %}
+                            <p class="diag-desc">{{ maladie.symptomes|slice(0, 140) }}...</p>
+                        {% endif %}
+
+                        <div class="diag-treatments">
+                            <div class="diag-treat-title">Traitements</div>
+                            {% if item.traitements is empty %}
+                                <div class="diag-empty">Aucun traitement disponible.</div>
+                            {% else %}
+                                <div class="diag-best">
+                                    <button type="button" class="diag-best-btn" data-target="best-{{ loop.index }}">Voir le meilleur traitement</button>
+                                    <div class="diag-best-box" id="best-{{ loop.index }}" hidden>
+                                        {% if bestTraitement %}
+                                            <strong>{{ bestTraitement.titre }}</strong>
+                                            <span class="diag-best-meta">👍 {{ bestTraitement.feedbackPositive }} / 👎 {{ bestTraitement.feedbackNegative }}</span>
+                                        {% else %}
+                                            <span>Aucun traitement disponible.</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% for trt in item.traitements %}
+                                    <div class="diag-treat-row">
+                                        <span class="diag-treat-name">{{ trt.titre }}</span>
+                                        <span class="diag-treat-score">👍 {{ trt.feedbackPositive }} / 👎 {{ trt.feedbackNegative }}</span>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <a class="diag-link" href="{{ path('user_maladie_show', {'id': maladie.id}) }}">Voir la fiche complete</a>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.diag-page { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; font-family: 'Plus Jakarta Sans', sans-serif; color: #1f2d24; }
+.diag-hero { text-align: center; margin-bottom: 2rem; }
+.diag-hero-badge { display: inline-block; background: #e8f5e9; color: #0f5c2f; padding: 0.3rem 0.9rem; border-radius: 20px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid rgba(15,92,47,0.15); margin-bottom: 0.8rem; }
+.diag-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0 0 0.6rem; }
+.diag-hero p { color: #5a7a5a; margin: 0 0 1rem; }
+.diag-hero-actions { display: inline-flex; gap: 0.75rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+.diag-back { color: #0f5c2f; text-decoration: none; font-weight: 600; }
+.diag-photo-link { background: #0f5c2f; color: #fff; text-decoration: none; font-weight: 700; padding: 0.45rem 0.9rem; border-radius: 999px; }
+
+.diag-form { background: #ffffff; border: 1px solid #e1ece1; border-radius: 18px; padding: 1.6rem; box-shadow: 0 12px 26px rgba(15,92,47,0.08); }
+.diag-field { margin-bottom: 1rem; }
+.diag-field label { display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.45rem; color: #2f4635; }
+.diag-field textarea, .diag-field input, .diag-field select { width: 100%; border: 1px solid #d6e2d6; border-radius: 12px; padding: 0.75rem 0.9rem; font-size: 0.9rem; font-family: inherit; }
+.diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.diag-error { margin-top: 0.35rem; font-size: 0.78rem; color: #b42318; }
+.diag-submit { margin-top: 0.4rem; background: #0f5c2f; color: #fff; border: none; border-radius: 12px; padding: 0.75rem 1.4rem; font-weight: 700; cursor: pointer; }
+
+.diag-results { margin-top: 2.4rem; }
+.diag-results h2 { margin-bottom: 1rem; }
+.diag-card { background: #fff; border: 1px solid #e1ece1; border-radius: 18px; padding: 1.4rem; margin-bottom: 1rem; box-shadow: 0 10px 22px rgba(15,92,47,0.08); }
+.diag-card-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.diag-card-head h3 { margin: 0; font-size: 1.2rem; }
+.diag-sci { margin: 0; font-style: italic; font-size: 0.9rem; color: #6b7f74; }
+.diag-score { background: #eff7f1; color: #0f5c2f; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.82rem; }
+.diag-meta { margin: 0.75rem 0 0.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.diag-badge { background: #f1f5f3; color: #465c50; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+.diag-badge-critique { background: #fdeaea; color: #b42318; }
+.diag-badge-eleve { background: #fff3e6; color: #b86a00; }
+.diag-badge-moyen { background: #e8f1fb; color: #165b99; }
+.diag-badge-faible { background: #eaf7ef; color: #2d7a3a; }
+.diag-tags { font-size: 0.78rem; color: #5f7468; }
+.diag-desc { color: #5f7468; margin: 0 0 0.9rem; }
+
+.diag-treatments { border-top: 1px solid #edf2ed; padding-top: 0.8rem; }
+.diag-treat-title { font-weight: 700; margin-bottom: 0.5rem; }
+.diag-best { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.diag-best-btn { background: #0f5c2f; color: #fff; border: none; border-radius: 10px; padding: 0.35rem 0.7rem; font-weight: 700; cursor: pointer; font-size: 0.8rem; }
+.diag-best-box { background: #f6fbf7; border: 1px solid #d9eadc; border-radius: 10px; padding: 0.35rem 0.7rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+.diag-best-meta { color: #6b7f74; font-size: 0.82rem; }
+.diag-treat-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; padding: 0.3rem 0; }
+.diag-treat-score { color: #6b7f74; }
+.diag-empty { background: #f6f9f7; border: 1px dashed #cfe0d2; padding: 0.9rem; border-radius: 12px; color: #6b7f74; }
+.diag-link { display: inline-flex; margin-top: 0.9rem; color: #0f5c2f; font-weight: 600; text-decoration: none; }
+
+@media (max-width: 800px) {
+    .diag-grid { grid-template-columns: 1fr; }
+    .diag-card-head { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+<script>
+document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.diag-best-btn');
+    if (!btn) return;
+    const targetId = btn.getAttribute('data-target');
+    if (!targetId) return;
+    const box = document.getElementById(targetId);
+    if (box) {
+        box.hidden = !box.hidden;
+    }
+});
+</script>
+{% endblock %}

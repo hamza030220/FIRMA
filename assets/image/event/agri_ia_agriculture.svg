@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A237E"/>
+      <stop offset="100%" stop-color="#3F51B5"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E7D32"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="350" width="800" height="150" fill="url(#ground)"/>
+  <!-- Circuit/AI pattern -->
+  <g opacity="0.3">
+    <line x1="100" y1="50" x2="100" y2="200" stroke="#64B5F6" stroke-width="2"/>
+    <line x1="100" y1="200" x2="250" y2="200" stroke="#64B5F6" stroke-width="2"/>
+    <line x1="700" y1="80" x2="700" y2="180" stroke="#64B5F6" stroke-width="2"/>
+    <line x1="550" y1="180" x2="700" y2="180" stroke="#64B5F6" stroke-width="2"/>
+    <circle cx="100" cy="200" r="5" fill="#64B5F6"/><circle cx="700" cy="180" r="5" fill="#64B5F6"/>
+    <line x1="200" y1="100" x2="600" y2="100" stroke="#64B5F6" stroke-width="1"/>
+    <line x1="300" y1="50" x2="300" y2="150" stroke="#64B5F6" stroke-width="1"/>
+    <line x1="500" y1="50" x2="500" y2="150" stroke="#64B5F6" stroke-width="1"/>
+  </g>
+  <!-- Brain / AI symbol -->
+  <g transform="translate(400,180)">
+    <circle cx="0" cy="0" r="60" fill="none" stroke="#64B5F6" stroke-width="3"/>
+    <circle cx="0" cy="0" r="45" fill="none" stroke="#42A5F5" stroke-width="2"/>
+    <path d="M-20,-20 Q0,-35 20,-20" stroke="#90CAF9" stroke-width="2" fill="none"/>
+    <path d="M-25,0 Q0,15 25,0" stroke="#90CAF9" stroke-width="2" fill="none"/>
+    <path d="M-15,15 Q0,30 15,15" stroke="#90CAF9" stroke-width="2" fill="none"/>
+    <circle cx="0" cy="0" r="8" fill="#64B5F6"/>
+    <!-- Connection nodes -->
+    <circle cx="-45" cy="0" r="6" fill="#42A5F5"/><circle cx="45" cy="0" r="6" fill="#42A5F5"/>
+    <circle cx="0" cy="-45" r="6" fill="#42A5F5"/><circle cx="0" cy="45" r="6" fill="#42A5F5"/>
+  </g>
+  <!-- Crop/plant row on ground -->
+  <g>
+    <line x1="150" y1="350" x2="150" y2="320" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="150" cy="315" rx="8" ry="5" fill="#66BB6A"/>
+    <line x1="300" y1="350" x2="300" y2="325" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="300" cy="320" rx="8" ry="5" fill="#66BB6A"/>
+    <line x1="450" y1="350" x2="450" y2="318" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="450" cy="313" rx="8" ry="5" fill="#66BB6A"/>
+    <line x1="600" y1="350" x2="600" y2="322" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="600" cy="317" rx="8" ry="5" fill="#66BB6A"/>
+  </g>
+  <!-- Drone -->
+  <g transform="translate(580,120)">
+    <rect x="-15" y="-5" width="30" height="10" fill="#78909C" rx="3"/>
+    <line x1="-20" y1="-5" x2="-30" y2="-12" stroke="#546E7A" stroke-width="2"/>
+    <line x1="20" y1="-5" x2="30" y2="-12" stroke="#546E7A" stroke-width="2"/>
+    <circle cx="-30" cy="-14" r="8" fill="none" stroke="#90A4AE" stroke-width="1.5"/>
+    <circle cx="30" cy="-14" r="8" fill="none" stroke="#90A4AE" stroke-width="1.5"/>
+    <circle cx="0" cy="8" r="4" fill="#F44336"/>
+  </g>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Conférence IA et Agriculture</text>
+  <text x="400" y="445" text-anchor="middle" fill="#90CAF9" font-family="Arial,sans-serif" font-size="18">Innovation digitale - Tunis</text>
+</svg>

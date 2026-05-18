@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#90CAF9"/>
+      <stop offset="100%" stop-color="#E3F2FD"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#66BB6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="320" width="800" height="180" fill="url(#ground)"/>
+  <!-- Workshop table -->
+  <g transform="translate(400,260)">
+    <rect x="-120" y="0" width="240" height="10" fill="#8D6E63"/>
+    <rect x="-110" y="10" width="10" height="50" fill="#6D4C41"/>
+    <rect x="100" y="10" width="10" height="50" fill="#6D4C41"/>
+  </g>
+  <!-- Cheese wheels -->
+  <g transform="translate(320,230)">
+    <ellipse cx="0" cy="0" rx="30" ry="8" fill="#FFC107"/>
+    <rect x="-30" y="0" width="60" height="20" fill="#FFB300"/>
+    <ellipse cx="0" cy="20" rx="30" ry="8" fill="#FFA000"/>
+    <!-- Holes -->
+    <circle cx="-10" cy="8" r="3" fill="#FF8F00"/><circle cx="15" cy="12" r="2" fill="#FF8F00"/>
+  </g>
+  <g transform="translate(450,225)">
+    <ellipse cx="0" cy="0" rx="25" ry="7" fill="#FFF9C4"/>
+    <rect x="-25" y="0" width="50" height="18" fill="#FFF176"/>
+    <ellipse cx="0" cy="18" rx="25" ry="7" fill="#FDD835"/>
+  </g>
+  <!-- Milk jug -->
+  <g transform="translate(550,235)">
+    <rect x="-15" y="0" width="30" height="30" fill="#ECEFF1" rx="3"/>
+    <rect x="-10" y="-5" width="20" height="8" fill="#ECEFF1" rx="2"/>
+    <path d="M15,5 Q25,5 20,15" stroke="#ECEFF1" stroke-width="4" fill="none"/>
+    <text x="0" y="22" text-anchor="middle" fill="#42A5F5" font-size="8" font-family="Arial">LAIT</text>
+  </g>
+  <!-- Goat -->
+  <g transform="translate(180,280)">
+    <ellipse cx="0" cy="0" rx="25" ry="15" fill="#F5F5F5"/>
+    <circle cx="25" cy="-10" r="10" fill="#EEEEEE"/>
+    <polygon points="30,-20 35,-30 28,-22" fill="#BDBDBD"/>
+    <polygon points="22,-20 17,-30 24,-22" fill="#BDBDBD"/>
+    <circle cx="28" cy="-12" r="2" fill="#212121"/>
+    <line x1="-15" y1="15" x2="-15" y2="30" stroke="#BDBDBD" stroke-width="2"/>
+    <line x1="-5" y1="15" x2="-5" y2="30" stroke="#BDBDBD" stroke-width="2"/>
+    <line x1="5" y1="15" x2="5" y2="30" stroke="#BDBDBD" stroke-width="2"/>
+    <line x1="15" y1="15" x2="15" y2="30" stroke="#BDBDBD" stroke-width="2"/>
+  </g>
+  <!-- Sun -->
+  <circle cx="680" cy="70" r="35" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Atelier Fromage Artisanal</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFF9C4" font-family="Arial,sans-serif" font-size="18">Fromage de chèvre - Le Kef</text>
+</svg>

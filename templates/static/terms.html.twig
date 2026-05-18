@@ -1,0 +1,153 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conditions d'utilisation — FIRMA{% endblock %}
+
+{% block body %}
+<div class="sp-page">
+
+    {# ── Hero ── #}
+    <div class="sp-hero">
+        <img src="{{ asset('image/firma.png') }}" alt="FIRMA" class="sp-hero-logo">
+        <h1>Conditions d'utilisation</h1>
+        <p>Veuillez lire attentivement les présentes conditions régissant l'utilisation de la plateforme FIRMA.</p>
+        <div class="sp-hero-breadcrumb">
+            <a href="{{ path('app_landing') }}">Accueil</a> / Conditions d'utilisation
+        </div>
+    </div>
+
+    {# ── Content ── #}
+    <div class="sp-container">
+
+        {# ── 1. Objet ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h2>Article 1 — Objet</h2>
+            </div>
+            <p>Les présentes conditions générales d'utilisation (ci-après « CGU ») définissent les règles d'accès et d'utilisation de la plateforme <strong>FIRMA</strong> (ci-après « la Plateforme »), accessible à l'adresse firma.tn et via ses applications associées.</p>
+            <p>La Plateforme est un outil numérique dédié au secteur agricole tunisien offrant les services suivants :</p>
+            <ul>
+                <li>Marketplace d'équipements agricoles, de véhicules et de terrains</li>
+                <li>Système de gestion d'événements agricoles</li>
+                <li>Bibliothèque de maladies des cultures et traitements</li>
+                <li>Forum communautaire d'échange entre agriculteurs</li>
+            </ul>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 2. Inscription ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                </div>
+                <h2>Article 2 — Inscription et compte utilisateur</h2>
+            </div>
+            <p>L'accès à la Plateforme nécessite la création d'un compte personnel. L'utilisateur s'engage à :</p>
+            <ul>
+                <li>Fournir des informations exactes, complètes et à jour lors de l'inscription</li>
+                <li>Maintenir la confidentialité de ses identifiants de connexion</li>
+                <li>Ne pas créer de comptes multiples ou usurper l'identité d'un tiers</li>
+                <li>Notifier immédiatement FIRMA de toute utilisation non autorisée de son compte</li>
+            </ul>
+            <p>L'inscription est soumise à la confirmation de l'adresse email. FIRMA se réserve le droit de suspendre ou supprimer tout compte ne respectant pas les présentes conditions.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 3. Marketplace ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <img src="{{ asset('image/marketplace/icone_equipements.png') }}" alt="">
+                </div>
+                <h2>Article 3 — Marketplace et transactions</h2>
+            </div>
+            <h3>3.1 — Achat d'équipements</h3>
+            <p>Les prix affichés sont en <strong>Dinar Tunisien (TND)</strong> et incluent toutes les taxes applicables. La Plateforme est gratuite d'utilisation ; seuls les achats et locations sont facturés.</p>
+            <p>Tout achat validé et payé constitue un engagement ferme. Les commandes sont traitées dans l'ordre de réception et sont soumises à la disponibilité du stock.</p>
+
+            <h3>3.2 — Location de véhicules et terrains</h3>
+            <p>Les locations sont soumises au paiement du montant correspondant à la durée choisie ainsi qu'à une <strong>caution</strong> remboursable sous conditions. La caution sera restituée dans un délai de 15 jours ouvrables après restitution du bien en bon état.</p>
+
+            <h3>3.3 — Paiement</h3>
+            <p>Tous les paiements sont traités de manière sécurisée via <strong>Stripe</strong>. FIRMA ne stocke aucune donnée de carte bancaire sur ses serveurs. Les informations de paiement sont chiffrées et traitées conformément aux normes PCI-DSS.</p>
+
+            <h3>3.4 — Annulation et remboursement</h3>
+            <p>Les demandes d'annulation doivent être effectuées dans un délai de 24 heures suivant la commande. Passé ce délai, FIRMA se réserve le droit de refuser l'annulation. Les remboursements approuvés sont traités sous 7 à 14 jours ouvrables.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 4. Forum ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h2>Article 4 — Contenu et forum communautaire</h2>
+            </div>
+            <p>En utilisant le forum, l'utilisateur s'engage à ne pas publier de contenu :</p>
+            <ul>
+                <li>Illicite, diffamatoire, injurieux, menaçant ou discriminatoire</li>
+                <li>Portant atteinte aux droits de propriété intellectuelle de tiers</li>
+                <li>Contenant des données personnelles d'autres personnes sans leur consentement</li>
+                <li>À caractère publicitaire non autorisé ou spam</li>
+            </ul>
+            <p>FIRMA se réserve le droit de modérer, modifier ou supprimer tout contenu jugé inapproprié sans notification préalable.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 5. Propriété intellectuelle ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h2>Article 5 — Propriété intellectuelle</h2>
+            </div>
+            <p>L'ensemble des éléments constituant la Plateforme (textes, images, logos, icônes, logiciels, base de données) sont la propriété exclusive de FIRMA et sont protégés par les lois relatives à la propriété intellectuelle.</p>
+            <p>Toute reproduction, représentation, modification ou exploitation non autorisée de tout ou partie de la Plateforme est strictement interdite et constitue une contrefaçon sanctionnée par la loi.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 6. Responsabilité ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <h2>Article 6 — Limitation de responsabilité</h2>
+            </div>
+            <p>FIRMA met tout en œuvre pour assurer la disponibilité et le bon fonctionnement de la Plateforme. Toutefois, FIRMA ne saurait être tenue responsable :</p>
+            <ul>
+                <li>Des interruptions temporaires pour maintenance ou mises à jour</li>
+                <li>Des dommages directs ou indirects résultant de l'utilisation de la Plateforme</li>
+                <li>De l'exactitude des informations publiées par les utilisateurs sur le forum</li>
+                <li>Des pertes liées à un accès non autorisé au compte de l'utilisateur</li>
+            </ul>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 7. Droit applicable ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <h2>Article 7 — Droit applicable</h2>
+            </div>
+            <p>Les présentes CGU sont régies par le droit tunisien. Tout litige relatif à l'interprétation ou à l'exécution des présentes sera soumis à la compétence exclusive des tribunaux de Tunis.</p>
+            <p>L'utilisation continue de la Plateforme après toute modification des CGU vaut acceptation des nouvelles conditions.</p>
+        </div>
+
+        <p class="sp-updated">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
+    </div>
+</div>
+{% endblock %}

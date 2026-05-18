@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { margin: 30px 40px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 11px; color: #333; }
+
+    .header { border-bottom: 3px solid #e6a817; padding-bottom: 14px; margin-bottom: 18px; }
+    .header table { width: 100%; }
+    .header td { vertical-align: top; }
+    .logo { width: 80px; height: auto; }
+    .company-name { font-size: 26px; font-weight: bold; color: #20452c; letter-spacing: 1px; }
+    .company-sub { font-size: 10px; color: #666; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 { font-size: 20px; color: #e6a817; text-transform: uppercase; letter-spacing: 2px; }
+    .doc-title .doc-num { font-size: 11px; color: #666; margin-top: 4px; }
+
+    .summary-banner { background: #e6a817; color: #fff; padding: 10px 16px; font-size: 12px; font-weight: bold; border-radius: 6px; margin-bottom: 18px; text-align: center; }
+
+    .stats-row { margin-bottom: 16px; }
+    .stats-row table { width: 100%; }
+    .stat-card { background: #f9f6ee; border: 1px solid #e6d89e; border-radius: 6px; padding: 10px 14px; text-align: center; }
+    .stat-card .number { font-size: 22px; font-weight: bold; color: #20452c; }
+    .stat-card .label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    .section-title { font-size: 11px; font-weight: bold; color: #e6a817; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; border-bottom: 2px solid #e6a817; padding-bottom: 4px; }
+
+    .products-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+    .products-table th { background: #20452c; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .products-table th:nth-child(4), .products-table td:nth-child(4),
+    .products-table th:nth-child(5), .products-table td:nth-child(5) { text-align: center; }
+    .products-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .products-table tr:nth-child(even) td { background: #fdfbf3; }
+    .stock-zero { color: #dc3545; font-weight: bold; }
+    .stock-low { color: #e6a817; font-weight: bold; }
+
+    .fournisseur-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+    .fournisseur-table th { background: #e6a817; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fournisseur-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .fournisseur-table tr:nth-child(even) td { background: #fdfbf3; }
+
+    .footer-img { margin-top: 30px; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:70%">
+                <table><tr>
+                    <td style="width:90px"><img src="{{ logo_base64 }}" class="logo"></td>
+                    <td>
+                        <div class="company-name">FIRMA</div>
+                        <div class="company-sub">Marketplace Agricole</div>
+                    </td>
+                </tr></table>
+            </td>
+            <td class="doc-title">
+                <h1>Analyse Stock</h1>
+                <div class="doc-num">Rapport du {{ "now"|date('d/m/Y à H:i') }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="summary-banner">
+    📊 Rapport d'analyse de stock — {{ equipements|length }} équipement{{ equipements|length > 1 ? 's' : '' }} en dessous du seuil d'alerte
+</div>
+
+<!-- Stats row -->
+<div class="stats-row">
+    <table>
+        <tr>
+            <td style="width:33%;padding-right:6px">
+                <div class="stat-card">
+                    <div class="number">{{ equipements|length }}</div>
+                    <div class="label">En alerte</div>
+                </div>
+            </td>
+            <td style="width:34%;padding:0 3px">
+                <div class="stat-card">
+                    <div class="number">{{ equipements|filter(e => e.quantiteStock == 0)|length }}</div>
+                    <div class="label">Rupture totale</div>
+                </div>
+            </td>
+            <td style="width:33%;padding-left:6px">
+                <div class="stat-card">
+                    <div class="number">{{ fournisseurs|length }}</div>
+                    <div class="label">Fournisseurs à contacter</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Equipements table -->
+<div class="section-title">Équipements en stock faible</div>
+<table class="products-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Équipement</th>
+            <th>Catégorie</th>
+            <th>Stock actuel</th>
+            <th>Seuil d'alerte</th>
+            <th>Fournisseur</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for equip in equipements %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ equip.nom }}</strong></td>
+            <td>{{ equip.categorie ? equip.categorie.nom : '—' }}</td>
+            <td class="{{ equip.quantiteStock == 0 ? 'stock-zero' : 'stock-low' }}">
+                {{ equip.quantiteStock }}
+            </td>
+            <td>{{ equip.seuilAlerte }}</td>
+            <td>{{ equip.fournisseur ? equip.fournisseur.nomEntreprise : '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Fournisseurs table -->
+<div class="section-title">Fournisseurs à contacter</div>
+<table class="fournisseur-table">
+    <thead>
+        <tr>
+            <th>Entreprise</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Ville</th>
+            <th>Nb produits en alerte</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fournisseur in fournisseurs %}
+        <tr>
+            <td><strong>{{ fournisseur.entity.nomEntreprise }}</strong></td>
+            <td>{{ fournisseur.entity.contactNom ?? '—' }}</td>
+            <td>{{ fournisseur.entity.email ?? '—' }}</td>
+            <td>{{ fournisseur.entity.telephone ?? '—' }}</td>
+            <td>{{ fournisseur.entity.ville ?? '—' }}</td>
+            <td style="text-align:center"><strong>{{ fournisseur.count }}</strong></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- firma.png illustration -->
+<div class="footer-img">
+    <img src="{{ firma_base64 }}" style="width:60px;height:auto;opacity:0.7">
+</div>
+
+<div class="footer">
+    FIRMA Marketplace &bull; Rapport d'analyse de stock &bull; {{ "now"|date('d/m/Y') }}
+</div>
+
+</body>
+</html>

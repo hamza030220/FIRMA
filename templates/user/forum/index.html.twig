@@ -1,0 +1,385 @@
+{% extends 'user/base.html.twig' %}
+
+{% block page_title %}Forum{% endblock %}
+
+{% block user_content %}
+<section class="forum-shell">
+    {% include 'shared/forum/_language_switcher.html.twig' %}
+    {% set forumUnreadNotifications = user_notifications_count() %}
+    {% if forumUnreadNotifications > 0 %}
+        <div class="forum-warning-banner" role="alert" aria-live="polite">
+            <div class="forum-warning-banner-copy">
+                <span class="forum-warning-banner-icon" aria-hidden="true">?</span>
+                <div>
+                    <strong>{{ 'forum.warning.title'|trans({}, 'forum') }}</strong>
+                    <p>{{ 'forum.warning.message'|trans({}, 'forum') }}</p>
+                </div>
+            </div>
+            <div class="forum-warning-banner-actions">
+                <span class="forum-warning-banner-count" aria-label="{{ forumUnreadNotifications }} notifications">{{ forumUnreadNotifications }}</span>
+                <a href="{{ path('user_notifications') }}" class="forum-warning-banner-link">
+                    {{ 'forum.warning.cta'|trans({}, 'forum') }}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+    <nav class="forum-bookmark-tabs" aria-label="Bibliotheque du forum">
+        <a href="{{ path('user_forum') }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'feed' %} is-active{% endif %}">Toutes les discussions</a>
+        <a href="{{ path('user_forum_favorites') }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'favorites' %} is-active{% endif %}">Mes favoris</a>
+        <a href="{{ path('user_forum_saved') }}" class="forum-bookmark-tab{% if forum_active_section|default('feed') == 'saved' %} is-active{% endif %}">A lire plus tard</a>
+    </nav>
+    <div class="forum-hero">
+        <div>
+            <p class="forum-kicker">{{ 'forum.index.kicker'|trans({}, 'forum') }}</p>
+            <h1>{{ 'forum.index.title'|trans({}, 'forum') }}</h1>
+            <p class="forum-lead">{{ 'forum.index.lead'|trans({}, 'forum') }}</p>
+        </div>
+        <div class="forum-stats">
+            <div>
+                <strong>{{ posts|length }}</strong>
+                <span>{{ 'forum.index.posts_visible'|trans({}, 'forum') }}</span>
+            </div>
+            <div>
+                <strong>{{ app.user.fullName }}</strong>
+                <span>{{ 'forum.common.connected'|trans({}, 'forum') }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="forum-flash forum-flash-{{ label in ['error', 'danger'] ? 'error' : 'success' }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if form_errors is not empty %}
+        <div class="forum-flash forum-flash-error">{{ 'forum.index.flash_form_error'|trans({}, 'forum') }}</div>
+    {% endif %}
+
+    <div class="forum-grid">
+        <aside class="forum-panel">
+            <h2>{{ 'forum.index.new_post'|trans({}, 'forum') }}</h2>
+            <form id="create-post-form" method="post" action="{{ path('user_forum_create') }}" class="forum-form" novalidate>
+                <input type="hidden" name="_token" value="{{ csrf_token('forum_create') }}">
+
+                <label for="titre">{{ 'forum.index.title_label'|trans({}, 'forum') }}</label>
+                <input id="titre" name="titre" type="text" value="{{ form_data.titre }}" placeholder="{{ 'forum.index.title_placeholder'|trans({}, 'forum') }}">
+                {% if form_errors.titre is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.titre }}</div>
+                {% endif %}
+
+                <label for="categorie">{{ 'forum.index.category_label'|trans({}, 'forum') }}</label>
+                <select id="categorie" name="categorie" required>
+                    <option value="">{{ 'forum.index.category_placeholder'|trans({}, 'forum') }}</option>
+                    {% for categorie in categories %}
+                        <option value="{{ categorie }}" {% if form_data.categorie == categorie %}selected{% endif %}>{{ translated_categories[categorie]|default(categorie) }}</option>
+                    {% endfor %}
+                </select>
+                {% if form_errors.categorie is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.categorie }}</div>
+                {% endif %}
+
+                <label for="contenu">{{ 'forum.index.content_label'|trans({}, 'forum') }}</label>
+                <textarea id="contenu" name="contenu" rows="6" placeholder="{{ 'forum.index.content_placeholder'|trans({}, 'forum') }}">{{ form_data.contenu }}</textarea>
+                {% if form_errors.contenu is defined %}
+                    <div class="forum-flash forum-flash-error">{{ form_errors.contenu }}</div>
+                {% endif %}
+
+                <button
+                    type="button"
+                    class="forum-button"
+                    onclick="window.firmaOpenConfirmModal('create-post-form', '{{ 'forum.index.publish_title'|trans({}, 'forum')|e('js') }}', '{{ 'forum.index.publish_message'|trans({}, 'forum')|e('js') }}', '{{ 'forum.common.publish'|trans({}, 'forum')|e('js') }}', 'primary');"
+                >
+                    {{ 'forum.common.publish'|trans({}, 'forum') }}
+                </button>
+            </form>
+        </aside>
+
+        <div class="forum-panel">
+            <div class="forum-toolbar">
+                <h2>{{ 'forum.index.discussions'|trans({}, 'forum') }}</h2>
+                <form method="get" action="{{ path('user_forum') }}" class="forum-search forum-search-inline" id="user-forum-search-form">
+                    <input type="search" name="q" value="{{ search }}" placeholder="{{ 'forum.index.search_placeholder'|trans({}, 'forum') }}" minlength="3" id="user-forum-search-input">
+                    <label for="user-forum-sort" class="forum-sort-pill">
+                        <span>{{ 'forum.common.sort'|trans({}, 'forum') }}</span>
+                        <select id="user-forum-sort" name="sort" class="forum-sort-select" aria-label="{{ 'forum.index.sort_aria'|trans({}, 'forum') }}" onchange="this.form.submit()">
+                            <option value="recent" {% if sort|default('recent') == 'recent' %}selected{% endif %}>{{ 'forum.index.sort_recent'|trans({}, 'forum') }}</option>
+                            <option value="oldest" {% if sort|default('recent') == 'oldest' %}selected{% endif %}>{{ 'forum.index.sort_oldest'|trans({}, 'forum') }}</option>
+                            <option value="title_asc" {% if sort|default('recent') == 'title_asc' %}selected{% endif %}>{{ 'forum.index.sort_title_asc'|trans({}, 'forum') }}</option>
+                            <option value="title_desc" {% if sort|default('recent') == 'title_desc' %}selected{% endif %}>{{ 'forum.index.sort_title_desc'|trans({}, 'forum') }}</option>
+                        </select>
+                    </label>
+                    <button type="submit">{{ 'forum.index.search_button'|trans({}, 'forum') }}</button>
+                    {% if search is not empty %}
+                        <a href="{{ path('user_forum', {sort: sort|default('recent')}) }}" class="forum-search-reset">{{ 'forum.common.search_reset'|trans({}, 'forum') }}</a>
+                    {% endif %}
+                </form>
+            </div>
+            {% if search is not empty %}
+                <p class="forum-search-info">
+                    {{ posts|length }} {{ 'forum.index.results_for'|trans({}, 'forum') }} "<strong>{{ search }}</strong>"
+                </p>
+            {% endif %}
+
+            <div class="forum-list" style="margin-top: 1rem;">
+                {% for post in posts %}
+                    {% set translatedPost = translated_posts[post.id] ?? null %}
+                    {% include 'shared/forum/_post_card.html.twig' with {
+                        post: post,
+                        translatedPost: translatedPost,
+                        translated_categories: translated_categories,
+                        favorite_bookmarked_ids: favorite_bookmarked_ids|default({}),
+                        saved_bookmarked_ids: saved_bookmarked_ids|default({}),
+                        forum_return_to: app.request.requestUri
+                    } only %}
+                {% else %}
+                    <div class="forum-empty">
+                        <h3>{{ 'forum.index.empty_title'|trans({}, 'forum') }}</h3>
+                        {% if search is not empty %}
+                            <p>{{ 'forum.index.empty_search'|trans({}, 'forum') }}</p>
+                        {% else %}
+                            <p>{{ 'forum.index.empty_default'|trans({}, 'forum') }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% set currentPage = currentPage|default(1) %}
+            {% set totalPages = totalPages|default(1) %}
+            {% include 'shared/_pagination.html.twig' with {
+                currentPage: currentPage,
+                totalPages: totalPages,
+                route: 'user_forum',
+                routeParams: { q: search, sort: sort }
+            } %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const successToast = {{ forum_success_toast is defined and forum_success_toast ? {
+                message: forum_success_toast.message|default(''),
+                type: forum_success_toast.type|default('success'),
+                duration: forum_success_toast.duration|default(10000)
+            }|json_encode|raw : 'null' }};
+            if (successToast && successToast.message) {
+                const showToast = (message, type = 'success', duration = 10000) => {
+                    if (typeof window.firmaToast === 'function') {
+                        window.firmaToast(message, type, duration);
+                        return;
+                    }
+
+                    const toast = document.createElement('div');
+                    toast.className = 'forum-flash forum-flash-' + (type === 'danger' ? 'error' : 'success');
+                    toast.style.cssText = 'position:fixed;top:18px;right:18px;z-index:99999;max-width:420px;padding:12px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.14);background:' + (type === 'danger' ? '#fdeaea' : '#eaf3de') + ';color:' + (type === 'danger' ? '#a32d2d' : '#27500a') + ';border:1px solid ' + (type === 'danger' ? '#f5c5c0' : '#c0dd97') + ';';
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+                    window.setTimeout(() => toast.remove(), duration);
+                };
+
+                showToast(successToast.message, successToast.type || 'success', Number.parseInt(successToast.duration || 10000, 10));
+            }
+
+            const storedScroll = sessionStorage.getItem('forumRestoreScrollY');
+            if (storedScroll !== null) {
+                const y = Number.parseInt(storedScroll, 10);
+                if (Number.isFinite(y) && y >= 0) {
+                    window.scrollTo({ top: y, behavior: 'auto' });
+                }
+                sessionStorage.removeItem('forumRestoreScrollY');
+            }
+
+            const form = document.getElementById('user-forum-search-form');
+            const input = document.getElementById('user-forum-search-input');
+            const createForm = document.getElementById('create-post-form');
+            const preserveScrollForms = document.querySelectorAll('form[data-forum-preserve-scroll="true"]');
+            const confirmEditLinks = document.querySelectorAll('a[data-firma-confirm-link="true"]');
+            const moodWidgets = document.querySelectorAll('[data-forum-mood-widget]');
+
+            if (createForm instanceof HTMLFormElement) {
+                createForm.addEventListener('submit', () => {
+                    sessionStorage.setItem('forumRestoreScrollY', String(window.scrollY));
+                });
+            }
+
+            preserveScrollForms.forEach((scrollForm) => {
+                if (!(scrollForm instanceof HTMLFormElement) || scrollForm.dataset.forumScrollBound === 'true') {
+                    return;
+                }
+
+                scrollForm.dataset.forumScrollBound = 'true';
+                scrollForm.addEventListener('submit', () => {
+                    sessionStorage.setItem('forumRestoreScrollY', String(window.scrollY));
+                });
+            });
+
+            const getMoodLabel = (mood) => {
+                switch ((mood || '').toLowerCase()) {
+                    case 'positif':
+                        return 'Positif';
+                    case 'negatif':
+                        return 'Négatif';
+                    default:
+                        return 'Neutre';
+                }
+            };
+
+            const getMoodEmoji = (mood) => {
+                switch ((mood || '').toLowerCase()) {
+                    case 'positif':
+                        return '😊';
+                    case 'negatif':
+                        return '😞';
+                    default:
+                        return '😐';
+                }
+            };
+
+            const getLocalizedMoodLabel = (mood) => {
+                const labels = {
+                    positif: '{{ "forum.mood.positive"|trans({}, "forum")|e("js") }}',
+                    negatif: '{{ "forum.mood.negative"|trans({}, "forum")|e("js") }}',
+                    neutre: '{{ "forum.mood.neutral"|trans({}, "forum")|e("js") }}',
+                };
+
+                return labels[(mood || '').toLowerCase()] || labels.neutre;
+            };
+
+            const getMoodClass = (mood) => {
+                switch ((mood || '').toLowerCase()) {
+                    case 'positif':
+                        return 'is-positive';
+                    case 'negatif':
+                        return 'is-negative';
+                    default:
+                        return 'is-neutral';
+                }
+            };
+
+            const analyzeMood = async (widget) => {
+                if (!(widget instanceof HTMLElement) || widget.dataset.forumMoodLoaded === 'true') {
+                    return;
+                }
+
+                const result = widget.querySelector('[data-forum-mood-result]');
+                const postId = Number.parseInt(widget.dataset.postId || '0', 10);
+                const moodUrl = widget.dataset.moodUrl || '';
+
+                if (!Number.isFinite(postId) || postId <= 0 || !moodUrl || !(result instanceof HTMLElement)) {
+                    return;
+                }
+
+                widget.dataset.forumMoodLoaded = 'loading';
+                result.textContent = '...';
+                widget.classList.add('is-loading');
+
+                try {
+                    const response = await fetch(moodUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ postId }),
+                    });
+
+                    const payload = await response.json();
+                    if (!response.ok || !payload || payload.ok !== true || !payload.data) {
+                        throw new Error((payload && payload.error) ? payload.error : 'Analyse indisponible.');
+                    }
+
+                    const mood = payload.data.mood || 'neutre';
+                    const score = typeof payload.data.score === 'number' ? Math.round(payload.data.score * 100) : null;
+
+                    widget.classList.remove('is-loading', 'is-positive', 'is-negative', 'is-neutral', 'is-error');
+                    widget.classList.add(getMoodClass(mood));
+                    result.textContent = score !== null ? `${getMoodEmoji(mood)} ${getLocalizedMoodLabel(mood)} · ${score}%` : `${getMoodEmoji(mood)} ${getLocalizedMoodLabel(mood)}`;
+                    widget.dataset.forumMoodLoaded = 'true';
+                } catch (error) {
+                    widget.classList.remove('is-loading', 'is-positive', 'is-negative', 'is-neutral');
+                    widget.classList.add('is-error');
+                    result.textContent = 'Erreur';
+                    widget.dataset.forumMoodLoaded = '';
+                    if (window.console && typeof window.console.warn === 'function') {
+                        window.console.warn(error);
+                    }
+                }
+            };
+
+            moodWidgets.forEach((widget) => {
+                if (!(widget instanceof HTMLElement)) {
+                    return;
+                }
+
+                analyzeMood(widget);
+            });
+
+            confirmEditLinks.forEach((link) => {
+                if (!(link instanceof HTMLAnchorElement) || link.dataset.forumConfirmBound === 'true') {
+                    return;
+                }
+
+                link.dataset.forumConfirmBound = 'true';
+                link.addEventListener('click', (event) => {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '#') {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const title = link.getAttribute('data-firma-confirm-title') || '{{ 'forum.index.edit_title'|trans({}, 'forum')|e('js') }}';
+                    const message = link.getAttribute('data-firma-confirm-message') || '{{ 'forum.index.edit_message'|trans({}, 'forum')|e('js') }}';
+                    const submitLabel = link.getAttribute('data-firma-confirm-submit') || '{{ 'forum.common.save'|trans({}, 'forum')|e('js') }}';
+
+                    if (typeof window.firmaConfirm === 'function') {
+                        window.firmaConfirm(title, message, submitLabel, 'primary').then((ok) => {
+                            if (!ok) {
+                                return;
+                            }
+
+                            window.location.href = href;
+                        });
+                        return;
+                    }
+
+                    window.location.href = href;
+                });
+            });
+
+            if (!(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const minLength = Number.parseInt(input.getAttribute('minlength') || '3', 10);
+            let lastSubmitted = (input.value || '').trim();
+            let debounceTimer = null;
+
+            const submitIfNeeded = () => {
+                const value = (input.value || '').trim();
+                const hasEnoughChars = value.length >= minLength;
+                const isReset = value.length === 0;
+
+                if ((!hasEnoughChars && !isReset) || value === lastSubmitted) {
+                    return;
+                }
+
+                lastSubmitted = value;
+                form.submit();
+            };
+
+            input.addEventListener('input', () => {
+                if (debounceTimer) {
+                    window.clearTimeout(debounceTimer);
+                }
+
+                debounceTimer = window.setTimeout(submitIfNeeded, 250);
+            });
+
+            input.addEventListener('search', submitIfNeeded);
+        });
+    </script>
+{% endblock %}

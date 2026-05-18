@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A1887F"/>
+      <stop offset="100%" stop-color="#8D6E63"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="300" width="800" height="200" fill="url(#soil)"/>
+  <!-- Main pipe -->
+  <rect x="50" y="280" width="700" height="12" fill="#546E7A" rx="4"/>
+  <!-- Drip lines -->
+  <g>
+    <line x1="150" y1="292" x2="150" y2="320" stroke="#37474F" stroke-width="3"/>
+    <line x1="300" y1="292" x2="300" y2="320" stroke="#37474F" stroke-width="3"/>
+    <line x1="450" y1="292" x2="450" y2="320" stroke="#37474F" stroke-width="3"/>
+    <line x1="600" y1="292" x2="600" y2="320" stroke="#37474F" stroke-width="3"/>
+  </g>
+  <!-- Drippers and water drops -->
+  <g>
+    <circle cx="150" cy="323" r="4" fill="#37474F"/>
+    <ellipse cx="150" cy="335" rx="3" ry="5" fill="#42A5F5" opacity="0.7"/>
+    <ellipse cx="150" cy="348" rx="2" ry="4" fill="#42A5F5" opacity="0.5"/>
+  </g>
+  <g>
+    <circle cx="300" cy="323" r="4" fill="#37474F"/>
+    <ellipse cx="300" cy="338" rx="3" ry="5" fill="#42A5F5" opacity="0.7"/>
+  </g>
+  <g>
+    <circle cx="450" cy="323" r="4" fill="#37474F"/>
+    <ellipse cx="450" cy="335" rx="3" ry="5" fill="#42A5F5" opacity="0.7"/>
+    <ellipse cx="450" cy="350" rx="2" ry="4" fill="#42A5F5" opacity="0.5"/>
+  </g>
+  <g>
+    <circle cx="600" cy="323" r="4" fill="#37474F"/>
+    <ellipse cx="600" cy="336" rx="3" ry="5" fill="#42A5F5" opacity="0.7"/>
+  </g>
+  <!-- Plants growing from drip points -->
+  <g transform="translate(150,300)">
+    <line x1="0" y1="0" x2="0" y2="-35" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-8" cy="-25" rx="8" ry="5" fill="#66BB6A" transform="rotate(-20 -8 -25)"/>
+    <ellipse cx="8" cy="-30" rx="8" ry="5" fill="#66BB6A" transform="rotate(20 8 -30)"/>
+    <circle cx="0" cy="-38" r="6" fill="#F44336"/>
+  </g>
+  <g transform="translate(300,300)">
+    <line x1="0" y1="0" x2="0" y2="-40" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-8" cy="-30" rx="8" ry="5" fill="#81C784" transform="rotate(-25 -8 -30)"/>
+    <ellipse cx="8" cy="-35" rx="8" ry="5" fill="#81C784" transform="rotate(25 8 -35)"/>
+    <circle cx="0" cy="-43" r="7" fill="#F44336"/>
+  </g>
+  <g transform="translate(450,300)">
+    <line x1="0" y1="0" x2="0" y2="-30" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-7" cy="-22" rx="7" ry="4" fill="#66BB6A" transform="rotate(-20 -7 -22)"/>
+    <ellipse cx="7" cy="-26" rx="7" ry="4" fill="#66BB6A" transform="rotate(20 7 -26)"/>
+  </g>
+  <g transform="translate(600,300)">
+    <line x1="0" y1="0" x2="0" y2="-38" stroke="#4CAF50" stroke-width="2"/>
+    <ellipse cx="-8" cy="-28" rx="8" ry="5" fill="#81C784" transform="rotate(-25 -8 -28)"/>
+    <ellipse cx="8" cy="-33" rx="8" ry="5" fill="#81C784" transform="rotate(25 8 -33)"/>
+    <circle cx="0" cy="-40" r="6" fill="#FF9800"/>
+  </g>
+  <!-- Water tank -->
+  <g transform="translate(60,210)">
+    <rect x="-25" y="0" width="50" height="60" fill="#546E7A" rx="5"/>
+    <rect x="-20" y="5" width="40" height="50" fill="#607D8B" rx="3"/>
+    <ellipse cx="0" cy="30" rx="15" ry="20" fill="#42A5F5" opacity="0.4"/>
+    <text x="0" y="35" text-anchor="middle" fill="white" font-size="8" font-family="Arial">H2O</text>
+  </g>
+  <!-- Sun -->
+  <circle cx="700" cy="60" r="40" fill="#FFD54F" opacity="0.9"/>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Formation Irrigation Goutte-à-Goutte</text>
+  <text x="400" y="445" text-anchor="middle" fill="#90CAF9" font-family="Arial,sans-serif" font-size="18">Économie d'eau - Gabès</text>
+</svg>

@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription — FIRMA{% endblock %}
+{% block meta_description %}Créez votre compte FIRMA.{% endblock %}
+
+{% block body %}
+<div class="login-page">
+  <div class="login-bg-pattern"></div>
+  <div class="login-orb login-orb-1"></div>
+  <div class="login-orb login-orb-2"></div>
+  <div class="login-orb login-orb-3"></div>
+
+  {# ── PANNEAU GAUCHE ── #}
+  <div class="login-brand-panel">
+    <div class="brand-content">
+      <a href="{{ path('app_landing') }}" class="brand-logo">
+        <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="brand-logo-img">
+        <span class="brand-logo-text">FIRMA</span>
+      </a>
+      <div class="brand-hero">
+        <div class="brand-circle"></div>
+        <div class="brand-circle brand-circle-2"></div>
+        <h1 class="brand-title">
+          <span class="brand-word bw1">Rejoignez</span>
+          <em><span class="brand-word bw2">FIRMA</span></em>
+        </h1>
+        <p class="brand-tagline">Créez votre compte et accédez à toute la plateforme agricole.</p>
+      </div>
+      <div class="brand-features">
+        <div class="brand-feature"><div class="bf-icon">🛒</div><span>Marketplace</span></div>
+        <div class="brand-feature"><div class="bf-icon">📅</div><span>Événements</span></div>
+        <div class="brand-feature"><div class="bf-icon">🌿</div><span>Maladies</span></div>
+        <div class="brand-feature"><div class="bf-icon">💬</div><span>Forum</span></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── PANNEAU DROIT : FORMULAIRE ── #}
+  <div class="login-form-panel">
+    <div class="login-form-wrapper" style="max-width:520px">
+      <div class="login-mobile-logo">
+        <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA" class="mobile-logo-img">
+      </div>
+
+      <div class="login-header">
+        <h2 class="login-title">Créer un compte</h2>
+        <p class="login-subtitle">Remplissez le formulaire pour rejoindre FIRMA</p>
+      </div>
+
+      {# Flashes #}
+      {% for msg in app.flashes('error') %}
+        <div class="login-alert">
+          <svg viewBox="0 0 20 20" fill="none" class="alert-icon">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 6v5M10 13.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>{{ msg }}</span>
+        </div>
+      {% endfor %}
+
+      {{ form_start(form, {'attr': {'class': 'login-form', 'novalidate': 'novalidate'}}) }}
+
+        {# Type de compte (en haut, bien visible) #}
+        <div class="form-group signup-role-group">
+          {{ form_label(form.typeUser, 'Type de compte') }}
+          <div class="signup-role-choices">
+            {% for child in form.typeUser %}
+              <label class="signup-role-card">
+                {{ form_widget(child) }}
+                <span class="signup-role-label">
+                  {% if child.vars.value == 'client' %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Utilisateur
+                  {% else %}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Technicien
+                  {% endif %}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+          {{ form_errors(form.typeUser) }}
+        </div>
+
+        <div class="signup-grid">
+          <div class="form-group">
+            {{ form_label(form.nom) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><path d="M10 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 9a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              {{ form_widget(form.nom, {'attr': {'class': 'form-input'}}) }}
+            </div>
+            {{ form_errors(form.nom) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.prenom) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><path d="M10 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 9a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              {{ form_widget(form.prenom, {'attr': {'class': 'form-input'}}) }}
+            </div>
+            {{ form_errors(form.prenom) }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.email) }}
+          <div class="input-wrapper">
+            <svg viewBox="0 0 20 20" fill="none" class="input-icon"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            {{ form_widget(form.email, {'attr': {'class': 'form-input'}}) }}
+          </div>
+          {{ form_errors(form.email) }}
+        </div>
+
+        <div class="signup-grid">
+          <div class="form-group">
+            {{ form_label(form.telephone) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><path d="M3 5a2 2 0 0 1 2-2h1.5l2 4.5-1.5 1a11 11 0 0 0 4.5 4.5l1-1.5L17 13.5V15a2 2 0 0 1-2 2A14 14 0 0 1 3 5z" stroke="currentColor" stroke-width="1.4"/></svg>
+              {{ form_widget(form.telephone, {'attr': {'class': 'form-input'}}) }}
+            </div>
+            {{ form_errors(form.telephone) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.ville) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><path d="M10 2a6 6 0 0 1 6 6c0 5-6 10-6 10S4 13 4 8a6 6 0 0 1 6-6z" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
+              {{ form_widget(form.ville, {'attr': {'class': 'form-input'}}) }}
+            </div>
+            {{ form_errors(form.ville) }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.adresse) }}
+          <div class="input-wrapper">
+            <svg viewBox="0 0 20 20" fill="none" class="input-icon"><rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 9h16" stroke="currentColor" stroke-width="1.4"/></svg>
+            {{ form_widget(form.adresse, {'attr': {'class': 'form-input'}}) }}
+          </div>
+          {{ form_errors(form.adresse) }}
+        </div>
+
+        <div class="signup-grid">
+          <div class="form-group">
+            {{ form_label(form.motDePasse.first) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><rect x="3" y="9" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 9V6a4 4 0 118 0v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="13.5" r="1.5" fill="currentColor"/></svg>
+              {{ form_widget(form.motDePasse.first, {'attr': {'class': 'form-input', 'id': 'inp-pwd1'}}) }}
+              <button type="button" class="toggle-password" onclick="togglePass('inp-pwd1','eye1')" aria-label="Afficher">
+                <svg viewBox="0 0 20 20" fill="none" class="eye-icon" id="eye1"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            {{ form_errors(form.motDePasse.first) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.motDePasse.second) }}
+            <div class="input-wrapper">
+              <svg viewBox="0 0 20 20" fill="none" class="input-icon"><rect x="3" y="9" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 9V6a4 4 0 118 0v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="13.5" r="1.5" fill="currentColor"/></svg>
+              {{ form_widget(form.motDePasse.second, {'attr': {'class': 'form-input', 'id': 'inp-pwd2'}}) }}
+              <button type="button" class="toggle-password" onclick="togglePass('inp-pwd2','eye2')" aria-label="Afficher">
+                <svg viewBox="0 0 20 20" fill="none" class="eye-icon" id="eye2"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            {{ form_errors(form.motDePasse.second) }}
+          </div>
+        </div>
+
+        {{ form_errors(form) }}
+
+        <button type="submit" class="login-btn" style="margin-top:0.5rem">
+          <span class="btn-text">Créer mon compte</span>
+          <svg viewBox="0 0 20 20" fill="none" class="btn-arrow"><path d="M4 10h12m-4-4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+      {{ form_end(form) }}
+
+      <div class="login-footer-text" style="margin-top:1.2rem">
+        <span>Déjà un compte ?</span>
+        <a href="{{ path('app_login') }}">Se connecter</a>
+      </div>
+      <a href="{{ path('app_landing') }}" class="back-home">← Retour à l'accueil</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.signup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 500px) { .signup-grid { grid-template-columns: 1fr; } }
+
+.signup-role-group { margin-bottom: 1.2rem; }
+.signup-role-choices { display: flex; gap: 1rem; margin-top: 0.5rem; }
+.signup-role-card { flex: 1; display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem;
+  border: 2px solid var(--border, #e2e8f0); border-radius: 10px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s; }
+.signup-role-card input[type="radio"] { accent-color: #2d7a3a; width: 16px; height: 16px; }
+.signup-role-card:has(input:checked) { border-color: #2d7a3a; background: #f0faf2; }
+.signup-role-label { display: flex; align-items: center; gap: 0.4rem; font-weight: 500; font-size: 0.95rem; }
+</style>
+
+<script>
+function togglePass(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/><line x1="3" y1="3" x2="17" y2="17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3"/>';
+  }
+}
+</script>
+{% endblock %}

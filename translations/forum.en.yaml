@@ -1,0 +1,159 @@
+forum:
+  language: Language
+  language_fr: French
+  language_en: English
+  language_en_gb: English (UK)
+  language_en_us: English (US)
+  language_de: German
+  language_es: Spanish
+  language_it: Italian
+  language_nl: Dutch
+  language_pt_br: Portuguese (Brazil)
+  language_pt_pt: Portuguese (Portugal)
+  language_pl: Polish
+  switch: Switch forum language
+
+  common:
+    back_to_discussions: Back to discussions
+    back_to_post: Back to post
+    cancel: Cancel
+    save: Save
+    publish: Publish
+    publish_comment: Publish comment
+    loading: Loading
+    reactions: reactions
+    comments: comments
+    comment: comment
+    comment_total: total
+    characters: characters
+    author: Author
+    by: By
+    connected: connected
+    search: Search
+    search_reset: Reset
+    sort: Sort
+    no_category: No category
+
+  index:
+    kicker: FIRMA Community
+    title: Exchange with the FIRMA community
+    lead: Share your questions, advice and experiences with platform users in a clear and professional space.
+    posts_visible: visible posts
+    new_post: New post
+    title_label: Title
+    title_placeholder: "Example: advice about irrigation"
+    category_label: Category
+    category_placeholder: Choose a category
+    content_label: Content
+    content_placeholder: Describe your need or share your experience...
+    publish_title: Publish this post
+    publish_message: Do you really want to publish this post?
+    discussions: Discussions
+    search_placeholder: Search a post by title
+    search_button: Search
+    sort_aria: Sort discussions
+    open_post: Open post
+    sort_recent: Most recent
+    sort_oldest: Oldest
+    sort_title_asc: Title A-Z
+    sort_title_desc: Title Z-A
+    search_info: result for
+    results_for: results for
+    view_post: View full post
+    edit_post: Edit post
+    edit_title: Edit this post
+    edit_message: Do you really want to edit this post?
+    delete_post: Delete this post
+    delete_message: Do you really want to delete this post? This action is irreversible.
+    empty_title: No discussion found
+    empty_search: No result matches your search. Try another keyword.
+    empty_default: Start by publishing the first forum topic in the Symfony version.
+    flash_form_error: The form contains errors. Check the fields below.
+
+  show:
+    comments: Comments
+    translate_label: Translate this post to
+    add_comment: Add a comment
+    comment_placeholder: Reply to this discussion...
+    comment_counter: '%current% / %max% characters'
+    image_label: Comment image
+    image_preview: Preview before publishing
+    image_preview_alt: Comment image preview
+    image_format_error: Invalid format. Use JPG, PNG, WEBP or GIF.
+    image_edit_label: Replace image
+    remove_current_image: Remove current image
+    no_comments_title: No comments yet
+    no_comments_text: Be the first to reply to this topic.
+    save: Save
+    cancel: Cancel
+    edit_comment: Edit comment
+    edit_comment_title: Edit this comment
+    edit_comment_message: Do you really want to edit this comment?
+    delete_comment: Delete comment
+    delete_comment_title: Delete this comment
+    delete_comment_message: Do you really want to delete this comment? This action is irreversible.
+    translate_post: Translate this post
+    translate_action: Translate
+    translation_loading: Translating...
+    translation_error: We could not translate the content right now.
+    translated_label: Translated version
+    translated_to: Translated version in %language%
+    translation_hint: Pick a target language, then launch the translation.
+
+  edit:
+    title: Edit post
+    save: Save
+    cancel: Cancel
+    category_placeholder: Choose a category
+    back_to_post: Back to post
+
+  reaction:
+    choose: Click to choose your mood
+
+  mood:
+    analyze: Analyze mood
+    pending: Pending
+    positive: Positive
+    negative: Negative
+    neutral: Neutral
+    relaunch: Relaunch
+    warning: Internal warning
+
+  warning:
+    title: Forum warning
+    message: Our app does not allow insulting language. Check your internal warnings.
+    cta: View warning
+
+  flash:
+    post_created: Post published successfully
+    post_updated: Post updated successfully
+    post_deleted: Post deleted successfully
+    comment_created: Comment added successfully
+    comment_updated: Comment updated successfully
+    comment_deleted: Comment deleted successfully
+    invalid_reaction: Invalid reaction.
+    invalid_csrf: Invalid CSRF token.
+    invalid_user: User not logged in.
+    invalid_post: Post not found.
+    invalid_comment: Comment not found.
+    invalid_image_file: The uploaded image file is invalid.
+    image_upload_failed: The image could not be saved. Please try again.
+    validation:
+      title_required: Title is required.
+      title_length: Title must not exceed 255 characters.
+      content_required: Content is required.
+      content_length: Content must contain at least 10 characters.
+      category_required: Category is required.
+      category_invalid: The selected category is invalid.
+      comment_required: Comment is required.
+      comment_min: Comment must contain at least %min% characters.
+      comment_max: Comment must not exceed %max% characters.
+      image_format: "Accepted formats: JPG, PNG, WEBP or GIF."
+      image_extension: "Invalid extension. Use JPG, PNG, WEBP or GIF."
+      image_size: "The image must not exceed 5 MB."
+      image_too_small: "Image too small: %width%x%height% px. Minimum required: %min_width%x%min_height% px."
+      image_too_large: "Image too large: %width%x%height% px. Maximum allowed: %max_width%x%max_height% px."
+      image_read: Unable to read image dimensions.
+      image_invalid: Unable to read the image file.
+      self_edit_post: You cannot edit this post.
+      self_edit_comment: You cannot edit this comment.

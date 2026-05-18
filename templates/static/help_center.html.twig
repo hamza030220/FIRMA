@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Centre d'aide — FIRMA{% endblock %}
+
+{% block body %}
+<div class="sp-page">
+
+    {# ── Hero ── #}
+    <div class="sp-hero">
+        <img src="{{ asset('image/firma.png') }}" alt="FIRMA" class="sp-hero-logo">
+        <h1>Centre d'aide</h1>
+        <p>Retrouvez tout ce dont vous avez besoin pour utiliser FIRMA au maximum. Guides, astuces et ressources pour chaque module de la plateforme.</p>
+        <div class="sp-hero-breadcrumb">
+            <a href="{{ path('app_landing') }}">Accueil</a> / Centre d'aide
+        </div>
+    </div>
+
+    {# ── Content ── #}
+    <div class="sp-container">
+
+        {# ── Quick cards ── #}
+        <div class="sp-card-grid">
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_equipements.png') }}" alt=""></div>
+                <h3>Marketplace — Équipements</h3>
+                <p>Parcourez le catalogue, ajoutez des articles au panier, passez commande et payez en ligne par carte via Stripe en toute sécurité.</p>
+            </div>
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_vehicule.png') }}" alt=""></div>
+                <h3>Location de véhicules</h3>
+                <p>Sélectionnez un véhicule, choisissez vos dates de début et fin, et réservez. Le montant est calculé automatiquement selon la durée.</p>
+            </div>
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_terrains.png') }}" alt=""></div>
+                <h3>Location de terrains</h3>
+                <p>Trouvez des terrains agricoles par ville et superficie. Réservez au mois ou à l'année et visualisez l'emplacement sur la carte interactive.</p>
+            </div>
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_commande.png') }}" alt=""></div>
+                <h3>Commandes & paiements</h3>
+                <p>Suivez vos commandes et locations dans votre historique. Tous les paiements se font par carte bancaire via la plateforme sécurisée Stripe.</p>
+            </div>
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_fournisseurs.png') }}" alt=""></div>
+                <h3>Événements agricoles</h3>
+                <p>Découvrez les événements à venir, inscrivez-vous en ligne. Consultez le programme, les intervenants et les lieux sur la carte.</p>
+            </div>
+            <div class="sp-card">
+                <div class="sp-card-icon"><img src="{{ asset('image/marketplace/icone_location.png') }}" alt=""></div>
+                <h3>Forum & communauté</h3>
+                <p>Posez vos questions, partagez vos expériences agricoles et échangez avec d'autres agriculteurs. Créez des sujets et commentez.</p>
+            </div>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Getting started ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h2>Premiers pas sur FIRMA</h2>
+            </div>
+            <h3>1. Créer votre compte</h3>
+            <p>Rendez-vous sur la page d'inscription et renseignez vos informations personnelles : nom, prénom, email et mot de passe. Un email de confirmation vous sera envoyé pour vérifier votre adresse.</p>
+
+            <h3>2. Explorer le catalogue</h3>
+            <p>La marketplace est organisée en trois onglets : <strong>Équipements</strong>, <strong>Véhicules</strong> et <strong>Terrains</strong>. Utilisez la barre de recherche pour filtrer rapidement. Cliquez sur « Voir les détails » pour consulter les informations complètes d'un article.</p>
+
+            <h3>3. Passer une commande</h3>
+            <p>Pour les équipements, ajoutez les articles au panier en précisant la quantité souhaitée. Pour les véhicules et terrains, sélectionnez vos dates de location. Validez ensuite votre panier ou vos locations et payez par carte bancaire.</p>
+
+            <h3>4. Consulter votre historique</h3>
+            <p>Retrouvez toutes vos commandes (équipements) et vos réservations (véhicules, terrains) dans le tiroir latéral accessible depuis les boutons flottants en bas de page.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Managing diseases ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                </div>
+                <h2>Maladies & traitements</h2>
+            </div>
+            <p>Le module Maladies vous aide à identifier les maladies courantes affectant vos cultures. Chaque fiche maladie contient :</p>
+            <ul>
+                <li>Une description détaillée avec symptômes visuels</li>
+                <li>Les causes et conditions favorables</li>
+                <li>Les solutions et traitements recommandés</li>
+                <li>Des images pour faciliter l'identification</li>
+            </ul>
+            <p>Consultez la bibliothèque de maladies depuis le menu principal et utilisez la recherche pour trouver rapidement une maladie par nom.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── Account & security ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h2>Compte & sécurité</h2>
+            </div>
+            <p>Gérez votre profil depuis la page <strong>Profil</strong> accessible depuis la barre de navigation :</p>
+            <ul>
+                <li><strong>Modifier vos informations</strong> : nom, prénom, téléphone, adresse</li>
+                <li><strong>Changer votre mot de passe</strong> : pour la sécurité de votre compte, utilisez un mot de passe fort</li>
+                <li><strong>Photo de profil</strong> : personnalisez votre avatar</li>
+            </ul>
+            <p>Si vous rencontrez des difficultés de connexion, utilisez la fonction « Mot de passe oublié » sur la page de connexion.</p>
+        </div>
+
+        {# ── Contact banner ── #}
+        <div class="sp-contact-banner">
+            <div class="sp-contact-banner-icon">
+                <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA">
+            </div>
+            <div>
+                <h3>Besoin d'aide supplémentaire ?</h3>
+                <p>Contactez notre équipe de support à <strong>support@firma.tn</strong> ou appelez le <strong>+216 XX XXX XXX</strong>. Nous répondons du lundi au vendredi, de 8h à 18h.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

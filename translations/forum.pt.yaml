@@ -1,0 +1,151 @@
+forum:
+  language: Idioma
+  language_fr: Francês
+  language_en: Inglês
+  language_en_gb: Inglês (RU)
+  language_en_us: Inglês (EUA)
+  language_de: Alemão
+  language_es: Espanhol
+  language_it: Italiano
+  language_nl: Holandês
+  language_pt_br: Português (Brasil)
+  language_pt_pt: Português (Portugal)
+  language_pl: Polonês
+  switch: Alterar idioma do fórum
+
+  common:
+    back_to_discussions: Voltar às discussões
+    back_to_post: Voltar ao post
+    cancel: Cancelar
+    save: Guardar
+    publish: Publicar
+    publish_comment: Publicar comentário
+    loading: A carregar
+    reactions: reações
+    comments: comentários
+    comment: comentário
+    comment_total: no total
+    characters: caracteres
+    author: Autor
+    by: Por
+    connected: ligado
+    search: Procurar
+    search_reset: Repor
+    sort: Ordenar
+    no_category: Sem categoria
+
+  index:
+    kicker: Comunidade FIRMA
+    title: Partilhe com a comunidade FIRMA
+    lead: Partilhe perguntas, conselhos e experiências num espaço claro e profissional.
+    posts_visible: posts visíveis
+    new_post: Novo post
+    title_label: Título
+    title_placeholder: "Exemplo: conselho para rega"
+    category_label: Categoria
+    category_placeholder: Escolha uma categoria
+    content_label: Conteúdo
+    content_placeholder: Descreva a sua necessidade ou partilhe a sua experiência...
+    publish_title: Publicar este post
+    publish_message: Tem a certeza de que quer publicar este post?
+    discussions: Discussões
+    search_placeholder: Procurar um post por título
+    search_button: Procurar
+    sort_aria: Ordenar discussões
+    open_post: Abrir post
+    sort_recent: Mais recentes
+    sort_oldest: Mais antigos
+    sort_title_asc: Título A-Z
+    sort_title_desc: Título Z-A
+    search_info: resultado para
+    results_for: resultados para
+    view_post: Ver o post completo
+    edit_post: Editar post
+    edit_title: Editar este post
+    edit_message: Tem a certeza de que quer editar este post?
+    delete_post: Eliminar post
+    delete_message: Tem a certeza de que quer eliminar este post? Esta ação é irreversível.
+    empty_title: Nenhuma discussão encontrada
+    empty_search: Nenhum resultado corresponde à sua pesquisa. Tente outra palavra-chave.
+    empty_default: Comece por publicar o primeiro tema do fórum na versão Symfony.
+    flash_form_error: O formulário contém erros. Verifique os campos abaixo.
+
+  show:
+    comments: Comentários
+    add_comment: Adicionar um comentário
+    comment_placeholder: Responda a esta discussão...
+    comment_counter: '%current% / %max% caracteres'
+    image_label: Imagem do comentário
+    image_preview: Pré-visualização antes de publicar
+    image_preview_alt: Pré-visualização da imagem do comentário
+    image_format_error: Formato inválido. Use JPG, PNG, WEBP ou GIF.
+    image_edit_label: Substituir imagem
+    remove_current_image: Remover imagem atual
+    no_comments_title: Ainda não há comentários
+    no_comments_text: Seja o primeiro a responder a este tema.
+    save: Guardar
+    cancel: Cancelar
+    edit_comment: Editar comentário
+    edit_comment_title: Editar este comentário
+    edit_comment_message: Tem a certeza de que quer editar este comentário?
+    delete_comment: Eliminar comentário
+    delete_comment_title: Eliminar este comentário
+    delete_comment_message: Tem a certeza de que quer eliminar este comentário? Esta ação é irreversível.
+
+  edit:
+    title: Editar post
+    save: Guardar
+    cancel: Cancelar
+    category_placeholder: Escolha uma categoria
+    back_to_post: Voltar ao post
+
+  reaction:
+    choose: Clique para escolher o seu estado de espírito
+
+  mood:
+    analyze: Analisar humor
+    pending: Em espera
+    positive: Positivo
+    negative: Negativo
+    neutral: Neutro
+    relaunch: Analisar novamente
+    warning: Aviso interno
+
+  warning:
+    title: Aviso do fórum
+    message: A nossa aplicação não permite linguagem ofensiva. Verifique os seus avisos internos.
+    cta: Ver aviso
+
+  flash:
+    post_created: Post publicado com sucesso
+    post_updated: Post atualizado com sucesso
+    post_deleted: Post eliminado com sucesso
+    comment_created: Comentário adicionado com sucesso
+    comment_updated: Comentário atualizado com sucesso
+    comment_deleted: Comentário eliminado com sucesso
+    invalid_reaction: Reação inválida.
+    invalid_csrf: Token CSRF inválido.
+    invalid_user: Utilizador não autenticado.
+    invalid_post: Post não encontrado.
+    invalid_comment: Comentário não encontrado.
+    invalid_image_file: O ficheiro de imagem enviado é inválido.
+    image_upload_failed: Não foi possível guardar a imagem. Tente novamente.
+    validation:
+      title_required: O título é obrigatório.
+      title_length: O título não deve exceder 255 caracteres.
+      content_required: O conteúdo é obrigatório.
+      content_length: O conteúdo deve conter pelo menos 10 caracteres.
+      category_required: A categoria é obrigatória.
+      category_invalid: A categoria selecionada é inválida.
+      comment_required: O comentário é obrigatório.
+      comment_min: O comentário deve conter pelo menos %min% caracteres.
+      comment_max: O comentário não deve exceder %max% caracteres.
+      image_format: "Formatos aceites: JPG, PNG, WEBP ou GIF."
+      image_extension: "Extensão inválida. Use JPG, PNG, WEBP ou GIF."
+      image_size: "A imagem não deve exceder 5 MB."
+      image_too_small: "Imagem demasiado pequena: %width%x%height% px. Tamanho mínimo: %min_width%x%min_height% px."
+      image_too_large: "Imagem demasiado grande: %width%x%height% px. Tamanho máximo: %max_width%x%max_height% px."
+      image_read: Não foi possível ler as dimensões da imagem.
+      image_invalid: Não foi possível ler o ficheiro de imagem.
+      self_edit_post: Não pode editar este post.
+      self_edit_comment: Não pode editar este comentário.

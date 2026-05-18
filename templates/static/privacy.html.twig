@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de confidentialité — FIRMA{% endblock %}
+
+{% block body %}
+<div class="sp-page">
+
+    {# ── Hero ── #}
+    <div class="sp-hero">
+        <img src="{{ asset('image/firma.png') }}" alt="FIRMA" class="sp-hero-logo">
+        <h1>Politique de confidentialité</h1>
+        <p>Découvrez comment FIRMA collecte, utilise et protège vos données personnelles.</p>
+        <div class="sp-hero-breadcrumb">
+            <a href="{{ path('app_landing') }}">Accueil</a> / Politique de confidentialité
+        </div>
+    </div>
+
+    {# ── Content ── #}
+    <div class="sp-container">
+
+        {# ── 1. Introduction ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h2>1. Introduction</h2>
+            </div>
+            <p>FIRMA (ci-après « nous », « notre ») s'engage à protéger la vie privée de ses utilisateurs. La présente politique de confidentialité décrit les types de données personnelles que nous collectons, la manière dont nous les utilisons et les mesures que nous mettons en place pour les protéger.</p>
+            <p>En utilisant la plateforme FIRMA, vous acceptez les pratiques décrites dans cette politique.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 2. Données collectées ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h2>2. Données personnelles collectées</h2>
+            </div>
+            <p>Nous collectons les catégories de données suivantes :</p>
+
+            <h3>2.1 — Données d'identification</h3>
+            <ul>
+                <li>Nom, prénom</li>
+                <li>Adresse email</li>
+                <li>Numéro de téléphone</li>
+                <li>Adresse postale</li>
+                <li>Photo de profil (facultatif)</li>
+            </ul>
+
+            <h3>2.2 — Données de transaction</h3>
+            <ul>
+                <li>Historique des commandes et locations</li>
+                <li>Montants des transactions en TND</li>
+                <li>Dates et références de paiement</li>
+            </ul>
+            <p><strong>Important :</strong> Les données de carte bancaire sont traitées directement par <strong>Stripe</strong> et ne transitent jamais par nos serveurs. Nous n'avons accès qu'aux 4 derniers chiffres de la carte et au statut du paiement.</p>
+
+            <h3>2.3 — Données d'utilisation</h3>
+            <ul>
+                <li>Pages consultées et fonctionnalités utilisées</li>
+                <li>Contenu publié sur le forum (sujets, commentaires)</li>
+                <li>Données de session et cookies techniques</li>
+            </ul>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 3. Utilisation ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <img src="{{ asset('image/marketplace/icone_commande.png') }}" alt="">
+                </div>
+                <h2>3. Utilisation des données</h2>
+            </div>
+            <p>Vos données personnelles sont utilisées pour :</p>
+            <ul>
+                <li><strong>Gestion de votre compte</strong> : création, connexion, personnalisation du profil</li>
+                <li><strong>Exécution des transactions</strong> : traitement des commandes d'équipements et des réservations de véhicules et terrains</li>
+                <li><strong>Communication</strong> : confirmations de commande, notifications importantes, support technique</li>
+                <li><strong>Amélioration de la plateforme</strong> : analyse d'usage anonyme pour améliorer l'expérience utilisateur</li>
+                <li><strong>Sécurité</strong> : détection de fraude et protection des comptes</li>
+            </ul>
+            <p>Nous ne vendons, ne louons et ne partageons jamais vos données personnelles à des tiers à des fins commerciales.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 4. Cookies ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
+                </div>
+                <h2>4. Cookies</h2>
+            </div>
+            <p>La Plateforme utilise exclusivement des <strong>cookies techniques et de session</strong> nécessaires à son bon fonctionnement :</p>
+            <ul>
+                <li><strong>Cookie de session</strong> : maintien de votre connexion active pendant votre visite</li>
+                <li><strong>Cookie de panier</strong> : conservation temporaire des articles ajoutés au panier marketplace</li>
+                <li><strong>Cookie CSRF</strong> : protection contre les attaques de type Cross-Site Request Forgery</li>
+            </ul>
+            <p>Nous n'utilisons <strong>aucun cookie publicitaire</strong> ni aucun outil de tracking tiers.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 5. Sécurité ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h2>5. Sécurité des données</h2>
+            </div>
+            <p>Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données :</p>
+            <ul>
+                <li>Chiffrement des communications via HTTPS/TLS</li>
+                <li>Hachage sécurisé des mots de passe (bcrypt)</li>
+                <li>Paiements sécurisés via Stripe (certifié PCI-DSS niveau 1)</li>
+                <li>Protection CSRF sur tous les formulaires</li>
+                <li>Accès restreint aux données par authentification et rôles</li>
+            </ul>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 6. Droits ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <h2>6. Vos droits</h2>
+            </div>
+            <p>Conformément à la législation tunisienne sur la protection des données personnelles (Loi organique n° 2004-63), vous disposez des droits suivants :</p>
+            <ul>
+                <li><strong>Droit d'accès</strong> : obtenir une copie de vos données personnelles</li>
+                <li><strong>Droit de rectification</strong> : corriger des données inexactes ou incomplètes</li>
+                <li><strong>Droit de suppression</strong> : demander la suppression de votre compte et de vos données</li>
+                <li><strong>Droit d'opposition</strong> : vous opposer au traitement de vos données</li>
+            </ul>
+            <p>Pour exercer ces droits, contactez-nous à <strong>support@firma.tn</strong>. Nous traiterons votre demande dans un délai maximum de 30 jours.</p>
+        </div>
+
+        <hr class="sp-divider">
+
+        {# ── 7. Conservation ── #}
+        <div class="sp-section">
+            <div class="sp-section-head">
+                <div class="sp-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <h2>7. Durée de conservation</h2>
+            </div>
+            <ul>
+                <li><strong>Données de compte</strong> : conservées pendant la durée de votre inscription, puis supprimées 12 mois après la clôture du compte</li>
+                <li><strong>Données de transaction</strong> : conservées 5 ans conformément aux obligations légales comptables</li>
+                <li><strong>Données de forum</strong> : conservées jusqu'à suppression par l'utilisateur ou modération</li>
+                <li><strong>Logs de connexion</strong> : conservés 6 mois maximum</li>
+            </ul>
+        </div>
+
+        {# ── Contact ── #}
+        <div class="sp-contact-banner">
+            <div class="sp-contact-banner-icon">
+                <img src="{{ asset('image/logofirma.jpg') }}" alt="FIRMA">
+            </div>
+            <div>
+                <h3>Questions sur vos données ?</h3>
+                <p>Écrivez-nous à <strong>support@firma.tn</strong>. Notre responsable de la protection des données vous répondra dans les meilleurs délais.</p>
+            </div>
+        </div>
+
+        <p class="sp-updated">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
+    </div>
+</div>
+{% endblock %}

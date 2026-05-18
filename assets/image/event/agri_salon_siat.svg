@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="100%" stop-color="#E0F7FA"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8BC34A"/>
+      <stop offset="100%" stop-color="#558B2F"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="320" width="800" height="180" fill="url(#ground)"/>
+  <!-- Sun -->
+  <circle cx="650" cy="100" r="60" fill="#FFD54F" opacity="0.9"/>
+  <!-- Wheat stalks -->
+  <g fill="none" stroke="#F9A825" stroke-width="3">
+    <line x1="150" y1="320" x2="140" y2="220"/><ellipse cx="138" cy="215" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="200" y1="320" x2="195" y2="200"/><ellipse cx="193" cy="195" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="250" y1="320" x2="248" y2="210"/><ellipse cx="247" cy="205" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="300" y1="320" x2="305" y2="215"/><ellipse cx="306" cy="210" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="350" y1="320" x2="345" y2="205"/><ellipse cx="344" cy="200" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="400" y1="320" x2="398" y2="218"/><ellipse cx="397" cy="213" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="450" y1="320" x2="455" y2="208"/><ellipse cx="456" cy="203" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="500" y1="320" x2="495" y2="220"/><ellipse cx="494" cy="215" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="550" y1="320" x2="552" y2="212"/><ellipse cx="553" cy="207" rx="6" ry="18" fill="#F9A825"/>
+    <line x1="600" y1="320" x2="598" y2="225"/><ellipse cx="597" cy="220" rx="6" ry="18" fill="#F9A825"/>
+  </g>
+  <!-- Building silhouette -->
+  <rect x="50" y="260" width="120" height="60" fill="#5D4037" rx="3"/>
+  <rect x="70" y="275" width="20" height="20" fill="#FFE082" rx="2"/>
+  <rect x="100" y="275" width="20" height="20" fill="#FFE082" rx="2"/>
+  <rect x="130" y="275" width="20" height="20" fill="#FFE082" rx="2"/>
+  <polygon points="50,260 110,230 170,260" fill="#8D6E63"/>
+  <!-- Text banner -->
+  <rect x="150" y="380" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="415" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">SIAT - Salon International de</text>
+  <text x="400" y="440" text-anchor="middle" fill="#FFD54F" font-family="Arial,sans-serif" font-size="20">l'Agriculture de Tunisie</text>
+</svg>

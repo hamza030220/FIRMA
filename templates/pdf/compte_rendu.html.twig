@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { margin: 30px 40px 80px 40px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 11px; color: #333; }
+
+    /* ── Header ── */
+    .header { border-bottom: 3px solid #e6a817; padding-bottom: 14px; margin-bottom: 18px; }
+    .header table { width: 100%; }
+    .header td { vertical-align: top; }
+    .logo { width: 80px; height: auto; }
+    .company-name { font-size: 26px; font-weight: bold; color: #20452c; letter-spacing: 1px; }
+    .company-sub { font-size: 10px; color: #666; margin-top: 2px; }
+    .doc-title { text-align: right; }
+    .doc-title h1 { font-size: 20px; color: #e6a817; text-transform: uppercase; letter-spacing: 2px; }
+    .doc-title .doc-num { font-size: 11px; color: #666; margin-top: 4px; }
+
+    /* ── Orange accent bar ── */
+    .accent-bar { background: #e6a817; color: #fff; padding: 8px 14px; font-size: 11px; font-weight: bold; border-radius: 4px; margin-bottom: 14px; }
+
+    /* ── Info blocks ── */
+    .info-row { width: 100%; margin-bottom: 16px; }
+    .info-row td { vertical-align: top; width: 50%; }
+    .info-block { background: #fffcf2; border: 1px solid #f0dfa0; border-radius: 6px; padding: 10px 12px; }
+    .info-block h4 { font-size: 10px; color: #c48f00; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-block p { font-size: 10.5px; line-height: 1.5; color: #444; }
+
+    /* ── Products table ── */
+    .products-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .products-table th { background: #b8860b; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .products-table th:last-child, .products-table td:last-child { text-align: right; }
+    .products-table th:nth-child(3), .products-table td:nth-child(3) { text-align: center; }
+    .products-table td { padding: 7px 10px; border-bottom: 1px solid #e8e8e8; font-size: 10.5px; }
+    .products-table tr:nth-child(even) td { background: #fffef8; }
+
+    /* ── Totals ── */
+    .totals { width: 260px; margin-left: auto; margin-bottom: 16px; }
+    .totals td { padding: 4px 10px; font-size: 11px; }
+    .totals .label { text-align: right; color: #666; }
+    .totals .value { text-align: right; font-weight: bold; }
+    .totals .grand-total td { border-top: 2px solid #e6a817; padding-top: 8px; font-size: 13px; }
+    .totals .grand-total .value { color: #e6a817; }
+
+    /* ── Payment badge ── */
+    .payment-badge { display: inline-block; background: #e6a817; color: #fff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* ── Signatures ── */
+    .signatures { width: 100%; margin-top: 24px; margin-bottom: 20px; }
+    .signatures td { width: 50%; vertical-align: top; }
+    .sig-box { border: 2px dashed #e6a817; border-radius: 8px; padding: 12px; text-align: center; min-height: 100px; }
+    .sig-box h4 { font-size: 10px; color: #c48f00; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .sig-box .sig-name { font-size: 10px; color: #888; margin-bottom: 30px; }
+    .sig-box .sig-line { border-top: 1px solid #ccc; width: 70%; margin: 0 auto; padding-top: 4px; font-size: 9px; color: #aaa; }
+
+    /* ── Warning ── */
+    .warning { background: #fff3cd; border: 1px solid #e6a817; border-radius: 6px; padding: 10px 14px; margin-top: 14px; page-break-inside: avoid; }
+    .warning h4 { color: #856404; font-size: 10px; text-transform: uppercase; margin-bottom: 6px; }
+    .warning p { font-size: 9px; color: #6d5a00; line-height: 1.5; }
+
+    /* ── Footer ── */
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:70%">
+                <table><tr>
+                    <td style="width:90px"><img src="{{ logo_base64 }}" class="logo"></td>
+                    <td>
+                        <div class="company-name">FIRMA</div>
+                        <div class="company-sub">Marketplace Agricole</div>
+                    </td>
+                </tr></table>
+            </td>
+            <td class="doc-title">
+                <h1>Compte-Rendu</h1>
+                <div class="doc-num">Paiement à la livraison</div>
+                <div class="doc-num">N° {{ commande.numeroCommande }}</div>
+                <div class="doc-num">{{ commande.dateCommande|date('d/m/Y à H:i') }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Info blocks -->
+<table class="info-row">
+    <tr>
+        <td style="padding-right:8px">
+            <div class="info-block">
+                <h4>Client</h4>
+                <p>
+                    <strong>{{ commande.utilisateur.prenom }} {{ commande.utilisateur.nom }}</strong><br>
+                    {{ commande.utilisateur.email }}
+                </p>
+            </div>
+        </td>
+        <td style="padding-left:8px">
+            <div class="info-block">
+                <h4>Adresse de livraison</h4>
+                <p>
+                    {{ commande.adresseLivraison }}<br>
+                    {{ commande.villeLivraison }}
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- Products -->
+<div class="accent-bar">Détails de la commande</div>
+<table class="products-table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Qté</th>
+            <th>Sous-total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for detail in commande.details %}
+        <tr>
+            <td>{{ detail.equipement.nom }}</td>
+            <td>{{ detail.prixUnitaire|number_format(2, ',', ' ') }} DT</td>
+            <td>{{ detail.quantite }}</td>
+            <td>{{ detail.sousTotal|number_format(2, ',', ' ') }} DT</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Totals -->
+<table class="totals">
+    <tr>
+        <td class="label">Sous-total produits</td>
+        <td class="value">{{ (commande.montantTotal - 7)|number_format(2, ',', ' ') }} DT</td>
+    </tr>
+    <tr>
+        <td class="label">Frais de livraison</td>
+        <td class="value">7,00 DT</td>
+    </tr>
+    <tr class="grand-total">
+        <td class="label">Montant à payer au livreur</td>
+        <td class="value">{{ commande.montantTotal|number_format(2, ',', ' ') }} DT</td>
+    </tr>
+</table>
+
+<div style="margin-bottom:14px">
+    <span style="color:#666;font-size:10px">Mode de paiement :</span>
+    <span class="payment-badge">⏳ Paiement à la livraison</span>
+</div>
+
+<!-- Signatures -->
+<table class="signatures">
+    <tr>
+        <td style="padding-right:10px">
+            <div class="sig-box">
+                <h4>Signature du client</h4>
+                <div class="sig-name">{{ commande.utilisateur.prenom }} {{ commande.utilisateur.nom }}</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </td>
+        <td style="padding-left:10px">
+            <div class="sig-box">
+                <h4>Signature du livreur</h4>
+                <div class="sig-name">Nom du livreur : ____________________</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- Warning -->
+<div class="warning">
+    <h4>⚠ Document confidentiel — Conditions de livraison</h4>
+    <p>
+        Ce document est strictement confidentiel et constitue un engagement contractuel entre le client et le service de livraison FIRMA.
+        Il doit obligatoirement être signé par le client et le livreur au moment de la remise des produits.
+        <strong>Aucun produit ne peut être livré sans la signature des deux parties.</strong>
+        Ce compte-rendu sert de protection pour le client et le livreur : il atteste que la commande a été remise en bon état
+        et que le paiement a été effectué. En cas de litige, ce document fera foi.
+        Veuillez conserver ce document précieusement après la livraison.
+    </p>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    FIRMA Marketplace &bull; Document généré le {{ "now"|date('d/m/Y') }} &bull; Compte-rendu de livraison — Paiement à la livraison
+</div>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#E1F5FE"/>
+    </linearGradient>
+    <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#66BB6A"/>
+      <stop offset="100%" stop-color="#388E3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <rect y="280" width="800" height="220" fill="url(#meadow)"/>
+  <!-- Mountains (Ain Draham region) -->
+  <polygon points="0,280 150,120 300,280" fill="#607D8B"/>
+  <polygon points="200,280 400,80 600,280" fill="#78909C"/>
+  <polygon points="500,280 680,140 800,280" fill="#607D8B"/>
+  <!-- Trees on mountains -->
+  <polygon points="150,150 140,120 160,120" fill="#2E7D32"/>
+  <polygon points="400,110 385,80 415,80" fill="#2E7D32"/>
+  <polygon points="680,170 670,140 690,140" fill="#2E7D32"/>
+  <!-- Beehives -->
+  <g transform="translate(250,260)">
+    <ellipse cx="0" cy="0" rx="25" ry="18" fill="#FFB300"/>
+    <ellipse cx="0" cy="-15" rx="20" ry="14" fill="#FFC107"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="9" fill="#FFD54F"/>
+    <rect x="-4" y="15" width="8" height="6" fill="#5D4037" rx="2"/>
+  </g>
+  <g transform="translate(500,265)">
+    <ellipse cx="0" cy="0" rx="25" ry="18" fill="#FFB300"/>
+    <ellipse cx="0" cy="-15" rx="20" ry="14" fill="#FFC107"/>
+    <ellipse cx="0" cy="-27" rx="12" ry="9" fill="#FFD54F"/>
+    <rect x="-4" y="15" width="8" height="6" fill="#5D4037" rx="2"/>
+  </g>
+  <!-- Honey jars -->
+  <g transform="translate(370,300)">
+    <rect x="-12" y="0" width="24" height="28" fill="#FF8F00" rx="4"/>
+    <rect x="-14" y="-2" width="28" height="6" fill="#8D6E63" rx="2"/>
+    <text x="0" y="18" text-anchor="middle" fill="white" font-size="10" font-family="Arial">Miel</text>
+  </g>
+  <!-- Bees -->
+  <g>
+    <ellipse cx="320" cy="180" rx="8" ry="5" fill="#FFD54F"/>
+    <rect x="317" y="177" width="2" height="2" fill="#212121"/><rect x="322" y="177" width="2" height="2" fill="#212121"/>
+    <line x1="316" y1="175" x2="310" y2="170" stroke="#90A4AE" stroke-width="1"/>
+    <line x1="324" y1="175" x2="330" y2="170" stroke="#90A4AE" stroke-width="1"/>
+  </g>
+  <g>
+    <ellipse cx="450" cy="200" rx="8" ry="5" fill="#FFD54F"/>
+    <rect x="447" y="197" width="2" height="2" fill="#212121"/><rect x="452" y="197" width="2" height="2" fill="#212121"/>
+    <line x1="446" y1="195" x2="440" y2="190" stroke="#90A4AE" stroke-width="1"/>
+    <line x1="454" y1="195" x2="460" y2="190" stroke="#90A4AE" stroke-width="1"/>
+  </g>
+  <!-- Flowers -->
+  <g>
+    <line x1="600" y1="280" x2="600" y2="250" stroke="#4CAF50" stroke-width="2"/>
+    <circle cx="600" cy="245" r="6" fill="#E91E63" opacity="0.7"/>
+    <circle cx="600" cy="245" r="3" fill="#FFF176"/>
+  </g>
+  <g>
+    <line x1="650" y1="280" x2="650" y2="255" stroke="#4CAF50" stroke-width="2"/>
+    <circle cx="650" cy="250" r="6" fill="#9C27B0" opacity="0.7"/>
+    <circle cx="650" cy="250" r="3" fill="#FFF176"/>
+  </g>
+  <!-- Banner -->
+  <rect x="150" y="390" width="500" height="70" rx="10" fill="rgba(0,0,0,0.6)"/>
+  <text x="400" y="420" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="22" font-weight="bold">Foire du Miel de Ain Draham</text>
+  <text x="400" y="445" text-anchor="middle" fill="#FFE082" font-family="Arial,sans-serif" font-size="18">Miel de forêt - Jendouba</text>
+</svg>

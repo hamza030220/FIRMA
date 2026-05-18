@@ -1,0 +1,159 @@
+forum:
+  language: Langue
+  language_fr: Français
+  language_en: English
+  language_en_gb: Anglais (R.-U.)
+  language_en_us: Anglais (É.-U.)
+  language_de: Allemand
+  language_es: Espagnol
+  language_it: Italien
+  language_nl: Néerlandais
+  language_pt_br: Portugais (Brésil)
+  language_pt_pt: Portugais (Portugal)
+  language_pl: Polonais
+  switch: Changer la langue du forum
+
+  common:
+    back_to_discussions: Retour aux discussions
+    back_to_post: Retour au post
+    cancel: Annuler
+    save: Enregistrer
+    publish: Publier
+    publish_comment: Publier le commentaire
+    loading: Chargement
+    reactions: réactions
+    comments: commentaires
+    comment: commentaire
+    comment_total: au total
+    characters: caractères
+    author: Auteur
+    by: Par
+    connected: connecté
+    search: Chercher
+    search_reset: Réinitialiser
+    sort: Trier
+    no_category: Sans catégorie
+
+  index:
+    kicker: Communauté FIRMA
+    title: Échangez avec la communauté FIRMA
+    lead: Partagez vos questions, vos conseils et vos expériences avec les utilisateurs de la plateforme dans un espace d'échange clair et professionnel.
+    posts_visible: posts visibles
+    new_post: Nouveau post
+    title_label: Titre
+    title_placeholder: "Exemple : conseil pour l'irrigation"
+    category_label: Catégorie
+    category_placeholder: Choisir une catégorie
+    content_label: Contenu
+    content_placeholder: Décrivez votre besoin ou partagez votre expérience...
+    publish_title: Publier ce post
+    publish_message: Voulez-vous vraiment publier ce post ?
+    discussions: Discussions
+    search_placeholder: Rechercher un post par titre
+    search_button: Chercher
+    sort_aria: Trier les discussions
+    open_post: Ouvrir le post
+    sort_recent: Plus récents
+    sort_oldest: Plus anciens
+    sort_title_asc: Titre A-Z
+    sort_title_desc: Titre Z-A
+    search_info: résultat pour
+    results_for: résultats pour
+    view_post: Voir tout le post
+    edit_post: Modifier le post
+    edit_title: Modifier ce post
+    edit_message: Voulez-vous vraiment modifier ce post ?
+    delete_post: Supprimer ce post
+    delete_message: Voulez-vous vraiment supprimer ce post ? Cette action est irréversible.
+    empty_title: Aucune discussion trouvée
+    empty_search: Aucun résultat ne correspond à votre recherche. Essayez avec un autre mot-clé.
+    empty_default: Commencez par publier le premier sujet du forum dans la version Symfony.
+    flash_form_error: Le formulaire contient des erreurs. Vérifiez les champs ci-dessous.
+
+  show:
+    comments: Commentaires
+    translate_label: Traduire ce post vers
+    add_comment: Ajouter un commentaire
+    comment_placeholder: Répondez à cette discussion...
+    comment_counter: '%current% / %max% caractères'
+    image_label: Image du commentaire
+    image_preview: Aperçu avant publication
+    image_preview_alt: Aperçu de l'image du commentaire
+    image_format_error: Format invalide. Utilisez JPG, PNG, WEBP ou GIF.
+    image_edit_label: Remplacer l'image
+    remove_current_image: Supprimer l'image actuelle
+    no_comments_title: Pas encore de commentaires
+    no_comments_text: Soyez le premier à répondre à ce sujet.
+    save: Enregistrer
+    cancel: Annuler
+    edit_comment: Modifier le commentaire
+    edit_comment_title: Modifier ce commentaire
+    edit_comment_message: Voulez-vous vraiment modifier ce commentaire ?
+    delete_comment: Supprimer le commentaire
+    delete_comment_title: Supprimer ce commentaire
+    delete_comment_message: Voulez-vous vraiment supprimer ce commentaire ? Cette action est irréversible.
+    translate_post: Traduire ce post
+    translate_action: Traduire
+    translation_loading: Traduction en cours...
+    translation_error: Impossible de traduire le contenu pour le moment.
+    translated_label: Version traduite
+    translated_to: Version traduite en %language%
+    translation_hint: Choisissez la langue cible puis lancez la traduction.
+
+  edit:
+    title: Modifier le post
+    save: Enregistrer
+    cancel: Annuler
+    category_placeholder: Choisir une catégorie
+    back_to_post: Retour au post
+
+  reaction:
+    choose: Cliquez pour choisir votre humeur
+
+  mood:
+    analyze: Analyser l'humeur
+    pending: En attente
+    positive: Positif
+    negative: Négatif
+    neutral: Neutre
+    relaunch: Relancer
+    warning: Avertissement interne
+
+  warning:
+    title: Avertissement forum
+    message: Notre application interdit les propos insultants. Consultez vos avertissements internes.
+    cta: Voir l'avertissement
+
+  flash:
+    post_created: Post publié avec succès
+    post_updated: Post modifié avec succès
+    post_deleted: Post supprimé avec succès
+    comment_created: Commentaire ajouté avec succès
+    comment_updated: Commentaire modifié avec succès
+    comment_deleted: Commentaire supprimé avec succès
+    invalid_reaction: Réaction invalide.
+    invalid_csrf: Jeton CSRF invalide.
+    invalid_user: Utilisateur non connecté.
+    invalid_post: Post introuvable.
+    invalid_comment: Commentaire introuvable.
+    invalid_image_file: Le fichier image transmis est invalide.
+    image_upload_failed: L'image n'a pas pu être enregistrée. Veuillez réessayer.
+    validation:
+      title_required: Le titre est obligatoire.
+      title_length: Le titre ne doit pas dépasser 255 caractères.
+      content_required: Le contenu est obligatoire.
+      content_length: Le contenu doit contenir au moins 10 caractères.
+      category_required: La catégorie est obligatoire.
+      category_invalid: La catégorie sélectionnée est invalide.
+      comment_required: Le commentaire est obligatoire.
+      comment_min: Le commentaire doit contenir au moins %min% caractères.
+      comment_max: Le commentaire ne doit pas dépasser %max% caractères.
+      image_format: "Formats acceptés : JPG, PNG, WEBP ou GIF."
+      image_extension: "Extension invalide. Utilisez JPG, PNG, WEBP ou GIF."
+      image_size: L'image ne doit pas dépasser 5 Mo.
+      image_too_small: "Image trop petite : %width%x%height% px. Minimum requis : %min_width%x%min_height% px."
+      image_too_large: "Image trop grande : %width%x%height% px. Maximum autorisé : %max_width%x%max_height% px."
+      image_read: Impossible de lire les dimensions de l'image.
+      image_invalid: Impossible de lire le fichier image.
+      self_edit_post: Vous ne pouvez pas modifier ce post.
+      self_edit_comment: Vous ne pouvez pas modifier ce commentaire.
